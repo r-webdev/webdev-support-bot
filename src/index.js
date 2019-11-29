@@ -24,6 +24,11 @@ client.on('message', async msg => {
 
   const search = msg.content.substr(keyword.length);
 
+  if (search === 'help') {
+    msg.reply(`Usage: \`!mdn <search term, e.g. localStorage>\``);
+    return;
+  }
+
   try {
     const response = await fetch(getSearchUrl(search));
 
