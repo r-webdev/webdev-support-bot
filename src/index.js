@@ -29,11 +29,6 @@ client.on('message', async msg => {
 
   const search = msg.content.substr(keyword.length).trim();
 
-  if (search === '<@!281576651526111232>') {
-    msg.reply('Change your name back ffs.');
-    return;
-  }
-
   if (search.length === 0 || search === 'help') {
     msg.reply(RESPONSES.usage);
     return;
