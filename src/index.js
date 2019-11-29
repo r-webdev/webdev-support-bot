@@ -3,8 +3,6 @@ const client = new Discord.Client();
 const fetch = require('node-fetch');
 const DOMParser = require('dom-parser');
 
-const { DISCORD_TOKEN } = require('../cfg.json');
-
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
 });
@@ -60,7 +58,7 @@ client.on('message', async msg => {
   }
 });
 
-client.login(DISCORD_TOKEN);
+client.login(process.env.DISCORD_TOKEN);
 
 function getSearchUrl(search) {
   return `https://developer.mozilla.org/en-US/search?q=${search}`;
