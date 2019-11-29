@@ -136,4 +136,4 @@ const parseResultAmount = givenValue => {
 
 client.on('message', handleMessage);
 
-client.login('NDUwNTkxMTgzMDQ4MDE1ODc0.XeGH2A.xCljt6ih8HnT-1bF2JuF9kA6pyQ');
+client.login(process.env.DISCORD_TOKEN);
