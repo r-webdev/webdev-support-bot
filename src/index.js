@@ -1,8 +1,10 @@
 const Discord = require('discord.js');
-const client = new Discord.Client();
 const fetch = require('node-fetch');
 const DOMParser = require('dom-parser');
+const Entities = require('html-entities').Html5Entities;
 const constants = require('./constants');
+
+const client = new Discord.Client();
 
 const { KEYWORDS, RESPONSES, ERRORS, RESULT_AMOUNT_THRESHOLDS } = constants;
 
@@ -72,10 +74,12 @@ const handleMessage = async msg => {
       return;
     }
 
+    const entities = new Entities();
+
     let description = results.reduce((carry, result, index) => {
       const titleElement = result.getElementsByClassName('result-title')[0];
 
-      const title = titleElement.textContent;
+      const title = entities.decode(titleElement.textContent);
       const url = buildDirectUrl(titleElement.getAttribute('href'));
 
       carry += `${index + 1}. ${createMarkdownLink(title, url)}\n`;
