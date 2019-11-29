@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const client = new Discord.Client();
 const fetch = require('node-fetch');
 const DOMParser = require('dom-parser');
-
+const links = require('./links')
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
 });
@@ -31,6 +31,12 @@ client.on('message', async msg => {
 
   if (search.length === 0 || search === 'help') {
     msg.reply(RESPONSES.usage);
+    return;
+  }
+
+  if (search in links) {
+    const link = buildDirectUrl(links[search])
+    msg.reply(RESPONSES.result(link))
     return;
   }
 
