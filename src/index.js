@@ -35,7 +35,7 @@ client.on('message', async msg => {
   }
 
   try {
-    const response = await fetch(getSearchUrl(search));
+    const response = await fetch(getSearchUrl(encodeURIComponent(search)));
 
     if (!response.ok) {
       msg.reply(ERRORS.invalidResponse);
@@ -72,7 +72,7 @@ client.on('message', async msg => {
 client.login(process.env.DISCORD_TOKEN);
 
 function getSearchUrl(search) {
-  return `https://developer.mozilla.org/en-US/search?q=${search}`;
+  return `https://developer.mozilla.org/en-US/search?q=${search}`
 }
 
 function buildDirectUrl(href) {
