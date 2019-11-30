@@ -17,14 +17,8 @@ const ERRORS = {
     'Sorry, something went wrong. If this issue persists, please file an issue at https://github.com/ljosberinn/discord-mdn-bot',
 };
 
-const RESPONSES = {
-  usage:
-    'Usage: `!mdn <search term, e.g. localStorage>` (optional: `--results=<number between 1 and 10>`)',
-};
-
 module.exports = {
   KEYWORDS,
   ERRORS,
-  RESPONSES,
   RESULT_AMOUNT_THRESHOLDS,
 };
