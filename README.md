@@ -6,20 +6,15 @@ Simple bot that parses MDN (Mozilla Developer Network) for possible results and 
 
 ```bash
 !mdn localstorage
-!mdn localStorage --results=7
 ```
 
-- `results=<number>` can be a number between 1 and 10, defaults to 3
-- invalid numbers will fallback to the appropriate nearest number
 - reacting with a number will filter the result
 
 ## Description
 
 By default, shows the first three results which can be helpful in case of ambiguous terms, such as `Map` (`<map>`-HTMLTag, `Map.prototype`).
 
-Optionally shows up to 10 results (first page of MDN search).
-
-If only a single result was found or filtered to via argument, will answer directly to the user.
+Shows the first 10 results (first page of MDN search).
 
 Reacting with a number coresponding to the list entry will filter the list.
 
@@ -40,4 +35,4 @@ yarn start # or npm start
 
 ## Found a bug/want to contribute?
 
-- please head over to [GitHub](https://github.com/ljosberinn/discord-mdn-bot/)
+- please head over to [GitHub](https://github.com/ljosberinn/discord-mdn-bot/issues)
