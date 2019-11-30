@@ -22,11 +22,13 @@ client.once('ready', () => {
  * @param {Discord.Message} msg
  */
 const handleMessage = async msg => {
-  if (!msg.content.startsWith(KEYWORD) || msg.content.indexOf('`@') > -1) {
+  const content = msg.content.replace(/([@`])/g, '\\$1');
+
+  if (!content.toLowerCase().startsWith(KEYWORD)) {
     return;
   }
 
-  let search = msg.content.substr(KEYWORD.length);
+  let search = content.substr(KEYWORD.length);
 
   // empty query or call for help
   if (search.length === 0 || search === 'help') {
@@ -53,7 +55,9 @@ const handleMessage = async msg => {
     // meta provides information about the amount of results found
     const meta = document.getElementsByClassName('result-meta')[0].textContent;
     if (meta.startsWith('0 documents found')) {
-      msg.reply(ERRORS.noResults(search));
+      const sentMessage = await msg.reply(ERRORS.noResults(search));
+
+      setTimeout(sentMessage.delete, 60 * 1000);
       return;
     }
 
@@ -178,4 +182,5 @@ const buildDirectUrl = href => `https://developer.mozilla.org${href}`;
 
 client.on('message', handleMessage);
 
-client.login(process.env.DISCORD_TOKEN);
+client.login('NDUwNTkxMTgzMDQ4MDE1ODc0.XeLY4A.6A8AJhP9ChdngWqlStnIFPdprY4');
+//client.login(process.env.DISCORD_TOKEN);
