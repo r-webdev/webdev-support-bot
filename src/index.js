@@ -55,9 +55,12 @@ const handleMessage = async msg => {
     // meta provides information about the amount of results found
     const meta = document.getElementsByClassName('result-meta')[0].textContent;
     if (meta.startsWith('0 documents found')) {
-      const sentMessage = await msg.reply(ERRORS.noResults(search));
+      msg.reply(ERRORS.noResults(search)).then(sentMessage =>
+        setTimeout(() => {
+          sentMessage.delete();
+        }, 1000 * 60),
+      );
 
-      setTimeout(sentMessage.delete, 60 * 1000);
       return;
     }
 
