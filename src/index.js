@@ -185,4 +185,8 @@ const buildDirectUrl = href => `https://developer.mozilla.org${href}`;
 
 client.on('message', handleMessage);
 
-client.login(process.env.DISCORD_TOKEN);
+try {
+  client.login(process.env.DISCORD_TOKEN);
+} catch (error) {
+  console.error('Invalid token.');
+}
