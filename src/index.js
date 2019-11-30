@@ -22,7 +22,7 @@ client.once('ready', () => {
  * @param {Discord.Message} msg
  */
 const handleMessage = async msg => {
-  const content = msg.content.replace(/<@.?[0-9]*?>/g, '');
+  const content = msg.content.replace(/<@.?[0-9]*?>/g, '').replace(/\s+/g, ' ');
 
   if (!content.toLowerCase().startsWith(KEYWORD)) {
     return;
@@ -185,4 +185,5 @@ const buildDirectUrl = href => `https://developer.mozilla.org${href}`;
 
 client.on('message', handleMessage);
 
-client.login(process.env.DISCORD_TOKEN);
+client.login('NDUwNTkxMTgzMDQ4MDE1ODc0.XeLe0w.a5es-Cd9Tzw-BEqUMrirp38XkhU');
+//client.login(process.env.DISCORD_TOKEN);
