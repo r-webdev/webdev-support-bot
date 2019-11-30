@@ -110,7 +110,13 @@ const handleMessage = async msg => {
   }
 };
 
-const createMarkdownLink = (title, url) => `[${title}](${url})`;
+const createMarkdownLink = (title, url) => {
+  if (url.endsWith(')')) {
+    url = url.substr(0, url.length - 1) + '%29';
+  }
+
+  return `[${title}](${url})`;
+};
 
 const getSearchUrl = search =>
   `https://developer.mozilla.org/en-US/search?q=${search}`;
