@@ -1,3 +1,4 @@
+require('dotenv').config();
 const Discord = require('discord.js');
 const fetch = require('node-fetch');
 const DOMParser = require('dom-parser');
@@ -83,7 +84,7 @@ const handleMessage = async msg => {
 
     const sentMsg = await msg.channel.send({
       embed: {
-        title: `MDN results for *${search}*`,
+        title: `MDN results for *${search}*`.substr(0, 256),
         color: 0x83d0f2, // MDN landing page color
         url: searchUrl,
         footer: {
@@ -184,9 +185,12 @@ const getSearchUrl = search =>
 const buildDirectUrl = href => `https://developer.mozilla.org${href}`;
 
 client.on('message', handleMessage);
-
 try {
-  client.login(process.env.DISCORD_TOKEN);
+  client.login(
+    process.env.NODE_ENV !== 'production'
+      ? process.env.DUMMY_TOKEN
+      : process.env.DISCORD_TOKEN,
+  );
 } catch (error) {
   console.error('Invalid token.');
 }
