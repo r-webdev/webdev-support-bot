@@ -82,47 +82,51 @@ const handleMessage = async msg => {
       'https://github.com/ljosberinn/discord-mdn-bot',
     )}*`;
 
-    const sentMsg = await msg.channel.send({
-      embed: {
-        title: `MDN results for *${search}*`.substr(0, 256),
-        color: 0x83d0f2, // MDN landing page color
-        url: searchUrl.substr(0, 2048),
-        footer: {
-          icon_url: 'https://avatars0.githubusercontent.com/u/7565578',
-          text: meta.split('for')[0],
-        },
-        description,
-      },
-    });
-
     try {
-      const collectedReactions = await sentMsg.awaitReactions(
-        reactionFilterBuilder(msg.author.id),
-        {
-          max: 1,
-          time: 60 * 1000,
-          errors: ['time'],
+      const sentMsg = await msg.channel.send({
+        embed: {
+          title: `MDN results for *${search}*`.substr(0, 256),
+          color: 0x83d0f2, // MDN landing page color
+          url: searchUrl.substr(0, 2048),
+          footer: {
+            icon_url: 'https://avatars0.githubusercontent.com/u/7565578',
+            text: meta.split('for')[0],
+          },
+          description,
         },
-      );
+      });
 
-      const emojiName = collectedReactions.first().emoji.name;
+      try {
+        const collectedReactions = await sentMsg.awaitReactions(
+          reactionFilterBuilder(msg.author.id),
+          {
+            max: 1,
+            time: 60 * 1000,
+            errors: ['time'],
+          },
+        );
 
-      if (validReactions.deletion.includes(emojiName)) {
-        await sentMsg.delete();
-        return;
+        const emojiName = collectedReactions.first().emoji.name;
+
+        if (validReactions.deletion.includes(emojiName)) {
+          await sentMsg.delete();
+          return;
+        }
+
+        const index = validReactions.indices.findIndex(
+          emoji => emoji === emojiName,
+        );
+        const chosenResult = results[index];
+
+        const { url } = extractTitleAndUrlFromResult(chosenResult);
+
+        // overwrite previous embed
+        sentMsg.edit(url, { embed: null });
+      } catch (collected) {
+        // nobody reacted, doesn't matter
       }
-
-      const index = validReactions.indices.findIndex(
-        emoji => emoji === emojiName,
-      );
-      const chosenResult = results[index];
-
-      const { url } = extractTitleAndUrlFromResult(chosenResult);
-
-      // overwrite previous embed
-      sentMsg.edit(url, { embed: null });
-    } catch (collected) {
-      // nobody reacted, doesn't matter
+    } catch (error) {
+      console.error(`${error.name}: ${error.message}`);
     }
   } catch (error) {
     console.error(error);
