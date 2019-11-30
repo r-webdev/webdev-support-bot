@@ -22,7 +22,9 @@ client.once('ready', () => {
  * @param {Discord.Message} msg
  */
 const handleMessage = async msg => {
-  const content = msg.content.replace(/([@`])/g, '\\$1');
+  //const content = msg.content.replace(/([@`])/g, '\\$1');
+
+  const content = msg.content.replace(/<@.?[0-9]*?>/g, '');
 
   if (!content.toLowerCase().startsWith(KEYWORD)) {
     return;
@@ -55,11 +57,17 @@ const handleMessage = async msg => {
     // meta provides information about the amount of results found
     const meta = document.getElementsByClassName('result-meta')[0].textContent;
     if (meta.startsWith('0 documents found')) {
-      msg.reply(ERRORS.noResults(search)).then(sentMessage =>
+      /*msg.reply(ERRORS.noResults(search)).then(sentMessage =>
         setTimeout(() => {
           sentMessage.delete();
         }, 1000 * 60),
-      );
+      );*/
+
+      const sentMessage = await msg.reply(ERRORS.noResults(search));
+
+      setTimeout(() => {
+        sentMessage.delete();
+      }, 1000 * 30);
 
       return;
     }
