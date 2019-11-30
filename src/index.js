@@ -86,7 +86,7 @@ const handleMessage = async msg => {
       embed: {
         title: `MDN results for *${search}*`.substr(0, 256),
         color: 0x83d0f2, // MDN landing page color
-        url: searchUrl,
+        url: searchUrl.substr(0, 2048),
         footer: {
           icon_url: 'https://avatars0.githubusercontent.com/u/7565578',
           text: meta.split('for')[0],
