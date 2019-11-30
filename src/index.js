@@ -23,7 +23,7 @@ client.once('ready', () => {
  * @param {Discord.Message} msg
  */
 const handleMessage = async msg => {
-  const content = msg.content.replace(/<@.?[0-9]*?>/g, '').replace(/\s+/g, ' ');
+  const content = msg.cleanContent;
 
   if (!content.toLowerCase().startsWith(KEYWORD)) {
     return;
