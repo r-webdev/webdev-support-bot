@@ -22,7 +22,7 @@ client.once('ready', () => {
  * @param {Discord.Message} msg
  */
 const handleMessage = async msg => {
-  if (!msg.content.startsWith(KEYWORD) || msg.content.startsWith('`@')) {
+  if (!msg.content.startsWith(KEYWORD) || msg.content.indexOf('`@') > -1) {
     return;
   }
 
