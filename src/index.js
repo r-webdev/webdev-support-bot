@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const fetch = require('node-fetch');
 const DOMParser = require('dom-parser');
 const Entities = require('html-entities').Html5Entities;
-const { KEYWORDS, ERRORS, RESULT_AMOUNT_THRESHOLDS } = require('./constants');
+const { KEYWORD, ERRORS } = require('./constants');
 
 const client = new Discord.Client();
 const entities = new Entities();
@@ -22,33 +22,18 @@ client.once('ready', () => {
  * @param {Discord.Message} msg
  */
 const handleMessage = async msg => {
-  if (!msg.content.startsWith(KEYWORDS.initial)) {
+  if (!msg.content.startsWith(KEYWORD)) {
     return;
   }
 
-  let search = msg.content.substr(KEYWORDS.initial.length);
+  let search = msg.content.substr(KEYWORD.length);
 
-  // empty query (although Discord trims messages by default)
-  // or call for help
+  // empty query or call for help
   if (search.length === 0 || search === 'help') {
     msg.reply(
       'Usage: `!mdn <search term, e.g. localStorage>` (optional: `--results=<number between 1 and 10>`)',
     );
     return;
-  }
-
-  let amountOfResultsToShow = RESULT_AMOUNT_THRESHOLDS.default;
-
-  // a hint will only be shown if the bot wasn't already called with it
-  const withResultArgumentHint =
-    search.indexOf(KEYWORDS.resultsArgument) === -1;
-
-  // called with --result argument
-  if (!withResultArgumentHint) {
-    const parts = search.split(KEYWORDS.resultsArgument);
-
-    search = parts[0];
-    amountOfResultsToShow = parseResultAmount(parts[1]);
   }
 
   try {
@@ -72,17 +57,7 @@ const handleMessage = async msg => {
       return;
     }
 
-    const results = document
-      .getElementsByClassName('result')
-      .slice(0, amountOfResultsToShow);
-
-    // respond directly to the user
-    if (amountOfResultsToShow === 1) {
-      const { url } = extractTitleAndUrlFromResult(results[0]);
-
-      msg.reply(url);
-      return;
-    }
+    const results = document.getElementsByClassName('result');
 
     let description = results.reduce((carry, result, index) => {
       const { title, url } = extractTitleAndUrlFromResult(result);
@@ -92,12 +67,12 @@ const handleMessage = async msg => {
       return carry;
     }, '');
 
-    if (withResultArgumentHint) {
-      description +=
-        '\n :wrench:  *show up to 10 results by appending `--results=<number>` to your request*';
-    }
-
-    description += '\n :bulb:  *react with a number to filter your result*';
+    description += `
+    :bulb: *react with a number to filter your result*
+    :gear: *issues? feature requests? head over to ${createMarkdownLink(
+      'github',
+      'https://github.com/ljosberinn/discord-mdn-bot',
+    )}*`;
 
     const sentMsg = await msg.channel.send({
       embed: {
@@ -106,18 +81,15 @@ const handleMessage = async msg => {
         url: searchUrl,
         footer: {
           icon_url: 'https://avatars0.githubusercontent.com/u/7565578',
-          text: createFooter(meta.split('for')[0], amountOfResultsToShow),
+          text: meta.split('for')[0],
         },
         description,
       },
     });
 
     try {
-      /**
-       * @var {Discord.Collection<Discord.Snowflake, Discord.MessageReaction>} collectedReactions
-       */
       const collectedReactions = await sentMsg.awaitReactions(
-        reactionFilterBuilder(amountOfResultsToShow, msg.author.id),
+        reactionFilterBuilder(msg.author.id),
         {
           max: 1,
           time: 60 * 1000,
@@ -127,7 +99,13 @@ const handleMessage = async msg => {
 
       const emojiName = collectedReactions.first().emoji.name;
 
-      const index = validReactions.findIndex(emoji => emoji === emojiName);
+      if (validReactions.deletion.includes(emojiName)) {
+        return;
+      }
+
+      const index = validReactions.indices.findIndex(
+        emoji => emoji === emojiName,
+      );
       const chosenResult = results[index];
 
       const { url } = extractTitleAndUrlFromResult(chosenResult);
@@ -143,18 +121,10 @@ const handleMessage = async msg => {
   }
 };
 
-const validReactions = [
-  '1️⃣',
-  '2️⃣',
-  '3️⃣',
-  '4️⃣',
-  '5️⃣',
-  '6️⃣',
-  '7️⃣',
-  '8️⃣',
-  '9️⃣',
-  '🔟',
-];
+const validReactions = {
+  deletion: ['❌', '✖️'],
+  indices: ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'],
+};
 
 /**
  *
@@ -174,21 +144,15 @@ const extractTitleAndUrlFromResult = result => {
 
 /**
  *
- * @param {number} amountOfResultsToShow
- * @param {number} initialMessageAuthorId
+ * @param {string} initialMessageAuthorId
  */
-const reactionFilterBuilder = (
-  amountOfResultsToShow,
-  initialMessageAuthorId,
-) => (reaction, user) =>
+const reactionFilterBuilder = initialMessageAuthorId => (reaction, user) =>
   user.id === initialMessageAuthorId &&
-  validReactions
-    .reduce(
-      (carry, reaction) =>
-        carry.length < amountOfResultsToShow ? [...carry, reaction] : carry,
-      [],
-    )
-    .includes(reaction.emoji.name);
+  Object.values(validReactions).reduce(
+    (carry, emojiArray) =>
+      carry === true ? carry : emojiArray.includes(reaction.emoji.name),
+    false,
+  );
 
 /**
  *
@@ -210,36 +174,6 @@ const getSearchUrl = search =>
  * @param {string} href
  */
 const buildDirectUrl = href => `https://developer.mozilla.org${href}`;
-
-/**
- *
- * @param {string} metaText
- * @param {number} amountOfResultsToShow
- */
-const createFooter = (metaText, amountOfResultsToShow) =>
-  `${metaText} - showing ${amountOfResultsToShow} of 10 first-page results`;
-
-/**
- *
- * @param {string} givenValue
- */
-const parseResultAmount = givenValue => {
-  const argument = Number(givenValue);
-
-  if (Number.isNaN(argument)) {
-    return RESULT_AMOUNT_THRESHOLDS.default;
-  }
-
-  if (argument > RESULT_AMOUNT_THRESHOLDS.max) {
-    return RESULT_AMOUNT_THRESHOLDS.max;
-  }
-
-  if (argument < RESULT_AMOUNT_THRESHOLDS.min) {
-    return RESULT_AMOUNT_THRESHOLDS.min;
-  }
-
-  return argument;
-};
 
 client.on('message', handleMessage);
 

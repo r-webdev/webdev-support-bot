@@ -1,13 +1,4 @@
-const KEYWORDS = {
-  initial: '!mdn ',
-  resultsArgument: ' --results=',
-};
-
-const RESULT_AMOUNT_THRESHOLDS = {
-  default: 3,
-  min: 1,
-  max: 10,
-};
+const KEYWORD = '!mdn ';
 
 const ERRORS = {
   invalidResponse:
@@ -18,7 +9,6 @@ const ERRORS = {
 };
 
 module.exports = {
-  KEYWORDS,
+  KEYWORD,
   ERRORS,
-  RESULT_AMOUNT_THRESHOLDS,
 };
