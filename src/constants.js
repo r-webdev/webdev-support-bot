@@ -20,7 +20,6 @@ const ERRORS = {
 const RESPONSES = {
   usage:
     'Usage: `!mdn <search term, e.g. localStorage>` (optional: `--results=<number between 1 and 10>`)',
-  result: url => `I found this: ${url}`,
 };
 
 module.exports = {
