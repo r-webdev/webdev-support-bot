@@ -182,5 +182,4 @@ const buildDirectUrl = href => `https://developer.mozilla.org${href}`;
 
 client.on('message', handleMessage);
 
-client.login('NDUwNTkxMTgzMDQ4MDE1ODc0.XeLY4A.6A8AJhP9ChdngWqlStnIFPdprY4');
-//client.login(process.env.DISCORD_TOKEN);
+client.login(process.env.DISCORD_TOKEN);
