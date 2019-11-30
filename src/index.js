@@ -117,7 +117,7 @@ const handleMessage = async msg => {
        * @var {Discord.Collection<Discord.Snowflake, Discord.MessageReaction>} collectedReactions
        */
       const collectedReactions = await sentMsg.awaitReactions(
-        reactionFilterBuilder(amountOfResultsToShow),
+        reactionFilterBuilder(amountOfResultsToShow, msg.author.id),
         {
           max: 1,
           time: 60 * 1000,
@@ -176,7 +176,11 @@ const extractTitleAndUrlFromResult = result => {
  *
  * @param {number} amountOfResultsToShow
  */
-const reactionFilterBuilder = amountOfResultsToShow => reaction =>
+const reactionFilterBuilder = (amountOfResultsToShow, messageAuthorId) => (
+  reaction,
+  user,
+) =>
+  user.id === messageAuthorId &&
   validReactions
     .reduce(
       (carry, reaction) =>
