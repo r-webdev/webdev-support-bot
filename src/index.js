@@ -175,12 +175,13 @@ const extractTitleAndUrlFromResult = result => {
 /**
  *
  * @param {number} amountOfResultsToShow
+ * @param {number} initialMessageAuthorId
  */
-const reactionFilterBuilder = (amountOfResultsToShow, messageAuthorId) => (
-  reaction,
-  user,
-) =>
-  user.id === messageAuthorId &&
+const reactionFilterBuilder = (
+  amountOfResultsToShow,
+  initialMessageAuthorId,
+) => (reaction, user) =>
+  user.id === initialMessageAuthorId &&
   validReactions
     .reduce(
       (carry, reaction) =>
