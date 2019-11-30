@@ -100,6 +100,7 @@ const handleMessage = async msg => {
       const emojiName = collectedReactions.first().emoji.name;
 
       if (validReactions.deletion.includes(emojiName)) {
+        await sentMsg.delete();
         return;
       }
 
@@ -177,4 +178,5 @@ const buildDirectUrl = href => `https://developer.mozilla.org${href}`;
 
 client.on('message', handleMessage);
 
-client.login(process.env.DISCORD_TOKEN);
+//client.login(process.env.DISCORD_TOKEN);
+client.login('NDUwNTkxMTgzMDQ4MDE1ODc0.XeLLOA.K5e_3-ISn50CTaRMM1EaDBDmY-k');
