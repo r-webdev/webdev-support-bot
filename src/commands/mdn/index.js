@@ -3,7 +3,10 @@ const { getSearchUrl, buildDirectUrl } = require('../../utils/urlTools');
 const { Message } = require('discord.js');
 const Entities = require('html-entities').Html5Entities;
 const DOMParser = require('dom-parser');
-const validReactions = require('../../utils/reactions');
+const {
+  validReactions,
+  reactionFilterBuilder,
+} = require('../../utils/reactions');
 const errors = require('../../utils/errors');
 const fetch = require('node-fetch');
 const { createMarkdownLink, createEmbed } = require('../../utils/discordTools');
@@ -14,7 +17,7 @@ const BASE_DESCRIPTION = `
 :bulb: *react with a number to filter your result*
 :gear: *issues? feature requests? head over to ${createMarkdownLink(
   'github',
-  'https://github.com/ljosberinn/discord-mdn-bot',
+  process.env.REPO_LINK,
 )}*`;
 
 /**
@@ -67,15 +70,15 @@ const handleMDNQuery = async (msg, searchTerm) => {
       }, '') + BASE_DESCRIPTION;
 
     try {
-      const embed = createEmbed({
-        provider: 'mdn',
-        searchTerm,
-        url: searchUrl,
-        footerText: meta.split('for')[0],
-        description,
-      });
-
-      const sentMsg = await msg.channel.send(embed);
+      const sentMsg = await msg.channel.send(
+        createEmbed({
+          provider: 'mdn',
+          searchTerm,
+          url: searchUrl,
+          footerText: meta.split('for')[0],
+          description,
+        }),
+      );
 
       try {
         const collectedReactions = await sentMsg.awaitReactions(
@@ -102,7 +105,7 @@ const handleMDNQuery = async (msg, searchTerm) => {
         const { url } = extractTitleAndUrlFromResult(chosenResult);
 
         // overwrite previous embed
-        sentMsg.edit(url, { embed: null });
+        await sentMsg.edit(url, { embed: null });
       } catch (collected) {
         // nobody reacted, doesn't matter
       }
@@ -130,17 +133,5 @@ const extractTitleAndUrlFromResult = result => {
     url,
   };
 };
-
-/**
- *
- * @param {string} initialMessageAuthorId
- */
-const reactionFilterBuilder = initialMessageAuthorId => (reaction, user) =>
-  user.id === initialMessageAuthorId &&
-  Object.values(validReactions).reduce(
-    (carry, emojiArray) =>
-      carry === true ? carry : emojiArray.includes(reaction.emoji.name),
-    false,
-  );
 
 module.exports = handleMDNQuery;
