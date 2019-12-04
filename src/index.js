@@ -29,14 +29,17 @@ const handleMessage = async msg => {
     return;
   }
 
+  // { mdn: 'mdn', /* etc */ }
   const keywords = Object.keys(providers).reduce((carry, keyword) => {
     carry[keyword] = keyword;
     return carry;
   }, {});
 
-  switch (cleanContent.split(' ', 1)[0].substr(1)) {
+  const keyword = cleanContent.split(' ', 1)[0].substr(1);
+
+  switch (keyword) {
     case keywords.mdn:
-      await handleMDNQuery(msg, cleanContent.substr(keywords.mdn.length + 1));
+      await handleMDNQuery(msg, cleanContent.substr(keywords.mdn.length + 2));
       return;
     case keywords.caniuse:
       return;
