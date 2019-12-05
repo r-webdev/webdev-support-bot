@@ -3,7 +3,9 @@ require('dotenv').config();
 const { Client, Message } = require('discord.js');
 const { providers, KEYWORD_REGEXP } = require('./utils/urlTools');
 
+// commands begin here
 const handleMDNQuery = require('./commands/mdn');
+const handleNPMQuery = require('./commands/npm');
 
 const client = new Client();
 
@@ -44,6 +46,7 @@ const handleMessage = async msg => {
     case keywords.caniuse:
       return;
     case keywords.npm:
+      await handleNPMQuery(msg, cleanContent.substr(keywords.npm.length + 2));
       return;
     case keywords.composer:
       return;

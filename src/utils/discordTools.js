@@ -16,7 +16,7 @@ const createMarkdownLink = (title, url) =>
  * @param {string} footerText
  * @param {string} description
  */
-const createEmbed = ({
+const createListEmbed = ({
   provider,
   searchTerm,
   url,
@@ -24,18 +24,51 @@ const createEmbed = ({
   description,
 }) => {
   if (providers[provider]) {
-    const { createTitle, color, icon } = providers[provider];
+    const { createTitle } = providers[provider];
+
+    return createEmbed({
+      provider,
+      title: createTitle(searchTerm),
+      url: url.substr(0, 2048),
+      footerText,
+      description,
+    });
+  }
+
+  throw new Error('provider not implemented');
+};
+
+/**
+ *
+ * @param {string} provider
+ * @param {string} title
+ * @param {string} url
+ * @param {string} footerText
+ * @param {string} description
+ * @param {array} fields
+ */
+const createEmbed = ({
+  provider,
+  title,
+  url,
+  footerText,
+  description,
+  fields = [],
+}) => {
+  if (providers[provider]) {
+    const { color, icon } = providers[provider];
 
     return {
       embed: {
-        title: createTitle(searchTerm),
+        title,
         color,
-        url: url.substr(0, 2048),
+        url,
         footer: {
           icon_url: icon,
           text: footerText,
         },
         description,
+        fields,
       },
     };
   }
@@ -45,5 +78,6 @@ const createEmbed = ({
 
 module.exports = {
   createMarkdownLink,
+  createListEmbed,
   createEmbed,
 };

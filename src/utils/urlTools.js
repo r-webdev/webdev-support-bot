@@ -14,12 +14,12 @@ const providers = {
     keyword: 'mdn',
   },
   npm: {
-    search: SEARCH_TERM,
-    direct: TERM,
-    color: undefined,
-    createTitle: searchTerm => searchTerm,
-    icon: undefined,
+    search: `https://www.npmjs.com/search?q=${SEARCH_TERM}`,
+    color: 0xfb3e44,
+    createTitle: searchTerm => `NPM results for *${searchTerm}*`,
+    icon: 'https://avatars0.githubusercontent.com/u/6078720',
     keyword: 'npm',
+    getExtendedInfo: package => `https://registry.npmjs.org/${package}/latest`,
   },
   composer: {
     search: SEARCH_TERM,

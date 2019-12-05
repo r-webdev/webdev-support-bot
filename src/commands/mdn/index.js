@@ -6,19 +6,17 @@ const DOMParser = require('dom-parser');
 const {
   validReactions,
   reactionFilterBuilder,
+  awaitReactionConfig,
 } = require('../../utils/reactions');
 const errors = require('../../utils/errors');
 const fetch = require('node-fetch');
-const { createMarkdownLink, createEmbed } = require('../../utils/discordTools');
+const {
+  createMarkdownLink,
+  createListEmbed,
+} = require('../../utils/discordTools');
+const BASE_DESCRIPTION = require('../shared');
 
 const entities = new Entities();
-
-const BASE_DESCRIPTION = `
-:bulb: *react with a number to filter your result*
-:gear: *issues? feature requests? head over to ${createMarkdownLink(
-  'github',
-  process.env.REPO_LINK,
-)}*`;
 
 /**
  *
@@ -71,7 +69,7 @@ const handleMDNQuery = async (msg, searchTerm) => {
 
     try {
       const sentMsg = await msg.channel.send(
-        createEmbed({
+        createListEmbed({
           provider: 'mdn',
           searchTerm,
           url: searchUrl,
@@ -83,11 +81,7 @@ const handleMDNQuery = async (msg, searchTerm) => {
       try {
         const collectedReactions = await sentMsg.awaitReactions(
           reactionFilterBuilder(msg.author.id),
-          {
-            max: 1,
-            time: 60 * 1000,
-            errors: ['time'],
-          },
+          awaitReactionConfig,
         );
 
         const emojiName = collectedReactions.first().emoji.name;
@@ -114,7 +108,7 @@ const handleMDNQuery = async (msg, searchTerm) => {
     }
   } catch (error) {
     console.error(error);
-    msg.reply(errors.unknownError);
+    await msg.reply(errors.unknownError);
   }
 };
 

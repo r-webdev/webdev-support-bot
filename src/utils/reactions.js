@@ -18,7 +18,14 @@ const reactionFilterBuilder = initialMessageAuthorId => (
   // validate reaction via whitelist
   reactionCache.includes(name);
 
+const awaitReactionConfig = {
+  max: 1,
+  time: 60 * 1000,
+  errors: ['time'],
+};
+
 module.exports = {
   validReactions,
   reactionFilterBuilder,
+  awaitReactionConfig,
 };
