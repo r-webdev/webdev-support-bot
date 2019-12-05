@@ -58,15 +58,6 @@ const handleMDNQuery = async (msg, searchTerm) => {
 
     const results = document.getElementsByClassName('result');
 
-    const description =
-      results.reduce((carry, result, index) => {
-        const { title, url } = extractTitleAndUrlFromResult(result);
-
-        carry += `${index + 1}. ${createMarkdownLink(title, url)}\n`;
-
-        return carry;
-      }, '') + BASE_DESCRIPTION;
-
     try {
       const sentMsg = await msg.channel.send(
         createListEmbed({
@@ -74,7 +65,14 @@ const handleMDNQuery = async (msg, searchTerm) => {
           searchTerm,
           url: searchUrl,
           footerText: meta.split('for')[0],
-          description,
+          description:
+            results.reduce((carry, result, index) => {
+              const { title, url } = extractTitleAndUrlFromResult(result);
+
+              carry += `${index + 1}. ${createMarkdownLink(title, url)}\n`;
+
+              return carry;
+            }, '') + BASE_DESCRIPTION,
         }),
       );
 
