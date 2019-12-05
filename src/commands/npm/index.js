@@ -54,47 +54,49 @@ const handleNPMQuery = async (msg, searchTerm) => {
 
     const { total, url } = json;
 
-    const firstTenResults = json.objects.splice(0, 10).reduce(
-      (carry, { package: { name, date, description, links } }, index) => [
-        ...carry,
-        {
-          lastUpdate: date.rel,
-          name,
-          description: adjustDescriptionLength(index + 1, name, description),
-          urls: {
-            homepage: links.homepage,
-            npm: links.npm,
-            repository: links.repository,
-          },
+    const firstTenResults = json.objects
+      .splice(0, 10)
+      .map(({ package: { name, date, description, links, publisher } }) => ({
+        lastUpdate: date.rel,
+        url: links.npm,
+        externalUrls: {
+          homepage: links.homepage,
+          repository: links.repository,
         },
-      ],
-      [],
-    );
-
-    const description =
-      firstTenResults.reduce((carry, { name, description, urls }, index) => {
-        const strongName = `**${name}**`;
-        const hasMarkdownInDescription = description.indexOf('[!') > -1;
-
-        const link = createMarkdownLink(
-          hasMarkdownInDescription
-            ? strongName
-            : `${strongName} - *${description}*`,
-          urls.npm,
-        );
-
-        carry += `${index + 1}. ${link}\n`;
-
-        return carry;
-      }, '') + BASE_DESCRIPTION;
+        author: {
+          name: publisher.name,
+          icon_url: publisher.avatars.small,
+          url: `https://www.npmjs.com/~${publisher.name}`,
+        },
+        name,
+        description,
+      }));
 
     try {
       const embed = createListEmbed({
         provider: 'npm',
         url: `https://npmjs.com${url}`,
         footerText: `${total.toLocaleString()} packages found`,
-        description,
         searchTerm,
+        description:
+          firstTenResults.reduce((carry, { name, description, url }, index) => {
+            // cant guarantee syntactically correct markdown image links,
+            // hence ignore description in those cases
+            // e.g. redux-react-session
+            const hasMarkdownImageLink = description.indexOf('[!') > -1;
+
+            const linkTitle = hasMarkdownImageLink
+              ? `**${name}**`
+              : `**${name}** - *${adjustDescriptionLength(
+                  index + 1,
+                  name,
+                  description,
+                )}*`;
+
+            const link = createMarkdownLink(linkTitle, url);
+
+            return carry + `${index + 1}. ${link}\n`;
+          }, '') + BASE_DESCRIPTION,
       });
 
       const sentMsg = await msg.channel.send(embed);
@@ -117,42 +119,33 @@ const handleNPMQuery = async (msg, searchTerm) => {
         );
         const chosenResult = firstTenResults[index];
 
-        const fields = Object.entries(chosenResult.urls).map(([host, url]) => {
-          const markdownTitle =
-            host === 'homepage'
-              ? url.replace('https://', '')
-              : host === 'npm'
-              ? url.split('/').pop()
-              : url.indexOf('gitlab') > -1
-              ? url.replace('https://gitlab.com/', '')
-              : url.indexOf('github') > -1
-              ? url.replace('https://github.com/', '')
-              : url.indexOf('bitbucket') > -1
-              ? url.replace('https://bitbucket.org/', '')
-              : url;
+        // create fields for all links except npm since that ones in the title already
+        const fields = Object.entries(chosenResult.externalUrls).map(
+          ([host, url]) => {
+            const markdownTitle = sanitizePackageLink(host, url);
 
-          return {
-            name: host,
-            value: createMarkdownLink(
-              markdownTitle.endsWith('/')
-                ? markdownTitle.substr(0, markdownTitle.length - 1)
-                : markdownTitle,
-              url,
-            ),
-            inline: host !== 'homepage',
-          };
-        });
+            return {
+              name: host,
+              value: createMarkdownLink(
+                markdownTitle.endsWith('/')
+                  ? markdownTitle.substr(0, markdownTitle.length - 1)
+                  : markdownTitle,
+                url,
+              ),
+              inline: true,
+            };
+          },
+        );
 
         const newEmbed = createEmbed({
           provider: 'npm',
           title: chosenResult.name,
-          url: chosenResult.urls.npm,
-          footerText: '',
-          description: 'adf',
+          url: chosenResult.url,
+          footerText: `last updated ${chosenResult.lastUpdate}`,
+          description: chosenResult.description,
+          author: chosenResult.author,
           fields,
         });
-
-        console.log({ chosenResult, footer: newEmbed.embed.footer });
 
         // overwrite previous embed
         await sentMsg.edit(newEmbed);
@@ -166,6 +159,20 @@ const handleNPMQuery = async (msg, searchTerm) => {
     console.error(error);
     await msg.reply(errors.unknownError);
   }
+};
+
+const sanitizePackageLink = (host, link) => {
+  const { protocol, pathname } = new URL(link);
+
+  if (host === 'homepage') {
+    return link.replace(`${protocol}//`, '');
+  }
+
+  if (host === 'repository') {
+    return pathname.startsWith('/') ? pathname.substring(1) : pathname;
+  }
+
+  return link;
 };
 
 const DESCRIPTION_LENGTH_LIMIT = 72;
