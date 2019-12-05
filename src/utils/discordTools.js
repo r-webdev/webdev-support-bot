@@ -54,6 +54,7 @@ const createEmbed = ({
   footerText,
   description,
   fields = [],
+  author = null,
 }) => {
   if (providers[provider]) {
     const { color, icon } = providers[provider];
@@ -69,6 +70,7 @@ const createEmbed = ({
         },
         description,
         fields,
+        author,
       },
     };
   }
