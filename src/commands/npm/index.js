@@ -7,15 +7,17 @@ const {
   awaitReactionConfig,
 } = require('../../utils/reactions');
 const errors = require('../../utils/errors');
-const fetch = require('node-fetch');
 const {
   createMarkdownLink,
   createListEmbed,
   createEmbed,
+  delayedAutoDeleteMessage,
+  adjustDescriptionLength,
 } = require('../../utils/discordTools');
 const BASE_DESCRIPTION = require('../shared');
+const useData = require('../../utils/useData');
 
-const searchHeaders = {
+const headers = {
   'X-SPIFERACK': 1,
 };
 
@@ -33,22 +35,17 @@ const handleNPMQuery = async (msg, searchTerm) => {
 
   try {
     const searchUrl = getSearchUrl('npm', searchTerm);
-    const response = await fetch(searchUrl, { headers: searchHeaders });
+    const { error, json } = await useData(searchUrl, 'json', { headers });
 
-    if (!response.ok) {
-      msg.reply(errors.invalidResponse);
+    if (error) {
+      await msg.reply(errors.invalidResponse);
       return;
     }
 
-    const json = await response.json();
-
     if (json.objects.length === 0) {
-      const sentMessage = await msg.reply(errors.noResults(searchTerm));
+      const sentMsg = await msg.reply(errors.noResults(searchTerm));
 
-      setTimeout(() => {
-        sentMessage.delete();
-      }, 1000 * 30);
-
+      delayedAutoDeleteMessage(sentMsg);
       return;
     }
 
@@ -80,7 +77,8 @@ const handleNPMQuery = async (msg, searchTerm) => {
         searchTerm,
         description:
           firstTenResults.reduce((carry, { name, description, url }, index) => {
-            // cant guarantee syntactically correct markdown image links,
+            // cant guarantee syntactically correct markdown image links due to
+            // npm limiting description to 255 chars,
             // hence ignore description in those cases
             // e.g. redux-react-session
             const hasMarkdownImageLink = description.indexOf('[!') > -1;
@@ -173,53 +171,6 @@ const sanitizePackageLink = (host, link) => {
   }
 
   return link;
-};
-
-const DESCRIPTION_LENGTH_LIMIT = 72;
-const SEPARATOR_LENGTH = 3;
-
-/**
- * Cuts off the description of a package name
- * based on the maximum of possible characters before
- * a linebreak occurs, keeping words intact.
- *
- * @param {number} position
- * @param {string} name
- * @param {string} description
- */
-const adjustDescriptionLength = (position, name, description) => {
-  const positionLength = position.toString().length + 2;
-  const nameLength = name.length;
-  const descriptionLength = description.length;
-
-  const currentLength =
-    positionLength + nameLength + SEPARATOR_LENGTH + descriptionLength;
-
-  if (currentLength > DESCRIPTION_LENGTH_LIMIT) {
-    const availableSpace =
-      DESCRIPTION_LENGTH_LIMIT - positionLength - nameLength - SEPARATOR_LENGTH;
-
-    let hasHitLimit = false;
-
-    const shortenedDescription = description
-      .split(' ')
-      .reduce((carry, part) => {
-        if (hasHitLimit || carry.length + part.length > availableSpace) {
-          hasHitLimit = true;
-          return carry;
-        }
-
-        if (carry.length === 0) {
-          return part;
-        }
-
-        return [carry, part].join(' ');
-      }, '');
-
-    return shortenedDescription + '...';
-  }
-
-  return description;
 };
 
 module.exports = handleNPMQuery;

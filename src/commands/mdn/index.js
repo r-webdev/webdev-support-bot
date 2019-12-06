@@ -9,12 +9,13 @@ const {
   awaitReactionConfig,
 } = require('../../utils/reactions');
 const errors = require('../../utils/errors');
-const fetch = require('node-fetch');
 const {
   createMarkdownLink,
+  delayedAutoDeleteMessage,
   createListEmbed,
 } = require('../../utils/discordTools');
 const BASE_DESCRIPTION = require('../shared');
+const useData = require('../../utils/useData');
 
 const entities = new Entities();
 
@@ -32,14 +33,12 @@ const handleMDNQuery = async (msg, searchTerm) => {
 
   try {
     const searchUrl = getSearchUrl('mdn', searchTerm);
-    const response = await fetch(searchUrl);
+    const { error, text } = await useData(searchUrl, 'text');
 
-    if (!response.ok) {
+    if (error) {
       msg.reply(errors.invalidResponse);
       return;
     }
-
-    const text = await response.text();
 
     const parser = new DOMParser();
     const document = parser.parseFromString(text);
@@ -47,12 +46,9 @@ const handleMDNQuery = async (msg, searchTerm) => {
     // meta provides information about the amount of results found
     const meta = document.getElementsByClassName('result-meta')[0].textContent;
     if (meta.startsWith('0 documents found')) {
-      const sentMessage = await msg.reply(errors.noResults(searchTerm));
+      const sentMsg = await msg.reply(errors.noResults(searchTerm));
 
-      setTimeout(() => {
-        sentMessage.delete();
-      }, 1000 * 30);
-
+      delayedAutoDeleteMessage(sentMsg);
       return;
     }
 
