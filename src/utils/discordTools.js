@@ -1,4 +1,6 @@
 const { providers } = require('./urlTools');
+// eslint-disable-next-line no-unused-vars
+const { Message } = require('discord.js');
 
 /**
  *
@@ -78,8 +80,68 @@ const createEmbed = ({
   throw new Error('provider not implemented');
 };
 
+/**
+ *
+ * @param {Message} msg
+ * @param {number} timeout
+ */
+const delayedAutoDeleteMessage = (msg, timeout = 30 * 1000) => {
+  setTimeout(() => {
+    msg.delete();
+  }, timeout);
+};
+
+const DESCRIPTION_LENGTH_LIMIT = 72;
+const SEPARATOR_LENGTH = 3;
+
+/**
+ * Cuts off the description of a package name
+ * based on the maximum of possible characters before
+ * a linebreak occurs, keeping words intact.
+ *
+ * @param {number} position
+ * @param {string} name
+ * @param {string} description
+ */
+const adjustDescriptionLength = (position, name, description) => {
+  const positionLength = position.toString().length + 2;
+  const nameLength = name.length;
+  const descriptionLength = description.length;
+
+  const currentLength =
+    positionLength + nameLength + SEPARATOR_LENGTH + descriptionLength;
+
+  if (currentLength > DESCRIPTION_LENGTH_LIMIT) {
+    const availableSpace =
+      DESCRIPTION_LENGTH_LIMIT - positionLength - nameLength - SEPARATOR_LENGTH;
+
+    let hasHitLimit = false;
+
+    const shortenedDescription = description
+      .split(' ')
+      .reduce((carry, part) => {
+        if (hasHitLimit || carry.length + part.length > availableSpace) {
+          hasHitLimit = true;
+          return carry;
+        }
+
+        if (carry.length === 0) {
+          return part;
+        }
+
+        return [carry, part].join(' ');
+      }, '');
+
+    return shortenedDescription + '...';
+  }
+
+  return description;
+};
+
 module.exports = {
   createMarkdownLink,
   createListEmbed,
   createEmbed,
+  delayedAutoDeleteMessage,
+  adjustDescriptionLength,
 };

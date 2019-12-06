@@ -19,15 +19,16 @@ const providers = {
     createTitle: searchTerm => `NPM results for *${searchTerm}*`,
     icon: 'https://avatars0.githubusercontent.com/u/6078720',
     keyword: 'npm',
-    getExtendedInfo: package => `https://registry.npmjs.org/${package}/latest`,
   },
   composer: {
-    search: SEARCH_TERM,
+    search: `https://packagist.org/search.json?q=${SEARCH_TERM}`,
     direct: TERM,
-    color: undefined,
-    createTitle: searchTerm => searchTerm,
-    icon: undefined,
+    color: 0xf28d1a,
+    createTitle: searchTerm => `Packagist results for ${searchTerm}`,
+    icon: 'https://packagist.org/bundles/packagistweb/img/logo-small.png',
     keyword: 'composer',
+    getExtendedInfoUrl: package =>
+      `https://packagist.org/packages/${package}.json`,
   },
   caniuse: {
     search: SEARCH_TERM,
@@ -79,9 +80,20 @@ const buildDirectUrl = (provider, href) => {
   throw new Error(`provider not implemeted: ${provider}`);
 };
 
+const getExtendedInfoUrl = (provider, term) => {
+  if (providers[provider] && providers[provider].getExtendedInfoUrl) {
+    return providers[provider].getExtendedInfoUrl(term);
+  }
+
+  throw new Error(
+    `provider or provider.getExtendedInfoUrl not implemented at provider: ${provider}`,
+  );
+};
+
 module.exports = {
   providers,
   getSearchUrl,
   KEYWORD_REGEXP,
   buildDirectUrl,
+  getExtendedInfoUrl,
 };

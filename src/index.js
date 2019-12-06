@@ -6,6 +6,7 @@ const { providers, KEYWORD_REGEXP } = require('./utils/urlTools');
 // commands begin here
 const handleMDNQuery = require('./commands/mdn');
 const handleNPMQuery = require('./commands/npm');
+const handleComposerQuery = require('./commands/composer');
 
 const client = new Client();
 
@@ -49,6 +50,10 @@ const handleMessage = async msg => {
       await handleNPMQuery(msg, cleanContent.substr(keywords.npm.length + 2));
       return;
     case keywords.composer:
+      await handleComposerQuery(
+        msg,
+        cleanContent.substr(keywords.composer.length + 2),
+      );
       return;
     default:
       throw new Error('classic "shouldnt be here" scenario');
