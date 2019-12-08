@@ -27,7 +27,7 @@ const { formatDistanceToNow } = require('date-fns');
 const handleComposerQuery = async (msg, searchTerm) => {
   // empty query or call for help
   if (searchTerm.length === 0 || searchTerm === '--help') {
-    await msg.reply('Usage: `!composer <search term, e.g. phpmailer>`');
+    await msg.reply('Usage: `!composer <search term, e.g. sentry>`');
     return;
   }
 
@@ -64,7 +64,7 @@ const handleComposerQuery = async (msg, searchTerm) => {
       const embed = createListEmbed({
         provider: 'composer',
         searchTerm,
-        url: searchUrl,
+        url: `https://packagist.org/?query=${encodeURI(searchTerm)}`,
         footerText: `${total} packages found`,
         description:
           firstTenResults.reduce((carry, { name, description, url }, index) => {
