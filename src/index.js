@@ -7,6 +7,7 @@ const { providers, KEYWORD_REGEXP } = require('./utils/urlTools');
 const handleMDNQuery = require('./commands/mdn');
 const handleNPMQuery = require('./commands/npm');
 const handleComposerQuery = require('./commands/composer');
+const handleCanIUseQuery = require('./commands/caniuse');
 
 const client = new Client();
 
@@ -20,6 +21,15 @@ client.once('ready', () => {
   });
 });
 
+// { mdn: 'mdn', /* etc */ }
+const keywords = Object.keys(providers).reduce((carry, keyword) => {
+  carry[keyword] = keyword;
+  return carry;
+}, {});
+
+const trimCleanContent = (provider, cleanContent) =>
+  cleanContent.substr(keywords[provider].length + 2);
+
 /**
  *
  * @param {Message} msg
@@ -32,28 +42,24 @@ const handleMessage = async msg => {
     return;
   }
 
-  // { mdn: 'mdn', /* etc */ }
-  const keywords = Object.keys(providers).reduce((carry, keyword) => {
-    carry[keyword] = keyword;
-    return carry;
-  }, {});
-
   const keyword = cleanContent.split(' ', 1)[0].substr(1);
 
   switch (keyword) {
     case keywords.mdn:
-      await handleMDNQuery(msg, cleanContent.substr(keywords.mdn.length + 2));
+      await handleMDNQuery(msg, trimCleanContent('mdn', cleanContent));
       return;
     case keywords.caniuse:
+      await handleCanIUseQuery(msg, trimCleanContent('caniuse', cleanContent));
       return;
     case keywords.npm:
-      await handleNPMQuery(msg, cleanContent.substr(keywords.npm.length + 2));
+      await handleNPMQuery(msg, trimCleanContent('npm', cleanContent));
       return;
     case keywords.composer:
       await handleComposerQuery(
         msg,
-        cleanContent.substr(keywords.composer.length + 2),
+        trimCleanContent('composer', cleanContent),
       );
+
       return;
     default:
       throw new Error('classic "shouldnt be here" scenario');
