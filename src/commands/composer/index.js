@@ -157,7 +157,7 @@ const EMPTY_FIELD = {
  * @param {object} package.version response from packagist API
  */
 const findLatestRelease = versions => {
-  const latest = Object.values(versions).reduce(
+  const { version, time } = Object.values(versions).reduce(
     (latest, item) => {
       const { version_normalized: itemVersion } = item;
 
@@ -177,8 +177,8 @@ const findLatestRelease = versions => {
   );
 
   return {
-    version: latest.version,
-    released: formatDistanceToNow(new Date(latest.time)),
+    version: version,
+    released: formatDistanceToNow(new Date(time)),
   };
 };
 
@@ -197,7 +197,7 @@ const extractFieldsFromLatestRelease = ({
 }) => {
   const fields = [
     {
-      name: 'add to project',
+      name: 'add to your project',
       value: `*composer require ${name}*`,
     },
   ];
@@ -206,12 +206,7 @@ const extractFieldsFromLatestRelease = ({
     fields.push({
       name: 'Keywords',
       value: keywords
-        .map(keyword =>
-          createMarkdownLink(
-            keyword,
-            `https://packagist.org/search/?tags=${keyword}`,
-          ),
-        )
+        .map(keyword => createMarkdownLink(keyword, createTagLink(keyword)))
         .join(', '),
     });
   }
@@ -277,33 +272,36 @@ const extractFieldsFromLatestRelease = ({
         ),
         inline: true,
       });
+
+      addedLinks++;
     }
 
-    addedLinks++;
+    // possible todo: other repository providers
+    // couldnt find one during development
   }
 
-  if (addedLinks === 2 && authors.length === 1) {
-    authors.forEach(author => {
-      fields.push({
-        name: 'Author',
-        value: author.name,
-        inline: true,
-      });
-    });
-  } else {
+  const emptyFieldRequired = !(addedLinks === 2 && authors.length === 1);
+
+  if (emptyFieldRequired) {
     fields.push(EMPTY_FIELD);
-
-    authors.forEach(author => {
-      fields.push({
-        name: 'Author',
-        value: author.name,
-        inline: true,
-      });
-    });
   }
+
+  authors.forEach(author => {
+    fields.push({
+      name: 'Author',
+      value: author.name,
+      inline: true,
+    });
+  });
 
   return fields;
 };
+
+/**
+ *
+ * @param {string} tag
+ */
+const createTagLink = tag => `https://packagist.org/search/?tags=${tag}`;
 
 /**
  *
