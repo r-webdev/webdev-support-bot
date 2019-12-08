@@ -1,6 +1,3 @@
-// eslint-disable-next-line no-unused-vars
-const { RichEmbed } = require('discord.js');
-
 const SEARCH_TERM = '%SEARCH%';
 const TERM = '%TERM%';
 
@@ -31,12 +28,14 @@ const providers = {
       `https://packagist.org/packages/${package}.json`,
   },
   caniuse: {
-    search: SEARCH_TERM,
-    direct: TERM,
-    color: undefined,
-    createTitle: searchTerm => searchTerm,
-    icon: undefined,
+    search: `https://caniuse.com/process/query.php?search=${SEARCH_TERM}`,
+    direct: `https://caniuse.com/#feat=${TERM}`,
+    color: 0xdb5600,
+    createTitle: searchTerm => `CanIUse results for ${searchTerm}`,
+    icon: 'https://caniuse.com/img/favicon-128.png',
     keyword: 'caniuse',
+    getExtendedInfoUrl: text =>
+      `https://caniuse.com/process/get_feat_data.php?type=support-data&feat=${text}`,
   },
 };
 
@@ -58,7 +57,7 @@ const KEYWORD_REGEXP = new RegExp(
  * @param {string} provider
  * @param {string} search
  *
- * @returns {RichEmbed}
+ * @returns {string}
  */
 const getSearchUrl = (provider, search) => {
   if (providers[provider]) {
@@ -80,6 +79,13 @@ const buildDirectUrl = (provider, href) => {
   throw new Error(`provider not implemeted: ${provider}`);
 };
 
+/**
+ *
+ * @param {string} provider
+ * @param {string} term
+ *
+ * @returns {string}
+ */
 const getExtendedInfoUrl = (provider, term) => {
   if (providers[provider] && providers[provider].getExtendedInfoUrl) {
     return providers[provider].getExtendedInfoUrl(term);
