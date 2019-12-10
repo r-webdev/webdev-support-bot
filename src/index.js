@@ -37,7 +37,12 @@ const trimCleanContent = (provider, cleanContent) =>
 const handleMessage = async msg => {
   const { cleanContent } = msg;
 
-  if (cleanContent === `@${client.user.username} --help`) {
+  if (
+    msg.mentions.users.find(
+      ({ username }) => username === client.user.username,
+    ) &&
+    cleanContent.indexOf('--help') > -1
+  ) {
     const prefix = 'try one of these:\n';
 
     await msg.reply(prefix + Object.values(help).join('\n'));
