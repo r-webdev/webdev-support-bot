@@ -17,8 +17,12 @@ client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
 });
 
-client.once('ready', () => {
+client.once('ready', async () => {
   client.user.setActivity(`@${client.user.username} --help`);
+
+  try {
+    await client.user.setAvatar('./logo.png');
+  } catch (error) {}
 });
 
 // { mdn: 'mdn', /* etc */ }

@@ -1,7 +1,7 @@
 # Webdev Support Bot
 
 <p align="center">
-    <img src="./logo-large.png" />
+    <img src="./logo.png" />
 </p>
 
 Bot providing multiple commands to query common sites used during development or helping people on Discord.
