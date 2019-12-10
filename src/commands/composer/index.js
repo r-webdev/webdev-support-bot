@@ -1,4 +1,8 @@
-const { getSearchUrl, getExtendedInfoUrl } = require('../../utils/urlTools');
+const {
+  getSearchUrl,
+  getExtendedInfoUrl,
+  buildDirectUrl,
+} = require('../../utils/urlTools');
 //eslint-disable-next-line no-unused-vars
 const { Message } = require('discord.js');
 const {
@@ -11,10 +15,11 @@ const {
   createMarkdownLink,
   createListEmbed,
   createEmbed,
+  createMarkdownListItem,
+  createDescription,
   adjustDescriptionLength,
   delayedAutoDeleteMessage,
 } = require('../../utils/discordTools');
-const BASE_DESCRIPTION = require('../shared');
 const useData = require('../../utils/useData');
 const compareVersions = require('compare-versions');
 const { formatDistanceToNow } = require('date-fns');
@@ -66,8 +71,8 @@ const handleComposerQuery = async (msg, searchTerm) => {
         searchTerm,
         url: `https://packagist.org/?query=${encodeURI(searchTerm)}`,
         footerText: `${total} packages found`,
-        description:
-          firstTenResults.reduce((carry, { name, description, url }, index) => {
+        description: createDescription(
+          firstTenResults.map(({ name, description, url }, index) => {
             const truncatedDescription =
               description.length > 0
                 ? adjustDescriptionLength(index + 1, name, description)
@@ -78,10 +83,12 @@ const handleComposerQuery = async (msg, searchTerm) => {
                 ? `**${name}** - *${truncatedDescription}*`
                 : `**${name}**`;
 
-            const link = createMarkdownLink(linkTitle, url);
-
-            return carry + `${index + 1}. ${link}\n`;
-          }, '') + BASE_DESCRIPTION,
+            return createMarkdownListItem(
+              index,
+              createMarkdownLink(linkTitle, url),
+            );
+          }),
+        ),
       });
 
       const sentMsg = await msg.channel.send(embed);
@@ -131,6 +138,7 @@ const handleComposerQuery = async (msg, searchTerm) => {
             icon_url: maintainers[0].avatar_url,
             name: maintainers[0].name,
           },
+          url: buildDirectUrl('composer', name),
           fields: extractFieldsFromLatestRelease(versions[version]),
         });
 

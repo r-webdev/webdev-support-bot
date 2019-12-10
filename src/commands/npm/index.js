@@ -13,8 +13,9 @@ const {
   createEmbed,
   delayedAutoDeleteMessage,
   adjustDescriptionLength,
+  createDescription,
+  createMarkdownListItem,
 } = require('../../utils/discordTools');
-const BASE_DESCRIPTION = require('../shared');
 const useData = require('../../utils/useData');
 
 const headers = {
@@ -75,8 +76,8 @@ const handleNPMQuery = async (msg, searchTerm) => {
         url: `https://npmjs.com${url}`,
         footerText: `${total.toLocaleString()} packages found`,
         searchTerm,
-        description:
-          firstTenResults.reduce((carry, { name, description, url }, index) => {
+        description: createDescription(
+          firstTenResults.map(({ name, description, url }, index) => {
             // cant guarantee syntactically correct markdown image links due to
             // npm limiting description to 255 chars,
             // hence ignore description in those cases
@@ -91,10 +92,12 @@ const handleNPMQuery = async (msg, searchTerm) => {
                   description,
                 )}*`;
 
-            const link = createMarkdownLink(linkTitle, url);
-
-            return carry + `${index + 1}. ${link}\n`;
-          }, '') + BASE_DESCRIPTION,
+            return createMarkdownListItem(
+              index,
+              createMarkdownLink(linkTitle, url),
+            );
+          }),
+        ),
       });
 
       const sentMsg = await msg.channel.send(embed);

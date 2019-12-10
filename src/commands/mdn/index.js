@@ -11,10 +11,11 @@ const {
 const errors = require('../../utils/errors');
 const {
   createMarkdownLink,
+  createDescription,
   delayedAutoDeleteMessage,
   createListEmbed,
+  createMarkdownListItem,
 } = require('../../utils/discordTools');
-const BASE_DESCRIPTION = require('../shared');
 const useData = require('../../utils/useData');
 
 const entities = new Entities();
@@ -61,14 +62,16 @@ const handleMDNQuery = async (msg, searchTerm) => {
           searchTerm,
           url: searchUrl,
           footerText: meta.split('for')[0],
-          description:
-            results.reduce((carry, result, index) => {
+          description: createDescription(
+            results.map((result, index) => {
               const { title, url } = extractTitleAndUrlFromResult(result);
 
-              carry += `${index + 1}. ${createMarkdownLink(title, url)}\n`;
-
-              return carry;
-            }, '') + BASE_DESCRIPTION,
+              return createMarkdownListItem(
+                index,
+                createMarkdownLink(title, url),
+              );
+            }),
+          ),
         }),
       );
 
