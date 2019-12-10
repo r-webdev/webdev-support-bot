@@ -63,9 +63,9 @@ const handleCanIUseQuery = async (msg, searchTerm) => {
 
     // dont trust the honestly weird caniuse API
     if (sanitizedText.length === 0 || sanitizedText.indexOf(',') === -1) {
-      await msg.reply(errors.noResults(searchTerm));
+      const sentMsg = await msg.reply(errors.noResults(searchTerm));
 
-      delayedAutoDeleteMessage(msg);
+      delayedAutoDeleteMessage(sentMsg);
       return;
     }
 
@@ -79,9 +79,9 @@ const handleCanIUseQuery = async (msg, searchTerm) => {
     const resultAmount = filteredResults.length;
 
     if (resultAmount === 0) {
-      await msg.reply(errors.noResults(searchTerm));
+      const sentMsg = await msg.reply(errors.noResults(searchTerm));
 
-      delayedAutoDeleteMessage(msg);
+      delayedAutoDeleteMessage(sentMsg);
       return;
     }
 
@@ -124,7 +124,7 @@ const handleCanIUseQuery = async (msg, searchTerm) => {
         const emojiName = collectedReactions.first().emoji.name;
 
         if (validReactions.deletion.includes(emojiName)) {
-          await sentMsg.delete();
+          delayedAutoDeleteMessage(sentMsg, 1);
           return;
         }
 
