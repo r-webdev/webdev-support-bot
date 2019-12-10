@@ -1,8 +1,20 @@
 # Webdev Support Bot
 
+<p align="center">
+    <img src="./logo-large.png" />
+</p>
+
 Bot providing multiple commands to query common sites used during development or helping people on Discord.
 
-Supports `!composer` via `packagist`, `!npm`, `!mdn` for `Mozilla Developer Network` and `caniuse` via `caniuse` and `mdn-browser-combat-data`.
+Supports
+
+`!composer` via `packagist`,
+
+`!npm`,
+
+`!mdn` for `Mozilla Developer Network` and
+
+`!caniuse` via `caniuse` and `mdn-browser-combat-data`.
 
 ## Usage / TLDR
 ```bash
@@ -65,4 +77,4 @@ git clone https://github.com/ljosberinn/webdev-support-bot/ && cd webdev-support
 
 ## Found a bug/want to contribute?
 
-- please head over to [GitHub](https://github.com/ljosberinn/webdev-support-bot/issues)
+Please head over to [GitHub](https://github.com/ljosberinn/webdev-support-bot/issues).
