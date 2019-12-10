@@ -1,5 +1,6 @@
 const {
   getSearchUrl,
+  HELP_KEYWORD,
   getExtendedInfoUrl,
   buildDirectUrl,
 } = require('../../utils/urlTools');
@@ -31,8 +32,8 @@ const { formatDistanceToNow } = require('date-fns');
  */
 const handleComposerQuery = async (msg, searchTerm) => {
   // empty query or call for help
-  if (searchTerm.length === 0 || searchTerm === '--help') {
-    await msg.reply('Usage: `!composer <search term, e.g. sentry>`');
+  if (searchTerm.length === 0 || searchTerm === HELP_KEYWORD) {
+    await msg.reply('Usage: `!composer sentry`');
     return;
   }
 

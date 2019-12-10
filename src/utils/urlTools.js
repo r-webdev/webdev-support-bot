@@ -39,6 +39,8 @@ const providers = {
   },
 };
 
+const HELP_KEYWORD = '--help';
+
 /**
  * dynamic regExp matching all possible Object.keys(providers) as keyword
  */
@@ -101,5 +103,6 @@ module.exports = {
   getSearchUrl,
   KEYWORD_REGEXP,
   buildDirectUrl,
+  HELP_KEYWORD,
   getExtendedInfoUrl,
 };

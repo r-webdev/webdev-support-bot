@@ -1,4 +1,8 @@
-const { getSearchUrl, buildDirectUrl } = require('../../utils/urlTools');
+const {
+  getSearchUrl,
+  buildDirectUrl,
+  HELP_KEYWORD,
+} = require('../../utils/urlTools');
 //eslint-disable-next-line no-unused-vars
 const { Message } = require('discord.js');
 const Entities = require('html-entities').Html5Entities;
@@ -27,8 +31,8 @@ const entities = new Entities();
  */
 const handleMDNQuery = async (msg, searchTerm) => {
   // empty query or call for help
-  if (searchTerm.length === 0 || searchTerm === 'help') {
-    await msg.reply('Usage: `!mdn <search term, e.g. localStorage>`');
+  if (searchTerm.length === 0 || searchTerm === HELP_KEYWORD) {
+    await msg.reply('Usage: `!mdn localStorage`');
     return;
   }
 

@@ -1,4 +1,8 @@
-const { getSearchUrl, getExtendedInfoUrl } = require('../../utils/urlTools');
+const {
+  getSearchUrl,
+  getExtendedInfoUrl,
+  HELP_KEYWORD,
+} = require('../../utils/urlTools');
 //eslint-disable-next-line no-unused-vars
 const { Message } = require('discord.js');
 const {
@@ -40,8 +44,8 @@ const browserNameMap = Object.entries(bcd.browsers).reduce(
  */
 const handleCanIUseQuery = async (msg, searchTerm) => {
   // empty query or call for help
-  if (searchTerm.length === 0 || searchTerm === 'help') {
-    await msg.reply('Usage: `!caniuse <term, e.g. grid>`');
+  if (searchTerm.length === 0 || searchTerm === HELP_KEYWORD) {
+    await msg.reply('Usage: `!caniuse grid`');
     return;
   }
 
