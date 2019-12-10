@@ -170,7 +170,6 @@ const handleCanIUseQuery = async (msg, searchTerm) => {
         // overwrite previous embed
         await sentMsg.edit(embed);
       } catch (collected) {
-        console.error(collected);
         // nobody reacted, doesn't matter
       }
     } catch (error) {
