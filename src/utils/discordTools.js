@@ -1,6 +1,7 @@
 const { providers } = require('./urlTools');
 // eslint-disable-next-line no-unused-vars
 const { Message } = require('discord.js');
+const errors = require('./errors');
 
 /**
  *
@@ -96,7 +97,10 @@ const createEmbed = ({
  */
 const delayedAutoDeleteMessage = (msg, timeout = 30 * 1000) => {
   setTimeout(() => {
-    msg.delete();
+    msg.delete().catch(error => {
+      console.error(error);
+      msg.edit(errors.missingRightsDeletion);
+    });
   }, timeout);
 };
 
