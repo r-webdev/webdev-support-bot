@@ -78,6 +78,13 @@ const handleCanIUseQuery = async (msg, searchTerm) => {
 
     const resultAmount = filteredResults.length;
 
+    if (resultAmount === 0) {
+      await msg.reply(errors.noResults(searchTerm));
+
+      delayedAutoDeleteMessage(msg);
+      return;
+    }
+
     if (extendedQueryError) {
       await msg.reply(errors.invalidResponse);
       return;
