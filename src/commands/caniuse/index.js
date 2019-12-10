@@ -232,20 +232,30 @@ const getFeatureMetadata = data => {
  */
 const extractCompatibilityFromBCD = path => {
   const parts = path.split('/');
-  const finalProp = parts
-    .pop()
-    .replace('.json', '')
-    .split('-')
-    .map(str => str.charAt(0).toUpperCase() + str.slice(1))
-    .join('-');
+  const finalProp = parts.pop().replace('.json', '');
 
-  return parts.reduce((carry, part) => {
+  const compatObj = parts.reduce((carry, part) => {
     if (carry[part]) {
       return carry[part];
     }
 
     return bcd[part];
-  }, {})[finalProp].__compat;
+  }, {});
+
+  if (compatObj[finalProp]) {
+    return compatObj[finalProp].__compat;
+  }
+
+  if (finalProp.includes('-')) {
+    const capitalizedProp = finalProp
+      .split('-')
+      .map(str => str.charAt(0).toUpperCase() + str.slice(1))
+      .join('-');
+
+    return compatObj[capitalizedProp].__compat;
+  }
+
+  throw new Error(`unknown path/prop: ${path} -> ${prop}`);
 };
 
 /**
