@@ -19,7 +19,7 @@ const providers = {
   },
   composer: {
     search: `https://packagist.org/search.json?q=${SEARCH_TERM}`,
-    direct: TERM,
+    direct: `https://packagist.org/packages/${TERM}`,
     color: 0xf28d1a,
     createTitle: searchTerm => `Packagist results for ${searchTerm}`,
     icon: 'https://packagist.org/bundles/packagistweb/img/logo-small.png',
