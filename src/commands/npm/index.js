@@ -17,6 +17,7 @@ const {
   createMarkdownListItem,
 } = require('../../utils/discordTools');
 const useData = require('../../utils/useData');
+const help = require('../../utils/help');
 
 const headers = {
   'X-SPIFERACK': 1,
@@ -30,7 +31,7 @@ const headers = {
 const handleNPMQuery = async (msg, searchTerm) => {
   // empty query or call for help
   if (searchTerm.length === 0 || searchTerm === HELP_KEYWORD) {
-    await msg.reply('Usage: `!npm react`');
+    await msg.reply(help.npm);
     return;
   }
 

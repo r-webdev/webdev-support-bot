@@ -3,6 +3,8 @@ require('dotenv').config();
 const { Client, Message } = require('discord.js');
 const { providers, KEYWORD_REGEXP } = require('./utils/urlTools');
 
+const help = require('./utils/help');
+
 // commands begin here
 const handleMDNQuery = require('./commands/mdn');
 const handleNPMQuery = require('./commands/npm');
@@ -16,9 +18,7 @@ client.on('ready', () => {
 });
 
 client.once('ready', () => {
-  client.user.setActivity('you code...', {
-    type: 'WATCHING',
-  });
+  client.user.setActivity(`@${client.user.username} --help`);
 });
 
 // { mdn: 'mdn', /* etc */ }
@@ -36,6 +36,13 @@ const trimCleanContent = (provider, cleanContent) =>
  */
 const handleMessage = async msg => {
   const { cleanContent } = msg;
+
+  if (cleanContent === `@${client.user.username} --help`) {
+    const prefix = 'try one of these:\n';
+
+    await msg.reply(prefix + Object.values(help).join('\n'));
+    return;
+  }
 
   // bail if no keyword was found
   if (!cleanContent.startsWith('!') || !KEYWORD_REGEXP.test(cleanContent)) {

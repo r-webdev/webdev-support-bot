@@ -21,6 +21,7 @@ const {
 } = require('../../utils/discordTools');
 const useData = require('../../utils/useData');
 const bcd = require('mdn-browser-compat-data');
+const help = require('../../utils/help');
 
 const emojis = {
   warning: ':exclamation:',
@@ -45,7 +46,7 @@ const browserNameMap = Object.entries(bcd.browsers).reduce(
 const handleCanIUseQuery = async (msg, searchTerm) => {
   // empty query or call for help
   if (searchTerm.length === 0 || searchTerm === HELP_KEYWORD) {
-    await msg.reply('Usage: `!caniuse grid`');
+    await msg.reply(help.caniuse);
     return;
   }
 

@@ -24,6 +24,7 @@ const {
 const useData = require('../../utils/useData');
 const compareVersions = require('compare-versions');
 const { formatDistanceToNow } = require('date-fns');
+const help = require('../../utils/help');
 
 /**
  *
@@ -33,7 +34,7 @@ const { formatDistanceToNow } = require('date-fns');
 const handleComposerQuery = async (msg, searchTerm) => {
   // empty query or call for help
   if (searchTerm.length === 0 || searchTerm === HELP_KEYWORD) {
-    await msg.reply('Usage: `!composer sentry`');
+    await msg.reply(help.composer);
     return;
   }
 

@@ -21,6 +21,7 @@ const {
   createMarkdownListItem,
 } = require('../../utils/discordTools');
 const useData = require('../../utils/useData');
+const help = require('../../utils/help');
 
 const entities = new Entities();
 
@@ -32,7 +33,7 @@ const entities = new Entities();
 const handleMDNQuery = async (msg, searchTerm) => {
   // empty query or call for help
   if (searchTerm.length === 0 || searchTerm === HELP_KEYWORD) {
-    await msg.reply('Usage: `!mdn localStorage`');
+    await msg.reply(help.mdn);
     return;
   }
 
