@@ -104,11 +104,15 @@ const handleCanIUseQuery = async (msg, searchTerm) => {
 
     const firstTenResults = filteredResults
       .splice(0, 10)
-      .map(({ title, path }, index) => ({
-        title,
-        url: buildHashUrl(hashes[index]),
-        compatibilityMap: extractCompatibilityFromBCD(path),
-      }));
+      .map(({ title, path }, index) => {
+        console.log(path);
+
+        return {
+          title,
+          url: buildHashUrl(hashes[index]),
+          compatibilityMap: extractCompatibilityFromBCD(path),
+        };
+      });
 
     const embed = createListEmbed({
       provider: 'caniuse',
@@ -232,7 +236,12 @@ const getFeatureMetadata = data => {
  */
 const extractCompatibilityFromBCD = path => {
   const parts = path.split('/');
-  const finalProp = parts.pop().replace('.json', '');
+  const finalProp = parts
+    .pop()
+    .replace('.json', '')
+    .split('-')
+    .map(str => str.charAt(0).toUpperCase() + str.slice(1))
+    .join('-');
 
   return parts.reduce((carry, part) => {
     if (carry[part]) {
