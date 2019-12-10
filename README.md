@@ -67,12 +67,12 @@ git clone https://github.com/ljosberinn/webdev-support-bot/
 cd webdev-support-bot
 
 yarn install # or npm install
-yarn start # or npm start
-
 code .
 
+yarn start # or npm start
+
 # or be fancy with a one-liner
-git clone https://github.com/ljosberinn/webdev-support-bot/ && cd webdev-support-bot && yarn install && yarn start && code .
+git clone https://github.com/ljosberinn/webdev-support-bot/ && cd webdev-support-bot && yarn install && code . && yarn start
 ```
 
 ## Found a bug/want to contribute?
