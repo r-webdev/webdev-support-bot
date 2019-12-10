@@ -62,7 +62,7 @@ const handleCanIUseQuery = async (msg, searchTerm) => {
     }
 
     // dont trust the honestly weird caniuse API
-    if (sanitizedText.length === 0 || sanitizedText.indexOf(',') === -1) {
+    if (sanitizedText.length === 0) {
       const sentMsg = await msg.reply(errors.noResults(searchTerm));
 
       delayedAutoDeleteMessage(sentMsg);
@@ -73,9 +73,21 @@ const handleCanIUseQuery = async (msg, searchTerm) => {
       getExtendedInfoUrl('caniuse', sanitizedText),
     );
 
-    // ignore pure web-standard information as it lacks a path to MDN
-    const filteredResults = json.filter(dataset => !!dataset.path);
+    let hashes = sanitizedText.split(',').splice(0, 10);
 
+    // ignore pure web-standard information as it lacks a path to MDN
+    const filteredResults = json.filter((dataset, index) => {
+      const isValid = !!dataset.path;
+
+      if (!isValid) {
+        // remove hash reference to preserve same indices with json
+        hashes[index] = undefined;
+      }
+
+      return isValid;
+    });
+
+    hashes = hashes.filter(Boolean);
     const resultAmount = filteredResults.length;
 
     if (resultAmount === 0) {
@@ -89,8 +101,6 @@ const handleCanIUseQuery = async (msg, searchTerm) => {
       await msg.reply(errors.invalidResponse);
       return;
     }
-
-    const hashes = sanitizedText.split(',').splice(0, 10);
 
     const firstTenResults = filteredResults
       .splice(0, 10)
