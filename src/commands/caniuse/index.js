@@ -104,15 +104,11 @@ const handleCanIUseQuery = async (msg, searchTerm) => {
 
     const firstTenResults = filteredResults
       .splice(0, 10)
-      .map(({ title, path }, index) => {
-        console.log(path);
-
-        return {
-          title,
-          url: buildHashUrl(hashes[index]),
-          compatibilityMap: extractCompatibilityFromBCD(path),
-        };
-      });
+      .map(({ title, path }, index) => ({
+        title,
+        url: buildHashUrl(hashes[index]),
+        compatibilityMap: extractCompatibilityFromBCD(path),
+      }));
 
     const embed = createListEmbed({
       provider: 'caniuse',
