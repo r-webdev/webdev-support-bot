@@ -89,7 +89,7 @@ const handleMDNQuery = async (msg, searchTerm) => {
         const emojiName = collectedReactions.first().emoji.name;
 
         if (validReactions.deletion.includes(emojiName)) {
-          await sentMsg.delete();
+          delayedAutoDeleteMessage(sentMsg, 1);
           return;
         }
 
