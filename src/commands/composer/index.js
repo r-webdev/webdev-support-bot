@@ -29,12 +29,18 @@ const provider = 'composer';
  */
 const handleComposerQuery = async (msg, searchTerm) => {
   try {
-    const { total, results } = await getData({
+    const json = await getData({
       provider,
       msg,
       searchTerm,
       isInvalidData: json => json.results.length === 0,
     });
+
+    if (!json) {
+      return;
+    }
+
+    const { total, results } = json;
 
     const firstTenResults = results
       .splice(0, 10)

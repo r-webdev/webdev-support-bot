@@ -30,13 +30,19 @@ const licenseCache = {};
  */
 const handleGithubQuery = async (msg, searchTerm) => {
   try {
-    const { total_count, items } = await getData({
+    const json = await getData({
       msg,
       provider,
       searchTerm,
       headers,
       isInvalidData: json => json.total_count === 0 || json.items.length === 0,
     });
+
+    if (!json) {
+      return;
+    }
+
+    const { total_count, items } = json;
 
     const firstTenResults = await Promise.all(
       items

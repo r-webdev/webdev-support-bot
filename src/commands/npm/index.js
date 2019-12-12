@@ -30,6 +30,10 @@ const handleNPMQuery = async (msg, searchTerm) => {
       isInvalidData: json => json.length === 0,
     });
 
+    if (!json) {
+      return;
+    }
+
     const firstTenResults = json
       .splice(0, 10)
       .map(({ name, date, description, links, publisher, maintainers }) => ({
