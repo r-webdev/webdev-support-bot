@@ -80,29 +80,31 @@ const handleComposerQuery = async (msg, searchTerm) => {
 
     const sentMsg = await msg.channel.send(embed);
 
-    try {
-      const { name: resultName } = await getChosenResult(
-        sentMsg,
-        msg,
-        firstTenResults,
-      );
+    const result = await getChosenResult(sentMsg, msg, firstTenResults);
 
-      const { error, json } = await useData(
-        getExtendedInfoUrl(provider, resultName),
-      );
+    if (!result) {
+      return;
+    }
 
-      if (error) {
-        await msg.reply(errors.invalidResponse);
-        return;
-      }
+    const { name: resultName } = result;
 
-      const {
-        package: { name, downloads, description, maintainers, versions },
-      } = json;
+    const { error, json: extendedJson } = await useData(
+      getExtendedInfoUrl(provider, resultName),
+    );
 
-      const { version, released } = findLatestRelease(versions);
+    if (error) {
+      await msg.reply(errors.invalidResponse);
+      return;
+    }
 
-      const newEmbed = createEmbed({
+    const {
+      package: { name, downloads, description, maintainers, versions },
+    } = extendedJson;
+
+    const { version, released } = findLatestRelease(versions);
+
+    await sentMsg.edit(
+      createEmbed({
         provider,
         title: `${name} *(${version})*`,
         footerText: generateDetailedFooter(downloads, released),
@@ -113,12 +115,8 @@ const handleComposerQuery = async (msg, searchTerm) => {
         },
         url: buildDirectUrl('composer', name),
         fields: extractFieldsFromLatestRelease(versions[version]),
-      });
-
-      await sentMsg.edit(newEmbed);
-    } catch (collected) {
-      // nobody reacted, doesn't matter
-    }
+      }),
+    );
   } catch (error) {
     console.error(error);
     await msg.reply(errors.unknownError);

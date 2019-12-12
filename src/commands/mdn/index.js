@@ -65,16 +65,16 @@ const handleMDNQuery = async (msg, searchTerm) => {
       }),
     );
 
-    try {
-      const chosenResult = await getChosenResult(sentMsg, msg, results);
+    const result = await getChosenResult(sentMsg, msg, results);
 
-      const { url } = extractTitleAndUrlFromResult(chosenResult);
-
-      // overwrite previous embed
-      await sentMsg.edit(url, { embed: null });
-    } catch (collected) {
-      // nobody reacted, doesn't matter
+    if (!result) {
+      return;
     }
+
+    const { url } = extractTitleAndUrlFromResult(result);
+
+    // overwrite previous embed
+    await sentMsg.edit(url, { embed: null });
   } catch (error) {
     console.error(error);
     await msg.reply(errors.unknownError);

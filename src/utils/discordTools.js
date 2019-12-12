@@ -1,13 +1,14 @@
 const { providers } = require('./urlTools');
 // eslint-disable-next-line no-unused-vars
-const { Message } = require('discord.js');
+const { Message, Collection, MessageReaction } = require('discord.js');
 const {
   reactionFilterBuilder,
   awaitReactionConfig,
   validReactions,
+  reactionCache,
 } = require('./reactions');
 const delayedMessageAutoDeletion = require('./delayedMessageAutoDeletion');
-
+const { unknownError } = require('./errors');
 /**
  *
  * @param {string} title
@@ -18,7 +19,7 @@ const createMarkdownLink = (title, url) =>
 
 const BASE_DESCRIPTION = `
 :bulb: *react with a number (:one:, :two:, ...) to filter your result*
-:neutral_face: *react with \`❌\` or \`✖️\` to delete*
+:neutral_face: *react with \`❌\` to delete*
 :point_up: *supports \`!mdn\`, \`!github\`, \`!caniuse\`, \`!npm\` and \`!composer\`*
 :gear: *issues? feature requests? head over to ${createMarkdownLink(
   'github',
@@ -168,26 +169,77 @@ const createDescription = items => items.concat(BASE_DESCRIPTION).join('\n');
 
 /**
  *
+ * @param {{reactions: Collection<string, MessageReaction>}} reactions
+ * @param {string} id
+ *
+ */
+const findEarlyReaction = ({ reactions }, id) =>
+  reactions.find(
+    ({ users, emoji: { name } }) =>
+      reactionCache.includes(name) && users.find(user => user.id === id),
+  );
+
+/**
+ *
  * @param {Message} sentMsg
  * @param {Message} msg
  * @param {array} firstTenResults
  */
 const getChosenResult = async (sentMsg, { author: { id } }, results) => {
-  const collectedReactions = await sentMsg.awaitReactions(
-    reactionFilterBuilder(id),
-    awaitReactionConfig,
-  );
+  let earlyReaction = null;
 
-  const emojiName = collectedReactions.first().emoji.name;
+  for (const emoji of reactionCache) {
+    earlyReaction = findEarlyReaction(sentMsg, id);
 
-  if (validReactions.deletion.includes(emojiName)) {
-    delayedMessageAutoDeletion(sentMsg, 1);
-    return;
+    if (earlyReaction) {
+      break;
+    }
+
+    await sentMsg.react(emoji);
   }
 
-  const index = validReactions.indices.findIndex(emoji => emoji === emojiName);
+  if (earlyReaction) {
+    const emojiName = earlyReaction.emoji.name;
 
-  return results[index];
+    if (validReactions.deletion === emojiName) {
+      delayedMessageAutoDeletion(sentMsg, 1);
+      return;
+    }
+
+    const index = validReactions.indices.findIndex(
+      emoji => emoji === emojiName,
+    );
+
+    return results[index];
+  }
+
+  try {
+    const collectedReactions = await sentMsg.awaitReactions(
+      reactionFilterBuilder(id),
+      awaitReactionConfig,
+    );
+
+    const emojiName = collectedReactions.first().emoji.name;
+
+    if (validReactions.deletion === emojiName) {
+      delayedMessageAutoDeletion(sentMsg, 1);
+      return;
+    }
+
+    const index = validReactions.indices.findIndex(
+      emoji => emoji === emojiName,
+    );
+
+    return results[index];
+  } catch (collected) {
+    if (!(collected instanceof Map)) {
+      console.error(`${collected.name}: ${collected.message}`);
+      await sentMsg.edit(unknownError);
+      return;
+    }
+
+    // nobody reacted, doesn't matter
+  }
 };
 
 module.exports = {

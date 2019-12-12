@@ -60,47 +60,49 @@ const handleNPMQuery = async (msg, searchTerm) => {
       return;
     }
 
-    const embed = createListEmbed({
-      provider,
-      url: `https://npmjs.com/search?q=${searchTerm}`,
-      footerText: `at least ${firstTenResults.length.toLocaleString()} packages found`,
-      searchTerm,
-      description: createDescription(
-        firstTenResults.map(({ name, description, url }, index) => {
-          // cant guarantee syntactically correct markdown image links due to
-          // npm limiting description to 255 chars,
-          // hence ignore description in those cases
-          // e.g. redux-react-session
-          const hasMarkdownImageLink = description
-            ? description.includes('[!')
-            : true;
+    const description = createDescription(
+      firstTenResults.map(({ name, description, url }, index) => {
+        // cant guarantee syntactically correct markdown image links due to
+        // npm limiting description to 255 chars,
+        // hence ignore description in those cases
+        // e.g. redux-react-session
+        const hasMarkdownImageLink = description
+          ? description.includes('[!')
+          : true;
 
-          const linkTitle = hasMarkdownImageLink
-            ? `**${name}**`
-            : `**${name}** - *${adjustDescriptionLength(
-                index + 1,
-                name,
-                description,
-              )}*`;
+        const linkTitle = hasMarkdownImageLink
+          ? `**${name}**`
+          : `**${name}** - *${adjustDescriptionLength(
+              index + 1,
+              name,
+              description,
+            )}*`;
 
-          return createMarkdownListItem(
-            index,
-            createMarkdownLink(linkTitle, url),
-          );
-        }),
-      ),
-    });
+        return createMarkdownListItem(
+          index,
+          createMarkdownLink(linkTitle, url),
+        );
+      }),
+    );
 
-    const sentMsg = await msg.channel.send(embed);
+    const sentMsg = await msg.channel.send(
+      createListEmbed({
+        provider,
+        url: `https://npmjs.com/search?q=${searchTerm}`,
+        footerText: `at least ${firstTenResults.length.toLocaleString()} packages found`,
+        searchTerm,
+        description,
+      }),
+    );
 
-    try {
-      const result = await getChosenResult(sentMsg, msg, firstTenResults);
+    const result = await getChosenResult(sentMsg, msg, firstTenResults);
 
-      // overwrite previous embed
-      await sentMsg.edit(createEmbed(createNPMEmbed(result)));
-    } catch (collected) {
-      // nobody reacted, doesn't matter
+    if (!result) {
+      return;
     }
+
+    // overwrite previous embed
+    await sentMsg.edit(createEmbed(createNPMEmbed(result)));
   } catch (error) {
     console.error(error);
     await msg.reply(errors.unknownError);

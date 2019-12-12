@@ -62,13 +62,10 @@ const handleGithubQuery = async (msg, searchTerm) => {
             owner,
             language,
           }) => {
-            const hasLicense = !!license;
+            const hasLicense =
+              license && license.spdx_id !== 'NOASSERTION' && license.url;
 
-            if (
-              hasLicense &&
-              license.spdx_id !== 'NOASSERTION' &&
-              license.url
-            ) {
+            if (hasLicense) {
               const key = license.spdx_id;
               // eslint-disable-next-line require-atomic-updates
               license.url = licenseCache[key]
@@ -110,36 +107,38 @@ const handleGithubQuery = async (msg, searchTerm) => {
       return;
     }
 
-    const embed = createListEmbed({
-      provider,
-      searchTerm,
-      url: `https://github.com/search?q=${encodeURI(searchTerm)}`,
-      description: createDescription(
-        firstTenResults.map(({ name, description, url }, index) => {
-          const title = description
-            ? `**${name}** - *${adjustDescriptionLength(
-                index,
-                name,
-                description,
-              )}*`
-            : `**${name}**`;
+    const sentMsg = await msg.channel.send(
+      createListEmbed({
+        provider,
+        searchTerm,
+        url: `https://github.com/search?q=${encodeURI(searchTerm)}`,
+        description: createDescription(
+          firstTenResults.map(({ name, description, url }, index) => {
+            const title = description
+              ? `**${name}** - *${adjustDescriptionLength(
+                  index,
+                  name,
+                  description,
+                )}*`
+              : `**${name}**`;
 
-          return createMarkdownListItem(index, createMarkdownLink(title, url));
-        }),
-      ),
-      footerText: `${total_count.toLocaleString()} results`,
-    });
+            return createMarkdownListItem(
+              index,
+              createMarkdownLink(title, url),
+            );
+          }),
+        ),
+        footerText: `${total_count.toLocaleString()} results`,
+      }),
+    );
 
-    const sentMsg = await msg.channel.send(embed);
+    const result = await getChosenResult(sentMsg, msg, firstTenResults);
 
-    try {
-      const result = await getChosenResult(sentMsg, msg, firstTenResults);
-      const embed = createEmbed(createGithubEmbed(result));
-
-      await sentMsg.edit(embed);
-    } catch (collected) {
-      // nobody reacted, doesn't matter
+    if (!result) {
+      return;
     }
+
+    await sentMsg.edit(createEmbed(createGithubEmbed(result)));
   } catch (error) {
     console.error(`${error.name}: ${error.message}`);
     await msg.reply(errors.unknownError);

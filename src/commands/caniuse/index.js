@@ -87,56 +87,58 @@ const handleCanIUseQuery = async (msg, searchTerm) => {
         compatibilityMap: extractCompatibilityFromBCD(path),
       }));
 
-    const embed = createListEmbed({
-      url: `https://caniuse.com/#search=${encodeURI(searchTerm)}`,
-      footerText: `${resultAmount} results found`,
-      provider,
-      searchTerm,
-      description: createDescription(
-        firstTenResults.map(({ title, url }, index) =>
-          createMarkdownListItem(index, createMarkdownLink(title, url)),
+    const sentMsg = await msg.channel.send(
+      createListEmbed({
+        url: `https://caniuse.com/#search=${encodeURI(searchTerm)}`,
+        footerText: `${resultAmount} results found`,
+        provider,
+        searchTerm,
+        description: createDescription(
+          firstTenResults.map(({ title, url }, index) =>
+            createMarkdownListItem(index, createMarkdownLink(title, url)),
+          ),
         ),
-      ),
-    });
+      }),
+    );
 
-    const sentMsg = await msg.channel.send(embed);
+    const result = await getChosenResult(sentMsg, msg, firstTenResults);
 
-    try {
-      const { title, url, compatibilityMap } = await getChosenResult(
-        sentMsg,
-        msg,
-        firstTenResults,
-      );
+    if (!result) {
+      return;
+    }
 
-      const fields = Object.entries(compatibilityMap.support).map(
-        ([id, data]) => {
-          const {
+    const { title, url, compatibilityMap } = result;
+
+    const fields = Object.entries(compatibilityMap.support).map(
+      ([id, data]) => {
+        const {
+          isSupported,
+          prefix,
+          altName,
+          flags: { isUserPreference, hasRuntimeFlag },
+          isPartialImplementation,
+        } = getFeatureMetadata(data);
+
+        return {
+          name: browserNameMap[id],
+          inline: true,
+          value: [
             isSupported,
-            prefix,
-            altName,
-            flags: { isUserPreference, hasRuntimeFlag },
-            isPartialImplementation,
-          } = getFeatureMetadata(data);
+            hasRuntimeFlag && `${emojis.warning} behind a flag`,
+            isUserPreference && `${emojis.warning} user preference`,
+            altName && `${emojis.warning} alt. name: ${altName}`,
+            prefix && `${emojis.warning} use prefix: ${prefix}`,
+            isPartialImplementation &&
+              `${emojis.warning} only partially supported`,
+          ]
+            .filter(Boolean)
+            .join('\n'),
+        };
+      },
+    );
 
-          return {
-            name: browserNameMap[id],
-            inline: true,
-            value: [
-              isSupported,
-              hasRuntimeFlag && `${emojis.warning} behind a flag`,
-              isUserPreference && `${emojis.warning} user preference`,
-              altName && `${emojis.warning} alt. name: ${altName}`,
-              prefix && `${emojis.warning} use prefix: ${prefix}`,
-              isPartialImplementation &&
-                `${emojis.warning} only partially supported`,
-            ]
-              .filter(Boolean)
-              .join('\n'),
-          };
-        },
-      );
-
-      const embed = createEmbed({
+    await sentMsg.edit(
+      createEmbed({
         provider,
         url,
         title: `CanIUse... ${title}`,
@@ -147,13 +149,8 @@ const handleCanIUseQuery = async (msg, searchTerm) => {
           compatibilityMap.mdn_url,
         ),
         fields,
-      });
-
-      // overwrite previous embed
-      await sentMsg.edit(embed);
-    } catch (collected) {
-      // nobody reacted, doesn't matter
-    }
+      }),
+    );
   } catch (error) {
     console.error(error);
     await msg.reply(errors.unknownError);
