@@ -21,7 +21,7 @@ const providers = {
     color: 0xfb3e44,
     createTitle: searchTerm => `NPM results for *${searchTerm}*`,
     icon: 'https://avatars0.githubusercontent.com/u/6078720',
-    keyword: 'npm',
+    keyword: 'npm' | 'github',
   },
   composer: {
     search: `https://packagist.org/search.json?q=${SEARCH_TERM}`,
@@ -43,6 +43,15 @@ const providers = {
     getExtendedInfoUrl: text =>
       `https://caniuse.com/process/get_feat_data.php?type=support-data&feat=${text}`,
   },
+  github: {
+    search: `https://api.github.com/search/repositories?q=${SEARCH_TERM}`,
+    direct: `https://github.com/${TERM}`,
+    color: 0x24292e,
+    createTitle: searchTerm => `GitHub results for ${searchTerm}`,
+    icon:
+      'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png',
+    keyword: 'github',
+  },
 };
 
 const HELP_KEYWORD = '--help';
@@ -62,7 +71,7 @@ const KEYWORD_REGEXP = new RegExp(
 
 /**
  *
- * @param {'mdn' | 'caniuse' | 'composer' | 'npm'} provider
+ * @param {'mdn' | 'caniuse' | 'composer' | 'npm' | 'github'} provider
  * @param {string} search
  *
  * @returns {string}
@@ -76,7 +85,7 @@ const getSearchUrl = (provider, search) => {
 };
 
 /**
- * @param {'mdn' | 'caniuse' | 'composer' | 'npm'} provider
+ * @param {'mdn' | 'caniuse' | 'composer' | 'npm' | 'github'} provider
  * @param {string} href
  */
 const buildDirectUrl = (provider, href) => {
@@ -89,7 +98,7 @@ const buildDirectUrl = (provider, href) => {
 
 /**
  *
- * @param {'mdn' | 'caniuse' | 'composer' | 'npm'} provider
+ * @param {'mdn' | 'caniuse' | 'composer' | 'npm' | 'github'} provider
  * @param {string} term
  *
  * @returns {string}
@@ -108,7 +117,7 @@ const getExtendedInfoUrl = (provider, term) => {
  *
  * @param {{
  *   msg: Message,
- *   provider: 'caniuse' | 'composer' | 'mdn' | 'npm',
+ *   provider: 'caniuse' | 'composer' | 'mdn' | 'npm' | 'github',
  *   searchTerm: string,
  *   invalidData: (str: string) => boolean,
  *   sanitizeData?: (data: any) => any,

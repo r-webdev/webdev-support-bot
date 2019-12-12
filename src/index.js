@@ -11,6 +11,7 @@ const handleMDNQuery = require('./commands/mdn');
 const handleNPMQuery = require('./commands/npm');
 const handleComposerQuery = require('./commands/composer');
 const handleCanIUseQuery = require('./commands/caniuse');
+const handleGithubQuery = require('./commands/github');
 
 const client = new Client();
 
@@ -90,6 +91,9 @@ const handleMessage = async msg => {
         return;
       case keywords.composer:
         await handleComposerQuery(msg, searchTerm);
+        return;
+      case keywords.github:
+        await handleGithubQuery(msg, searchTerm);
         return;
       default:
         throw new Error('classic "shouldnt be here" scenario');
