@@ -871,10 +871,10 @@ make-dir@^1.0.0:
   dependencies:
     pify "^3.0.0"
 
-mdn-browser-compat-data@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/mdn-browser-compat-data/-/mdn-browser-compat-data-1.0.1.tgz#52657b4418e809a49d61877b50e20662cdd0b317"
-  integrity sha512-FxRIu4UYu4rRdFs5JFf6del6J+OpbOq2tYfIEK7N/PtEtz6yGVcWcytmh5L5hZxe58kuxUzjgR8+/0TRyRzRqA==
+mdn-browser-compat-data@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/mdn-browser-compat-data/-/mdn-browser-compat-data-1.0.2.tgz#de62b1ca5ac7ed51ed432efd017bcdeb51e94de4"
+  integrity sha512-9QGBlMF904G/5AMbitushExjqBEnmCyGChTd38qTUsStehwMMb2zH8g+KyjJYduQE1vqm7ztYiw6pE2xaUqlbg==
   dependencies:
     extend "3.0.2"
 
@@ -937,10 +937,10 @@ node-fetch@^2.6.0:
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.0.tgz#e633456386d4aa55863f676a7ab0daa8fdecb0fd"
   integrity sha512-8dG4H5ujfvFiqDmVu9fQ5bOHUC15JMjMY/Zumv26oOvvVJjM67KF8koCWIabKQ1GJIa9r2mMZscBq/TbdOcmNA==
 
-nodemon@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/nodemon/-/nodemon-2.0.1.tgz#cec436f8153ad5d3e6c27c304849a06cabea71cc"
-  integrity sha512-UC6FVhNLXjbbV4UzaXA3wUdbEkUZzLGgMGzmxvWAex5nzib/jhcSHVFlQODdbuUHq8SnnZ4/EABBAbC3RplvPg==
+nodemon@^2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/nodemon/-/nodemon-2.0.2.tgz#9c7efeaaf9b8259295a97e5d4585ba8f0cbe50b0"
+  integrity sha512-GWhYPMfde2+M0FsHnggIHXTqPDHXia32HRhh6H0d75Mt9FKUoCBvumNHr7LdrpPBTKxsWmIEOjoN+P4IU6Hcaw==
   dependencies:
     chokidar "^3.2.2"
     debug "^3.2.6"
