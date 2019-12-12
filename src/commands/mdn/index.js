@@ -60,53 +60,49 @@ const handleMDNQuery = async (msg, searchTerm) => {
 
     const results = document.getElementsByClassName('result');
 
-    try {
-      const sentMsg = await msg.channel.send(
-        createListEmbed({
-          provider: 'mdn',
-          searchTerm,
-          url: searchUrl,
-          footerText: meta.split('for')[0],
-          description: createDescription(
-            results.map((result, index) => {
-              const { title, url } = extractTitleAndUrlFromResult(result);
+    const sentMsg = await msg.channel.send(
+      createListEmbed({
+        provider: 'mdn',
+        searchTerm,
+        url: searchUrl,
+        footerText: meta.split('for')[0],
+        description: createDescription(
+          results.map((result, index) => {
+            const { title, url } = extractTitleAndUrlFromResult(result);
 
-              return createMarkdownListItem(
-                index,
-                createMarkdownLink(title, url),
-              );
-            }),
-          ),
-        }),
+            return createMarkdownListItem(
+              index,
+              createMarkdownLink(title, url),
+            );
+          }),
+        ),
+      }),
+    );
+
+    try {
+      const collectedReactions = await sentMsg.awaitReactions(
+        reactionFilterBuilder(msg.author.id),
+        awaitReactionConfig,
       );
 
-      try {
-        const collectedReactions = await sentMsg.awaitReactions(
-          reactionFilterBuilder(msg.author.id),
-          awaitReactionConfig,
-        );
+      const emojiName = collectedReactions.first().emoji.name;
 
-        const emojiName = collectedReactions.first().emoji.name;
-
-        if (validReactions.deletion.includes(emojiName)) {
-          delayedAutoDeleteMessage(sentMsg, 1);
-          return;
-        }
-
-        const index = validReactions.indices.findIndex(
-          emoji => emoji === emojiName,
-        );
-        const chosenResult = results[index];
-
-        const { url } = extractTitleAndUrlFromResult(chosenResult);
-
-        // overwrite previous embed
-        await sentMsg.edit(url, { embed: null });
-      } catch (collected) {
-        // nobody reacted, doesn't matter
+      if (validReactions.deletion.includes(emojiName)) {
+        delayedAutoDeleteMessage(sentMsg, 1);
+        return;
       }
-    } catch (error) {
-      console.error(`${error.name}: ${error.message}`);
+
+      const index = validReactions.indices.findIndex(
+        emoji => emoji === emojiName,
+      );
+      const chosenResult = results[index];
+
+      const { url } = extractTitleAndUrlFromResult(chosenResult);
+
+      // overwrite previous embed
+      await sentMsg.edit(url, { embed: null });
+    } catch (collected) {
+      // nobody reacted, doesn't matter
     }
   } catch (error) {
     console.error(error);

@@ -67,89 +67,82 @@ const handleComposerQuery = async (msg, searchTerm) => {
         stars: favers,
       }));
 
+    const embed = createListEmbed({
+      provider: 'composer',
+      searchTerm,
+      url: `https://packagist.org/?query=${encodeURI(searchTerm)}`,
+      footerText: `${total} packages found`,
+      description: createDescription(
+        firstTenResults.map(({ name, description, url }, index) => {
+          const truncatedDescription =
+            description.length > 0
+              ? adjustDescriptionLength(index + 1, name, description)
+              : '';
+
+          const linkTitle =
+            truncatedDescription.length > 0
+              ? `**${name}** - *${truncatedDescription}*`
+              : `**${name}**`;
+
+          return createMarkdownListItem(
+            index,
+            createMarkdownLink(linkTitle, url),
+          );
+        }),
+      ),
+    });
+
+    const sentMsg = await msg.channel.send(embed);
+
     try {
-      const embed = createListEmbed({
+      const collectedReactions = await sentMsg.awaitReactions(
+        reactionFilterBuilder(msg.author.id),
+        awaitReactionConfig,
+      );
+
+      const emojiName = collectedReactions.first().emoji.name;
+
+      if (validReactions.deletion.includes(emojiName)) {
+        delayedAutoDeleteMessage(sentMsg, 1);
+        return;
+      }
+
+      const index = validReactions.indices.findIndex(
+        emoji => emoji === emojiName,
+      );
+      const chosenResult = firstTenResults[index];
+
+      const extendedInfoUrl = getExtendedInfoUrl('composer', chosenResult.name);
+
+      const { error, json } = await useData(extendedInfoUrl);
+
+      if (error) {
+        await msg.reply(errors.invalidResponse);
+        return;
+      }
+
+      const {
+        package: { name, downloads, description, maintainers, versions },
+      } = json;
+
+      const { version, released } = findLatestRelease(versions);
+
+      const newEmbed = createEmbed({
         provider: 'composer',
-        searchTerm,
-        url: `https://packagist.org/?query=${encodeURI(searchTerm)}`,
-        footerText: `${total} packages found`,
-        description: createDescription(
-          firstTenResults.map(({ name, description, url }, index) => {
-            const truncatedDescription =
-              description.length > 0
-                ? adjustDescriptionLength(index + 1, name, description)
-                : '';
-
-            const linkTitle =
-              truncatedDescription.length > 0
-                ? `**${name}** - *${truncatedDescription}*`
-                : `**${name}**`;
-
-            return createMarkdownListItem(
-              index,
-              createMarkdownLink(linkTitle, url),
-            );
-          }),
-        ),
+        title: `${name} *(${version})*`,
+        footerText: generateDetailedFooter(downloads, released),
+        description,
+        author: {
+          icon_url: maintainers[0].avatar_url,
+          name: maintainers[0].name,
+        },
+        url: buildDirectUrl('composer', name),
+        fields: extractFieldsFromLatestRelease(versions[version]),
       });
 
-      const sentMsg = await msg.channel.send(embed);
-
-      try {
-        const collectedReactions = await sentMsg.awaitReactions(
-          reactionFilterBuilder(msg.author.id),
-          awaitReactionConfig,
-        );
-
-        const emojiName = collectedReactions.first().emoji.name;
-
-        if (validReactions.deletion.includes(emojiName)) {
-          delayedAutoDeleteMessage(sentMsg, 1);
-          return;
-        }
-
-        const index = validReactions.indices.findIndex(
-          emoji => emoji === emojiName,
-        );
-        const chosenResult = firstTenResults[index];
-
-        const extendedInfoUrl = getExtendedInfoUrl(
-          'composer',
-          chosenResult.name,
-        );
-
-        const { error, json } = await useData(extendedInfoUrl);
-
-        if (error) {
-          await msg.reply(errors.invalidResponse);
-          return;
-        }
-
-        const {
-          package: { name, downloads, description, maintainers, versions },
-        } = json;
-
-        const { version, released } = findLatestRelease(versions);
-
-        const newEmbed = createEmbed({
-          provider: 'composer',
-          title: `${name} *(${version})*`,
-          footerText: generateDetailedFooter(downloads, released),
-          description,
-          author: {
-            icon_url: maintainers[0].avatar_url,
-            name: maintainers[0].name,
-          },
-          url: buildDirectUrl('composer', name),
-          fields: extractFieldsFromLatestRelease(versions[version]),
-        });
-
-        await sentMsg.edit(newEmbed);
-      } catch (collected) {
-        // nobody reacted, doesn't matter
-      }
-    } catch (error) {
-      console.error(`${error.name}: ${error.message}`);
+      await sentMsg.edit(newEmbed);
+    } catch (collected) {
+      // nobody reacted, doesn't matter
     }
   } catch (error) {
     console.error(error);
