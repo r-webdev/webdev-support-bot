@@ -1,6 +1,6 @@
 const { providers } = require('./urlTools');
 // eslint-disable-next-line no-unused-vars
-const { Message, Collection, MessageReaction } = require('discord.js');
+const { Message, Collection, MessageReaction, User } = require('discord.js');
 const {
   reactionFilterBuilder,
   awaitReactionConfig,
@@ -181,6 +181,23 @@ const findEarlyReaction = ({ reactions }, id) =>
 
 /**
  *
+ * @param {{
+ *  reactions: Collection<string, MessageReaction>,
+ *  author: User}
+ * } reactions
+ */
+const clearReactions = ({ reactions, author }) => {
+  reactions.forEach(reaction => {
+    reaction.users.forEach(async user => {
+      if (user.bot && user.id === author.id) {
+        await reaction.remove(user);
+      }
+    });
+  });
+};
+
+/**
+ *
  * @param {Message} sentMsg
  * @param {Message} msg
  * @param {array} firstTenResults
@@ -210,6 +227,8 @@ const getChosenResult = async (sentMsg, { author: { id } }, results) => {
       emoji => emoji === emojiName,
     );
 
+    clearReactions(sentMsg);
+
     return results[index];
   }
 
@@ -229,6 +248,8 @@ const getChosenResult = async (sentMsg, { author: { id } }, results) => {
     const index = validReactions.indices.findIndex(
       emoji => emoji === emojiName,
     );
+
+    clearReactions(sentMsg);
 
     return results[index];
   } catch (collected) {
