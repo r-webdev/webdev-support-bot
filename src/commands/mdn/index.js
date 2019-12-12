@@ -14,6 +14,7 @@ const {
 } = require('../../utils/discordTools');
 const useData = require('../../utils/useData');
 
+const provider = 'mdn';
 const entities = new Entities();
 
 /**
@@ -23,7 +24,7 @@ const entities = new Entities();
  */
 const handleMDNQuery = async (msg, searchTerm) => {
   try {
-    const searchUrl = getSearchUrl('mdn', searchTerm);
+    const searchUrl = getSearchUrl(provider, searchTerm);
     const { error, text } = await useData(searchUrl, 'text');
 
     if (error) {
@@ -47,7 +48,7 @@ const handleMDNQuery = async (msg, searchTerm) => {
 
     const sentMsg = await msg.channel.send(
       createListEmbed({
-        provider: 'mdn',
+        provider,
         searchTerm,
         url: searchUrl,
         footerText: meta.split('for')[0],

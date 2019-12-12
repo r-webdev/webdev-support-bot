@@ -19,6 +19,8 @@ const useData = require('../../utils/useData');
 const compareVersions = require('compare-versions');
 const { formatDistanceToNow } = require('date-fns');
 
+const provider = 'composer';
+
 /**
  *
  * @param {Message} msg
@@ -27,7 +29,7 @@ const { formatDistanceToNow } = require('date-fns');
 const handleComposerQuery = async (msg, searchTerm) => {
   try {
     const { total, results } = await getData({
-      provider: 'composer',
+      provider,
       msg,
       searchTerm,
       isInvalidData: json => json.results.length === 0,
@@ -45,7 +47,7 @@ const handleComposerQuery = async (msg, searchTerm) => {
       }));
 
     const embed = createListEmbed({
-      provider: 'composer',
+      provider,
       searchTerm,
       url: `https://packagist.org/?query=${encodeURI(searchTerm)}`,
       footerText: `${total} packages found`,
@@ -79,7 +81,7 @@ const handleComposerQuery = async (msg, searchTerm) => {
       );
 
       const { error, json } = await useData(
-        getExtendedInfoUrl('composer', resultName),
+        getExtendedInfoUrl(provider, resultName),
       );
 
       if (error) {
@@ -94,7 +96,7 @@ const handleComposerQuery = async (msg, searchTerm) => {
       const { version, released } = findLatestRelease(versions);
 
       const newEmbed = createEmbed({
-        provider: 'composer',
+        provider,
         title: `${name} *(${version})*`,
         footerText: generateDetailedFooter(downloads, released),
         description,

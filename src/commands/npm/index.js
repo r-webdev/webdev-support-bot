@@ -12,6 +12,8 @@ const {
   getChosenResult,
 } = require('../../utils/discordTools');
 
+const provider = 'npm';
+
 const headers = {
   'X-SPIFERACK': 1,
 };
@@ -26,7 +28,7 @@ const handleNPMQuery = async (msg, searchTerm) => {
     const { total, url, objects } = await getData({
       msg,
       searchTerm,
-      provider: 'npm',
+      provider,
       headers,
       isInvalidData: json => json.objects.length === 0,
     });
@@ -50,7 +52,7 @@ const handleNPMQuery = async (msg, searchTerm) => {
       }));
 
     const embed = createListEmbed({
-      provider: 'npm',
+      provider,
       url: `https://npmjs.com${url}`,
       footerText: `${total.toLocaleString()} packages found`,
       searchTerm,
@@ -81,33 +83,38 @@ const handleNPMQuery = async (msg, searchTerm) => {
     const sentMsg = await msg.channel.send(embed);
 
     try {
-      const chosenResult = await getChosenResult(sentMsg, msg, firstTenResults);
+      const {
+        externalUrls,
+        name,
+        url,
+        description,
+        lastUpdate,
+        author,
+      } = await getChosenResult(sentMsg, msg, firstTenResults);
 
       // create fields for all links except npm since that ones in the title already
-      const fields = Object.entries(chosenResult.externalUrls).map(
-        ([host, url]) => {
-          const markdownTitle = sanitizePackageLink(host, url);
+      const fields = Object.entries(externalUrls).map(([host, url]) => {
+        const markdownTitle = sanitizePackageLink(host, url);
 
-          return {
-            name: host,
-            value: createMarkdownLink(
-              markdownTitle.endsWith('/')
-                ? markdownTitle.substr(0, markdownTitle.length - 1)
-                : markdownTitle,
-              url,
-            ),
-            inline: true,
-          };
-        },
-      );
+        return {
+          name: host,
+          value: createMarkdownLink(
+            markdownTitle.endsWith('/')
+              ? markdownTitle.substr(0, markdownTitle.length - 1)
+              : markdownTitle,
+            url,
+          ),
+          inline: true,
+        };
+      });
 
       const newEmbed = createEmbed({
-        provider: 'npm',
-        title: chosenResult.name,
-        url: chosenResult.url,
-        footerText: `last updated ${chosenResult.lastUpdate}`,
-        description: chosenResult.description,
-        author: chosenResult.author,
+        provider,
+        title: name,
+        url: url,
+        footerText: `last updated ${lastUpdate}`,
+        description: description,
+        author: author,
         fields,
       });
 

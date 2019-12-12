@@ -14,6 +14,8 @@ const {
 const useData = require('../../utils/useData');
 const bcd = require('mdn-browser-compat-data');
 
+const provider = 'caniuse';
+
 const emojis = {
   warning: ':warning:',
   yes: ':white_check_mark:',
@@ -39,13 +41,13 @@ const handleCanIUseQuery = async (msg, searchTerm) => {
     const text = await getData({
       msg,
       searchTerm,
-      provider: 'caniuse',
+      provider,
       sanitizeData: text => text.replace('"', ''),
       isInvalidData: text => text.length === 0,
     });
 
     const { error: extendedQueryError, json } = await useData(
-      getExtendedInfoUrl('caniuse', text),
+      getExtendedInfoUrl(provider, text),
     );
 
     if (extendedQueryError) {
@@ -86,9 +88,9 @@ const handleCanIUseQuery = async (msg, searchTerm) => {
       }));
 
     const embed = createListEmbed({
-      provider: 'caniuse',
       url: `https://caniuse.com/#search=${encodeURI(searchTerm)}`,
       footerText: `${resultAmount} results found`,
+      provider,
       searchTerm,
       description: createDescription(
         firstTenResults.map(({ title, url }, index) =>
@@ -112,7 +114,7 @@ const handleCanIUseQuery = async (msg, searchTerm) => {
             isSupported,
             prefix,
             altName,
-            flagInformation,
+            flags: { isUserPreference, hasRuntimeFlag },
             isPartialImplementation,
           } = getFeatureMetadata(data);
 
@@ -121,9 +123,8 @@ const handleCanIUseQuery = async (msg, searchTerm) => {
             inline: true,
             value: [
               isSupported,
-              flagInformation.runtimeFlag && `${emojis.warning} behind a flag`,
-              flagInformation.userPreference &&
-                `${emojis.warning} user preference`,
+              hasRuntimeFlag && `${emojis.warning} behind a flag`,
+              isUserPreference && `${emojis.warning} user preference`,
               altName && `${emojis.warning} alt. name: ${altName}`,
               prefix && `${emojis.warning} use prefix: ${prefix}`,
               isPartialImplementation &&
@@ -136,9 +137,9 @@ const handleCanIUseQuery = async (msg, searchTerm) => {
       );
 
       const embed = createEmbed({
-        provider: 'caniuse',
-        title: `CanIUse... ${title}`,
+        provider,
         url,
+        title: `CanIUse... ${title}`,
         footerText:
           'This bot only considers the **latest stable version** of a browser.',
         description: createMarkdownLink(
@@ -175,16 +176,16 @@ const getFeatureMetadata = data => {
   } = data.length ? data[0] : data;
 
   const flagInformation = {
-    userPreference: false,
-    runtimeFlag: false,
+    isUserPreference: false,
+    hasRuntimeFlag: false,
   };
 
   if (flags) {
-    flagInformation.userPreference = !!flags.find(
+    flagInformation.isUserPreference = !!flags.find(
       ({ type }) => type === 'preference',
     );
 
-    flagInformation.runtimeFlag = !!flags.find(
+    flagInformation.hasRuntimeFlag = !!flags.find(
       ({ type }) => type === 'runtime_flag',
     );
   }
@@ -195,7 +196,7 @@ const getFeatureMetadata = data => {
 
   return {
     isSupported,
-    flagInformation,
+    flags: flagInformation,
     altName: alternative_name && alternative_name,
     prefix: prefix && prefix,
     isPartialImplementation: !!partial_implementation,
