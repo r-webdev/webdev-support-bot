@@ -97,6 +97,11 @@ const handleGithubQuery = async (msg, searchTerm) => {
         ),
     );
 
+    if (firstTenResult.length === 1) {
+      await msg.channel.send(createEmbed(createGithubEmbed(firstTenResult[0])));
+      return;
+    }
+
     const embed = createListEmbed({
       provider,
       searchTerm,
@@ -120,92 +125,8 @@ const handleGithubQuery = async (msg, searchTerm) => {
     const sentMsg = await msg.channel.send(embed);
 
     try {
-      const {
-        description,
-        name,
-        language,
-        url,
-        homepage,
-        issues,
-        stars,
-        forks,
-        license,
-        created,
-        updated,
-        owner,
-      } = await getChosenResult(sentMsg, msg, firstTenResult);
-
-      const fields = [
-        {
-          name: 'Language',
-          value: language,
-        },
-        {
-          name: 'clone via...',
-          value: createMarkdownBash(`git clone ${url}`),
-        },
-        {
-          name: 'Open Issues :warning:',
-          value: createMarkdownLink(issues.toLocaleString(), url + '/issues'),
-          inline: true,
-        },
-        {
-          name: 'Stars :star: ',
-          value: createMarkdownLink(
-            stars.toLocaleString(),
-            url + '/stargazers',
-          ),
-          inline: true,
-        },
-        {
-          name: 'Forks :fork_and_knife:',
-          value: createMarkdownLink(
-            forks.toLocaleString(),
-            url + '/network/members',
-          ),
-          inline: true,
-        },
-      ];
-
-      if (homepage) {
-        const { protocol } = new URL(homepage);
-
-        fields.push({
-          name: 'Homepage',
-          value: createMarkdownLink(
-            homepage.replace(`${protocol}//`, ''),
-            homepage,
-          ),
-          inline: true,
-        });
-      }
-
-      if (license) {
-        fields.push({
-          name: 'License',
-          value: createMarkdownLink(license.name, license.url),
-          inline: true,
-        });
-      }
-
-      const embed = createEmbed({
-        provider,
-        title: name,
-        url,
-        author: {
-          name: `${owner.name} ${
-            owner.type === 'Organization' ? '(Organization)' : ''
-          }`,
-          url: `https://github.com/${owner.name}`,
-          icon_url: owner.avatar,
-        },
-        description,
-        footerText: [
-          `updated ${formatDistanceToNow(new Date(updated))} ago`,
-          `created ${formatDistanceToNow(new Date(created))} ago`,
-        ].join(' - '),
-        fields,
-      });
+      const result = await getChosenResult(sentMsg, msg, firstTenResult);
+      const embed = createEmbed(createGithubEmbed(result));
 
       await sentMsg.edit(embed);
     } catch (collected) {
@@ -215,6 +136,114 @@ const handleGithubQuery = async (msg, searchTerm) => {
     console.error(`${error.name}: ${error.message}`);
     await msg.reply(errors.unknownError);
   }
+};
+
+/**
+ *
+ * @param {{
+ *  name: string,
+ *  owner: {},
+ *  url: string,
+ *   description?: string,
+ *  updated: string,
+ *  created, string}
+ * }
+ */
+const createGithubEmbed = result => {
+  const { name, owner, description, url, updated, created } = result;
+
+  return {
+    provider,
+    title: name,
+    url,
+    author: {
+      name: `${owner.name} ${
+        owner.type === 'Organization' ? '(Organization)' : ''
+      }`,
+      url: `https://github.com/${owner.name}`,
+      icon_url: owner.avatar,
+    },
+    description,
+    footerText: [
+      `updated ${formatDistanceToNow(new Date(updated))} ago`,
+      `created ${formatDistanceToNow(new Date(created))} ago`,
+    ].join(' - '),
+    fields: createFields(result),
+  };
+};
+
+/**
+ *
+ * @param {{
+ *  language: string,
+ *  url: string,
+ *  stars: number,
+ *  forks: number,
+ *  issues: number,
+ *  homepage?: string,
+ *  license?: { name: string, spdx_id: string, node_id: string, key: string, url: string }
+ * }}
+ */
+const createFields = ({
+  language,
+  issues,
+  url,
+  forks,
+  homepage,
+  license,
+  stars,
+}) => {
+  const fields = [
+    {
+      name: 'Language',
+      value: language,
+    },
+    {
+      name: 'clone via...',
+      value: createMarkdownBash(`git clone ${url}`),
+    },
+    {
+      name: 'Open Issues :warning:',
+      value: createMarkdownLink(issues.toLocaleString(), url + '/issues'),
+      inline: true,
+    },
+    {
+      name: 'Stars :star: ',
+      value: createMarkdownLink(stars.toLocaleString(), url + '/stargazers'),
+      inline: true,
+    },
+    {
+      name: 'Forks :fork_and_knife:',
+      value: createMarkdownLink(
+        forks.toLocaleString(),
+        url + '/network/members',
+      ),
+      inline: true,
+    },
+  ];
+
+  if (homepage) {
+    const { protocol } = new URL(homepage);
+
+    fields.push({
+      name: 'Homepage',
+      value: createMarkdownLink(
+        homepage.replace(`${protocol}//`, ''),
+        homepage,
+      ),
+      inline: true,
+    });
+  }
+
+  if (license) {
+    fields.push({
+      name: 'License',
+      value: createMarkdownLink(license.name, license.url),
+      inline: true,
+    });
+  }
+
+  return fields;
 };
 
 /**
