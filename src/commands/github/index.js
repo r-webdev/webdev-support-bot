@@ -190,6 +190,8 @@ const createGithubEmbed = result => {
  *  homepage?: string,
  *  license?: { name: string, spdx_id: string, node_id: string, key: string, url: string }
  * }}
+ *
+ * @returns {{name: string, value: string, inline?: boolean}[]}
  */
 const createFields = ({
   language,
@@ -202,25 +204,21 @@ const createFields = ({
 }) => {
   const fields = [
     {
-      name: 'Language',
-      value: language,
-    },
-    {
       name: 'clone via...',
       value: createMarkdownBash(`git clone ${url}`),
     },
     {
-      name: 'open issues :warning:',
+      name: ':warning: open issues',
       value: createMarkdownLink(issues.toLocaleString(), url + '/issues'),
       inline: true,
     },
     {
-      name: 'stars :star: ',
+      name: ':star: stars',
       value: createMarkdownLink(stars.toLocaleString(), url + '/stargazers'),
       inline: true,
     },
     {
-      name: 'forks :fork_and_knife:',
+      name: ':fork_and_knife: forks',
       value: createMarkdownLink(
         forks.toLocaleString(),
         url + '/network/members',
@@ -233,7 +231,7 @@ const createFields = ({
     const { protocol } = new URL(homepage);
 
     fields.push({
-      name: 'homepage',
+      name: ':globe_with_meridians: homepage',
       value: createMarkdownLink(
         homepage.replace(`${protocol}//`, ''),
         homepage,
@@ -244,12 +242,19 @@ const createFields = ({
 
   if (license) {
     fields.push({
-      name: 'license',
+      name: ':notepad_spiral: license',
       value:
         license.url.length > 0
           ? createMarkdownLink(license.name, license.url)
           : license.name,
       inline: true,
+    });
+  }
+
+  if (language) {
+    fields.push({
+      name: ':writing_hand: language',
+      value: language,
     });
   }
 
