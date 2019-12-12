@@ -24,7 +24,7 @@ const bcd = require('mdn-browser-compat-data');
 const help = require('../../utils/help');
 
 const emojis = {
-  warning: ':exclamation:',
+  warning: ':warning:',
   yes: ':white_check_mark:',
   no: ':x:',
 };
@@ -73,6 +73,11 @@ const handleCanIUseQuery = async (msg, searchTerm) => {
       getExtendedInfoUrl('caniuse', sanitizedText),
     );
 
+    if (extendedQueryError) {
+      await msg.reply(errors.invalidResponse);
+      return;
+    }
+
     let hashes = sanitizedText.split(',').splice(0, 10);
 
     // ignore pure web-standard information as it lacks a path to MDN
@@ -97,11 +102,6 @@ const handleCanIUseQuery = async (msg, searchTerm) => {
       return;
     }
 
-    if (extendedQueryError) {
-      await msg.reply(errors.invalidResponse);
-      return;
-    }
-
     const firstTenResults = filteredResults
       .splice(0, 10)
       .map(({ title, path }, index) => ({
@@ -122,75 +122,75 @@ const handleCanIUseQuery = async (msg, searchTerm) => {
       ),
     });
 
+    const sentMsg = await msg.channel.send(embed);
+
     try {
-      const sentMsg = await msg.channel.send(embed);
+      const collectedReactions = await sentMsg.awaitReactions(
+        reactionFilterBuilder(msg.author.id),
+        awaitReactionConfig,
+      );
 
-      try {
-        const collectedReactions = await sentMsg.awaitReactions(
-          reactionFilterBuilder(msg.author.id),
-          awaitReactionConfig,
-        );
+      const emojiName = collectedReactions.first().emoji.name;
 
-        const emojiName = collectedReactions.first().emoji.name;
-
-        if (validReactions.deletion.includes(emojiName)) {
-          delayedAutoDeleteMessage(sentMsg, 1);
-          return;
-        }
-
-        const index = validReactions.indices.findIndex(
-          emoji => emoji === emojiName,
-        );
-
-        const { title, url, compatibilityMap } = firstTenResults[index];
-
-        const fields = Object.entries(compatibilityMap.support).map(
-          ([id, data]) => {
-            const {
-              isSupported,
-              prefix,
-              altName,
-              hasFlag,
-              isPartialImplementation,
-            } = getFeatureMetadata(data);
-
-            return {
-              name: browserNameMap[id],
-              inline: true,
-              value: [
-                isSupported,
-                hasFlag && `${emojis.warning} behind a flag`,
-                altName && `${emojis.warning} alt. name: ${altName}`,
-                prefix && `${emojis.warning} use prefix: ${prefix}`,
-                isPartialImplementation &&
-                  `${emojis.warning} only partially supported`,
-              ]
-                .filter(Boolean)
-                .join('\n'),
-            };
-          },
-        );
-
-        const embed = createEmbed({
-          provider: 'caniuse',
-          title: `CanIUse... ${title}`,
-          url,
-          footerText:
-            'This bot only considers the **latest stable version** of a browser.',
-          description: createMarkdownLink(
-            'visit MDN for more information about this specific API',
-            compatibilityMap.mdn_url,
-          ),
-          fields,
-        });
-
-        // overwrite previous embed
-        await sentMsg.edit(embed);
-      } catch (collected) {
-        // nobody reacted, doesn't matter
+      if (validReactions.deletion.includes(emojiName)) {
+        delayedAutoDeleteMessage(sentMsg, 1);
+        return;
       }
-    } catch (error) {
-      console.error(`${error.name}: ${error.message}`);
+
+      const index = validReactions.indices.findIndex(
+        emoji => emoji === emojiName,
+      );
+
+      const { title, url, compatibilityMap } = firstTenResults[index];
+
+      console.log({ title });
+
+      const fields = Object.entries(compatibilityMap.support).map(
+        ([id, data]) => {
+          const {
+            isSupported,
+            prefix,
+            altName,
+            flagInformation,
+            isPartialImplementation,
+          } = getFeatureMetadata(data);
+
+          return {
+            name: browserNameMap[id],
+            inline: true,
+            value: [
+              isSupported,
+              flagInformation.runtimeFlag && `${emojis.warning} behind a flag`,
+              flagInformation.userPreference &&
+                `${emojis.warning} user preference`,
+              altName && `${emojis.warning} alt. name: ${altName}`,
+              prefix && `${emojis.warning} use prefix: ${prefix}`,
+              isPartialImplementation &&
+                `${emojis.warning} only partially supported`,
+            ]
+              .filter(Boolean)
+              .join('\n'),
+          };
+        },
+      );
+
+      const embed = createEmbed({
+        provider: 'caniuse',
+        title: `CanIUse... ${title}`,
+        url,
+        footerText:
+          'This bot only considers the **latest stable version** of a browser.',
+        description: createMarkdownLink(
+          'visit MDN for more information about this specific API',
+          compatibilityMap.mdn_url,
+        ),
+        fields,
+      });
+
+      // overwrite previous embed
+      await sentMsg.edit(embed);
+    } catch (collected) {
+      // nobody reacted, doesn't matter
     }
   } catch (error) {
     console.error(error);
@@ -213,9 +213,28 @@ const getFeatureMetadata = data => {
     partial_implementation,
   } = data.length ? data[0] : data;
 
+  const flagInformation = {
+    userPreference: false,
+    runtimeFlag: false,
+  };
+
+  if (flags) {
+    flagInformation.userPreference = !!flags.find(
+      ({ type }) => type === 'preference',
+    );
+
+    flagInformation.runtimeFlag = !!flags.find(
+      ({ type }) => type === 'runtime_flag',
+    );
+  }
+
+  // a feature may not be behind a flag to be supported in general
+  const isSupported =
+    version_added && !flagInformation.runtimeFlag ? emojis.yes : emojis.no;
+
   return {
-    isSupported: version_added ? emojis.yes : emojis.no,
-    hasFlag: !!flags,
+    isSupported,
+    flagInformation,
     altName: alternative_name && alternative_name,
     prefix: prefix && prefix,
     isPartialImplementation: !!partial_implementation,
@@ -255,7 +274,7 @@ const extractCompatibilityFromBCD = path => {
     return compatObj[capitalizedProp].__compat;
   }
 
-  throw new Error(`unknown path/prop: ${path} -> ${prop}`);
+  throw new Error(`unknown path/finalProp: ${path} -> ${finalProp}`);
 };
 
 /**
