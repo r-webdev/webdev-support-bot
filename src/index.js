@@ -43,7 +43,9 @@ const linebreakPattern = /\n/gim;
  * @param {Message} msg
  */
 const handleMessage = async msg => {
-  const cleanContent = msg.cleanContent.replace(linebreakPattern, ' ');
+  const cleanContent = msg.cleanContent
+    .replace(linebreakPattern, ' ')
+    .toLowerCase();
 
   const isGeneralHelpRequest =
     cleanContent.includes('--help') &&
