@@ -245,7 +245,10 @@ const createFields = ({
   if (license) {
     fields.push({
       name: 'license',
-      value: createMarkdownLink(license.name, license.url),
+      value:
+        license.url.length > 0
+          ? createMarkdownLink(license.name, license.url)
+          : license.name,
       inline: true,
     });
   }
@@ -260,19 +263,19 @@ const createFields = ({
  *  spdx_id: string
  * }}
  *
- * @returns Promise<string|undefined>
+ * @returns Promise<string>
  */
 const extractAndCacheLicense = async ({ url, spdx_id }) => {
   const { error, json } = await useData(url);
 
-  if (!error) {
-    // cache to prevent continuos requests
-    licenseCache[spdx_id] = json.html_url;
-
-    return json.html_url;
+  if (error) {
+    return '';
   }
 
-  return undefined;
+  // cache to prevent continuos requests
+  licenseCache[spdx_id] = json.html_url;
+
+  return json.html_url;
 };
 
 module.exports = handleGithubQuery;
