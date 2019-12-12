@@ -1,11 +1,6 @@
 const { getSearchUrl, HELP_KEYWORD } = require('../../utils/urlTools');
 //eslint-disable-next-line no-unused-vars
 const { Message } = require('discord.js');
-const {
-  validReactions,
-  reactionFilterBuilder,
-  awaitReactionConfig,
-} = require('../../utils/reactions');
 const errors = require('../../utils/errors');
 const {
   createMarkdownLink,
@@ -15,6 +10,7 @@ const {
   adjustDescriptionLength,
   createDescription,
   createMarkdownListItem,
+  getChosenResult,
 } = require('../../utils/discordTools');
 const useData = require('../../utils/useData');
 const help = require('../../utils/help');
@@ -103,22 +99,7 @@ const handleNPMQuery = async (msg, searchTerm) => {
     const sentMsg = await msg.channel.send(embed);
 
     try {
-      const collectedReactions = await sentMsg.awaitReactions(
-        reactionFilterBuilder(msg.author.id),
-        awaitReactionConfig,
-      );
-
-      const emojiName = collectedReactions.first().emoji.name;
-
-      if (validReactions.deletion.includes(emojiName)) {
-        delayedAutoDeleteMessage(sentMsg, 1);
-        return;
-      }
-
-      const index = validReactions.indices.findIndex(
-        emoji => emoji === emojiName,
-      );
-      const chosenResult = firstTenResults[index];
+      const chosenResult = await getChosenResult(sentMsg, msg, firstTenResults);
 
       // create fields for all links except npm since that ones in the title already
       const fields = Object.entries(chosenResult.externalUrls).map(

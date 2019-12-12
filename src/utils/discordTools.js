@@ -2,6 +2,11 @@ const { providers } = require('./urlTools');
 // eslint-disable-next-line no-unused-vars
 const { Message } = require('discord.js');
 const errors = require('./errors');
+const {
+  reactionFilterBuilder,
+  awaitReactionConfig,
+  validReactions,
+} = require('./reactions');
 
 /**
  *
@@ -164,6 +169,30 @@ const createMarkdownListItem = (index, content) => `${index + 1}. ${content}`;
  */
 const createDescription = items => items.concat(BASE_DESCRIPTION).join('\n');
 
+/**
+ *
+ * @param {Message} sentMsg
+ * @param {Message} msg
+ * @param {array} firstTenResults
+ */
+const getChosenResult = async (sentMsg, { author: { id } }, results) => {
+  const collectedReactions = await sentMsg.awaitReactions(
+    reactionFilterBuilder(id),
+    awaitReactionConfig,
+  );
+
+  const emojiName = collectedReactions.first().emoji.name;
+
+  if (validReactions.deletion.includes(emojiName)) {
+    delayedAutoDeleteMessage(sentMsg, 1);
+    return;
+  }
+
+  const index = validReactions.indices.findIndex(emoji => emoji === emojiName);
+
+  return results[index];
+};
+
 module.exports = {
   createMarkdownLink,
   createListEmbed,
@@ -172,4 +201,5 @@ module.exports = {
   adjustDescriptionLength,
   createMarkdownListItem,
   createDescription,
+  getChosenResult,
 };

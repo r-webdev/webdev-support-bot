@@ -6,11 +6,6 @@ const {
 } = require('../../utils/urlTools');
 //eslint-disable-next-line no-unused-vars
 const { Message } = require('discord.js');
-const {
-  validReactions,
-  reactionFilterBuilder,
-  awaitReactionConfig,
-} = require('../../utils/reactions');
 const errors = require('../../utils/errors');
 const {
   createMarkdownLink,
@@ -20,6 +15,7 @@ const {
   createDescription,
   adjustDescriptionLength,
   delayedAutoDeleteMessage,
+  getChosenResult,
 } = require('../../utils/discordTools');
 const useData = require('../../utils/useData');
 const compareVersions = require('compare-versions');
@@ -95,22 +91,7 @@ const handleComposerQuery = async (msg, searchTerm) => {
     const sentMsg = await msg.channel.send(embed);
 
     try {
-      const collectedReactions = await sentMsg.awaitReactions(
-        reactionFilterBuilder(msg.author.id),
-        awaitReactionConfig,
-      );
-
-      const emojiName = collectedReactions.first().emoji.name;
-
-      if (validReactions.deletion.includes(emojiName)) {
-        delayedAutoDeleteMessage(sentMsg, 1);
-        return;
-      }
-
-      const index = validReactions.indices.findIndex(
-        emoji => emoji === emojiName,
-      );
-      const chosenResult = firstTenResults[index];
+      const chosenResult = await getChosenResult(sentMsg, msg, firstTenResults);
 
       const extendedInfoUrl = getExtendedInfoUrl('composer', chosenResult.name);
 

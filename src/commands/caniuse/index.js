@@ -5,11 +5,6 @@ const {
 } = require('../../utils/urlTools');
 //eslint-disable-next-line no-unused-vars
 const { Message } = require('discord.js');
-const {
-  validReactions,
-  reactionFilterBuilder,
-  awaitReactionConfig,
-} = require('../../utils/reactions');
 const errors = require('../../utils/errors');
 const {
   createMarkdownLink,
@@ -17,6 +12,7 @@ const {
   createEmbed,
   createDescription,
   createMarkdownListItem,
+  getChosenResult,
   delayedAutoDeleteMessage,
 } = require('../../utils/discordTools');
 const useData = require('../../utils/useData');
@@ -125,25 +121,11 @@ const handleCanIUseQuery = async (msg, searchTerm) => {
     const sentMsg = await msg.channel.send(embed);
 
     try {
-      const collectedReactions = await sentMsg.awaitReactions(
-        reactionFilterBuilder(msg.author.id),
-        awaitReactionConfig,
+      const { title, url, compatibilityMap } = await getChosenResult(
+        sentMsg,
+        msg,
+        firstTenResults,
       );
-
-      const emojiName = collectedReactions.first().emoji.name;
-
-      if (validReactions.deletion.includes(emojiName)) {
-        delayedAutoDeleteMessage(sentMsg, 1);
-        return;
-      }
-
-      const index = validReactions.indices.findIndex(
-        emoji => emoji === emojiName,
-      );
-
-      const { title, url, compatibilityMap } = firstTenResults[index];
-
-      console.log({ title });
 
       const fields = Object.entries(compatibilityMap.support).map(
         ([id, data]) => {

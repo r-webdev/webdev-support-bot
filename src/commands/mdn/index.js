@@ -7,11 +7,6 @@ const {
 const { Message } = require('discord.js');
 const Entities = require('html-entities').Html5Entities;
 const DOMParser = require('dom-parser');
-const {
-  validReactions,
-  reactionFilterBuilder,
-  awaitReactionConfig,
-} = require('../../utils/reactions');
 const errors = require('../../utils/errors');
 const {
   createMarkdownLink,
@@ -19,6 +14,7 @@ const {
   delayedAutoDeleteMessage,
   createListEmbed,
   createMarkdownListItem,
+  getChosenResult,
 } = require('../../utils/discordTools');
 const useData = require('../../utils/useData');
 const help = require('../../utils/help');
@@ -80,22 +76,7 @@ const handleMDNQuery = async (msg, searchTerm) => {
     );
 
     try {
-      const collectedReactions = await sentMsg.awaitReactions(
-        reactionFilterBuilder(msg.author.id),
-        awaitReactionConfig,
-      );
-
-      const emojiName = collectedReactions.first().emoji.name;
-
-      if (validReactions.deletion.includes(emojiName)) {
-        delayedAutoDeleteMessage(sentMsg, 1);
-        return;
-      }
-
-      const index = validReactions.indices.findIndex(
-        emoji => emoji === emojiName,
-      );
-      const chosenResult = results[index];
+      const chosenResult = await getChosenResult(sentMsg, msg, results);
 
       const { url } = extractTitleAndUrlFromResult(chosenResult);
 
