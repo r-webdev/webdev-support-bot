@@ -1,7 +1,7 @@
 require('dotenv').config();
 // eslint-disable-next-line no-unused-vars
 const { Client, Message } = require('discord.js');
-const { providers, KEYWORD_REGEXP } = require('./utils/urlTools');
+const { providers, KEYWORD_REGEXP, HELP_KEYWORD } = require('./utils/urlTools');
 
 const help = require('./utils/help');
 const errors = require('./utils/errors');
@@ -44,7 +44,7 @@ const linebreakPattern = /\n/gim;
 const handleMessage = async msg => {
   const cleanContent = msg.cleanContent.replace(linebreakPattern, ' ');
 
-  const isHelpRequest =
+  const isGeneralHelpRequest =
     cleanContent.includes('--help') &&
     msg.mentions.users.find(
       ({ username }) => username === client.user.username,
@@ -53,7 +53,7 @@ const handleMessage = async msg => {
   const isCommandQuery =
     cleanContent.startsWith('!') && KEYWORD_REGEXP.test(cleanContent);
 
-  if (isHelpRequest) {
+  if (isGeneralHelpRequest) {
     const prefix = 'try one of these:\n';
 
     await msg.reply(prefix + Object.values(help).join('\n'));
@@ -66,33 +66,37 @@ const handleMessage = async msg => {
   }
 
   const keyword = cleanContent.split(' ', 1)[0].substr(1);
+  const searchTerm = trimCleanContent(keywords[keyword], cleanContent);
+
+  const isSpecificHelpRequest =
+    searchTerm.length === 0 || searchTerm === HELP_KEYWORD;
+
+  // empty query or specific call for help
+  if (isSpecificHelpRequest) {
+    await msg.reply(help[keyword]);
+    return;
+  }
 
   try {
     switch (keyword) {
       case keywords.mdn:
-        await handleMDNQuery(msg, trimCleanContent('mdn', cleanContent));
+        await handleMDNQuery(msg, searchTerm);
         return;
       case keywords.caniuse:
-        await handleCanIUseQuery(
-          msg,
-          trimCleanContent('caniuse', cleanContent),
-        );
+        await handleCanIUseQuery(msg, searchTerm);
         return;
       case keywords.npm:
-        await handleNPMQuery(msg, trimCleanContent('npm', cleanContent));
+        await handleNPMQuery(msg, searchTerm);
         return;
       case keywords.composer:
-        await handleComposerQuery(
-          msg,
-          trimCleanContent('composer', cleanContent),
-        );
-
+        await handleComposerQuery(msg, searchTerm);
         return;
       default:
         throw new Error('classic "shouldnt be here" scenario');
     }
   } catch (error) {
-    msg.reply(errors.unknownError);
+    console.error(`${error.name}: ${error.message}`);
+    await msg.reply(errors.unknownError);
   }
 };
 
@@ -105,5 +109,5 @@ try {
       : process.env.DISCORD_TOKEN,
   );
 } catch (error) {
-  console.error('Invalid token.');
+  console.error('Boot Error: token invalid');
 }

@@ -1,3 +1,9 @@
+const errors = require('./errors');
+const useData = require('./useData');
+const delayedMessageAutoDeletion = require('./delayedMessageAutoDeletion');
+// eslint-disable-next-line no-unused-vars
+const { Message } = require('discord.js');
+
 const SEARCH_TERM = '%SEARCH%';
 const TERM = '%TERM%';
 
@@ -56,7 +62,7 @@ const KEYWORD_REGEXP = new RegExp(
 
 /**
  *
- * @param {string} provider
+ * @param {'mdn' | 'caniuse' | 'composer' | 'npm'} provider
  * @param {string} search
  *
  * @returns {string}
@@ -70,7 +76,7 @@ const getSearchUrl = (provider, search) => {
 };
 
 /**
- * @param {string} provider
+ * @param {'mdn' | 'caniuse' | 'composer' | 'npm'} provider
  * @param {string} href
  */
 const buildDirectUrl = (provider, href) => {
@@ -83,7 +89,7 @@ const buildDirectUrl = (provider, href) => {
 
 /**
  *
- * @param {string} provider
+ * @param {'mdn' | 'caniuse' | 'composer' | 'npm'} provider
  * @param {string} term
  *
  * @returns {string}
@@ -98,6 +104,49 @@ const getExtendedInfoUrl = (provider, term) => {
   );
 };
 
+/**
+ *
+ * @param {{
+ *   msg: Message,
+ *   provider: 'caniuse' | 'composer' | 'mdn' | 'npm',
+ *   searchTerm: string,
+ *   invalidData: (str: string) => boolean,
+ *   sanitizeData?: (data: any) => any,
+ *   headers?: Headers
+ * }}
+ *
+ * @returns Promise<array|object|string>
+ */
+const getData = async ({
+  msg,
+  provider,
+  searchTerm,
+  sanitizeData,
+  isInvalidData,
+  headers,
+}) => {
+  const searchUrl = getSearchUrl(provider, searchTerm);
+  const { error, json: data } = await useData(searchUrl, 'json', {
+    headers,
+  });
+
+  if (error) {
+    await msg.reply(errors.invalidResponse);
+    return;
+  }
+
+  const sanitizedData = sanitizeData ? sanitizeData(data) : data;
+
+  if (isInvalidData(sanitizedData)) {
+    const sentMessage = await msg.reply(errors.noResults(searchTerm));
+
+    delayedMessageAutoDeletion(sentMessage);
+    return;
+  }
+
+  return sanitizedData;
+};
+
 module.exports = {
   providers,
   getSearchUrl,
@@ -105,4 +154,5 @@ module.exports = {
   buildDirectUrl,
   HELP_KEYWORD,
   getExtendedInfoUrl,
+  getData,
 };

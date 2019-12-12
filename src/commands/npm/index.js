@@ -1,4 +1,4 @@
-const { getSearchUrl, HELP_KEYWORD } = require('../../utils/urlTools');
+const { getData } = require('../../utils/urlTools');
 //eslint-disable-next-line no-unused-vars
 const { Message } = require('discord.js');
 const errors = require('../../utils/errors');
@@ -6,14 +6,11 @@ const {
   createMarkdownLink,
   createListEmbed,
   createEmbed,
-  delayedAutoDeleteMessage,
   adjustDescriptionLength,
   createDescription,
   createMarkdownListItem,
   getChosenResult,
 } = require('../../utils/discordTools');
-const useData = require('../../utils/useData');
-const help = require('../../utils/help');
 
 const headers = {
   'X-SPIFERACK': 1,
@@ -25,31 +22,16 @@ const headers = {
  * @param {string} searchTerm
  */
 const handleNPMQuery = async (msg, searchTerm) => {
-  // empty query or call for help
-  if (searchTerm.length === 0 || searchTerm === HELP_KEYWORD) {
-    await msg.reply(help.npm);
-    return;
-  }
-
   try {
-    const searchUrl = getSearchUrl('npm', searchTerm);
-    const { error, json } = await useData(searchUrl, 'json', { headers });
+    const { total, url, objects } = await getData({
+      msg,
+      searchTerm,
+      provider: 'npm',
+      headers,
+      isInvalidData: json => json.objects.length === 0,
+    });
 
-    if (error) {
-      await msg.reply(errors.invalidResponse);
-      return;
-    }
-
-    if (json.objects.length === 0) {
-      const sentMsg = await msg.reply(errors.noResults(searchTerm));
-
-      delayedAutoDeleteMessage(sentMsg);
-      return;
-    }
-
-    const { total, url } = json;
-
-    const firstTenResults = json.objects
+    const firstTenResults = objects
       .splice(0, 10)
       .map(({ package: { name, date, description, links, publisher } }) => ({
         lastUpdate: date.rel,

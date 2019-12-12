@@ -1,8 +1,7 @@
 const {
-  getSearchUrl,
-  HELP_KEYWORD,
   getExtendedInfoUrl,
   buildDirectUrl,
+  getData,
 } = require('../../utils/urlTools');
 //eslint-disable-next-line no-unused-vars
 const { Message } = require('discord.js');
@@ -14,13 +13,11 @@ const {
   createMarkdownListItem,
   createDescription,
   adjustDescriptionLength,
-  delayedAutoDeleteMessage,
   getChosenResult,
 } = require('../../utils/discordTools');
 const useData = require('../../utils/useData');
 const compareVersions = require('compare-versions');
 const { formatDistanceToNow } = require('date-fns');
-const help = require('../../utils/help');
 
 /**
  *
@@ -28,31 +25,15 @@ const help = require('../../utils/help');
  * @param {string} searchTerm
  */
 const handleComposerQuery = async (msg, searchTerm) => {
-  // empty query or call for help
-  if (searchTerm.length === 0 || searchTerm === HELP_KEYWORD) {
-    await msg.reply(help.composer);
-    return;
-  }
-
   try {
-    const searchUrl = getSearchUrl('composer', searchTerm);
-    const { error, json } = await useData(searchUrl);
+    const { total, results } = await getData({
+      provider: 'composer',
+      msg,
+      searchTerm,
+      isInvalidData: json => json.results.length === 0,
+    });
 
-    if (error) {
-      await msg.reply(errors.invalidResponse);
-      return;
-    }
-
-    if (json.results.length === 0) {
-      const sentMessage = await msg.reply(errors.noResults(searchTerm));
-
-      delayedAutoDeleteMessage(sentMessage);
-      return;
-    }
-
-    const { total } = json;
-
-    const firstTenResults = json.results
+    const firstTenResults = results
       .splice(0, 10)
       .map(({ name, description, repository, url, downloads, favers }) => ({
         name,
@@ -91,11 +72,15 @@ const handleComposerQuery = async (msg, searchTerm) => {
     const sentMsg = await msg.channel.send(embed);
 
     try {
-      const chosenResult = await getChosenResult(sentMsg, msg, firstTenResults);
+      const { name: resultName } = await getChosenResult(
+        sentMsg,
+        msg,
+        firstTenResults,
+      );
 
-      const extendedInfoUrl = getExtendedInfoUrl('composer', chosenResult.name);
-
-      const { error, json } = await useData(extendedInfoUrl);
+      const { error, json } = await useData(
+        getExtendedInfoUrl('composer', resultName),
+      );
 
       if (error) {
         await msg.reply(errors.invalidResponse);

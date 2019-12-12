@@ -1,8 +1,4 @@
-const {
-  getSearchUrl,
-  buildDirectUrl,
-  HELP_KEYWORD,
-} = require('../../utils/urlTools');
+const { getSearchUrl, buildDirectUrl } = require('../../utils/urlTools');
 //eslint-disable-next-line no-unused-vars
 const { Message } = require('discord.js');
 const Entities = require('html-entities').Html5Entities;
@@ -17,7 +13,6 @@ const {
   getChosenResult,
 } = require('../../utils/discordTools');
 const useData = require('../../utils/useData');
-const help = require('../../utils/help');
 
 const entities = new Entities();
 
@@ -27,12 +22,6 @@ const entities = new Entities();
  * @param {string} searchTerm
  */
 const handleMDNQuery = async (msg, searchTerm) => {
-  // empty query or call for help
-  if (searchTerm.length === 0 || searchTerm === HELP_KEYWORD) {
-    await msg.reply(help.mdn);
-    return;
-  }
-
   try {
     const searchUrl = getSearchUrl('mdn', searchTerm);
     const { error, text } = await useData(searchUrl, 'text');

@@ -1,8 +1,4 @@
-const {
-  getSearchUrl,
-  getExtendedInfoUrl,
-  HELP_KEYWORD,
-} = require('../../utils/urlTools');
+const { getExtendedInfoUrl, getData } = require('../../utils/urlTools');
 //eslint-disable-next-line no-unused-vars
 const { Message } = require('discord.js');
 const errors = require('../../utils/errors');
@@ -17,7 +13,6 @@ const {
 } = require('../../utils/discordTools');
 const useData = require('../../utils/useData');
 const bcd = require('mdn-browser-compat-data');
-const help = require('../../utils/help');
 
 const emojis = {
   warning: ':warning:',
@@ -40,33 +35,17 @@ const browserNameMap = Object.entries(bcd.browsers).reduce(
  * @param {string} searchTerm
  */
 const handleCanIUseQuery = async (msg, searchTerm) => {
-  // empty query or call for help
-  if (searchTerm.length === 0 || searchTerm === HELP_KEYWORD) {
-    await msg.reply(help.caniuse);
-    return;
-  }
-
   try {
-    const searchUrl = getSearchUrl('caniuse', searchTerm);
-    const { error, json: text } = await useData(searchUrl);
-
-    const sanitizedText = text.replace('"', '');
-
-    if (error) {
-      await msg.reply(errors.invalidResponse);
-      return;
-    }
-
-    // dont trust the honestly weird caniuse API
-    if (sanitizedText.length === 0) {
-      const sentMsg = await msg.reply(errors.noResults(searchTerm));
-
-      delayedAutoDeleteMessage(sentMsg);
-      return;
-    }
+    const text = await getData({
+      msg,
+      searchTerm,
+      provider: 'caniuse',
+      sanitizeData: text => text.replace('"', ''),
+      isInvalidData: text => text.length === 0,
+    });
 
     const { error: extendedQueryError, json } = await useData(
-      getExtendedInfoUrl('caniuse', sanitizedText),
+      getExtendedInfoUrl('caniuse', text),
     );
 
     if (extendedQueryError) {
@@ -74,7 +53,7 @@ const handleCanIUseQuery = async (msg, searchTerm) => {
       return;
     }
 
-    let hashes = sanitizedText.split(',').splice(0, 10);
+    let hashes = text.split(',').splice(0, 10);
 
     // ignore pure web-standard information as it lacks a path to MDN
     const filteredResults = json.filter((dataset, index) => {

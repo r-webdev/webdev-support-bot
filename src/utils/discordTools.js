@@ -1,12 +1,12 @@
 const { providers } = require('./urlTools');
 // eslint-disable-next-line no-unused-vars
 const { Message } = require('discord.js');
-const errors = require('./errors');
 const {
   reactionFilterBuilder,
   awaitReactionConfig,
   validReactions,
 } = require('./reactions');
+const delayedMessageAutoDeletion = require('./delayedMessageAutoDeletion');
 
 /**
  *
@@ -27,11 +27,13 @@ const BASE_DESCRIPTION = `
 
 /**
  *
- * @param {string} provider
- * @param {string} searchTerm
- * @param {string} url
- * @param {string} footerText
- * @param {string} description
+ * @param {{
+ *   provider: 'caniuse' | 'mdn' | 'composer' | 'npm',
+ *   searchTerm: string,
+ *   url: string,
+ *   footerText: string,
+ *   description: string,
+ * }}
  */
 const createListEmbed = ({
   provider,
@@ -93,20 +95,6 @@ const createEmbed = ({
   }
 
   throw new Error('provider not implemented');
-};
-
-/**
- *
- * @param {Message} msg
- * @param {number} timeout
- */
-const delayedAutoDeleteMessage = (msg, timeout = 30 * 1000) => {
-  setTimeout(() => {
-    msg.delete().catch(error => {
-      console.error(error);
-      msg.edit(errors.missingRightsDeletion);
-    });
-  }, timeout);
 };
 
 const DESCRIPTION_LENGTH_LIMIT = 72;
@@ -184,7 +172,7 @@ const getChosenResult = async (sentMsg, { author: { id } }, results) => {
   const emojiName = collectedReactions.first().emoji.name;
 
   if (validReactions.deletion.includes(emojiName)) {
-    delayedAutoDeleteMessage(sentMsg, 1);
+    delayedMessageAutoDeletion(sentMsg, 1);
     return;
   }
 
@@ -197,7 +185,6 @@ module.exports = {
   createMarkdownLink,
   createListEmbed,
   createEmbed,
-  delayedAutoDeleteMessage,
   adjustDescriptionLength,
   createMarkdownListItem,
   createDescription,
