@@ -263,6 +263,11 @@ const getChosenResult = async (sentMsg, { author: { id } }, results) => {
   }
 };
 
+const EMPTY_FIELD = {
+  name: '\u200B',
+  value: '\u200B',
+};
+
 module.exports = {
   createMarkdownLink,
   createListEmbed,
@@ -272,4 +277,5 @@ module.exports = {
   createDescription,
   getChosenResult,
   createMarkdownBash,
+  EMPTY_FIELD,
 };

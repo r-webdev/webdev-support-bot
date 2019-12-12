@@ -15,6 +15,7 @@ const {
   adjustDescriptionLength,
   getChosenResult,
   createMarkdownBash,
+  EMPTY_FIELD,
 } = require('../../utils/discordTools');
 const useData = require('../../utils/useData');
 const compareVersions = require('compare-versions');
@@ -123,11 +124,6 @@ const handleComposerQuery = async (msg, searchTerm) => {
   }
 };
 
-const EMPTY_FIELD = {
-  name: '\u200B',
-  value: '\u200B',
-};
-
 /**
  *
  * @param {object} package.version response from packagist API
@@ -180,7 +176,7 @@ const extractFieldsFromLatestRelease = ({
 
   if (keywords.length > 0) {
     fields.push({
-      name: 'keywords',
+      name: ':key: keywords',
       value: keywords
         .map(keyword => createMarkdownLink(keyword, createTagLink(keyword)))
         .join(', '),
@@ -200,14 +196,14 @@ const extractFieldsFromLatestRelease = ({
   }
 
   fields.push({
-    name: 'dependencies',
+    name: ':chains: dependencies',
     value: Object.keys(require).length - (phpRequirement ? 1 : 0),
     inline: true,
   });
 
   if (license) {
     fields.push({
-      name: 'license',
+      name: ':notepad_spiral: license',
       value: license
         .map(license =>
           createMarkdownLink(
@@ -232,7 +228,7 @@ const extractFieldsFromLatestRelease = ({
     const { protocol } = new URL(homepage);
 
     fields.push({
-      name: 'homepage',
+      name: ':globe_with_meridians: homepage',
       value: createMarkdownLink(
         homepage.replace(`${protocol}//`, ''),
         homepage,
@@ -271,7 +267,7 @@ const extractFieldsFromLatestRelease = ({
 
   authors.forEach(author => {
     fields.push({
-      name: 'author',
+      name: ':writing_hand: author',
       value: author.name,
       inline: true,
     });

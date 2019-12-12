@@ -230,10 +230,12 @@ const createFields = ({
   if (homepage) {
     const { protocol } = new URL(homepage);
 
+    const title = homepage.replace(`${protocol}//`, '');
+
     fields.push({
       name: ':globe_with_meridians: homepage',
       value: createMarkdownLink(
-        homepage.replace(`${protocol}//`, ''),
+        title.endsWith('/') ? title.substr(0, title.length - 1) : title,
         homepage,
       ),
       inline: true,
