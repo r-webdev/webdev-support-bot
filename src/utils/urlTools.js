@@ -17,11 +17,11 @@ const providers = {
     keyword: 'mdn',
   },
   npm: {
-    search: `https://www.npmjs.com/search?q=${SEARCH_TERM}`,
+    search: `https://www.npmjs.com/search/suggestions?q=${SEARCH_TERM}`,
     color: 0xfb3e44,
     createTitle: searchTerm => `NPM results for *${searchTerm}*`,
     icon: 'https://avatars0.githubusercontent.com/u/6078720',
-    keyword: 'npm' | 'github',
+    keyword: 'npm',
   },
   composer: {
     search: `https://packagist.org/search.json?q=${SEARCH_TERM}`,

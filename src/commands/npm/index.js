@@ -10,13 +10,11 @@ const {
   createDescription,
   createMarkdownListItem,
   getChosenResult,
+  createMarkdownBash,
 } = require('../../utils/discordTools');
+const { formatDistanceToNow } = require('date-fns');
 
 const provider = 'npm';
-
-const headers = {
-  'X-SPIFERACK': 1,
-};
 
 /**
  *
@@ -25,36 +23,43 @@ const headers = {
  */
 const handleNPMQuery = async (msg, searchTerm) => {
   try {
-    const { total, url, objects } = await getData({
+    const json = await getData({
       msg,
       searchTerm,
       provider,
-      headers,
-      isInvalidData: json => json.objects.length === 0,
+      isInvalidData: json => json.length === 0,
     });
 
-    const firstTenResults = objects
+    const firstTenResults = json
       .splice(0, 10)
-      .map(({ package: { name, date, description, links, publisher } }) => ({
-        lastUpdate: date.rel,
+      .map(({ name, date, description, links, publisher, maintainers }) => ({
+        lastUpdate: `${formatDistanceToNow(new Date(date))} ago`,
         url: links.npm,
         externalUrls: {
           homepage: links.homepage,
           repository: links.repository,
         },
         author: {
-          name: publisher.name,
-          icon_url: publisher.avatars.small,
-          url: `https://www.npmjs.com/~${publisher.name}`,
+          name: publisher.username,
+          //icon_url: publisher.avatars.small,
+          url: `https://www.npmjs.com/~${publisher.username}`,
         },
         name,
         description,
+        maintainers: maintainers.length,
       }));
+
+    if (firstTenResults.length === 1) {
+      const embed = createEmbed(createNPMEmbed(firstTenResults[0]));
+
+      await msg.channel.send(embed);
+      return;
+    }
 
     const embed = createListEmbed({
       provider,
-      url: `https://npmjs.com${url}`,
-      footerText: `${total.toLocaleString()} packages found`,
+      url: `https://npmjs.com/search?q=${searchTerm}`,
+      footerText: `at least ${firstTenResults.length.toLocaleString()} packages found`,
       searchTerm,
       description: createDescription(
         firstTenResults.map(({ name, description, url }, index) => {
@@ -62,7 +67,9 @@ const handleNPMQuery = async (msg, searchTerm) => {
           // npm limiting description to 255 chars,
           // hence ignore description in those cases
           // e.g. redux-react-session
-          const hasMarkdownImageLink = description.indexOf('[!') > -1;
+          const hasMarkdownImageLink = description
+            ? description.includes('[!')
+            : true;
 
           const linkTitle = hasMarkdownImageLink
             ? `**${name}**`
@@ -83,43 +90,10 @@ const handleNPMQuery = async (msg, searchTerm) => {
     const sentMsg = await msg.channel.send(embed);
 
     try {
-      const {
-        externalUrls,
-        name,
-        url,
-        description,
-        lastUpdate,
-        author,
-      } = await getChosenResult(sentMsg, msg, firstTenResults);
-
-      // create fields for all links except npm since that ones in the title already
-      const fields = Object.entries(externalUrls).map(([host, url]) => {
-        const markdownTitle = sanitizePackageLink(host, url);
-
-        return {
-          name: host,
-          value: createMarkdownLink(
-            markdownTitle.endsWith('/')
-              ? markdownTitle.substr(0, markdownTitle.length - 1)
-              : markdownTitle,
-            url,
-          ),
-          inline: true,
-        };
-      });
-
-      const newEmbed = createEmbed({
-        provider,
-        title: name,
-        url: url,
-        footerText: `last updated ${lastUpdate}`,
-        description: description,
-        author: author,
-        fields,
-      });
+      const result = await getChosenResult(sentMsg, msg, firstTenResults);
 
       // overwrite previous embed
-      await sentMsg.edit(newEmbed);
+      await sentMsg.edit(createEmbed(createNPMEmbed(result)));
     } catch (collected) {
       // nobody reacted, doesn't matter
     }
@@ -129,6 +103,72 @@ const handleNPMQuery = async (msg, searchTerm) => {
   }
 };
 
+/**
+ *
+ * @param {{
+ *  externalUrls: { homepage: string, repository: string},
+ *  name: string,
+ *  url: string,
+ *  description: string,
+ *  lastUpdate: string,
+ *  maintainers: number,
+ *  author: {name: string, url: string}
+ *  }}
+ */
+const createNPMEmbed = ({
+  externalUrls,
+  name,
+  url,
+  description,
+  lastUpdate,
+  maintainers,
+  author,
+}) => ({
+  provider,
+  title: name,
+  url: url,
+  footerText: `last updated ${lastUpdate}`,
+  description: description,
+  author: author,
+  fields: createFields(name, externalUrls, maintainers),
+});
+
+/**
+ *  Creates fields for all links except npm since that ones in the title already
+ *
+ * @param {{homepage: string, repository: string}} externalUrls
+ */
+const createFields = (name, externalUrls, maintainers) => [
+  {
+    name: 'add to your project',
+    value: createMarkdownBash(`npm install ${name}`),
+  },
+  ...Object.entries(externalUrls).map(([host, url]) => {
+    const markdownTitle = sanitizePackageLink(host, url);
+
+    return {
+      name: host,
+      value: createMarkdownLink(
+        markdownTitle.endsWith('/')
+          ? markdownTitle.substr(0, markdownTitle.length - 1)
+          : markdownTitle,
+        url,
+      ),
+      inline: true,
+    };
+  }),
+  {
+    name: 'maintainers',
+    value: maintainers,
+    inline: true,
+  },
+];
+
+/**
+ *
+ * @param {string} host
+ * @param {string} link
+ */
 const sanitizePackageLink = (host, link) => {
   const { protocol, pathname } = new URL(link);
 
