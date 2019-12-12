@@ -8,13 +8,15 @@ Bot providing multiple commands to query common sites used during development or
 
 Supports
 
-`!composer` via `packagist`,
+`!github` via `GitHub API`,
 
-`!npm`,
+`!composer` via `packagist API`,
 
-`!mdn` for `Mozilla Developer Network` and
+`!npm` via unofficial `npmjs.com API`,
 
-`!caniuse` via `caniuse` and `mdn-browser-combat-data`.
+`!mdn` via parsing [Mozilla Developer Network](http://developer.mozilla.org/) and
+
+`!caniuse` via unofficial `caniuse API` and [mdn-browser-combat-data](https://github.com/mdn/browser-compat-data).
 
 ## Usage / TLDR
 ```bash
@@ -25,6 +27,7 @@ Supports
 !caniuse --help
 !composer --help
 !npm --help
+!github --help
 ```
 
 ```bash
@@ -46,12 +49,18 @@ Supports
 !npm <package>
 ```
 
+```bash
+# queries github with <term>
+!github <term>
+```
+
+- single-result queries will directly show the result
 - reacting with a number will filter the result
 - reacting with the _red_ or _black_ `x` will remove the request
 
 ## Description
 
-By default, shows the first ten results of any given query.
+By default, shows the first ten results of any given query, unless only one result was found.
 
 Reacting with a number corresponding to the list entry will filter the list and edit the original message, providing more specific information.
 
