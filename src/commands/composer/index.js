@@ -176,7 +176,7 @@ const extractFieldsFromLatestRelease = ({
 
   if (keywords.length > 0) {
     fields.push({
-      name: 'Keywords',
+      name: 'keywords',
       value: keywords
         .map(keyword => createMarkdownLink(keyword, createTagLink(keyword)))
         .join(', '),
@@ -196,14 +196,14 @@ const extractFieldsFromLatestRelease = ({
   }
 
   fields.push({
-    name: 'Dependencies',
+    name: 'dependencies',
     value: Object.keys(require).length - (phpRequirement ? 1 : 0),
     inline: true,
   });
 
   if (license) {
     fields.push({
-      name: 'License',
+      name: 'license',
       value: license
         .map(license =>
           createMarkdownLink(
@@ -228,7 +228,7 @@ const extractFieldsFromLatestRelease = ({
     const { protocol } = new URL(homepage);
 
     fields.push({
-      name: 'Homepage',
+      name: 'homepage',
       value: createMarkdownLink(
         homepage.replace(`${protocol}//`, ''),
         homepage,
@@ -244,7 +244,7 @@ const extractFieldsFromLatestRelease = ({
       const { pathname } = new URL(source.url);
 
       fields.push({
-        name: 'Repository',
+        name: 'repository',
         value: createMarkdownLink(
           pathname.substr(1).replace('.git', ''),
           source.url.replace('.git', ''),
@@ -267,7 +267,7 @@ const extractFieldsFromLatestRelease = ({
 
   authors.forEach(author => {
     fields.push({
-      name: 'Author',
+      name: 'author',
       value: author.name,
       inline: true,
     });

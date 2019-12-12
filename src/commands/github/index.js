@@ -38,7 +38,7 @@ const handleGithubQuery = async (msg, searchTerm) => {
       isInvalidData: json => json.total_count === 0 || json.items.length === 0,
     });
 
-    const firstTenResult = await Promise.all(
+    const firstTenResults = await Promise.all(
       items
         .splice(0, 10)
         .map(
@@ -97,8 +97,10 @@ const handleGithubQuery = async (msg, searchTerm) => {
         ),
     );
 
-    if (firstTenResult.length === 1) {
-      await msg.channel.send(createEmbed(createGithubEmbed(firstTenResult[0])));
+    if (firstTenResults.length === 1) {
+      await msg.channel.send(
+        createEmbed(createGithubEmbed(firstTenResults[0])),
+      );
       return;
     }
 
@@ -107,7 +109,7 @@ const handleGithubQuery = async (msg, searchTerm) => {
       searchTerm,
       url: `https://github.com/search?q=${encodeURI(searchTerm)}`,
       description: createDescription(
-        firstTenResult.map(({ name, description, url }, index) => {
+        firstTenResults.map(({ name, description, url }, index) => {
           const title = description
             ? `**${name}** - *${adjustDescriptionLength(
                 index,
@@ -125,7 +127,7 @@ const handleGithubQuery = async (msg, searchTerm) => {
     const sentMsg = await msg.channel.send(embed);
 
     try {
-      const result = await getChosenResult(sentMsg, msg, firstTenResult);
+      const result = await getChosenResult(sentMsg, msg, firstTenResults);
       const embed = createEmbed(createGithubEmbed(result));
 
       await sentMsg.edit(embed);
@@ -203,17 +205,17 @@ const createFields = ({
       value: createMarkdownBash(`git clone ${url}`),
     },
     {
-      name: 'Open Issues :warning:',
+      name: 'open issues :warning:',
       value: createMarkdownLink(issues.toLocaleString(), url + '/issues'),
       inline: true,
     },
     {
-      name: 'Stars :star: ',
+      name: 'stars :star: ',
       value: createMarkdownLink(stars.toLocaleString(), url + '/stargazers'),
       inline: true,
     },
     {
-      name: 'Forks :fork_and_knife:',
+      name: 'forks :fork_and_knife:',
       value: createMarkdownLink(
         forks.toLocaleString(),
         url + '/network/members',
@@ -226,7 +228,7 @@ const createFields = ({
     const { protocol } = new URL(homepage);
 
     fields.push({
-      name: 'Homepage',
+      name: 'homepage',
       value: createMarkdownLink(
         homepage.replace(`${protocol}//`, ''),
         homepage,
@@ -237,7 +239,7 @@ const createFields = ({
 
   if (license) {
     fields.push({
-      name: 'License',
+      name: 'license',
       value: createMarkdownLink(license.name, license.url),
       inline: true,
     });
