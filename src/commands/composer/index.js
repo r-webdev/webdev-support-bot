@@ -14,6 +14,7 @@ const {
   createDescription,
   adjustDescriptionLength,
   getChosenResult,
+  createMarkdownBash,
 } = require('../../utils/discordTools');
 const useData = require('../../utils/useData');
 const compareVersions = require('compare-versions');
@@ -169,7 +170,7 @@ const extractFieldsFromLatestRelease = ({
   const fields = [
     {
       name: 'add to your project',
-      value: `*composer require ${name}*`,
+      value: createMarkdownBash(`composer require ${name}`),
     },
   ];
 
@@ -203,7 +204,14 @@ const extractFieldsFromLatestRelease = ({
   if (license) {
     fields.push({
       name: 'License',
-      value: license.join(' '),
+      value: license
+        .map(license =>
+          createMarkdownLink(
+            license,
+            `https://choosealicense.com/licenses/${license.toLowerCase()}`,
+          ),
+        )
+        .join(' '),
       inline: true,
     });
   }
