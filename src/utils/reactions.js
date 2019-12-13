@@ -4,19 +4,18 @@ const validReactions = {
   indices: ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'],
 };
 
-const reactionCache = [...validReactions.indices, validReactions.deletion];
-
 /**
  *
  * @param {string} initialMessageAuthorId
+ * @param {string[]} currentlyValidEmojis
  */
-const reactionFilterBuilder = initialMessageAuthorId => (
-  { emoji: { name } },
-  user,
-) =>
+const reactionFilterBuilder = (
+  initialMessageAuthorId,
+  currentlyValidEmojis,
+) => ({ emoji: { name } }, user) =>
   user.id === initialMessageAuthorId &&
   // validate reaction via whitelist
-  reactionCache.includes(name);
+  currentlyValidEmojis.includes(name);
 
 const awaitReactionConfig = {
   max: 1,
@@ -26,7 +25,6 @@ const awaitReactionConfig = {
 
 module.exports = {
   validReactions,
-  reactionCache,
   reactionFilterBuilder,
   awaitReactionConfig,
 };

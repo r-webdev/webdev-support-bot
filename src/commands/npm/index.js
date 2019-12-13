@@ -91,7 +91,10 @@ const handleNPMQuery = async (msg, searchTerm) => {
       createListEmbed({
         provider,
         url: `https://npmjs.com/search?q=${searchTerm}`,
-        footerText: `at least ${firstTenResults.length.toLocaleString()} packages found`,
+        footerText:
+          firstTenResults.length < 10
+            ? `${firstTenResults.length} packages found`
+            : `at least ${firstTenResults.length.toLocaleString()} packages found`,
         searchTerm,
         description,
       }),

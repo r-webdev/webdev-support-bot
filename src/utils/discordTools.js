@@ -5,7 +5,6 @@ const {
   reactionFilterBuilder,
   awaitReactionConfig,
   validReactions,
-  reactionCache,
 } = require('./reactions');
 const delayedMessageAutoDeletion = require('./delayedMessageAutoDeletion');
 const { unknownError } = require('./errors');
@@ -174,12 +173,13 @@ const createDescription = items => items.concat(BASE_DESCRIPTION).join('\n');
  *
  * @param {{reactions: Collection<string, MessageReaction>}} reactions
  * @param {string} id
+ * @param {string[]} currentlyValidEmojis
  *
  */
-const findEarlyReaction = ({ reactions }, id) =>
+const findEarlyReaction = ({ reactions }, id, currentlyValidEmojis) =>
   reactions.find(
     ({ users, emoji: { name } }) =>
-      reactionCache.includes(name) && users.find(user => user.id === id),
+      currentlyValidEmojis.includes(name) && users.find(user => user.id === id),
   );
 
 /**
@@ -217,8 +217,15 @@ const clearReactions = ({ reactions, author }) => {
 const getChosenResult = async (sentMsg, { author: { id } }, results) => {
   let earlyReaction = null;
 
-  for (const emoji of reactionCache) {
-    earlyReaction = findEarlyReaction(sentMsg, id);
+  const emojis = [
+    ...(results.length < 10
+      ? [...validReactions.indices].splice(0, results.length)
+      : validReactions.indices),
+    validReactions.deletion,
+  ];
+
+  for (const emoji of emojis) {
+    earlyReaction = findEarlyReaction(sentMsg, id, emojis);
 
     if (earlyReaction) {
       break;
@@ -253,7 +260,7 @@ const getChosenResult = async (sentMsg, { author: { id } }, results) => {
 
   try {
     const collectedReactions = await sentMsg.awaitReactions(
-      reactionFilterBuilder(id),
+      reactionFilterBuilder(id, emojis),
       awaitReactionConfig,
     );
 
