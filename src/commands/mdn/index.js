@@ -7,12 +7,12 @@ const errors = require('../../utils/errors');
 const {
   createMarkdownLink,
   createDescription,
-  delayedAutoDeleteMessage,
   createListEmbed,
   createMarkdownListItem,
   getChosenResult,
 } = require('../../utils/discordTools');
 const useData = require('../../utils/useData');
+const delayedMessageAutoDeletion = require('../../utils/delayedMessageAutoDeletion');
 
 const provider = 'mdn';
 const entities = new Entities();
@@ -40,7 +40,7 @@ const handleMDNQuery = async (msg, searchTerm) => {
     if (meta.startsWith('0 documents found')) {
       const sentMsg = await msg.reply(errors.noResults(searchTerm));
 
-      delayedAutoDeleteMessage(sentMsg);
+      delayedMessageAutoDeletion(sentMsg);
       return;
     }
 

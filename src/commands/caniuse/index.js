@@ -9,11 +9,11 @@ const {
   createDescription,
   createMarkdownListItem,
   getChosenResult,
-  delayedAutoDeleteMessage,
 } = require('../../utils/discordTools');
 const useData = require('../../utils/useData');
 const bcd = require('mdn-browser-compat-data');
 const emojis = require('../../utils/emojis');
+const delayedMessageAutoDeletion = require('../../utils/delayedMessageAutoDeletion');
 
 const provider = 'caniuse';
 
@@ -70,7 +70,7 @@ const handleCanIUseQuery = async (msg, searchTerm) => {
     if (resultAmount === 0) {
       const sentMsg = await msg.reply(errors.noResults(searchTerm));
 
-      delayedAutoDeleteMessage(sentMsg);
+      delayedMessageAutoDeletion(sentMsg);
       return;
     }
 
