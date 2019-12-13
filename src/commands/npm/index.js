@@ -56,9 +56,7 @@ const handleNPMQuery = async (msg, searchTerm) => {
       }));
 
     if (firstTenResults.length === 1) {
-      const embed = createEmbed(createNPMEmbed(firstTenResults[0]));
-
-      await msg.channel.send(embed);
+      await msg.channel.send(createEmbed(createNPMEmbed(firstTenResults[0])));
       return;
     }
 
@@ -90,7 +88,7 @@ const handleNPMQuery = async (msg, searchTerm) => {
     const sentMsg = await msg.channel.send(
       createListEmbed({
         provider,
-        url: `https://npmjs.com/search?q=${searchTerm}`,
+        url: `https://npmjs.com/search?q=${encodeURI(searchTerm)}`,
         footerText:
           firstTenResults.length < 10
             ? `${firstTenResults.length} packages found`
@@ -153,22 +151,24 @@ const createFields = (name, externalUrls, maintainers) => [
     name: 'add to your project',
     value: createMarkdownBash(`npm install ${name}`),
   },
-  ...Object.entries(externalUrls).map(([host, url]) => {
-    const markdownTitle = sanitizePackageLink(host, url);
+  ...Object.entries(externalUrls)
+    .filter(([, url]) => !!url)
+    .map(([host, url]) => {
+      const markdownTitle = sanitizePackageLink(host, url);
 
-    const emoji = host === 'homepage' ? emojis.website : false;
+      const emoji = host === 'homepage' ? emojis.website : false;
 
-    return {
-      name: emoji ? `${emoji} ${host}` : host,
-      value: createMarkdownLink(
-        markdownTitle.endsWith('/')
-          ? markdownTitle.substr(0, markdownTitle.length - 1)
-          : markdownTitle,
-        url,
-      ),
-      inline: true,
-    };
-  }),
+      return {
+        name: emoji ? `${emoji} ${host}` : host,
+        value: createMarkdownLink(
+          markdownTitle.endsWith('/')
+            ? markdownTitle.substr(0, markdownTitle.length - 1)
+            : markdownTitle,
+          url,
+        ),
+        inline: true,
+      };
+    }),
   {
     name: `${emojis.language} maintainers`,
     value: maintainers,
