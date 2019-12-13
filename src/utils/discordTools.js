@@ -190,12 +190,21 @@ const findEarlyReaction = ({ reactions }, id) =>
  * } reactions
  */
 const clearReactions = ({ reactions, author }) => {
+  let isSubscribed = true;
+
   reactions.forEach(reaction => {
-    reaction.users.forEach(async user => {
-      if (user.bot && user.id === author.id) {
-        await reaction.remove(user);
-      }
-    });
+    reaction.users
+      .filter(user => user.bot && user.id === author.id)
+      .forEach(user => {
+        reaction.remove(user).catch(() => {
+          if (isSubscribed) {
+            console.info(
+              'Attempting to remove reactions: message probably deleted.',
+            );
+            isSubscribed = false;
+          }
+        });
+      });
   });
 };
 
@@ -215,7 +224,14 @@ const getChosenResult = async (sentMsg, { author: { id } }, results) => {
       break;
     }
 
-    await sentMsg.react(emoji);
+    try {
+      await sentMsg.react(emoji);
+    } catch (error) {
+      console.info(
+        'Add reaction failed: message was apparently deleted by someone else.',
+      );
+      return;
+    }
   }
 
   if (earlyReaction) {
@@ -258,7 +274,7 @@ const getChosenResult = async (sentMsg, { author: { id } }, results) => {
   } catch (collected) {
     if (!(collected instanceof Map)) {
       console.error(`${collected.name}: ${collected.message}`);
-      await sentMsg.edit(unknownError);
+      await attemptEdit(sentMsg, unknownError);
       return;
     }
 
@@ -271,6 +287,20 @@ const EMPTY_FIELD = {
   value: '\u200B',
 };
 
+/**
+ *
+ * @param {Message} sentMsg
+ * @param {string | array | number} content
+ * @param {{ embed: object, code: string | boolean } | { data: object }} options
+ */
+const attemptEdit = async (sentMsg, content, options = undefined) => {
+  try {
+    await sentMsg.edit(content, options);
+  } catch (error) {
+    console.info('Attempting to edit message: message probably deleted.');
+  }
+};
+
 module.exports = {
   createMarkdownLink,
   createListEmbed,
@@ -281,4 +311,5 @@ module.exports = {
   getChosenResult,
   createMarkdownBash,
   EMPTY_FIELD,
+  attemptEdit,
 };

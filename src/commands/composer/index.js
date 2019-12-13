@@ -16,6 +16,7 @@ const {
   getChosenResult,
   createMarkdownBash,
   EMPTY_FIELD,
+  attemptEdit,
 } = require('../../utils/discordTools');
 const useData = require('../../utils/useData');
 const compareVersions = require('compare-versions');
@@ -105,7 +106,8 @@ const handleComposerQuery = async (msg, searchTerm) => {
 
     const { version, released } = findLatestRelease(versions);
 
-    await sentMsg.edit(
+    await attemptEdit(
+      sentMsg,
       createEmbed({
         provider,
         title: `${name} *(${version})*`,

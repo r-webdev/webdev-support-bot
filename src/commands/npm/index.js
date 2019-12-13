@@ -11,6 +11,7 @@ const {
   createMarkdownListItem,
   getChosenResult,
   createMarkdownBash,
+  attemptEdit,
 } = require('../../utils/discordTools');
 const { formatDistanceToNow } = require('date-fns');
 const emojis = require('../../utils/emojis');
@@ -102,8 +103,7 @@ const handleNPMQuery = async (msg, searchTerm) => {
       return;
     }
 
-    // overwrite previous embed
-    await sentMsg.edit(createEmbed(createNPMEmbed(result)));
+    await attemptEdit(sentMsg, createEmbed(createNPMEmbed(result)));
   } catch (error) {
     console.error(error);
     await msg.reply(errors.unknownError);

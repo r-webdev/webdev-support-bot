@@ -10,6 +10,7 @@ const {
   createListEmbed,
   createMarkdownListItem,
   getChosenResult,
+  attemptEdit,
 } = require('../../utils/discordTools');
 const useData = require('../../utils/useData');
 const delayedMessageAutoDeletion = require('../../utils/delayedMessageAutoDeletion');
@@ -73,8 +74,7 @@ const handleMDNQuery = async (msg, searchTerm) => {
 
     const { url } = extractTitleAndUrlFromResult(result);
 
-    // overwrite previous embed
-    await sentMsg.edit(url, { embed: null });
+    await attemptEdit(sentMsg, url, { embed: null });
   } catch (error) {
     console.error(error);
     await msg.reply(errors.unknownError);

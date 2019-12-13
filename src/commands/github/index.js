@@ -11,6 +11,7 @@ const {
   adjustDescriptionLength,
   getChosenResult,
   createMarkdownBash,
+  attemptEdit,
 } = require('../../utils/discordTools');
 const { formatDistanceToNow } = require('date-fns');
 const useData = require('../../utils/useData');
@@ -137,7 +138,7 @@ const handleGithubQuery = async (msg, searchTerm) => {
       return;
     }
 
-    await sentMsg.edit(createEmbed(createGithubEmbed(result)));
+    await attemptEdit(sentMsg, createEmbed(createGithubEmbed(result)));
   } catch (error) {
     console.error(`${error.name}: ${error.message}`);
     await msg.reply(errors.unknownError);

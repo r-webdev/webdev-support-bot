@@ -9,6 +9,7 @@ const {
   createDescription,
   createMarkdownListItem,
   getChosenResult,
+  attemptEdit,
 } = require('../../utils/discordTools');
 const useData = require('../../utils/useData');
 const bcd = require('mdn-browser-compat-data');
@@ -136,7 +137,8 @@ const handleCanIUseQuery = async (msg, searchTerm) => {
       },
     );
 
-    await sentMsg.edit(
+    await attemptEdit(
+      sentMsg,
       createEmbed({
         provider,
         url,
