@@ -41,6 +41,10 @@ const handleCanIUseQuery = async (msg, searchTerm) => {
       isInvalidData: text => text.length === 0,
     });
 
+    if (!text) {
+      return;
+    }
+
     const { error: extendedQueryError, json } = await useData(
       getExtendedInfoUrl(provider, text),
     );
