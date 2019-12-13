@@ -14,6 +14,7 @@ const {
 } = require('../../utils/discordTools');
 const { formatDistanceToNow } = require('date-fns');
 const useData = require('../../utils/useData');
+const emojis = require('../../utils/emojis');
 
 const provider = 'github';
 
@@ -42,10 +43,8 @@ const handleGithubQuery = async (msg, searchTerm) => {
       return;
     }
 
-    const { total_count, items } = json;
-
     const firstTenResults = await Promise.all(
-      items
+      json.items
         .splice(0, 10)
         .map(
           async ({
@@ -128,7 +127,7 @@ const handleGithubQuery = async (msg, searchTerm) => {
             );
           }),
         ),
-        footerText: `${total_count.toLocaleString()} results`,
+        footerText: `${json.total_count.toLocaleString()} results`,
       }),
     );
 
@@ -208,17 +207,17 @@ const createFields = ({
       value: createMarkdownBash(`git clone ${url}`),
     },
     {
-      name: ':warning: open issues',
+      name: `${emojis.warning} open issues`,
       value: createMarkdownLink(issues.toLocaleString(), url + '/issues'),
       inline: true,
     },
     {
-      name: ':star: stars',
+      name: `${emojis.star} stars`,
       value: createMarkdownLink(stars.toLocaleString(), url + '/stargazers'),
       inline: true,
     },
     {
-      name: ':fork_and_knife: forks',
+      name: `${emojis.forks} forks`,
       value: createMarkdownLink(
         forks.toLocaleString(),
         url + '/network/members',
@@ -233,7 +232,7 @@ const createFields = ({
     const title = homepage.replace(`${protocol}//`, '');
 
     fields.push({
-      name: ':globe_with_meridians: homepage',
+      name: `${emojis.website} homepage`,
       value: createMarkdownLink(
         title.endsWith('/') ? title.substr(0, title.length - 1) : title,
         homepage,
@@ -244,7 +243,7 @@ const createFields = ({
 
   if (license) {
     fields.push({
-      name: ':notepad_spiral: license',
+      name: `${emojis.license} license`,
       value:
         license.url.length > 0
           ? createMarkdownLink(license.name, license.url)
@@ -255,7 +254,7 @@ const createFields = ({
 
   if (language) {
     fields.push({
-      name: ':writing_hand: language',
+      name: `${emojis.language} language`,
       value: language,
     });
   }

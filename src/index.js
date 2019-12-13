@@ -48,7 +48,7 @@ const handleMessage = async msg => {
     .toLowerCase();
 
   const isGeneralHelpRequest =
-    cleanContent.includes('--help') &&
+    cleanContent.includes(HELP_KEYWORD) &&
     msg.mentions.users.find(
       ({ username }) => username === client.user.username,
     );

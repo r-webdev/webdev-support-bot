@@ -1,0 +1,16 @@
+module.exports = {
+  website: ':globe_with_meridians:',
+  forks: ':fork_and_knife:',
+  star: ':star:',
+  warning: ':warning:',
+  license: ':notepad_spiral:',
+  language: ':writing_hand:',
+  yes: ':white_check_mark:',
+  no: ':x:',
+  keywords: ':key:',
+  dependencies: ':chains:',
+  light: ':bulb:',
+  neutral_face: ':neutral_face:',
+  point_up: ':point_up:',
+  gear: ':gear:',
+};

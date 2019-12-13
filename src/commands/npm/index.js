@@ -13,6 +13,7 @@ const {
   createMarkdownBash,
 } = require('../../utils/discordTools');
 const { formatDistanceToNow } = require('date-fns');
+const emojis = require('../../utils/emojis');
 
 const provider = 'npm';
 
@@ -152,8 +153,10 @@ const createFields = (name, externalUrls, maintainers) => [
   ...Object.entries(externalUrls).map(([host, url]) => {
     const markdownTitle = sanitizePackageLink(host, url);
 
+    const emoji = host === 'homepage' ? emojis.website : false;
+
     return {
-      name: host,
+      name: emoji ? `${emoji} ${host}` : host,
       value: createMarkdownLink(
         markdownTitle.endsWith('/')
           ? markdownTitle.substr(0, markdownTitle.length - 1)
@@ -164,7 +167,7 @@ const createFields = (name, externalUrls, maintainers) => [
     };
   }),
   {
-    name: 'maintainers',
+    name: `${emojis.language} maintainers`,
     value: maintainers,
     inline: true,
   },

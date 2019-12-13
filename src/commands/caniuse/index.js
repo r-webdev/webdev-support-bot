@@ -13,14 +13,9 @@ const {
 } = require('../../utils/discordTools');
 const useData = require('../../utils/useData');
 const bcd = require('mdn-browser-compat-data');
+const emojis = require('../../utils/emojis');
 
 const provider = 'caniuse';
-
-const emojis = {
-  warning: ':warning:',
-  yes: ':white_check_mark:',
-  no: ':x:',
-};
 
 const browserNameMap = Object.entries(bcd.browsers).reduce(
   (carry, [id, { name }]) => {

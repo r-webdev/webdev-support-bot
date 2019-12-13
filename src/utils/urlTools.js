@@ -1,4 +1,4 @@
-const errors = require('./errors');
+const { noResults, invalidResponse } = require('./errors');
 const useData = require('./useData');
 const delayedMessageAutoDeletion = require('./delayedMessageAutoDeletion');
 // eslint-disable-next-line no-unused-vars
@@ -14,14 +14,12 @@ const providers = {
     color: 0x83d0f2,
     createTitle: searchTerm => `MDN results for *${searchTerm}*`,
     icon: 'https://avatars0.githubusercontent.com/u/7565578',
-    keyword: 'mdn',
   },
   npm: {
     search: `https://www.npmjs.com/search/suggestions?q=${SEARCH_TERM}`,
     color: 0xfb3e44,
     createTitle: searchTerm => `NPM results for *${searchTerm}*`,
     icon: 'https://avatars0.githubusercontent.com/u/6078720',
-    keyword: 'npm',
   },
   composer: {
     search: `https://packagist.org/search.json?q=${SEARCH_TERM}`,
@@ -29,7 +27,6 @@ const providers = {
     color: 0xf28d1a,
     createTitle: searchTerm => `Packagist results for ${searchTerm}`,
     icon: 'https://packagist.org/bundles/packagistweb/img/logo-small.png',
-    keyword: 'composer',
     getExtendedInfoUrl: package =>
       `https://packagist.org/packages/${package}.json`,
   },
@@ -39,7 +36,6 @@ const providers = {
     color: 0xdb5600,
     createTitle: searchTerm => `CanIUse results for ${searchTerm}`,
     icon: 'https://caniuse.com/img/favicon-128.png',
-    keyword: 'caniuse',
     getExtendedInfoUrl: text =>
       `https://caniuse.com/process/get_feat_data.php?type=support-data&feat=${text}`,
   },
@@ -50,7 +46,6 @@ const providers = {
     createTitle: searchTerm => `GitHub results for ${searchTerm}`,
     icon:
       'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png',
-    keyword: 'github',
   },
 };
 
@@ -140,14 +135,14 @@ const getData = async ({
   });
 
   if (error) {
-    await msg.reply(errors.invalidResponse);
+    await msg.reply(invalidResponse);
     return;
   }
 
   const sanitizedData = sanitizeData ? sanitizeData(data) : data;
 
   if (isInvalidData(sanitizedData)) {
-    const sentMessage = await msg.reply(errors.noResults(searchTerm));
+    const sentMessage = await msg.reply(noResults(searchTerm));
 
     delayedMessageAutoDeletion(sentMessage);
     return;

@@ -20,6 +20,7 @@ const {
 const useData = require('../../utils/useData');
 const compareVersions = require('compare-versions');
 const { formatDistanceToNow } = require('date-fns');
+const emojis = require('../../utils/emojis');
 
 const provider = 'composer';
 
@@ -176,7 +177,7 @@ const extractFieldsFromLatestRelease = ({
 
   if (keywords.length > 0) {
     fields.push({
-      name: ':key: keywords',
+      name: `${emojis.key} keywords`,
       value: keywords
         .map(keyword => createMarkdownLink(keyword, createTagLink(keyword)))
         .join(', '),
@@ -196,14 +197,14 @@ const extractFieldsFromLatestRelease = ({
   }
 
   fields.push({
-    name: ':chains: dependencies',
+    name: `${emojis.dependencies} dependencies`,
     value: Object.keys(require).length - (phpRequirement ? 1 : 0),
     inline: true,
   });
 
   if (license) {
     fields.push({
-      name: ':notepad_spiral: license',
+      name: `${emojis.license} license`,
       value: license
         .map(license =>
           createMarkdownLink(
@@ -228,7 +229,7 @@ const extractFieldsFromLatestRelease = ({
     const { protocol } = new URL(homepage);
 
     fields.push({
-      name: ':globe_with_meridians: homepage',
+      name: `${emojis.website} homepage`,
       value: createMarkdownLink(
         homepage.replace(`${protocol}//`, ''),
         homepage,
@@ -267,7 +268,7 @@ const extractFieldsFromLatestRelease = ({
 
   authors.forEach(author => {
     fields.push({
-      name: ':writing_hand: author',
+      name: `${emojis.language} author`,
       value: author.name,
       inline: true,
     });

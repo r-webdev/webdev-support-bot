@@ -9,6 +9,7 @@ const {
 } = require('./reactions');
 const delayedMessageAutoDeletion = require('./delayedMessageAutoDeletion');
 const { unknownError } = require('./errors');
+const emojis = require('./emojis');
 /**
  *
  * @param {string} title
@@ -18,10 +19,12 @@ const createMarkdownLink = (title, url) =>
   `[${title}](${url.replace(/\)/g, '\\)')})`;
 
 const BASE_DESCRIPTION = `
-:bulb: *react with a number (:one:, :two:, ...) to filter your result*
-:neutral_face: *react with \`❌\` to delete*
-:point_up: *supports \`!mdn\`, \`!github\`, \`!caniuse\`, \`!npm\` and \`!composer\`*
-:gear: *issues? feature requests? head over to ${createMarkdownLink(
+${emojis.light} *react with a number (:one:, :two:, ...) to filter your result*
+${emojis.neutral_face} *react with \`❌\` to delete*
+${
+  emojis.point_up
+} *supports \`!mdn\`, \`!github\`, \`!caniuse\`, \`!npm\` and \`!composer\`*
+${emojis.gear} *issues? feature requests? head over to ${createMarkdownLink(
   'github',
   process.env.REPO_LINK,
 )}*`;
