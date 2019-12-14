@@ -68,6 +68,12 @@ Reacting with a number corresponding to the list entry will filter the list and 
 
 ...accessing [this link](https://discordapp.com/api/oauth2/authorize?client_id=649967864425611274&scope=bot&permissions=1).
 
+## Demo
+
+<p align="center">
+    <img src="./webdev-support-bot-demo.gif" />
+</p>
+
 ## Development
 
 ```bash
