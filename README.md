@@ -1,5 +1,14 @@
 # Webdev Support Bot
 
+[![dependencies][dependencies-image] ][dependencies-url]
+[![devdependencies][devdependencies-image] ][devdependencies-url]
+
+[dependencies-image]: https://david-dm.org/ljosberinn/webdev-support-bot.png
+[dependencies-url]: https://david-dm.org/ljosberinn/webdev-support-bot
+
+[devdependencies-image]: https://david-dm.org/ljosberinn/webdev-support-bot/dev-status.png
+[devdependencies-url]: https://david-dm.org/ljosberinn/webdev-support-bot#info=devDependencies
+
 <p align="center">
     <img src="./logo.png" />
 </p>
