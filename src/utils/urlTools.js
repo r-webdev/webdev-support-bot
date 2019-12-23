@@ -1,8 +1,6 @@
 const { noResults, invalidResponse } = require('./errors');
 const useData = require('./useData');
 const delayedMessageAutoDeletion = require('./delayedMessageAutoDeletion');
-// eslint-disable-next-line no-unused-vars
-const { Message } = require('discord.js');
 
 const SEARCH_TERM = '%SEARCH%';
 const TERM = '%TERM%';
@@ -14,12 +12,14 @@ const providers = {
     color: 0x83d0f2,
     createTitle: searchTerm => `MDN results for *${searchTerm}*`,
     icon: 'https://avatars0.githubusercontent.com/u/7565578',
+    help: '!mdn localStorage',
   },
   npm: {
     search: `https://www.npmjs.com/search/suggestions?q=${SEARCH_TERM}`,
     color: 0xfb3e44,
     createTitle: searchTerm => `NPM results for *${searchTerm}*`,
     icon: 'https://avatars0.githubusercontent.com/u/6078720',
+    help: '!npm react ',
   },
   composer: {
     search: `https://packagist.org/search.json?q=${SEARCH_TERM}`,
@@ -29,6 +29,7 @@ const providers = {
     icon: 'https://packagist.org/bundles/packagistweb/img/logo-small.png',
     getExtendedInfoUrl: package =>
       `https://packagist.org/packages/${package}.json`,
+    help: '!composer sentry',
   },
   caniuse: {
     search: `https://caniuse.com/process/query.php?search=${SEARCH_TERM}`,
@@ -38,6 +39,7 @@ const providers = {
     icon: 'https://caniuse.com/img/favicon-128.png',
     getExtendedInfoUrl: text =>
       `https://caniuse.com/process/get_feat_data.php?type=support-data&feat=${text}`,
+    help: '!caniuse IntersectionObserver ',
   },
   github: {
     search: `https://api.github.com/search/repositories?q=${SEARCH_TERM}`,
@@ -46,6 +48,7 @@ const providers = {
     createTitle: searchTerm => `GitHub results for ${searchTerm}`,
     icon:
       'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png',
+    help: '!github react ',
   },
 };
 
@@ -111,7 +114,7 @@ const getExtendedInfoUrl = (provider, term) => {
 /**
  *
  * @param {{
- *   msg: Message,
+ *   msg: import('discord.js').Message,
  *   provider: 'caniuse' | 'composer' | 'mdn' | 'npm' | 'github',
  *   searchTerm: string,
  *   invalidData: (str: string) => boolean,

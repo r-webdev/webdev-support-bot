@@ -1,9 +1,7 @@
 require('dotenv').config();
-// eslint-disable-next-line no-unused-vars
-const { Client, Message } = require('discord.js');
+const { Client } = require('discord.js');
 const { providers, KEYWORD_REGEXP, HELP_KEYWORD } = require('./utils/urlTools');
 
-const help = require('./utils/help');
 const errors = require('./utils/errors');
 
 // commands begin here
@@ -38,9 +36,14 @@ const trimCleanContent = (provider, cleanContent) =>
 
 const linebreakPattern = /\n/gim;
 
+const help = Object.entries(providers).reduce((carry, [provider, { help }]) => {
+  carry[provider] = help;
+  return carry;
+}, {});
+
 /**
  *
- * @param {Message} msg
+ * @param {import('discord.js').Message} msg
  */
 const handleMessage = async msg => {
   const cleanContent = msg.cleanContent
