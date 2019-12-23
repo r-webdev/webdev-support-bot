@@ -1,6 +1,4 @@
 const { providers } = require('./urlTools');
-// eslint-disable-next-line no-unused-vars
-const { Message, Collection, MessageReaction, User } = require('discord.js');
 const {
   reactionFilterBuilder,
   awaitReactionConfig,
@@ -171,7 +169,7 @@ const createDescription = items => items.concat(BASE_DESCRIPTION).join('\n');
 
 /**
  *
- * @param {{reactions: Collection<string, MessageReaction>}} reactions
+ * @param {{reactions: import('discord.js').Collection<string, import('discord.js').MessageReaction>}} reactions
  * @param {string} id
  * @param {string[]} currentlyValidEmojis
  *
@@ -185,8 +183,8 @@ const findEarlyReaction = ({ reactions }, id, currentlyValidEmojis) =>
 /**
  *
  * @param {{
- *  reactions: Collection<string, MessageReaction>,
- *  author: User}
+ *  reactions: import('discord.js').Collection<string, import('discord.js').MessageReaction>,
+ *  author: import('discord.js').User}
  * } reactions
  */
 const clearReactions = ({ reactions, author }) => {
@@ -210,8 +208,8 @@ const clearReactions = ({ reactions, author }) => {
 
 /**
  *
- * @param {Message} sentMsg
- * @param {Message} msg
+ * @param {import('discord.js').Message} sentMsg
+ * @param {import('discord.js').Message} msg
  * @param {array} firstTenResults
  */
 const getChosenResult = async (sentMsg, { author: { id } }, results) => {
@@ -296,7 +294,7 @@ const EMPTY_FIELD = {
 
 /**
  *
- * @param {Message} sentMsg
+ * @param {import('discord.js').Message} sentMsg
  * @param {string | array | number} content
  * @param {{ embed: object, code: string | boolean } | { data: object }} options
  */

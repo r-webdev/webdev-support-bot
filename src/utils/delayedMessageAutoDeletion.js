@@ -4,7 +4,7 @@ const THIRTY_SECONDS_IN_MS = 30 * 1000;
 
 /**
  *
- * @param {Message} msg
+ * @param {import('discord.js').Message} msg
  * @param {number} timeout
  */
 const delayedMessageAutoDeletion = (msg, timeout = THIRTY_SECONDS_IN_MS) => {

@@ -1,6 +1,4 @@
 const { getData } = require('../../utils/urlTools');
-//eslint-disable-next-line no-unused-vars
-const { Message } = require('discord.js');
 const errors = require('../../utils/errors');
 const {
   createMarkdownLink,
@@ -27,7 +25,7 @@ const licenseCache = {};
 
 /**
  *
- * @param {Message} msg
+ * @param {import('discord.js').Message} msg
  * @param {string} searchTerm
  */
 const handleGithubQuery = async (msg, searchTerm) => {

@@ -1,6 +1,4 @@
 const { getSearchUrl, buildDirectUrl } = require('../../utils/urlTools');
-//eslint-disable-next-line no-unused-vars
-const { Message } = require('discord.js');
 const Entities = require('html-entities').Html5Entities;
 const DOMParser = require('dom-parser');
 const errors = require('../../utils/errors');
@@ -20,7 +18,7 @@ const entities = new Entities();
 
 /**
  *
- * @param {Message} msg
+ * @param {import('discord.js').Message} msg
  * @param {string} searchTerm
  */
 const handleMDNQuery = async (msg, searchTerm) => {

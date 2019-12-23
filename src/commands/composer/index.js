@@ -3,8 +3,6 @@ const {
   buildDirectUrl,
   getData,
 } = require('../../utils/urlTools');
-//eslint-disable-next-line no-unused-vars
-const { Message } = require('discord.js');
 const errors = require('../../utils/errors');
 const {
   createMarkdownLink,
@@ -27,7 +25,7 @@ const provider = 'composer';
 
 /**
  *
- * @param {Message} msg
+ * @param {import('discord.js').Message} msg
  * @param {string} searchTerm
  */
 const handleComposerQuery = async (msg, searchTerm) => {
