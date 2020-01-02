@@ -150,6 +150,20 @@ const adjustDescriptionLength = (position, name, description) => {
 
 /**
  *
+ * @param {string} title
+ */
+const adjustTitleLength = title => {
+  const titleLength = title.length;
+
+  if (titleLength > DESCRIPTION_LENGTH_LIMIT) {
+    return title.substr(0, DESCRIPTION_LENGTH_LIMIT - SEPARATOR_LENGTH) + '...';
+  }
+
+  return title;
+};
+
+/**
+ *
  * @param {number} index
  * @param {string} content
  */
@@ -317,4 +331,5 @@ module.exports = {
   createMarkdownBash,
   EMPTY_FIELD,
   attemptEdit,
+  adjustTitleLength,
 };

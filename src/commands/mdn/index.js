@@ -9,6 +9,7 @@ const {
   createMarkdownListItem,
   getChosenResult,
   attemptEdit,
+  adjustTitleLength,
 } = require('../../utils/discordTools');
 const useData = require('../../utils/useData');
 const delayedMessageAutoDeletion = require('../../utils/delayedMessageAutoDeletion');
@@ -53,11 +54,14 @@ const handleMDNQuery = async (msg, searchTerm) => {
         footerText: meta.split('for')[0],
         description: createDescription(
           results.map((result, index) => {
-            const { title, url } = extractTitleAndUrlFromResult(result);
+            const { title, url, excerpt } = extractMetadataFromResult(result);
 
             return createMarkdownListItem(
               index,
-              createMarkdownLink(title, url),
+              createMarkdownLink(
+                adjustTitleLength([`**${title}**`, excerpt].join(' - ')),
+                url,
+              ),
             );
           }),
         ),
@@ -70,7 +74,7 @@ const handleMDNQuery = async (msg, searchTerm) => {
       return;
     }
 
-    const { url } = extractTitleAndUrlFromResult(result);
+    const { url } = extractMetadataFromResult(result);
 
     await attemptEdit(sentMsg, url, { embed: null });
   } catch (error) {
@@ -82,15 +86,23 @@ const handleMDNQuery = async (msg, searchTerm) => {
 /**
  *
  * @param {any} result [document.parseFromString return type]
+ * @returns {{
+ * title: string,
+ * excerpt: string,
+ * url: string}
+ * }
  */
-const extractTitleAndUrlFromResult = result => {
+const extractMetadataFromResult = result => {
   const titleElement = result.getElementsByClassName('result-title')[0];
+  const excerptElement = result.getElementsByClassName('result-excerpt')[0];
 
   const title = entities.decode(titleElement.textContent);
   const url = buildDirectUrl('mdn', titleElement.getAttribute('href'));
+  const excerpt = entities.decode(excerptElement.textContent);
 
   return {
     title,
+    excerpt,
     url,
   };
 };
