@@ -155,11 +155,12 @@ const adjustDescriptionLength = (position, name, description) => {
 const adjustTitleLength = title => {
   const titleLength = title.length;
 
-  if (titleLength > DESCRIPTION_LENGTH_LIMIT) {
-    return title.substr(0, DESCRIPTION_LENGTH_LIMIT - SEPARATOR_LENGTH) + '...';
-  }
+  const cleansedTitle =
+    titleLength > DESCRIPTION_LENGTH_LIMIT
+      ? title.substr(0, DESCRIPTION_LENGTH_LIMIT - SEPARATOR_LENGTH) + '...'
+      : title;
 
-  return title;
+  return cleansedTitle.replace(/\n/gm, ' ');
 };
 
 /**
