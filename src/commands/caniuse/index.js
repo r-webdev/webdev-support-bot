@@ -70,7 +70,7 @@ const handleCanIUseQuery = async (msg, searchTerm) => {
     hashes = hashes.filter(Boolean);
     const resultAmount = filteredResults.length;
 
-    if (resultAmount === 0) {
+    if (resultAmount === 0 || hashes.length === 0) {
       const sentMsg = await msg.reply(errors.noResults(searchTerm));
 
       delayedMessageAutoDeletion(sentMsg);
@@ -79,11 +79,13 @@ const handleCanIUseQuery = async (msg, searchTerm) => {
 
     const firstTenResults = filteredResults
       .splice(0, 10)
-      .map(({ title, path }, index) => ({
-        title,
-        url: buildHashUrl(hashes[index]),
-        compatibilityMap: extractCompatibilityFromBCD(path),
-      }));
+      .map(({ title, path }, index) => {
+        return {
+          title,
+          url: buildHashUrl(hashes[index]),
+          compatibilityMap: extractCompatibilityFromBCD(path),
+        };
+      });
 
     const sentMsg = await msg.channel.send(
       createListEmbed({
