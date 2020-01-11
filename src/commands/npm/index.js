@@ -147,7 +147,11 @@ const createNPMEmbed = ({
 const createFields = (name, externalUrls, maintainers) => [
   {
     name: 'add to your project',
-    value: createMarkdownBash(`npm install ${name}`),
+    value: createMarkdownBash(
+      ['npm', 'yarn']
+        .map(packageManager => `${packageManager} install ${name}`)
+        .join('\n'),
+    ),
   },
   ...Object.entries(externalUrls)
     .filter(([, url]) => !!url)
