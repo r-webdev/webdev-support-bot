@@ -274,10 +274,10 @@ crypto-random-string@^1.0.0:
   resolved "https://registry.yarnpkg.com/crypto-random-string/-/crypto-random-string-1.0.0.tgz#a230f64f568310e1498009940790ec99545bca7e"
   integrity sha1-ojD2T1aDEOFJgAmUB5DsmVRbyn4=
 
-date-fns@^2.8.1:
-  version "2.8.1"
-  resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-2.8.1.tgz#2109362ccb6c87c3ca011e9e31f702bc09e4123b"
-  integrity sha512-EL/C8IHvYRwAHYgFRse4MGAPSqlJVlOrhVYZ75iQBKrnv+ZedmYsgwH3t+BCDuZDXpoo07+q9j4qgSSOa7irJg==
+date-fns@^2.9.0:
+  version "2.9.0"
+  resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-2.9.0.tgz#d0b175a5c37ed5f17b97e2272bbc1fa5aec677d2"
+  integrity sha512-khbFLu/MlzLjEzy9Gh8oY1hNt/Dvxw3J6Rbc28cVoYWQaC1S3YI4xwkF9ZWcjDLscbZlY9hISMr66RFzZagLsA==
 
 debug@^2.2.0:
   version "2.6.9"
@@ -871,10 +871,10 @@ make-dir@^1.0.0:
   dependencies:
     pify "^3.0.0"
 
-mdn-browser-compat-data@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/mdn-browser-compat-data/-/mdn-browser-compat-data-1.0.3.tgz#62f248a6fc457c01b6243425af0b45fdf11054bf"
-  integrity sha512-5n7c20IVrUiuOPSuhbkd5xoJPSzEEGsoMrmrdEtPHIw6gRPzonydcsguAmqGfSBd4d2DRoDQg533sijLUpeJLg==
+mdn-browser-compat-data@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/mdn-browser-compat-data/-/mdn-browser-compat-data-1.0.4.tgz#3e160d6a323aacf8dab6f37f828064cd4b102193"
+  integrity sha512-lH3KvOceTX/aI2DNJkvmCV/Bz6znC2tTS4wDAmLZNs4aiJpRCdEZJsnfY0b3omVsQv+dHHKytQe07S5enupiVQ==
   dependencies:
     extend "3.0.2"
 

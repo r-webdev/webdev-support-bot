@@ -11,12 +11,12 @@
   "license": "ISC",
   "dependencies": {
     "compare-versions": "^3.5.1",
-    "date-fns": "^2.8.1",
+    "date-fns": "^2.9.0",
     "discord.js": "^11.5.1",
     "dom-parser": "^0.1.6",
     "dotenv": "^8.2.0",
     "html-entities": "^1.2.1",
-    "mdn-browser-compat-data": "^1.0.3",
+    "mdn-browser-compat-data": "^1.0.4",
     "node-fetch": "^2.6.0"
   },
   "devDependencies": {
