@@ -333,4 +333,5 @@ module.exports = {
   EMPTY_FIELD,
   attemptEdit,
   adjustTitleLength,
+  BASE_DESCRIPTION,
 };

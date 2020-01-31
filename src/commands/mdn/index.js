@@ -10,6 +10,7 @@ const {
   getChosenResult,
   attemptEdit,
   adjustTitleLength,
+  BASE_DESCRIPTION,
 } = require('../../utils/discordTools');
 const useData = require('../../utils/useData');
 const delayedMessageAutoDeletion = require('../../utils/delayedMessageAutoDeletion');
@@ -46,25 +47,44 @@ const handleMDNQuery = async (msg, searchTerm) => {
 
     const results = document.getElementsByClassName('result');
 
+    let expectedLength = 0;
+
+    let preparedDescription = results.map((result, index) => {
+      const { title, url, excerpt } = extractMetadataFromResult(result);
+
+      const item = createMarkdownListItem(
+        index,
+        createMarkdownLink(
+          adjustTitleLength([`**${title}**`, excerpt].join(' - ')),
+          url,
+        ),
+      );
+
+      expectedLength += item.length;
+
+      return item;
+    });
+
+    // remove excerpt if its forseeable to go over embed.description Discord cap
+    if (expectedLength + BASE_DESCRIPTION.length + 10 * '\n'.length > 2048) {
+      preparedDescription = preparedDescription.map(string => {
+        // split at markdown link ending
+        const [title, ...rest] = string.split('...]');
+
+        // split title on title - excerpt glue
+        // concat with rest
+        // fix broken markdown link ending
+        return [title.split(' - ')[0], rest.join('')].join(']');
+      });
+    }
+
     const sentMsg = await msg.channel.send(
       createListEmbed({
         provider,
         searchTerm,
         url: searchUrl,
         footerText: meta.split('for')[0],
-        description: createDescription(
-          results.map((result, index) => {
-            const { title, url, excerpt } = extractMetadataFromResult(result);
-
-            return createMarkdownListItem(
-              index,
-              createMarkdownLink(
-                adjustTitleLength([`**${title}**`, excerpt].join(' - ')),
-                url,
-              ),
-            );
-          }),
-        ),
+        description: createDescription(preparedDescription),
       }),
     );
 
@@ -96,9 +116,11 @@ const extractMetadataFromResult = result => {
   const titleElement = result.getElementsByClassName('result-title')[0];
   const excerptElement = result.getElementsByClassName('result-excerpt')[0];
 
-  const title = entities.decode(titleElement.textContent);
+  const title = escapeMarkdown(entities.decode(titleElement.textContent));
   const url = buildDirectUrl('mdn', titleElement.getAttribute('href'));
-  const excerpt = entities.decode(excerptElement.textContent);
+  const excerpt = sanitizeExcerpt(
+    escapeMarkdown(entities.decode(excerptElement.textContent)),
+  );
 
   return {
     title,
@@ -106,5 +128,28 @@ const extractMetadataFromResult = result => {
     url,
   };
 };
+
+/**
+ *
+ * @param {string} excerpt
+ */
+const sanitizeExcerpt = excerpt => {
+  let sanitized = excerpt;
+
+  if (
+    sanitized.includes(')') &&
+    sanitized.indexOf(')') < sanitized.indexOf('(')
+  ) {
+    sanitized = sanitized.replace(')', '');
+  }
+
+  return sanitized.replace(/\[|\]/g, '');
+};
+
+/**
+ * Escapes *, _, `, ~, \
+ * @param {string} text
+ */
+const escapeMarkdown = text => text.replace(/(\*|_|`|~|\\)/g, '\\$1');
 
 module.exports = handleMDNQuery;
