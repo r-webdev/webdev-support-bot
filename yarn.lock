@@ -871,10 +871,10 @@ make-dir@^1.0.0:
   dependencies:
     pify "^3.0.0"
 
-mdn-browser-compat-data@^1.0.9:
-  version "1.0.9"
-  resolved "https://registry.yarnpkg.com/mdn-browser-compat-data/-/mdn-browser-compat-data-1.0.9.tgz#1338e919eff0cf379f2dfcf4bc6405e948ec5dd2"
-  integrity sha512-GL8RBobmCdKtjub0wkravzeda2fbZSPevClVUZeR7J5M8UcyWzcfUM2dprBKzn19H3hLX74JEzh2onqfwWk0FA==
+mdn-browser-compat-data@^1.0.10:
+  version "1.0.10"
+  resolved "https://registry.yarnpkg.com/mdn-browser-compat-data/-/mdn-browser-compat-data-1.0.10.tgz#1f845219f8c19123792e29a2af86992b362d646a"
+  integrity sha512-UusipwyfBuSYQ9+bJXCuLXRg1rPVZic3RSGKtMHPGNFAdIOvXKOrZ9pAN+4udGVW17QOZuR73NpV95BmUfWHxw==
   dependencies:
     extend "3.0.2"
 
