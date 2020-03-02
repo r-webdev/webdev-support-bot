@@ -184,42 +184,31 @@ const createDescription = items => items.concat(BASE_DESCRIPTION).join('\n');
 
 /**
  *
- * @param {{reactions: import('discord.js').Collection<string, import('discord.js').MessageReaction>}} reactions
+ * @param {{reactions: import('discord.js').ReactionManager}} reactions
  * @param {string} id
  * @param {string[]} currentlyValidEmojis
  *
  */
 const findEarlyReaction = ({ reactions }, id, currentlyValidEmojis) =>
-  reactions.find(
+  reactions.cache.find(
     ({ users, emoji: { name } }) =>
-      currentlyValidEmojis.includes(name) && users.find(user => user.id === id),
+      currentlyValidEmojis.includes(name) &&
+      users.cache.find(user => user.id === id),
   );
 
 /**
  *
  * @param {{
- *  reactions: import('discord.js').Collection<string, import('discord.js').MessageReaction>,
- *  author: import('discord.js').User}
+ *  reactions: import('discord.js').ReactionManager,
  * } reactions
  */
-const clearReactions = ({ reactions, author }) => {
-  let isSubscribed = true;
-
-  reactions.forEach(reaction => {
-    reaction.users
-      .filter(user => user.bot && user.id === author.id)
-      .forEach(user => {
-        reaction.remove(user).catch(() => {
-          if (isSubscribed) {
-            console.info(
-              'Attempting to remove reactions: message probably deleted.',
-            );
-            isSubscribed = false;
-          }
-        });
-      });
+const clearReactions = ({ reactions }) =>
+  reactions.removeAll().catch(error => {
+    console.error(error);
+    console.info(
+      'Attempting to remove reactions: message probably deleted or insufficient rights.',
+    );
   });
-};
 
 /**
  *
