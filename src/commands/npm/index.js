@@ -148,9 +148,7 @@ const createFields = (name, externalUrls, maintainers) => [
   {
     name: 'add to your project',
     value: createMarkdownBash(
-      ['npm', 'yarn']
-        .map(packageManager => `${packageManager} install ${name}`)
-        .join('\n'),
+      ['npm install', 'yarn add'].map(cmd => [cmd, name].join(' ')).join('\n'),
     ),
   },
   ...Object.entries(externalUrls)
