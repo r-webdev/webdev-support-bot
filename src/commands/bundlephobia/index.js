@@ -248,7 +248,7 @@ const createFields = ({
       value: `labelled as _${label}_`,
     });
 
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i <= 2; i++) {
       if (packages[i]) {
         const { name, size } = packages[i];
 
