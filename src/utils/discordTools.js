@@ -20,7 +20,7 @@ ${emojis.light} *react with a number (:one:, :two:, ...) to filter your result*
 ${emojis.neutral_face} *react with \`❌\` to delete*
 ${
   emojis.point_up
-} *supports \`!mdn\`, \`!github\`, \`!caniuse\`, \`!npm\` and \`!composer\`*
+} *supports \`!mdn\`, \`!github\`, \`!caniuse\`, \`!npm\`, \`!composer\` and \`!bundlephobia\`*
 ${emojis.gear} *issues? feature requests? head over to ${createMarkdownLink(
   'github',
   process.env.REPO_LINK,
@@ -29,7 +29,7 @@ ${emojis.gear} *issues? feature requests? head over to ${createMarkdownLink(
 /**
  *
  * @param {{
- *   provider: 'caniuse' | 'mdn' | 'composer' | 'npm',
+ *   provider: 'caniuse' | 'mdn' | 'composer' | 'npm' | 'bundlephobia',
  *   searchTerm: string,
  *   url: string,
  *   footerText: string,
@@ -61,7 +61,7 @@ const createListEmbed = ({
 /**
  *
  * @param {{
- *   provider: 'caniuse' | 'npm' | 'github' | 'composer' | 'mdn',
+ *   provider: 'caniuse' | 'npm' | 'github' | 'composer' | 'mdn' | 'bundlephobia',
  *   title: string,
  *   url: string,
  *   footerText: string,

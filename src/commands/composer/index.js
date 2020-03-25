@@ -115,7 +115,7 @@ const handleComposerQuery = async (msg, searchTerm) => {
           icon_url: maintainers[0].avatar_url,
           name: maintainers[0].name,
         },
-        url: buildDirectUrl('composer', name),
+        url: buildDirectUrl(provider, name),
         fields: extractFieldsFromLatestRelease(versions[version]),
       }),
     );

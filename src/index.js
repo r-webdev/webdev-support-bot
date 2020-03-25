@@ -10,6 +10,7 @@ const handleNPMQuery = require('./commands/npm');
 const handleComposerQuery = require('./commands/composer');
 const handleCanIUseQuery = require('./commands/caniuse');
 const handleGithubQuery = require('./commands/github');
+const handleBundlephobiaQuery = require('./commands/bundlephobia');
 
 const client = new Client();
 
@@ -86,20 +87,17 @@ const handleMessage = async msg => {
   try {
     switch (keyword) {
       case keywords.mdn:
-        await handleMDNQuery(msg, searchTerm);
-        return;
+        return await handleMDNQuery(msg, searchTerm);
       case keywords.caniuse:
-        await handleCanIUseQuery(msg, searchTerm);
-        return;
+        return await handleCanIUseQuery(msg, searchTerm);
       case keywords.npm:
-        await handleNPMQuery(msg, searchTerm);
-        return;
+        return await handleNPMQuery(msg, searchTerm);
       case keywords.composer:
-        await handleComposerQuery(msg, searchTerm);
-        return;
+        return await handleComposerQuery(msg, searchTerm);
       case keywords.github:
-        await handleGithubQuery(msg, searchTerm);
-        return;
+        return await handleGithubQuery(msg, searchTerm);
+      case keywords.bundlephobia:
+        return await handleBundlephobiaQuery(msg, searchTerm);
       default:
         throw new Error('classic "shouldnt be here" scenario');
     }

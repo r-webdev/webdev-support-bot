@@ -13,4 +13,5 @@ module.exports = {
   neutral_face: ':neutral_face:',
   point_up: ':point_up:',
   gear: ':gear:',
+  exclamation: ':exclamation:',
 };

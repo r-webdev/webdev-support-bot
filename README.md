@@ -5,7 +5,6 @@
 
 [dependencies-image]: https://david-dm.org/ljosberinn/webdev-support-bot.png
 [dependencies-url]: https://david-dm.org/ljosberinn/webdev-support-bot
-
 [devdependencies-image]: https://david-dm.org/ljosberinn/webdev-support-bot/dev-status.png
 [devdependencies-url]: https://david-dm.org/ljosberinn/webdev-support-bot#info=devDependencies
 
@@ -27,7 +26,10 @@ Supports
 
 `!caniuse` via unofficial `caniuse API` and [mdn-browser-combat-data](https://github.com/mdn/browser-compat-data).
 
+`!bundlephobia` via unofficial `bundlephobia API`
+
 ## Usage / TLDR
+
 ```bash
 # tag it in discord to receive general help
 @bot --help
@@ -37,12 +39,14 @@ Supports
 !composer --help
 !npm --help
 !github --help
+!bundlephobia --help
 ```
 
 ```bash
 # queries MDN with <term>
 !mdn <term>
 ```
+
 ```bash
 # queries caniuse with <term>
 !caniuse <term>
@@ -61,6 +65,11 @@ Supports
 ```bash
 # queries github with <term>
 !github <term>
+```
+
+```bash
+# queries bundlephobia with <term>
+!bundlephobia <term>
 ```
 
 - single-result queries will directly show the result
@@ -90,13 +99,15 @@ git clone https://github.com/ljosberinn/webdev-support-bot/
 
 cd webdev-support-bot
 
+cp .env.example .env # and enter a token
+
 yarn install # or npm install
 code .
 
 yarn start # or npm start
 
 # or be fancy with a one-liner
-git clone https://github.com/ljosberinn/webdev-support-bot/ && cd webdev-support-bot && yarn install && code . && yarn start
+git clone https://github.com/ljosberinn/webdev-support-bot/ && cd webdev-support-bot && cp .env.example .env && yarn install && code . && yarn start
 ```
 
 ## Found a bug/want to contribute?
