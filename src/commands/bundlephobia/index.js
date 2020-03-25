@@ -222,7 +222,7 @@ const createFields = ({
 
   fields.push({
     name: 'side effects?',
-    value: hasSideEffects ? emojis.exclamation + 'yes' : emojis.yes + 'no',
+    value: hasSideEffects ? emojis.exclamation + ' yes' : emojis.yes + ' no',
     inline: true,
   });
 
@@ -248,14 +248,16 @@ const createFields = ({
       value: `labelled as _${label}_`,
     });
 
-    for (let i = 0; i <= packages.length - 1; i++) {
-      const { name, size } = packages[i];
+    for (let i = 0; i < 2; i++) {
+      if (packages[i]) {
+        const { name, size } = packages[i];
 
-      fields.push({
-        name,
-        value: toKilobytes(size),
-        inline: true,
-      });
+        fields.push({
+          name,
+          value: toKilobytes(size),
+          inline: true,
+        });
+      }
     }
   }
 
