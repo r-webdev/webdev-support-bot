@@ -16,7 +16,7 @@
     "dom-parser": "^0.1.6",
     "dotenv": "^8.2.0",
     "html-entities": "^1.2.1",
-    "mdn-browser-compat-data": "^1.0.15",
+    "mdn-browser-compat-data": "^1.0.16",
     "node-fetch": "^2.6.0"
   },
   "devDependencies": {
