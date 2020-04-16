@@ -1,14 +1,25 @@
 const { createEmbed, createMarkdownBash } = require('../utils/discordTools');
-const errors = require('../utils/errors');
 
-module.exports = async (msg) => {
-  const { userID, username, discriminator, channel, msgID, server } = msg;
-
+/**
+ * @param {import('discord.js').Message} msg
+ */
+module.exports = async ({
+  userID,
+  username,
+  discriminator,
+  channel,
+  msgID,
+  server,
+}) => {
+  /**
+   * @param {import('discord.js').Channel} modChannel
+   */
   const modChannel = server.channels.cache.find(
     ({ name }) => name === process.env.MOD_CHANNEL
   );
 
   if (!modChannel) {
+    console.warn(`channel ${modChannel} does not exist on this server`);
     return;
   }
 
@@ -39,6 +50,5 @@ module.exports = async (msg) => {
     );
   } catch (error) {
     console.error(error);
-    await msg.reply(errors.unknownError);
   }
 };

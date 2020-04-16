@@ -1,11 +1,14 @@
 const NodeCache = require('node-cache');
 
-const numberOfAllowedMessages = process.env.NUMBER_OF_ALLOWED_MESSAGES;
-const timer = process.env.TIMER;
+const numberOfAllowedMessages = parseInt(
+  process.env.NUMBER_OF_ALLOWED_MESSAGES
+);
+const cacheRevalidationWindow =
+  parseInt(process.env.CACHE_REVALIDATION_IN_SECONDS) * 1000;
 
 const cache = new NodeCache({
-  stdTTL: process.env.CACHE_TTL,
-  checkperiod: 5,
+  stdTTL: parseInt(process.env.FINAL_CACHE_EXPIRATION_IN_SECONDS),
+  checkperiod: cacheRevalidationWindow,
 });
 
 /**
@@ -13,24 +16,27 @@ const cache = new NodeCache({
  * - If the time difference is less than or equal to the timer, return true
  * - Else, return false.
  *
- * @param {ReturnType<generateMsg>[]} messages
- * @param {number} timer
+ * @param {number[]} timestamps
  *
  * @returns {boolean}
  */
-const isSurpassingSpamThreshold = (messages, timer) => {
-  const creationOfFirstMessage = messages[0];
-  const creationOfLastMessages = messages[messages.length - 1];
+const isSurpassingSpamThreshold = (timestamps) => {
+  if (timestamps.length <= numberOfAllowedMessages) {
+    return false;
+  }
+
+  const creationOfFirstMessage = timestamps[0];
+  const creationOfLastMessages = timestamps[timestamps.length - 1];
 
   const difference = creationOfLastMessages - creationOfFirstMessage;
 
-  return Math.floor(difference / 1000) <= timer;
+  return difference <= cacheRevalidationWindow;
 };
 
 /**
  * - Implement a simple cache, in which each message lives in for 10 seconds
  * - The key for the cache will be set to the user ID
- * - If a user sends `numberOfAllowedMessages` in the span of the `timer`, warn the user
+ * - If a user sends `numberOfAllowedMessages` in the span of the `timeWindow`, call the ~~c~~mods
  * @param {import('discord.js').Message} msg
  *
  * @returns {null | {
@@ -57,32 +63,54 @@ module.exports = ({
     return;
   }
 
-  // Check if the user has cached messages
-  const messages = cache.get(userID);
+  const previousEntry = cache.get(userID);
   const now = Date.now();
 
-  // If not, set the user, the message content and the current timestamp into the cache and break out
-  if (!messages) {
-    cache.set(userID, [now]);
+  if (!previousEntry) {
+    // create entry and bail
+    cache.set(userID, {
+      wasRecentlyWarned: false,
+      timestamps: [now],
+    });
     return null;
   }
 
-  // As the threshold has not been reached, add the new message to the cache
-  if (messages.length < numberOfAllowedMessages) {
-    cache.set(userID, [...messages, now]);
+  const { wasRecentlyWarned, timestamps } = previousEntry;
+
+  // prevent spam by the bot itself
+  if (wasRecentlyWarned) {
+    // keep this cache set active so we dont warn about the same user until its
+    // been resolved
+    cache.set(userID, {
+      ...previousEntry,
+      timestamps: [...timestamps.slice(1), now],
+    });
     return null;
   }
 
-  // Else, check if the user is spamming.
-  if (!isSurpassingSpamThreshold(messages, timer)) {
-    cache.del(userID);
+  if (!isSurpassingSpamThreshold(timestamps)) {
+    const newTimestamps = [
+      ...(timestamps.length <= numberOfAllowedMessages
+        ? timestamps
+        : timestamps.slice(1)),
+      now,
+    ];
+
+    cache.set(userID, {
+      ...previousEntry,
+      timestamps: newTimestamps,
+    });
     return null;
   }
 
-  // Remove the user from the cache
-  cache.del(userID);
+  // remember this user was warned to prevent the bot from spamming about this user
+  cache.set(userID, {
+    ...previousEntry,
+    timestamps: [...timestamps, now],
+    wasRecentlyWarned: true,
+  });
 
-  // Return details of the incident to be handled further
+  // return metadata about spammer
   return {
     userID,
     username,
