@@ -5,7 +5,7 @@ const { providers, KEYWORD_REGEXP, HELP_KEYWORD } = require('./utils/urlTools');
 const errors = require('./utils/errors');
 
 // Spam filtering module
-const filterSpam = require('./filter');
+const spamFilter = require('./spam_filter');
 
 // commands begin here
 const handleMDNQuery = require('./commands/mdn');
@@ -26,7 +26,9 @@ client.once('ready', async () => {
 
   try {
     await client.user.setAvatar('./logo.png');
-  } catch (error) {}
+  } catch (error) {
+    /* cry(error); :) */
+  }
 });
 
 // { mdn: 'mdn', /* etc */ }
@@ -53,7 +55,7 @@ const handleMessage = async (msg) => {
   const cleanContent = cleanContentFunc(msg);
 
   // Pipe the message into the spam filter
-  filterSpam(msg);
+  spamFilter(msg);
 
   const isGeneralHelpRequest =
     cleanContent.includes(HELP_KEYWORD) &&

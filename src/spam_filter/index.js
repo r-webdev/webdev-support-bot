@@ -10,8 +10,7 @@ function generateMsg(msg) {
   };
 }
 
-/**
- * Concept:
+/** NOTE: Concept
  * - Check the time elapsed between the first message and the last one.
  * - If the time difference is less than or equal to the timer, return true
  * - Else, return false.
@@ -27,11 +26,10 @@ const checkForSpam = (messages, timer) => {
 module.exports = (msg) => {
   const numberOfAllowedMessages = 5;
   const timer = 2;
-  /**
-   * Concept:
+  /** NOTE: Concept
    * - Implement a simple cache, in which each message lives in for 10 seconds
    * - The key for the cache will be set to the user ID
-   * - If a user sends 5 messages in the span of the timer, warn the user
+   * - If a user sends `numberOfAllowedMessages` in the span of the `timer`, warn the user
    */
   // Check if the user has cached messages
   const messages = cache.get(msg.author.id);
@@ -44,5 +42,5 @@ module.exports = (msg) => {
   const isSpam = checkForSpam(messages, timer);
   if (!isSpam) return cache.del(msg.author.id);
   // Spam detected.
-  console.log('Spam!');
+  msg.reply('You are spamming, bucko.');
 };
