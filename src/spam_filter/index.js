@@ -35,6 +35,7 @@ module.exports = (msg) => {
   const numberOfAllowedMessages = 5;
   const timer = 2;
   const { id } = msg.author;
+  const { name: channel } = msg.channel;
   // Check if the user has cached messages
   const messages = cache.get(id);
   // If not, set the user, the message content and the current timestamp into the cache and break out
@@ -57,5 +58,5 @@ module.exports = (msg) => {
   msg.reply('You are spamming, bucko.'); // TODO: Make the message compliant in terms of design to the command messages
   // Remove the user from the cache
   cache.del(id);
-  return { id, channel: msg.channel.name };
+  return { id, channel };
 };

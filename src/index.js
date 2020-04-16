@@ -118,8 +118,9 @@ client.on('message', handleMessage);
 
 // Spam handler
 const handleSpam = ({ id, channel }) => {
-  const modChannel = client.channels.cache.find((c) => c.name === 'moderators');
-  modChannel.send(`${id} is spamming in ${channel}`);
+  const channelName = 'moderators';
+  const modChannel = client.channels.cache.find((c) => c.name === channelName);
+  modChannel.send(`${id} is spamming in ${channel}`); // TODO: Make the message compliant in terms of design to the command messages
 };
 
 client.on('spam', handleSpam);
