@@ -1,7 +1,7 @@
 require('dotenv').config();
 const { Client } = require('discord.js');
 const { providers, KEYWORD_REGEXP, HELP_KEYWORD } = require('./utils/urlTools');
-const { createEmbed } = require('./utils/discordTools');
+const { createEmbed, createMarkdownBash } = require('./utils/discordTools');
 
 const errors = require('./utils/errors');
 
@@ -117,37 +117,38 @@ const handleMessage = async (msg) => {
 
 client.on('message', handleMessage);
 
-const getUserDetails = (membersMap, userID) => {
-  for (const member of membersMap) {
-    const user = member[1].user;
-    const { id, username, discriminator } = user;
-    if (id === userID) return { username, discriminator };
-  }
-};
-
 // Spam handler
-const handleSpam = ({ id, channel }) => {
-  const channelName = 'moderators';
-  const modChannel = client.channels.cache.find((c) => c.name === channelName);
-  const {
-    id: serverID,
-    members,
-  } = client.channels.cache.entries().next().value[1].guild;
-  const { username, discriminator } = getUserDetails(
-    members.cache.entries(),
-    id,
+const handleSpam = ({
+  userID,
+  username,
+  discriminator,
+  channel,
+  msgID,
+  server,
+}) => {
+  const modChannel = server.channels.cache.find(
+    (c) => c.name === process.env.MOD_CHANNEL,
   );
-  const url = `https://discordapp.com/channels/${serverID}/${channel.id}`;
+  const { id: serverID } = server;
+  const url = `https://discordapp.com/channels/${serverID}/${channel.id}/${msgID}`;
+  const user = `@${username}#${discriminator}`;
   modChannel.send(
     createEmbed({
       provider: 'spam',
-      description: 'Detected spam on server',
-      author: id,
+      description: 'Spam has been detected on the server.',
+      author: userID,
       url,
-      title: 'Spam Alert!',
+      title: 'Alert!',
       fields: [
-        { name: 'User', value: `${username}#${discriminator}` },
-        { name: 'Channel', value: `#${channel}` },
+        { name: 'User', value: user, inline: true },
+        { name: 'Channel', value: `${channel}`, inline: true },
+        {
+          name: 'Command',
+          value: createMarkdownBash(
+            `?mute ${user} 5h Spamming in #${channel.name}`,
+          ),
+        },
+        { name: 'Message Link', value: url },
       ],
       footerText: 'Spam Filter',
     }),

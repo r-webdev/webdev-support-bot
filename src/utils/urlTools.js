@@ -62,7 +62,8 @@ const providers = {
   },
   spam: {
     color: 0xffffff,
-    icon: '../../logo.png',
+    icon:
+      'https://github.com/ljosberinn/webdev-support-bot/blob/master/logo.png?raw=true',
   },
 };
 

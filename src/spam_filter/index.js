@@ -34,30 +34,30 @@ module.exports = (msg) => {
   if (msg.author.bot) return; // Bail if the user is a bot
   const numberOfAllowedMessages = 5;
   const timer = 2;
-  const { channel } = msg;
-  const { id } = msg.author;
+  const { channel, id: msgID, guild: server } = msg;
+  const { id: userID, username, discriminator } = msg.author;
   // Check if the user has cached messages
-  const messages = cache.get(id);
+  const messages = cache.get(userID);
   // If not, set the user, the message content and the current timestamp into the cache and break out
   if (!messages) {
-    cache.set(id, [generateMsg(msg)]);
+    cache.set(userID, [generateMsg(msg)]);
     return false;
   }
   // As the threshold has not been reached, add the new message to the cache
   if (messages.length < numberOfAllowedMessages) {
-    cache.set(id, [...messages, generateMsg(msg)]);
+    cache.set(userID, [...messages, generateMsg(msg)]);
     return false;
   }
   // Else, check if the user is spamming.
   const isSpam = checkForSpam(messages, timer);
   if (!isSpam) {
-    cache.del(id);
+    cache.del(userID);
     return false;
   }
   // Spam detected.
   msg.reply('You are spamming, bucko.'); // TODO: Make the message compliant in terms of design to the command messages
   // Remove the user from the cache
-  cache.del(id);
+  cache.del(userID);
   // Return details of the incident to be handled further
-  return { id, channel };
+  return { userID, username, discriminator, channel, msgID, server };
 };
