@@ -4,6 +4,9 @@ const { providers, KEYWORD_REGEXP, HELP_KEYWORD } = require('./utils/urlTools');
 
 const errors = require('./utils/errors');
 
+// Spam filtering module
+const spamFilter = require('./spam_filter');
+
 // commands begin here
 const handleMDNQuery = require('./commands/mdn');
 const handleNPMQuery = require('./commands/npm');
@@ -23,6 +26,7 @@ client.once('ready', async () => {
 
   try {
     await client.user.setAvatar('./logo.png');
+    // eslint-disable-next-line no-empty
   } catch (error) {}
 });
 
@@ -46,15 +50,22 @@ const help = Object.entries(providers).reduce((carry, [provider, { help }]) => {
  *
  * @param {import('discord.js').Message} msg
  */
-const handleMessage = async msg => {
+const handleMessage = async (msg) => {
   const cleanContent = msg.cleanContent
     .replace(linebreakPattern, ' ')
     .toLowerCase();
 
+  // Pipe the message into the spam filter
+  const spamMetadata = spamFilter(msg);
+  if (spamMetadata) {
+    client.emit('spam', spamMetadata);
+    return;
+  }
+
   const isGeneralHelpRequest =
     cleanContent.includes(HELP_KEYWORD) &&
     msg.mentions.users.find(
-      ({ username }) => username === client.user.username,
+      ({ username }) => username === client.user.username
     );
 
   const isCommandQuery =
@@ -109,11 +120,15 @@ const handleMessage = async msg => {
 
 client.on('message', handleMessage);
 
+// Spam handler
+const handleSpam = require('./spam_filter/handler');
+client.on('spam', handleSpam);
+
 try {
   client.login(
     process.env.NODE_ENV !== 'production'
       ? process.env.DUMMY_TOKEN
-      : process.env.DISCORD_TOKEN,
+      : process.env.DISCORD_TOKEN
   );
 } catch (error) {
   console.error('Boot Error: token invalid');
