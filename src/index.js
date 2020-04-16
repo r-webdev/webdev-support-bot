@@ -4,6 +4,9 @@ const { providers, KEYWORD_REGEXP, HELP_KEYWORD } = require('./utils/urlTools');
 
 const errors = require('./utils/errors');
 
+// Spam filtering module
+const filterSpam = require('./filter');
+
 // commands begin here
 const handleMDNQuery = require('./commands/mdn');
 const handleNPMQuery = require('./commands/npm');
@@ -35,21 +38,22 @@ const keywords = Object.keys(providers).reduce((carry, keyword) => {
 const trimCleanContent = (provider, cleanContent) =>
   cleanContent.substr(keywords[provider].length + 2);
 
-const linebreakPattern = /\n/gim;
-
 const help = Object.entries(providers).reduce((carry, [provider, { help }]) => {
   carry[provider] = help;
   return carry;
 }, {});
 
+const cleanContentFunc = require('./utils/cleanContent');
+
 /**
  *
  * @param {import('discord.js').Message} msg
  */
-const handleMessage = async msg => {
-  const cleanContent = msg.cleanContent
-    .replace(linebreakPattern, ' ')
-    .toLowerCase();
+const handleMessage = async (msg) => {
+  const cleanContent = cleanContentFunc(msg);
+
+  // Pipe the message into the spam filter
+  filterSpam(msg);
 
   const isGeneralHelpRequest =
     cleanContent.includes(HELP_KEYWORD) &&
