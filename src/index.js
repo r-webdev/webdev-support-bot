@@ -26,9 +26,8 @@ client.once('ready', async () => {
 
   try {
     await client.user.setAvatar('./logo.png');
-  } catch (error) {
-    /* cry(error); :) */
-  }
+    // eslint-disable-next-line no-empty
+  } catch (error) {}
 });
 
 // { mdn: 'mdn', /* etc */ }
@@ -40,28 +39,33 @@ const keywords = Object.keys(providers).reduce((carry, keyword) => {
 const trimCleanContent = (provider, cleanContent) =>
   cleanContent.substr(keywords[provider].length + 2);
 
+const linebreakPattern = /\n/gim;
+
 const help = Object.entries(providers).reduce((carry, [provider, { help }]) => {
   carry[provider] = help;
   return carry;
 }, {});
-
-const cleanContentFunc = require('./utils/cleanContent');
 
 /**
  *
  * @param {import('discord.js').Message} msg
  */
 const handleMessage = async (msg) => {
-  const cleanContent = cleanContentFunc(msg);
+  const cleanContent = msg.cleanContent
+    .replace(linebreakPattern, ' ')
+    .toLowerCase();
 
   // Pipe the message into the spam filter
-  const res = spamFilter(msg); // spamFilter returns an object with the user id and channel or false
-  if (res) client.emit('spam', res);
+  const spamMetadata = spamFilter(msg);
+  if (spamMetadata) {
+    client.emit('spam', spamMetadata);
+    return;
+  }
 
   const isGeneralHelpRequest =
     cleanContent.includes(HELP_KEYWORD) &&
     msg.mentions.users.find(
-      ({ username }) => username === client.user.username,
+      ({ username }) => username === client.user.username
     );
 
   const isCommandQuery =
@@ -124,7 +128,7 @@ try {
   client.login(
     process.env.NODE_ENV !== 'production'
       ? process.env.DUMMY_TOKEN
-      : process.env.DISCORD_TOKEN,
+      : process.env.DISCORD_TOKEN
   );
 } catch (error) {
   console.error('Boot Error: token invalid');
