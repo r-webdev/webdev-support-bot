@@ -10,14 +10,14 @@ const providers = {
     search: `https://developer.mozilla.org/en-US/search?q=${SEARCH_TERM}`,
     direct: `https://developer.mozilla.org${TERM}`,
     color: 0x83d0f2,
-    createTitle: searchTerm => `MDN results for *${searchTerm}*`,
+    createTitle: (searchTerm) => `MDN results for *${searchTerm}*`,
     icon: 'https://avatars0.githubusercontent.com/u/7565578',
     help: '!mdn localStorage',
   },
   npm: {
     search: `https://www.npmjs.com/search/suggestions?q=${SEARCH_TERM}`,
     color: 0xfb3e44,
-    createTitle: searchTerm => `NPM results for *${searchTerm}*`,
+    createTitle: (searchTerm) => `NPM results for *${searchTerm}*`,
     icon: 'https://avatars0.githubusercontent.com/u/6078720',
     help: '!npm react',
   },
@@ -25,9 +25,9 @@ const providers = {
     search: `https://packagist.org/search.json?q=${SEARCH_TERM}`,
     direct: `https://packagist.org/packages/${TERM}`,
     color: 0xf28d1a,
-    createTitle: searchTerm => `Packagist results for ${searchTerm}`,
+    createTitle: (searchTerm) => `Packagist results for ${searchTerm}`,
     icon: 'https://packagist.org/bundles/packagistweb/img/logo-small.png',
-    getExtendedInfoUrl: package =>
+    getExtendedInfoUrl: (package) =>
       `https://packagist.org/packages/${package}.json`,
     help: '!composer sentry',
   },
@@ -35,9 +35,9 @@ const providers = {
     search: `https://caniuse.com/process/query.php?search=${SEARCH_TERM}`,
     direct: `https://caniuse.com/#feat=${TERM}`,
     color: 0xdb5600,
-    createTitle: searchTerm => `CanIUse results for *${searchTerm}*`,
+    createTitle: (searchTerm) => `CanIUse results for *${searchTerm}*`,
     icon: 'https://caniuse.com/img/favicon-128.png',
-    getExtendedInfoUrl: text =>
+    getExtendedInfoUrl: (text) =>
       `https://caniuse.com/process/get_feat_data.php?type=support-data&feat=${text}`,
     help: '!caniuse IntersectionObserver',
   },
@@ -45,7 +45,7 @@ const providers = {
     search: `https://api.github.com/search/repositories?q=${SEARCH_TERM}`,
     direct: `https://github.com/${TERM}`,
     color: 0x24292e,
-    createTitle: searchTerm => `GitHub results for *${searchTerm}*`,
+    createTitle: (searchTerm) => `GitHub results for *${searchTerm}*`,
     icon:
       'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png',
     help: '!github react',
@@ -54,11 +54,15 @@ const providers = {
     search: `https://api.npms.io/v2/search/suggestions?q=${SEARCH_TERM}`,
     direct: `https://bundlephobia.com/result?p=${TERM}`,
     color: 0xffffff,
-    createTitle: searchTerm => `Bundlephobia results for *${searchTerm}*`,
-    getExtendedInfoUrl: package =>
+    createTitle: (searchTerm) => `Bundlephobia results for *${searchTerm}*`,
+    getExtendedInfoUrl: (package) =>
       `https://bundlephobia.com/api/size?package=${package}&record=true`,
     icon: 'https://bundlephobia.com/android-chrome-192x192.png',
     help: '!bundlephobia @chakra-ui/core',
+  },
+  spam: {
+    color: 0xffffff,
+    icon: '../../logo.png',
   },
 };
 

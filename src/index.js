@@ -1,6 +1,7 @@
 require('dotenv').config();
 const { Client } = require('discord.js');
 const { providers, KEYWORD_REGEXP, HELP_KEYWORD } = require('./utils/urlTools');
+const { createEmbed } = require('./utils/discordTools');
 
 const errors = require('./utils/errors');
 
@@ -55,7 +56,7 @@ const handleMessage = async (msg) => {
   const cleanContent = cleanContentFunc(msg);
 
   // Pipe the message into the spam filter
-  const res = spamFilter(msg); // spamFilter returns the user ID or false
+  const res = spamFilter(msg); // spamFilter returns an object with the user id and channel or false
   if (res) client.emit('spam', res);
 
   const isGeneralHelpRequest =
@@ -116,11 +117,41 @@ const handleMessage = async (msg) => {
 
 client.on('message', handleMessage);
 
+const getUserDetails = (membersMap, userID) => {
+  for (const member of membersMap) {
+    const user = member[1].user;
+    const { id, username, discriminator } = user;
+    if (id === userID) return { username, discriminator };
+  }
+};
+
 // Spam handler
 const handleSpam = ({ id, channel }) => {
   const channelName = 'moderators';
   const modChannel = client.channels.cache.find((c) => c.name === channelName);
-  modChannel.send(`${id} is spamming in ${channel}`); // TODO: Make the message compliant in terms of design to the command messages
+  const {
+    id: serverID,
+    members,
+  } = client.channels.cache.entries().next().value[1].guild;
+  const { username, discriminator } = getUserDetails(
+    members.cache.entries(),
+    id,
+  );
+  const url = `https://discordapp.com/channels/${serverID}/${channel.id}`;
+  modChannel.send(
+    createEmbed({
+      provider: 'spam',
+      description: 'Detected spam on server',
+      author: id,
+      url,
+      title: 'Spam Alert!',
+      fields: [
+        { name: 'User', value: `${username}#${discriminator}` },
+        { name: 'Channel', value: `#${channel}` },
+      ],
+      footerText: 'Spam Filter',
+    }),
+  );
 };
 
 client.on('spam', handleSpam);
