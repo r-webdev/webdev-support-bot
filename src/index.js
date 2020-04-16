@@ -55,7 +55,8 @@ const handleMessage = async (msg) => {
   const cleanContent = cleanContentFunc(msg);
 
   // Pipe the message into the spam filter
-  spamFilter(msg);
+  const res = spamFilter(msg); // spamFilter returns the user ID or false
+  if (res) client.emit('spam', res);
 
   const isGeneralHelpRequest =
     cleanContent.includes(HELP_KEYWORD) &&
@@ -114,6 +115,14 @@ const handleMessage = async (msg) => {
 };
 
 client.on('message', handleMessage);
+
+// Spam handler
+const handleSpam = ({ id, channel }) => {
+  const modChannel = client.channels.cache.find((c) => c.name === 'moderators');
+  modChannel.send(`${id} is spamming in ${channel}`);
+};
+
+client.on('spam', handleSpam);
 
 try {
   client.login(
