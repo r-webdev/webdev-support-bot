@@ -61,7 +61,7 @@ const providers = {
     help: '!bundlephobia @chakra-ui/core',
   },
   spam: {
-    color: 0xffffff,
+    color: 0xfe5f55,
     icon:
       'https://github.com/ljosberinn/webdev-support-bot/blob/master/logo.png?raw=true',
   },

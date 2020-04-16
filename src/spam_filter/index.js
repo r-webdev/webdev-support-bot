@@ -1,7 +1,10 @@
 const NodeCache = require('node-cache');
 const cleanContent = require('../utils/cleanContent');
 
-const cache = new NodeCache({ stdTTL: 10, checkperiod: 5 });
+const cache = new NodeCache({
+  stdTTL: process.env.CACHE_TTL || 10,
+  checkperiod: 5,
+});
 
 /**
  * @param {import('discord.js').Message} msg */
@@ -32,8 +35,8 @@ module.exports = (msg) => {
    * - If a user sends `numberOfAllowedMessages` in the span of the `timer`, warn the user
    */
   if (msg.author.bot) return; // Bail if the user is a bot
-  const numberOfAllowedMessages = 5;
-  const timer = 2;
+  const numberOfAllowedMessages = process.env.NUMBER_OF_ALLOWED_MESSAGES || 5;
+  const timer = process.env.TIMER || 2;
   const { channel, id: msgID, guild: server } = msg;
   const { id: userID, username, discriminator } = msg.author;
   // Check if the user has cached messages
@@ -54,8 +57,6 @@ module.exports = (msg) => {
     cache.del(userID);
     return false;
   }
-  // Spam detected.
-  msg.reply('You are spamming, bucko.'); // TODO: Make the message compliant in terms of design to the command messages
   // Remove the user from the cache
   cache.del(userID);
   // Return details of the incident to be handled further
