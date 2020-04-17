@@ -1,21 +1,23 @@
-const { providers } = require('./urlTools');
-const {
+import { providers } from './urlTools';
+import {
   reactionFilterBuilder,
   awaitReactionConfig,
   validReactions,
-} = require('./reactions');
-const delayedMessageAutoDeletion = require('./delayedMessageAutoDeletion');
-const { unknownError } = require('./errors');
-const emojis = require('./emojis');
-/**
- *
- * @param {string} title
- * @param {string} url
- */
-const createMarkdownLink = (title, url) =>
+} from './reactions';
+import delayedMessageAutoDeletion from './delayedMessageAutoDeletion';
+import { unknownError } from './errors';
+import * as emojis from './emojis';
+import {
+  Message,
+  MessageEditOptions,
+  EmbedField,
+  MessageEmbed,
+} from 'discord.js';
+
+export const createMarkdownLink = (title: string, url: string) =>
   `[${title}](${url.replace(/\)/g, '\\)')})`;
 
-const BASE_DESCRIPTION = `
+export const BASE_DESCRIPTION = `
 ${emojis.light} *react with a number (:one:, :two:, ...) to filter your result*
 ${emojis.neutral_face} *react with \`❌\` to delete*
 ${
@@ -23,26 +25,32 @@ ${
 } *supports \`!mdn\`, \`!github\`, \`!caniuse\`, \`!npm\`, \`!composer\` and \`!bundlephobia\`*
 ${emojis.gear} *issues? feature requests? head over to ${createMarkdownLink(
   'github',
-  process.env.REPO_LINK,
+  process.env.REPO_LINK
 )}*`;
 
-/**
- *
- * @param {{
- *   provider: 'caniuse' | 'mdn' | 'composer' | 'npm' | 'bundlephobia',
- *   searchTerm: string,
- *   url: string,
- *   footerText: string,
- *   description: string,
- * }}
- */
-const createListEmbed = ({
+export type Provider =
+  | 'caniuse'
+  | 'npm'
+  | 'github'
+  | 'composer'
+  | 'mdn'
+  | 'bundlephobia';
+
+interface ListEmbed {
+  provider: Provider;
+  searchTerm: string;
+  url: string;
+  footerText: string;
+  description: string;
+}
+
+export const createListEmbed = ({
   provider,
   searchTerm,
   url,
   footerText,
   description,
-}) => {
+}: ListEmbed) => {
   if (providers[provider]) {
     const { createTitle } = providers[provider];
 
@@ -58,19 +66,23 @@ const createListEmbed = ({
   throw new Error('provider not implemented');
 };
 
-/**
- *
- * @param {{
- *   provider: 'caniuse' | 'npm' | 'github' | 'composer' | 'mdn' | 'bundlephobia',
- *   title: string,
- *   url: string,
- *   footerText: string,
- *   description: string,
- *   fields: {name: string, value: string, inline?: boolean}[],
- *   author?: { name: string, icon_url: string, url: string }
- * }} param0
- */
-const createEmbed = ({
+export interface Embed {
+  provider: Provider | 'spam';
+  title: string;
+  url: string;
+  footerText: string;
+  description: string;
+  fields?: EmbedField[];
+  author?: { name: string; icon_url?: string; url?: string };
+}
+
+const spamMeta = {
+  color: 0xfe5f55,
+  icon:
+    'https://github.com/ljosberinn/webdev-support-bot/blob/master/logo.png?raw=true',
+};
+
+export const createEmbed = ({
   provider,
   title,
   url,
@@ -78,9 +90,11 @@ const createEmbed = ({
   description,
   fields = [],
   author = null,
-}) => {
-  if (providers[provider]) {
-    const { color, icon } = providers[provider];
+}: Embed): { embed: Partial<MessageEmbed> } => {
+  const isSpam = provider === 'spam';
+
+  if (isSpam || providers[provider]) {
+    const { color, icon } = isSpam ? spamMeta : providers[provider];
 
     return {
       embed: {
@@ -88,7 +102,7 @@ const createEmbed = ({
         color,
         url,
         footer: {
-          icon_url: icon,
+          iconURL: icon,
           text: footerText,
         },
         description,
@@ -109,11 +123,12 @@ const SEPARATOR_LENGTH = 3;
  * based on the maximum of possible characters before
  * a linebreak occurs, keeping words intact.
  *
- * @param {number} position
- * @param {string} name
- * @param {string} description
  */
-const adjustDescriptionLength = (position, name, description) => {
+export const adjustDescriptionLength = (
+  position: number,
+  name: string,
+  description: string
+) => {
   const positionLength = position.toString().length + 2;
   const nameLength = name.length;
   const descriptionLength = description.length;
@@ -129,7 +144,7 @@ const adjustDescriptionLength = (position, name, description) => {
 
     const shortenedDescription = description
       .split(' ')
-      .reduce((carry, part) => {
+      .reduce((carry: string, part: string) => {
         if (hasHitLimit || carry.length + part.length > availableSpace) {
           hasHitLimit = true;
           return carry;
@@ -148,11 +163,7 @@ const adjustDescriptionLength = (position, name, description) => {
   return description;
 };
 
-/**
- *
- * @param {string} title
- */
-const adjustTitleLength = title => {
+export const adjustTitleLength = (title: string) => {
   const titleLength = title.length;
 
   const cleansedTitle =
@@ -163,60 +174,39 @@ const adjustTitleLength = title => {
   return cleansedTitle.replace(/\n/gm, ' ');
 };
 
-/**
- *
- * @param {number} index
- * @param {string} content
- */
-const createMarkdownListItem = (index, content) => `${index + 1}. ${content}`;
+export const createMarkdownListItem = (index: number, content: string) =>
+  `${index + 1}. ${content}`;
 
-/**
- *
- * @param {string} string
- */
-const createMarkdownBash = string => ['```bash', string, '```'].join('\n');
+export const createMarkdownBash = (string: string) =>
+  ['```bash', string, '```'].join('\n');
 
-/**
- *
- * @param {array} items
- */
-const createDescription = items => items.concat(BASE_DESCRIPTION).join('\n');
+export const createDescription = (items: any[]) =>
+  items.concat(BASE_DESCRIPTION).join('\n');
 
-/**
- *
- * @param {{reactions: import('discord.js').ReactionManager}} reactions
- * @param {string} id
- * @param {string[]} currentlyValidEmojis
- *
- */
-const findEarlyReaction = ({ reactions }, id, currentlyValidEmojis) =>
+export const findEarlyReaction = (
+  { reactions }: Message,
+  id: string,
+  currentlyValidEmojis: string[]
+) =>
   reactions.cache.find(
     ({ users, emoji: { name } }) =>
       currentlyValidEmojis.includes(name) &&
-      users.cache.find(user => user.id === id),
+      !!users.cache.find((user) => user.id === id)
   );
 
-/**
- *
- * @param {{
- *  reactions: import('discord.js').ReactionManager,
- * } reactions
- */
-const clearReactions = ({ reactions }) =>
-  reactions.removeAll().catch(error => {
+export const clearReactions = ({ reactions }: Message) =>
+  reactions.removeAll().catch((error) => {
     console.error(error);
     console.info(
-      'Attempting to remove reactions: message probably deleted or insufficient rights.',
+      'Attempting to remove reactions: message probably deleted or insufficient rights.'
     );
   });
 
-/**
- *
- * @param {import('discord.js').Message} sentMsg
- * @param {import('discord.js').Message} msg
- * @param {array} firstTenResults
- */
-const getChosenResult = async (sentMsg, { author: { id } }, results) => {
+export const getChosenResult = async <T>(
+  sentMsg: Message,
+  { author: { id } }: Message,
+  results: T[]
+): Promise<T> => {
   let earlyReaction = null;
 
   const emojis = [
@@ -237,7 +227,7 @@ const getChosenResult = async (sentMsg, { author: { id } }, results) => {
       await sentMsg.react(emoji);
     } catch (error) {
       console.info(
-        'Add reaction failed: message was apparently deleted by someone else.',
+        'Add reaction failed: message was apparently deleted by someone else.'
       );
       return;
     }
@@ -252,7 +242,7 @@ const getChosenResult = async (sentMsg, { author: { id } }, results) => {
     }
 
     const index = validReactions.indices.findIndex(
-      emoji => emoji === emojiName,
+      (emoji) => emoji === emojiName
     );
 
     clearReactions(sentMsg);
@@ -263,7 +253,7 @@ const getChosenResult = async (sentMsg, { author: { id } }, results) => {
   try {
     const collectedReactions = await sentMsg.awaitReactions(
       reactionFilterBuilder(id, emojis),
-      awaitReactionConfig,
+      awaitReactionConfig
     );
 
     const emojiName = collectedReactions.first().emoji.name;
@@ -274,7 +264,7 @@ const getChosenResult = async (sentMsg, { author: { id } }, results) => {
     }
 
     const index = validReactions.indices.findIndex(
-      emoji => emoji === emojiName,
+      (emoji) => emoji === emojiName
     );
 
     clearReactions(sentMsg);
@@ -291,36 +281,20 @@ const getChosenResult = async (sentMsg, { author: { id } }, results) => {
   }
 };
 
-const EMPTY_FIELD = {
+export const EMPTY_FIELD: EmbedField = {
   name: '\u200B',
   value: '\u200B',
+  inline: true,
 };
 
-/**
- *
- * @param {import('discord.js').Message} sentMsg
- * @param {string | array | number} content
- * @param {{ embed: object, code: string | boolean } | { data: object }} options
- */
-const attemptEdit = async (sentMsg, content, options = undefined) => {
+export const attemptEdit = async (
+  sentMsg: Message,
+  content: string | any[] | number | { embed: Partial<MessageEmbed> },
+  options: MessageEmbed | MessageEditOptions = undefined
+) => {
   try {
     await sentMsg.edit(content, options);
   } catch (error) {
     console.info('Attempting to edit message: message probably deleted.');
   }
-};
-
-module.exports = {
-  createMarkdownLink,
-  createListEmbed,
-  createEmbed,
-  adjustDescriptionLength,
-  createMarkdownListItem,
-  createDescription,
-  getChosenResult,
-  createMarkdownBash,
-  EMPTY_FIELD,
-  attemptEdit,
-  adjustTitleLength,
-  BASE_DESCRIPTION,
 };
