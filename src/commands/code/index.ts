@@ -2,10 +2,10 @@ import { Message } from 'discord.js';
 import { warning } from '../../utils/emojis';
 
 const sites = [
-  `https://codepen.io/ - ${warning} requires account`,
+  `<https://codepen.io/> - ${warning} requires account`,
   'https://codesandbox.io/',
-  'https://repl.it/',
-  'https://ideone.com/',
+  '<https://repl.it/>',
+  '<https://ideone.com/>',
 ].join('\n');
 
 const handleCodeRequest = async (msg: Message) => {
