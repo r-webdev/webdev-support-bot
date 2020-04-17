@@ -1,8 +1,8 @@
-const { getSearchUrl, buildDirectUrl } = require('../../utils/urlTools');
-const Entities = require('html-entities').Html5Entities;
-const DOMParser = require('dom-parser');
-const errors = require('../../utils/errors');
-const {
+import { getSearchUrl, buildDirectUrl } from '../../utils/urlTools';
+import { Html5Entities as Entities } from 'html-entities';
+import * as DOMParser from 'dom-parser';
+import * as errors from '../../utils/errors';
+import {
   createMarkdownLink,
   createDescription,
   createListEmbed,
@@ -11,19 +11,15 @@ const {
   attemptEdit,
   adjustTitleLength,
   BASE_DESCRIPTION,
-} = require('../../utils/discordTools');
-const useData = require('../../utils/useData');
-const delayedMessageAutoDeletion = require('../../utils/delayedMessageAutoDeletion');
+} from '../../utils/discordTools';
+import useData from '../../utils/useData';
+import delayedMessageAutoDeletion from '../../utils/delayedMessageAutoDeletion';
+import { Message } from 'discord.js';
 
 const provider = 'mdn';
 const entities = new Entities();
 
-/**
- *
- * @param {import('discord.js').Message} msg
- * @param {string} searchTerm
- */
-const handleMDNQuery = async (msg, searchTerm) => {
+const handleMDNQuery = async (msg: Message, searchTerm: string) => {
   try {
     const searchUrl = getSearchUrl(provider, searchTerm);
     const { error, text } = await useData(searchUrl, 'text');
@@ -56,8 +52,8 @@ const handleMDNQuery = async (msg, searchTerm) => {
         index,
         createMarkdownLink(
           adjustTitleLength([`**${title}**`, excerpt].join(' - ')),
-          url,
-        ),
+          url
+        )
       );
 
       expectedLength += item.length;
@@ -67,7 +63,7 @@ const handleMDNQuery = async (msg, searchTerm) => {
 
     // remove excerpt if its forseeable to go over embed.description Discord cap
     if (expectedLength + BASE_DESCRIPTION.length + 10 * '\n'.length > 2048) {
-      preparedDescription = preparedDescription.map(string => {
+      preparedDescription = preparedDescription.map((string) => {
         // split at markdown link ending
         const [title, ...rest] = string.split('...]');
 
@@ -85,7 +81,7 @@ const handleMDNQuery = async (msg, searchTerm) => {
         url: searchUrl,
         footerText: meta.split('for')[0],
         description: createDescription(preparedDescription),
-      }),
+      })
     );
 
     const result = await getChosenResult(sentMsg, msg, results);
@@ -106,20 +102,22 @@ const handleMDNQuery = async (msg, searchTerm) => {
 /**
  *
  * @param {any} result [document.parseFromString return type]
- * @returns {{
- * title: string,
- * excerpt: string,
- * url: string}
- * }
  */
-const extractMetadataFromResult = result => {
+const extractMetadataFromResult = (result: any) => {
   const titleElement = result.getElementsByClassName('result-title')[0];
   const excerptElement = result.getElementsByClassName('result-excerpt')[0];
 
-  const title = escapeMarkdown(entities.decode(titleElement.textContent));
-  const url = buildDirectUrl('mdn', titleElement.getAttribute('href'));
+  const title = escapeMarkdown(
+    entities.decode(titleElement.textContent)
+  ) as string;
+
+  const url = buildDirectUrl(
+    provider,
+    titleElement.getAttribute('href')
+  ) as string;
+
   const excerpt = sanitizeExcerpt(
-    escapeMarkdown(entities.decode(excerptElement.textContent)),
+    escapeMarkdown(entities.decode(excerptElement.textContent))
   );
 
   return {
@@ -129,11 +127,7 @@ const extractMetadataFromResult = result => {
   };
 };
 
-/**
- *
- * @param {string} excerpt
- */
-const sanitizeExcerpt = excerpt => {
+const sanitizeExcerpt = (excerpt: string) => {
   let sanitized = excerpt;
 
   if (
@@ -148,8 +142,7 @@ const sanitizeExcerpt = excerpt => {
 
 /**
  * Escapes *, _, `, ~, \
- * @param {string} text
  */
-const escapeMarkdown = text => text.replace(/(\*|_|`|~|\\)/g, '\\$1');
+const escapeMarkdown = (text: string) => text.replace(/(\*|_|`|~|\\)/g, '\\$1');
 
-module.exports = handleMDNQuery;
+export default handleMDNQuery;
