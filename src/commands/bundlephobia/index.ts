@@ -1,10 +1,10 @@
-const {
+import {
   getExtendedInfoUrl,
   buildDirectUrl,
   getData,
-} = require('../../utils/urlTools');
-const errors = require('../../utils/errors');
-const {
+} from '../../utils/urlTools';
+import * as errors from '../../utils/errors';
+import {
   createMarkdownLink,
   createListEmbed,
   createEmbed,
@@ -14,25 +14,27 @@ const {
   getChosenResult,
   EMPTY_FIELD,
   attemptEdit,
-} = require('../../utils/discordTools');
-const useData = require('../../utils/useData');
-const emojis = require('../../utils/emojis');
-const compareVersions = require('compare-versions');
+} from '../../utils/discordTools';
+import useData from '../../utils/useData';
+import * as emojis from '../../utils/emojis';
+import * as compareVersions from 'compare-versions';
+import { Message, EmbedField } from 'discord.js';
+import {
+  BundlephobiaResponse,
+  ExtendedBundlephobiaResponse,
+  Fields,
+  SimilarPackagesResponse,
+} from './types';
 
 const provider = 'bundlephobia';
 
-/**
- *
- * @param {import('discord.js').Message} msg
- * @param {string} searchTerm
- */
-const handleBundlephobiaQuery = async (msg, searchTerm) => {
+const handleBundlephobiaQuery = async (msg: Message, searchTerm: string) => {
   try {
-    const json = await getData({
+    const json = await getData<BundlephobiaResponse[]>({
       provider,
       msg,
       searchTerm,
-      isInvalidData: json => json.length === 0,
+      isInvalidData: (json) => json.length === 0,
     });
 
     if (!json) {
@@ -73,9 +75,9 @@ const handleBundlephobiaQuery = async (msg, searchTerm) => {
 
           return createMarkdownListItem(
             index,
-            createMarkdownLink(linkTitle, url),
+            createMarkdownLink(linkTitle, url)
           );
-        }),
+        })
       ),
     });
 
@@ -93,16 +95,14 @@ const handleBundlephobiaQuery = async (msg, searchTerm) => {
   }
 };
 
-/**
- *
- * @param {import('discord.js').Message} msg
- * @param {{name: string; description: string;}} result
- * @param {import('discord.js').Message} sentMsg
- */
-const handleResult = async (msg, { name, description }, sentMsg) => {
-  const { error, json: extendedJson } = await useData(
-    getExtendedInfoUrl(provider, name),
-  );
+const handleResult = async (
+  msg: Message,
+  { name, description }: { name: string; description: string },
+  sentMsg: Message
+) => {
+  const { error, json: extendedJson } = await useData<
+    ExtendedBundlephobiaResponse
+  >(getExtendedInfoUrl(provider, name));
 
   if (error) {
     await msg.reply(errors.invalidResponse);
@@ -147,12 +147,7 @@ const handleResult = async (msg, { name, description }, sentMsg) => {
   await attemptEdit(sentMsg, embed);
 };
 
-/**
- *
- * @param {number} current
- * @param {number | undefined} last
- */
-const getInitialFieldValue = (current, last) => {
+const getInitialFieldValue = (current: number, last: number | undefined) => {
   const currentInKb = toKilobytes(current);
 
   if (!last) {
@@ -169,19 +164,6 @@ const getInitialFieldValue = (current, last) => {
   return `${currentInKb}\n(${prefix}${sizeDiff.toFixed(2)}% to last)`;
 };
 
-/**
- *
- * @param {{
- * gzip: number;
- * previousVersionSize?: number;
- * dependencies: number;
- * hasSideEffects: boolean;
- * isTreeShakeable: boolean;
- * estDownloadTimeEdge: string;
- * estDownloadTimeEmerging3g: string;
- * similarPackages: {label: string|undefined, packages: {name: string; size: number}[]};
- * }} param0
- */
 const createFields = ({
   gzip,
   previousVersionSize,
@@ -191,8 +173,8 @@ const createFields = ({
   estDownloadTimeEdge,
   estDownloadTimeEmerging3g,
   similarPackages = { label: undefined, packages: [] },
-}) => {
-  const fields = [
+}: Fields) => {
+  const fields: EmbedField[] = [
     {
       name: 'size (latest)',
       value: getInitialFieldValue(gzip, previousVersionSize),
@@ -208,7 +190,7 @@ const createFields = ({
 
   fields.push({
     name: 'dependencies',
-    value: dependencies,
+    value: '' + dependencies,
     inline: true,
   });
 
@@ -246,6 +228,7 @@ const createFields = ({
     fields.push({
       name: 'Similar packages',
       value: `labelled as _${label}_`,
+      inline: false,
     });
 
     for (let i = 0; i <= 2; i++) {
@@ -264,17 +247,12 @@ const createFields = ({
   return fields;
 };
 
-/**
- *
- * @param {number} current
- * @param {number} previous
- */
-const calcDiffInPercent = (current, previous) =>
+const calcDiffInPercent = (current: number, previous: number) =>
   (current / previous) * 100 - 100;
 
-const getPreviousVersionSize = async package => {
+const getPreviousVersionSize = async (pkg: string) => {
   const { error, json } = await useData(
-    `https://bundlephobia.com/api/package-history?package=${package}`,
+    `https://bundlephobia.com/api/package-history?package=${pkg}`
   );
 
   if (error) {
@@ -296,13 +274,9 @@ const getPreviousVersionSize = async package => {
   }
 };
 
-/**
- *
- * @param {number} size
- */
-const toKilobytes = size => (size / 1024).toFixed(2) + 'kb';
+const toKilobytes = (size: number) => (size / 1024).toFixed(2) + 'kb';
 
-const calcDownloadTime = (size, type) => {
+const calcDownloadTime = (size: number, type: '3g' | 'edge') => {
   switch (type) {
     case '3g':
       if (size > 1024) {
@@ -321,13 +295,9 @@ const calcDownloadTime = (size, type) => {
   }
 };
 
-/**
- *
- * @param {string} package
- */
-const getSimilarPackages = async package => {
-  const url = `https://bundlephobia.com/api/similar-packages?package=${package}`;
-  const { error, json } = await useData(url);
+const getSimilarPackages = async (pkg: string) => {
+  const url = `https://bundlephobia.com/api/similar-packages?package=${pkg}`;
+  const { error, json } = await useData<SimilarPackagesResponse>(url);
 
   if (error || !json.category.similar) {
     return undefined;
@@ -337,9 +307,9 @@ const getSimilarPackages = async package => {
 
   const packages = await Promise.all(
     similar
-      .map(async otherPackage => {
-        const { error, json } = await useData(
-          getExtendedInfoUrl(provider, otherPackage),
+      .map(async (otherPackage) => {
+        const { error, json } = await useData<ExtendedBundlephobiaResponse>(
+          getExtendedInfoUrl(provider, otherPackage)
         );
 
         if (error) {
@@ -351,13 +321,13 @@ const getSimilarPackages = async package => {
           size: json.gzip,
         };
       })
-      .filter(Boolean),
+      .filter(Boolean)
   );
 
   return {
     label,
-    packages: packages,
+    packages,
   };
 };
 
-module.exports = handleBundlephobiaQuery;
+export default handleBundlephobiaQuery;

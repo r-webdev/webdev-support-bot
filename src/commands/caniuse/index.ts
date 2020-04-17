@@ -1,6 +1,8 @@
-const { getExtendedInfoUrl, getData } = require('../../utils/urlTools');
-const errors = require('../../utils/errors');
-const {
+import { Message } from 'discord.js';
+
+import { getExtendedInfoUrl, getData } from '../../utils/urlTools';
+import * as errors from '../../utils/errors';
+import {
   createMarkdownLink,
   createListEmbed,
   createEmbed,
@@ -8,11 +10,16 @@ const {
   createMarkdownListItem,
   getChosenResult,
   attemptEdit,
-} = require('../../utils/discordTools');
-const useData = require('../../utils/useData');
-const bcd = require('mdn-browser-compat-data');
-const emojis = require('../../utils/emojis');
-const delayedMessageAutoDeletion = require('../../utils/delayedMessageAutoDeletion');
+} from '../../utils/discordTools';
+import useData from '../../utils/useData';
+import * as bcd from 'mdn-browser-compat-data';
+import { warning, yes, no } from '../../utils/emojis';
+import delayedMessageAutoDeletion from '../../utils/delayedMessageAutoDeletion';
+import { ExtendedCanIUseData } from './types';
+import {
+  CompatStatement,
+  SupportStatement,
+} from 'mdn-browser-compat-data/types';
 
 const provider = 'caniuse';
 
@@ -22,31 +29,26 @@ const browserNameMap = Object.entries(bcd.browsers).reduce(
 
     return carry;
   },
-  {},
+  {}
 );
 
-/**
- *
- * @param {import('discord.js').Message} msg
- * @param {string} searchTerm
- */
-const handleCanIUseQuery = async (msg, searchTerm) => {
+const handleCanIUseQuery = async (msg: Message, searchTerm: string) => {
   try {
-    const text = await getData({
+    const text = await getData<string>({
       msg,
       searchTerm,
       provider,
-      sanitizeData: text => text.replace('"', ''),
-      isInvalidData: text => text.length === 0,
+      sanitizeData: (text) => text.replace('"', ''),
+      isInvalidData: (text) => text.length === 0,
     });
 
     if (!text) {
       return;
     }
 
-    const { error: extendedQueryError, json } = await useData(
-      getExtendedInfoUrl(provider, text),
-    );
+    const { error: extendedQueryError, json } = await useData<
+      ExtendedCanIUseData[]
+    >(getExtendedInfoUrl(provider, text));
 
     if (extendedQueryError) {
       await msg.reply(errors.invalidResponse);
@@ -95,13 +97,17 @@ const handleCanIUseQuery = async (msg, searchTerm) => {
         searchTerm,
         description: createDescription(
           firstTenResults.map(({ title, url }, index) =>
-            createMarkdownListItem(index, createMarkdownLink(title, url)),
-          ),
+            createMarkdownListItem(index, createMarkdownLink(title, url))
+          )
         ),
-      }),
+      })
     );
 
-    const result = await getChosenResult(sentMsg, msg, firstTenResults);
+    const result = await getChosenResult<typeof firstTenResults[number]>(
+      sentMsg,
+      msg,
+      firstTenResults
+    );
 
     if (!result) {
       return;
@@ -124,17 +130,16 @@ const handleCanIUseQuery = async (msg, searchTerm) => {
           inline: true,
           value: [
             isSupported,
-            hasRuntimeFlag && `${emojis.warning} behind a flag`,
-            isUserPreference && `${emojis.warning} user preference`,
-            altName && `${emojis.warning} alt. name: ${altName}`,
-            prefix && `${emojis.warning} use prefix: ${prefix}`,
-            isPartialImplementation &&
-              `${emojis.warning} only partially supported`,
+            hasRuntimeFlag && `${warning} behind a flag`,
+            isUserPreference && `${warning} user preference`,
+            altName && `${warning} alt. name: ${altName}`,
+            prefix && `${warning} use prefix: ${prefix}`,
+            isPartialImplementation && `${warning} only partially supported`,
           ]
             .filter(Boolean)
             .join('\n'),
         };
-      },
+      }
     );
 
     await attemptEdit(
@@ -147,10 +152,10 @@ const handleCanIUseQuery = async (msg, searchTerm) => {
           'This bot only considers the **latest stable version** of a browser.',
         description: createMarkdownLink(
           'visit MDN for more information about this specific API',
-          compatibilityMap.mdn_url,
+          compatibilityMap.mdn_url
         ),
         fields,
-      }),
+      })
     );
   } catch (error) {
     console.error(error);
@@ -160,18 +165,16 @@ const handleCanIUseQuery = async (msg, searchTerm) => {
 
 /**
  *
- * @param {object|array} data
- *
  * @see https://github.com/mdn/browser-compat-data/blob/master/schemas/compat-data-schema.md#the-support_statement-object
  */
-const getFeatureMetadata = data => {
+const getFeatureMetadata = (data: SupportStatement) => {
   const {
     version_added,
     flags,
     alternative_name,
     prefix,
     partial_implementation,
-  } = data.length ? data[0] : data;
+  } = Array.isArray(data) ? data[0] : data;
 
   const flagInformation = {
     isUserPreference: false,
@@ -180,17 +183,17 @@ const getFeatureMetadata = data => {
 
   if (flags) {
     flagInformation.isUserPreference = !!flags.find(
-      ({ type }) => type === 'preference',
+      ({ type }) => type === 'preference'
     );
 
     flagInformation.hasRuntimeFlag = !!flags.find(
-      ({ type }) => type === 'runtime_flag',
+      ({ type }) => type === 'runtime_flag'
     );
   }
 
   // a feature may not be behind a flag to be supported in general
   const isSupported =
-    version_added && !flagInformation.runtimeFlag ? emojis.yes : emojis.no;
+    version_added && !flagInformation.hasRuntimeFlag ? yes : no;
 
   return {
     isSupported,
@@ -207,9 +210,8 @@ const getFeatureMetadata = data => {
  *
  * @see https://github.com/mdn/browser-compat-data/blob/master/schemas/compat-data-schema.md#the-__compat-object
  *
- * @param {string} path
  */
-const extractCompatibilityFromBCD = path => {
+const extractCompatibilityFromBCD = (path: string): CompatStatement => {
   const parts = path.split('/');
   const finalProp = parts.pop().replace('.json', '');
 
@@ -228,7 +230,7 @@ const extractCompatibilityFromBCD = path => {
   if (finalProp.includes('-')) {
     const capitalizedProp = finalProp
       .split('-')
-      .map(str => str.charAt(0).toUpperCase() + str.slice(1))
+      .map((str) => str.charAt(0).toUpperCase() + str.slice(1))
       .join('-');
 
     return compatObj[capitalizedProp].__compat;
@@ -237,10 +239,6 @@ const extractCompatibilityFromBCD = path => {
   throw new Error(`unknown path/finalProp: ${path} -> ${finalProp}`);
 };
 
-/**
- *
- * @param {string} hash
- */
-const buildHashUrl = hash => `https://caniuse.com/#feat=${hash}`;
+const buildHashUrl = (hash: string) => `https://caniuse.com/#feat=${hash}`;
 
-module.exports = handleCanIUseQuery;
+export default handleCanIUseQuery;

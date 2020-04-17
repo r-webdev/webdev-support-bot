@@ -1,10 +1,10 @@
-const {
+import {
   getExtendedInfoUrl,
   buildDirectUrl,
   getData,
-} = require('../../utils/urlTools');
-const errors = require('../../utils/errors');
-const {
+} from '../../utils/urlTools';
+import * as errors from '../../utils/errors';
+import {
   createMarkdownLink,
   createListEmbed,
   createEmbed,
@@ -15,26 +15,38 @@ const {
   createMarkdownBash,
   EMPTY_FIELD,
   attemptEdit,
-} = require('../../utils/discordTools');
-const useData = require('../../utils/useData');
-const compareVersions = require('compare-versions');
-const { formatDistanceToNow } = require('date-fns');
-const emojis = require('../../utils/emojis');
+} from '../../utils/discordTools';
+import useData from '../../utils/useData';
+import * as compareVersions from 'compare-versions';
+import { formatDistanceToNow } from 'date-fns';
+import {
+  dependencies,
+  keywords,
+  license,
+  website,
+  language,
+} from '../../utils/emojis';
+import { Message, EmbedField } from 'discord.js';
+import { URL } from 'url';
+import {
+  PackagistResponse,
+  ExtendedPackagistResponse,
+  Downloads,
+  Versions,
+  Version,
+} from './types';
 
 const provider = 'composer';
 
-/**
- *
- * @param {import('discord.js').Message} msg
- * @param {string} searchTerm
- */
-const handleComposerQuery = async (msg, searchTerm) => {
+const handleComposerQuery = async (msg: Message, searchTerm: string) => {
   try {
-    const json = await getData({
+    const json = await getData<PackagistResponse>({
       provider,
       msg,
       searchTerm,
-      isInvalidData: json => json.results.length === 0,
+      isInvalidData(json: PackagistResponse) {
+        return json.results.length === 0;
+      },
     });
 
     if (!json) {
@@ -73,9 +85,9 @@ const handleComposerQuery = async (msg, searchTerm) => {
 
           return createMarkdownListItem(
             index,
-            createMarkdownLink(linkTitle, url),
+            createMarkdownLink(linkTitle, url)
           );
-        }),
+        })
       ),
     });
 
@@ -89,9 +101,9 @@ const handleComposerQuery = async (msg, searchTerm) => {
 
     const { name: resultName } = result;
 
-    const { error, json: extendedJson } = await useData(
-      getExtendedInfoUrl(provider, resultName),
-    );
+    const { error, json: extendedJson } = await useData<
+      ExtendedPackagistResponse
+    >(getExtendedInfoUrl(provider, resultName));
 
     if (error) {
       await msg.reply(errors.invalidResponse);
@@ -117,7 +129,7 @@ const handleComposerQuery = async (msg, searchTerm) => {
         },
         url: buildDirectUrl(provider, name),
         fields: extractFieldsFromLatestRelease(versions[version]),
-      }),
+      })
     );
   } catch (error) {
     console.error(error);
@@ -125,12 +137,8 @@ const handleComposerQuery = async (msg, searchTerm) => {
   }
 };
 
-/**
- *
- * @param {object} package.version response from packagist API
- */
-const findLatestRelease = versions => {
-  const { version, time } = Object.values(versions).reduce(
+const findLatestRelease = (versions: Versions) => {
+  const { version, time } = Object.values(versions).reduce<Version>(
     (latest, item) => {
       const { version_normalized: itemVersion } = item;
 
@@ -146,19 +154,15 @@ const findLatestRelease = versions => {
 
       return latest;
     },
-    { version_normalized: '0.0.0.0' },
+    null
   );
 
   return {
-    version: version,
+    version,
     released: formatDistanceToNow(new Date(time)),
   };
 };
 
-/**
- *
- * @param {object} latestRelease
- */
 const extractFieldsFromLatestRelease = ({
   name,
   keywords,
@@ -167,50 +171,52 @@ const extractFieldsFromLatestRelease = ({
   homepage,
   source,
   authors,
-}) => {
+}: Version): EmbedField[] => {
   const fields = [
     {
       name: 'add to your project',
       value: createMarkdownBash(`composer require ${name}`),
+      inline: false,
     },
   ];
 
   if (keywords.length > 0) {
     fields.push({
-      name: `${emojis.key} keywords`,
+      name: `${keywords} keywords`,
       value: keywords
-        .map(keyword => createMarkdownLink(keyword, createTagLink(keyword)))
+        .map((keyword) => createMarkdownLink(keyword, createTagLink(keyword)))
         .join(', '),
+      inline: false,
     });
   }
 
   const phpRequirement = Object.entries(require).find(
-    ([dependency]) => dependency === 'php',
+    ([dependency]) => dependency === 'php'
   );
 
   if (phpRequirement) {
     fields.push({
       name: 'PHP version',
-      value: phpRequirement[1],
+      value: '' + phpRequirement[1],
       inline: true,
     });
   }
 
   fields.push({
-    name: `${emojis.dependencies} dependencies`,
-    value: Object.keys(require).length - (phpRequirement ? 1 : 0),
+    name: `${dependencies} dependencies`,
+    value: (Object.keys(require).length - (phpRequirement ? 1 : 0)).toString(),
     inline: true,
   });
 
   if (license) {
     fields.push({
-      name: `${emojis.license} license`,
+      name: `${license} license`,
       value: license
-        .map(license =>
+        .map((license) =>
           createMarkdownLink(
             license,
-            `https://choosealicense.com/licenses/${license.toLowerCase()}`,
-          ),
+            `https://choosealicense.com/licenses/${license.toLowerCase()}`
+          )
         )
         .join(' '),
       inline: true,
@@ -229,10 +235,10 @@ const extractFieldsFromLatestRelease = ({
     const { protocol } = new URL(homepage);
 
     fields.push({
-      name: `${emojis.website} homepage`,
+      name: `${website} homepage`,
       value: createMarkdownLink(
         homepage.replace(`${protocol}//`, ''),
-        homepage,
+        homepage
       ),
       inline: true,
     });
@@ -248,7 +254,7 @@ const extractFieldsFromLatestRelease = ({
         name: 'repository',
         value: createMarkdownLink(
           pathname.substr(1).replace('.git', ''),
-          source.url.replace('.git', ''),
+          source.url.replace('.git', '')
         ),
         inline: true,
       });
@@ -266,9 +272,9 @@ const extractFieldsFromLatestRelease = ({
     fields.push(EMPTY_FIELD);
   }
 
-  authors.forEach(author => {
+  authors.forEach((author) => {
     fields.push({
-      name: `${emojis.language} author`,
+      name: `${language} author`,
       value: author.name,
       inline: true,
     });
@@ -277,21 +283,13 @@ const extractFieldsFromLatestRelease = ({
   return fields;
 };
 
-/**
- *
- * @param {string} tag
- */
-const createTagLink = tag => `https://packagist.org/search/?tags=${tag}`;
+const createTagLink = (tag: string) =>
+  `https://packagist.org/search/?tags=${tag}`;
 
-/**
- *
- * @param {object} package.downloads
- * @param {number} released
- */
-const generateDetailedFooter = (downloads, released) =>
+const generateDetailedFooter = (downloads: Downloads, released: string) =>
   `Downloads: ${Object.entries(downloads)
     .reverse()
     .map(([period, amount]) => `${amount.toLocaleString()} ${period}`)
     .join(' | ')}\nlast updated ${released} ago`;
 
-module.exports = handleComposerQuery;
+export default handleComposerQuery;

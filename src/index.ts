@@ -1,19 +1,21 @@
 require('dotenv').config();
-const { Client } = require('discord.js');
-const { providers, KEYWORD_REGEXP, HELP_KEYWORD } = require('./utils/urlTools');
+import { Client, Message } from 'discord.js';
+import { providers, KEYWORD_REGEXP, HELP_KEYWORD } from './utils/urlTools';
 
-const errors = require('./utils/errors');
+import * as errors from './utils/errors';
 
 // Spam filtering module
-const spamFilter = require('./spam_filter');
+import spamFilter from './spam_filter';
+import handleSpam from './spam_filter/handler';
 
 // commands begin here
-const handleMDNQuery = require('./commands/mdn');
-const handleNPMQuery = require('./commands/npm');
-const handleComposerQuery = require('./commands/composer');
-const handleCanIUseQuery = require('./commands/caniuse');
-const handleGithubQuery = require('./commands/github');
-const handleBundlephobiaQuery = require('./commands/bundlephobia');
+import handleMDNQuery from './commands/mdn';
+import handleNPMQuery from './commands/npm';
+import handleComposerQuery from './commands/composer';
+import handleCanIUseQuery from './commands/caniuse';
+import handleGithubQuery from './commands/github';
+import handleBundlephobiaQuery from './commands/bundlephobia';
+import { Provider } from 'utils/discordTools';
 
 const client = new Client();
 
@@ -31,40 +33,43 @@ client.once('ready', async () => {
 });
 
 // { mdn: 'mdn', /* etc */ }
-const keywords = Object.keys(providers).reduce((carry, keyword) => {
-  carry[keyword] = keyword;
-  return carry;
-}, {});
+const keywordMap = Object.keys(providers).reduce<{ [key: string]: Provider }>(
+  (carry, keyword: Provider) => {
+    carry[keyword] = keyword;
+    return carry;
+  },
+  {}
+);
 
-const trimCleanContent = (provider, cleanContent) =>
-  cleanContent.substr(keywords[provider].length + 2);
+const trimCleanContent = (provider: Provider, cleanContent: string) =>
+  cleanContent.substr(keywordMap[provider].length + 2);
 
 const linebreakPattern = /\n/gim;
 
-const help = Object.entries(providers).reduce((carry, [provider, { help }]) => {
-  carry[provider] = help;
-  return carry;
-}, {});
+const help: { [key: string]: string } = Object.entries(providers).reduce(
+  (carry, [provider, { help }]) => {
+    carry[provider] = help;
+    return carry;
+  },
+  {}
+);
 
-/**
- *
- * @param {import('discord.js').Message} msg
- */
-const handleMessage = async (msg) => {
+const handleMessage = async (msg: Message) => {
   const cleanContent = msg.cleanContent
     .replace(linebreakPattern, ' ')
     .toLowerCase();
 
   // Pipe the message into the spam filter
   const spamMetadata = spamFilter(msg);
+
   if (spamMetadata) {
-    client.emit('spam', spamMetadata);
+    await handleSpam(spamMetadata);
     return;
   }
 
   const isGeneralHelpRequest =
     cleanContent.includes(HELP_KEYWORD) &&
-    msg.mentions.users.find(
+    !!msg.mentions.users.find(
       ({ username }) => username === client.user.username
     );
 
@@ -84,7 +89,7 @@ const handleMessage = async (msg) => {
   }
 
   const keyword = cleanContent.split(' ', 1)[0].substr(1);
-  const searchTerm = trimCleanContent(keywords[keyword], cleanContent);
+  const searchTerm = trimCleanContent(keywordMap[keyword], cleanContent);
 
   const isSpecificHelpRequest =
     searchTerm.length === 0 || searchTerm === HELP_KEYWORD;
@@ -97,17 +102,17 @@ const handleMessage = async (msg) => {
 
   try {
     switch (keyword) {
-      case keywords.mdn:
+      case keywordMap.mdn:
         return await handleMDNQuery(msg, searchTerm);
-      case keywords.caniuse:
+      case keywordMap.caniuse:
         return await handleCanIUseQuery(msg, searchTerm);
-      case keywords.npm:
+      case keywordMap.npm:
         return await handleNPMQuery(msg, searchTerm);
-      case keywords.composer:
+      case keywordMap.composer:
         return await handleComposerQuery(msg, searchTerm);
-      case keywords.github:
+      case keywordMap.github:
         return await handleGithubQuery(msg, searchTerm);
-      case keywords.bundlephobia:
+      case keywordMap.bundlephobia:
         return await handleBundlephobiaQuery(msg, searchTerm);
       default:
         throw new Error('classic "shouldnt be here" scenario');
@@ -119,10 +124,6 @@ const handleMessage = async (msg) => {
 };
 
 client.on('message', handleMessage);
-
-// Spam handler
-const handleSpam = require('./spam_filter/handler');
-client.on('spam', handleSpam);
 
 try {
   client.login(

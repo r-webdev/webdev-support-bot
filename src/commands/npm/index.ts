@@ -1,6 +1,6 @@
-const { getData } = require('../../utils/urlTools');
-const errors = require('../../utils/errors');
-const {
+import { getData } from '../../utils/urlTools';
+import * as errors from '../../utils/errors';
+import {
   createMarkdownLink,
   createListEmbed,
   createEmbed,
@@ -10,24 +10,23 @@ const {
   getChosenResult,
   createMarkdownBash,
   attemptEdit,
-} = require('../../utils/discordTools');
-const { formatDistanceToNow } = require('date-fns');
-const emojis = require('../../utils/emojis');
+  Embed,
+} from '../../utils/discordTools';
+import { formatDistanceToNow } from 'date-fns';
+import { website, language } from '../../utils/emojis';
+import { Message, EmbedField } from 'discord.js';
+import { URL } from 'url';
+import { NPMResponse } from './types';
 
 const provider = 'npm';
 
-/**
- *
- * @param {import('discord.js').Message} msg
- * @param {string} searchTerm
- */
-const handleNPMQuery = async (msg, searchTerm) => {
+const handleNPMQuery = async (msg: Message, searchTerm: string) => {
   try {
-    const json = await getData({
+    const json = await getData<NPMResponse[]>({
       msg,
       searchTerm,
       provider,
-      isInvalidData: json => json.length === 0,
+      isInvalidData: (json) => json.length === 0,
     });
 
     if (!json) {
@@ -73,14 +72,14 @@ const handleNPMQuery = async (msg, searchTerm) => {
           : `**${name}** - *${adjustDescriptionLength(
               index + 1,
               name,
-              description,
+              description
             )}*`;
 
         return createMarkdownListItem(
           index,
-          createMarkdownLink(linkTitle, url),
+          createMarkdownLink(linkTitle, url)
         );
-      }),
+      })
     );
 
     const sentMsg = await msg.channel.send(
@@ -93,7 +92,7 @@ const handleNPMQuery = async (msg, searchTerm) => {
             : `at least ${firstTenResults.length.toLocaleString()} packages found`,
         searchTerm,
         description,
-      }),
+      })
     );
 
     const result = await getChosenResult(sentMsg, msg, firstTenResults);
@@ -109,18 +108,16 @@ const handleNPMQuery = async (msg, searchTerm) => {
   }
 };
 
-/**
- *
- * @param {{
- *  externalUrls: { homepage: string, repository: string},
- *  name: string,
- *  url: string,
- *  description: string,
- *  lastUpdate: string,
- *  maintainers: number,
- *  author: {name: string, url: string}
- *  }}
- */
+interface NPMEmbed {
+  externalUrls: { homepage: string; repository: string };
+  name: string;
+  url: string;
+  description: string;
+  lastUpdate: string;
+  maintainers: number;
+  author: { name: string; url: string };
+}
+
 const createNPMEmbed = ({
   externalUrls,
   name,
@@ -129,34 +126,38 @@ const createNPMEmbed = ({
   lastUpdate,
   maintainers,
   author,
-}) => ({
+}: NPMEmbed): Embed => ({
   provider,
   title: name,
-  url: url,
+  url,
   footerText: `last updated ${lastUpdate}`,
-  description: description,
-  author: author,
+  description,
+  author,
   fields: createFields(name, externalUrls, maintainers),
 });
 
 /**
  *  Creates fields for all links except npm since that ones in the title already
  *
- * @param {{homepage: string, repository: string}} externalUrls
  */
-const createFields = (name, externalUrls, maintainers) => [
+const createFields = (
+  name: string,
+  externalUrls: { homepage: string; repository: string },
+  maintainers: number
+): EmbedField[] => [
   {
     name: 'add to your project',
     value: createMarkdownBash(
-      ['npm install', 'yarn add'].map(cmd => [cmd, name].join(' ')).join('\n'),
+      ['npm install', 'yarn add'].map((cmd) => [cmd, name].join(' ')).join('\n')
     ),
+    inline: false,
   },
   ...Object.entries(externalUrls)
     .filter(([, url]) => !!url)
     .map(([host, url]) => {
       const markdownTitle = sanitizePackageLink(host, url);
 
-      const emoji = host === 'homepage' ? emojis.website : false;
+      const emoji = host === 'homepage' ? website : false;
 
       return {
         name: emoji ? `${emoji} ${host}` : host,
@@ -164,24 +165,19 @@ const createFields = (name, externalUrls, maintainers) => [
           markdownTitle.endsWith('/')
             ? markdownTitle.substr(0, markdownTitle.length - 1)
             : markdownTitle,
-          url,
+          url
         ),
         inline: true,
       };
     }),
   {
-    name: `${emojis.language} maintainers`,
-    value: maintainers,
+    name: `${language} maintainers`,
+    value: maintainers.toString(),
     inline: true,
   },
 ];
 
-/**
- *
- * @param {string} host
- * @param {string} link
- */
-const sanitizePackageLink = (host, link) => {
+const sanitizePackageLink = (host: string, link: string) => {
   const { protocol, pathname } = new URL(link);
 
   if (host === 'homepage') {
@@ -195,4 +191,4 @@ const sanitizePackageLink = (host, link) => {
   return link;
 };
 
-module.exports = handleNPMQuery;
+export default handleNPMQuery;
