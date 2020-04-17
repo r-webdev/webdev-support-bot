@@ -15,7 +15,7 @@ Try reproducing your issue on one of these sites, save and then link it here:
 
 ${sites}
 
-Sometimes trying to recreate a problem outside of your project already helps you tracking down the issue.
+Sometimes trying to recreate a problem outside of your project already helps you tracking down the issue on your own.
 `);
 };
 
