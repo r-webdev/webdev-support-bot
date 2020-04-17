@@ -1,4 +1,12 @@
-const NodeCache = require('node-cache');
+import * as NodeCache from 'node-cache';
+import {
+  Message,
+  TextChannel,
+  Guild,
+  DMChannel,
+  NewsChannel,
+  GuildChannel,
+} from 'discord.js';
 
 const numberOfAllowedMessages = parseInt(
   process.env.NUMBER_OF_ALLOWED_MESSAGES
@@ -15,12 +23,8 @@ const cache = new NodeCache({
  * - Check the time elapsed between the first message and the last one.
  * - If the time difference is less than or equal to the timer, return true
  * - Else, return false.
- *
- * @param {number[]} timestamps
- *
- * @returns {boolean}
  */
-const isSurpassingSpamThreshold = (timestamps) => {
+const isSurpassingSpamThreshold = (timestamps: number[]) => {
   if (timestamps.length <= numberOfAllowedMessages) {
     return false;
   }
@@ -33,37 +37,38 @@ const isSurpassingSpamThreshold = (timestamps) => {
   return difference <= cacheRevalidationWindow;
 };
 
+export type SpammerMetadata = null | {
+  userID: string;
+  username: string;
+  discriminator: string;
+  channelId: string;
+  channelName: string;
+  msgID: string;
+  guild: Guild;
+};
+
+interface CacheEntry {
+  wasRecentlyWarned: boolean;
+  timestamps: number[];
+}
+
 /**
  * - Implement a simple cache, in which each message lives in for 10 seconds
  * - The key for the cache will be set to the user ID
  * - If a user sends `numberOfAllowedMessages` in the span of the `timeWindow`, call the ~~c~~mods
- * @param {import('discord.js').Message} msg
- *
- * @returns {null | {
- * userID: string;
- * username: string;
- * discriminator: string;
- * channel:
- *  import('discord.js').TextChannel
- *  | import('discord.js').DMChannel
- *  | import('discord.js').NewsChannel;
- * msgID: string;
- * server: import('discord.js').Guild
- * }}
- *
  */
-module.exports = ({
+export default ({
   channel,
   id: msgID,
-  guild: server,
+  guild,
   author: { bot, id: userID, username, discriminator },
-}) => {
+}: Message): SpammerMetadata => {
   // Bail if the user is a bot
   if (bot) {
     return;
   }
 
-  const previousEntry = cache.get(userID);
+  const previousEntry: CacheEntry = cache.get(userID);
   const now = Date.now();
 
   if (!previousEntry) {
@@ -115,8 +120,9 @@ module.exports = ({
     userID,
     username,
     discriminator,
-    channel,
+    channelId: channel.id,
+    channelName: (channel as GuildChannel).name,
     msgID,
-    server,
+    guild,
   };
 };
