@@ -1,6 +1,11 @@
 require('dotenv').config();
 import { Client, Message } from 'discord.js';
-import { providers, KEYWORD_REGEXP, HELP_KEYWORD } from './utils/urlTools';
+import {
+  providers,
+  KEYWORD_REGEXP,
+  HELP_KEYWORD,
+  FORMATTING_KEYWORD,
+} from './utils/urlTools';
 
 import * as errors from './utils/errors';
 
@@ -15,6 +20,7 @@ import handleComposerQuery from './commands/composer';
 import handleCanIUseQuery from './commands/caniuse';
 import handleGithubQuery from './commands/github';
 import handleBundlephobiaQuery from './commands/bundlephobia';
+import handleFormattingRequest from './commands/formatting';
 import { Provider } from 'utils/discordTools';
 
 const client = new Client();
@@ -65,6 +71,10 @@ const handleMessage = async (msg: Message) => {
   if (spamMetadata) {
     await handleSpam(spamMetadata);
     return;
+  }
+
+  if (cleanContent === FORMATTING_KEYWORD) {
+    return await handleFormattingRequest(msg);
   }
 
   const isGeneralHelpRequest =

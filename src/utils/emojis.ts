@@ -13,3 +13,5 @@ export const neutral_face = ':neutral_face:';
 export const point_up = ':point_up:';
 export const gear = ':gear:';
 export const exclamation = ':exclamation:';
+export const paintbrush = ':paintbrush:';
+export const art = ':art:';
