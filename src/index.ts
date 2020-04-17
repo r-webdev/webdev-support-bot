@@ -93,9 +93,15 @@ const handleMessage = async (msg: Message) => {
         );
 
       if (isGeneralHelpRequest) {
-        const prefix = 'try one of these:\n';
-
-        return await msg.reply(prefix + Object.values(help).join('\n'));
+        return await msg.reply(
+          [
+            '\ntry one of these:',
+            ...Object.values(help).map((str) => `> ${str}`),
+            'or',
+            '> !formatting',
+            '> !code',
+          ].join('\n')
+        );
       }
 
       const isCommandQuery =
