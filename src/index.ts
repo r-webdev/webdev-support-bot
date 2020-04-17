@@ -5,6 +5,7 @@ import {
   KEYWORD_REGEXP,
   HELP_KEYWORD,
   FORMATTING_KEYWORD,
+  CODE_KEYWORD,
 } from './utils/urlTools';
 
 import * as errors from './utils/errors';
@@ -21,7 +22,8 @@ import handleCanIUseQuery from './commands/caniuse';
 import handleGithubQuery from './commands/github';
 import handleBundlephobiaQuery from './commands/bundlephobia';
 import handleFormattingRequest from './commands/formatting';
-import { Provider } from 'utils/discordTools';
+import { Provider } from './utils/discordTools';
+import handleCodeRequest from './commands/code';
 
 const client = new Client();
 
@@ -77,59 +79,66 @@ const handleMessage = async (msg: Message) => {
     return await handleFormattingRequest(msg);
   }
 
-  const isGeneralHelpRequest =
-    cleanContent.includes(HELP_KEYWORD) &&
-    !!msg.mentions.users.find(
-      ({ username }) => username === client.user.username
-    );
+  switch (cleanContent) {
+    case FORMATTING_KEYWORD:
+      return await handleFormattingRequest(msg);
+    case CODE_KEYWORD:
+      return await handleCodeRequest(msg);
+    default:
+      // todo: probably refactor this sooner or later
+      const isGeneralHelpRequest =
+        cleanContent.includes(HELP_KEYWORD) &&
+        !!msg.mentions.users.find(
+          ({ username }) => username === client.user.username
+        );
 
-  const isCommandQuery =
-    cleanContent.startsWith('!') && KEYWORD_REGEXP.test(cleanContent);
+      if (isGeneralHelpRequest) {
+        const prefix = 'try one of these:\n';
 
-  if (isGeneralHelpRequest) {
-    const prefix = 'try one of these:\n';
+        return await msg.reply(prefix + Object.values(help).join('\n'));
+      }
 
-    await msg.reply(prefix + Object.values(help).join('\n'));
-    return;
-  }
+      const isCommandQuery =
+        cleanContent.startsWith('!') && KEYWORD_REGEXP.test(cleanContent);
 
-  // bail if no keyword was found
-  if (!isCommandQuery) {
-    return;
-  }
+      // bail if no keyword was found
+      if (!isCommandQuery) {
+        return;
+      }
 
-  const keyword = cleanContent.split(' ', 1)[0].substr(1);
-  const searchTerm = trimCleanContent(keywordMap[keyword], cleanContent);
+      const keyword = cleanContent.split(' ', 1)[0].substr(1);
+      const searchTerm = trimCleanContent(keywordMap[keyword], cleanContent);
 
-  const isSpecificHelpRequest =
-    searchTerm.length === 0 || searchTerm === HELP_KEYWORD;
+      const isSpecificHelpRequest =
+        searchTerm.length === 0 || searchTerm === HELP_KEYWORD;
 
-  // empty query or specific call for help
-  if (isSpecificHelpRequest) {
-    await msg.reply(help[keyword]);
-    return;
-  }
+      // empty query or specific call for help
+      if (isSpecificHelpRequest) {
+        await msg.reply(help[keyword]);
+        return;
+      }
 
-  try {
-    switch (keyword) {
-      case keywordMap.mdn:
-        return await handleMDNQuery(msg, searchTerm);
-      case keywordMap.caniuse:
-        return await handleCanIUseQuery(msg, searchTerm);
-      case keywordMap.npm:
-        return await handleNPMQuery(msg, searchTerm);
-      case keywordMap.composer:
-        return await handleComposerQuery(msg, searchTerm);
-      case keywordMap.github:
-        return await handleGithubQuery(msg, searchTerm);
-      case keywordMap.bundlephobia:
-        return await handleBundlephobiaQuery(msg, searchTerm);
-      default:
-        throw new Error('classic "shouldnt be here" scenario');
-    }
-  } catch (error) {
-    console.error(`${error.name}: ${error.message}`);
-    await msg.reply(errors.unknownError);
+      try {
+        switch (keyword) {
+          case keywordMap.mdn:
+            return await handleMDNQuery(msg, searchTerm);
+          case keywordMap.caniuse:
+            return await handleCanIUseQuery(msg, searchTerm);
+          case keywordMap.npm:
+            return await handleNPMQuery(msg, searchTerm);
+          case keywordMap.composer:
+            return await handleComposerQuery(msg, searchTerm);
+          case keywordMap.github:
+            return await handleGithubQuery(msg, searchTerm);
+          case keywordMap.bundlephobia:
+            return await handleBundlephobiaQuery(msg, searchTerm);
+          default:
+            throw new Error('classic "shouldnt be here" scenario');
+        }
+      } catch (error) {
+        console.error(`${error.name}: ${error.message}`);
+        await msg.reply(errors.unknownError);
+      }
   }
 };
 

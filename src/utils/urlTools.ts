@@ -80,6 +80,7 @@ export const providers: ProviderMap = {
 
 export const HELP_KEYWORD = '--help';
 export const FORMATTING_KEYWORD = '!formatting';
+export const CODE_KEYWORD = '!code';
 
 /**
  * dynamic regExp matching all possible Object.keys(providers) as keyword
