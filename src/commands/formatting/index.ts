@@ -28,7 +28,11 @@ function getActualName(user: string) {
   return map[user] ?? 'no match found';
 }
 
-const exampleFns = [formatFn, annoyTitan, getActualName];
+function typeOfNestor() {
+  return 'naab';
+}
+
+const exampleFns = [formatFn, annoyTitan, getActualName, typeOfNestor];
 
 const getSnippetElements = () =>
   [
