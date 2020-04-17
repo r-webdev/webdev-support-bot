@@ -1,6 +1,6 @@
-const { getData } = require('../../utils/urlTools');
-const errors = require('../../utils/errors');
-const {
+import { getData } from '../../utils/urlTools';
+import * as errors from '../../utils/errors';
+import {
   createMarkdownLink,
   createListEmbed,
   createEmbed,
@@ -10,10 +10,19 @@ const {
   getChosenResult,
   createMarkdownBash,
   attemptEdit,
-} = require('../../utils/discordTools');
-const { formatDistanceToNow } = require('date-fns');
-const useData = require('../../utils/useData');
-const emojis = require('../../utils/emojis');
+  Embed,
+} from '../../utils/discordTools';
+import { formatDistanceToNow } from 'date-fns';
+import useData from '../../utils/useData';
+import * as emojis from '../../utils/emojis';
+import { Message, EmbedField } from 'discord.js';
+import {
+  GithubResponse,
+  License,
+  LicenseContent,
+  GithubResponseItem,
+} from './types';
+import { URL } from 'url';
 
 const provider = 'github';
 
@@ -23,19 +32,15 @@ const headers = {
 
 const licenseCache = {};
 
-/**
- *
- * @param {import('discord.js').Message} msg
- * @param {string} searchTerm
- */
-const handleGithubQuery = async (msg, searchTerm) => {
+const handleGithubQuery = async (msg: Message, searchTerm: string) => {
   try {
-    const json = await getData({
+    const json = await getData<GithubResponse>({
       msg,
       provider,
       searchTerm,
       headers,
-      isInvalidData: json => json.total_count === 0 || json.items.length === 0,
+      isInvalidData: (json) =>
+        json.total_count === 0 || json.items.length === 0,
     });
 
     if (!json) {
@@ -78,7 +83,7 @@ const handleGithubQuery = async (msg, searchTerm) => {
               homepage,
               issues: open_issues,
               stars: stargazers_count,
-              forks: forks_count,
+              forks: forks_count.toString(),
               license: hasLicense
                 ? {
                     url: license.url,
@@ -94,13 +99,13 @@ const handleGithubQuery = async (msg, searchTerm) => {
               },
               language,
             };
-          },
-        ),
+          }
+        )
     );
 
     if (firstTenResults.length === 1) {
       await msg.channel.send(
-        createEmbed(createGithubEmbed(firstTenResults[0])),
+        createEmbed(createGithubEmbed(firstTenResults[0]))
       );
       return;
     }
@@ -116,18 +121,18 @@ const handleGithubQuery = async (msg, searchTerm) => {
               ? `**${name}** - *${adjustDescriptionLength(
                   index,
                   name,
-                  description,
+                  description
                 )}*`
               : `**${name}**`;
 
             return createMarkdownListItem(
               index,
-              createMarkdownLink(title, url),
+              createMarkdownLink(title, url)
             );
-          }),
+          })
         ),
         footerText: `${json.total_count.toLocaleString()} results`,
-      }),
+      })
     );
 
     const result = await getChosenResult(sentMsg, msg, firstTenResults);
@@ -143,23 +148,32 @@ const handleGithubQuery = async (msg, searchTerm) => {
   }
 };
 
-/**
- *
- * @param {{
- *  name: string,
- *  owner: {},
- *  url: string,
- *   description?: string,
- *  updated: string,
- *  created, string}
- * }
- */
-const createGithubEmbed = result => {
-  const { name, owner, description, url, updated, created } = result;
+interface ModifiedGithubResponseItem {
+  name: string;
+  owner: {
+    name: string;
+    type: string;
+    avatar: string;
+  };
+  description: string;
+  url: string;
+  updated: Date;
+  created: Date;
+
+  language: string;
+  stars: number;
+  forks: string;
+  issues: number;
+  homepage?: string;
+  license?: { url: string; name: string };
+}
+
+const createGithubEmbed = (result: ModifiedGithubResponseItem): Embed => {
+  const { name: title, owner, description, url, updated, created } = result;
 
   return {
     provider,
-    title: name,
+    title,
     url,
     author: {
       name: `${owner.name} ${
@@ -177,20 +191,6 @@ const createGithubEmbed = result => {
   };
 };
 
-/**
- *
- * @param {{
- *  language: string,
- *  url: string,
- *  stars: number,
- *  forks: number,
- *  issues: number,
- *  homepage?: string,
- *  license?: { name: string, spdx_id: string, node_id: string, key: string, url: string }
- * }}
- *
- * @returns {{name: string, value: string, inline?: boolean}[]}
- */
 const createFields = ({
   language,
   issues,
@@ -199,11 +199,12 @@ const createFields = ({
   homepage,
   license,
   stars,
-}) => {
+}: ModifiedGithubResponseItem): EmbedField[] => {
   const fields = [
     {
       name: 'clone via...',
       value: createMarkdownBash(`git clone ${url}`),
+      inline: false,
     },
     {
       name: `${emojis.warning} open issues`,
@@ -219,7 +220,7 @@ const createFields = ({
       name: `${emojis.forks} forks`,
       value: createMarkdownLink(
         forks.toLocaleString(),
-        url + '/network/members',
+        url + '/network/members'
       ),
       inline: true,
     },
@@ -234,7 +235,7 @@ const createFields = ({
       name: `${emojis.website} homepage`,
       value: createMarkdownLink(
         title.endsWith('/') ? title.substr(0, title.length - 1) : title,
-        homepage,
+        homepage
       ),
       inline: true,
     });
@@ -255,23 +256,15 @@ const createFields = ({
     fields.push({
       name: `${emojis.language} language`,
       value: language,
+      inline: false,
     });
   }
 
   return fields;
 };
 
-/**
- *
- * @param {{
- *  url: string,
- *  spdx_id: string
- * }}
- *
- * @returns Promise<string>
- */
-const extractAndCacheLicense = async ({ url, spdx_id }) => {
-  const { error, json } = await useData(url);
+const extractAndCacheLicense = async ({ url, spdx_id }: License) => {
+  const { error, json } = await useData<LicenseContent>(url);
 
   if (error) {
     return '';
@@ -283,4 +276,4 @@ const extractAndCacheLicense = async ({ url, spdx_id }) => {
   return json.html_url;
 };
 
-module.exports = handleGithubQuery;
+export default handleGithubQuery;
