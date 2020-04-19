@@ -81,6 +81,7 @@ export const providers: ProviderMap = {
 export const HELP_KEYWORD = '--help';
 export const FORMATTING_KEYWORD = '!formatting';
 export const CODE_KEYWORD = '!code';
+export const VSCODE_KEYWORD = '!vscode';
 
 /**
  * dynamic regExp matching all possible Object.keys(providers) as keyword

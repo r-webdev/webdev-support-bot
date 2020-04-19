@@ -6,6 +6,7 @@ import {
   HELP_KEYWORD,
   FORMATTING_KEYWORD,
   CODE_KEYWORD,
+  VSCODE_KEYWORD,
 } from './utils/urlTools';
 
 import * as errors from './utils/errors';
@@ -22,6 +23,7 @@ import handleCanIUseQuery from './commands/caniuse';
 import handleGithubQuery from './commands/github';
 import handleBundlephobiaQuery from './commands/bundlephobia';
 import handleFormattingRequest from './commands/formatting';
+import handleVSCodeRequest from './commands/vscode';
 import { Provider } from './utils/discordTools';
 import handleCodeRequest from './commands/code';
 
@@ -84,6 +86,8 @@ const handleMessage = async (msg: Message) => {
       return await handleFormattingRequest(msg);
     case CODE_KEYWORD:
       return await handleCodeRequest(msg);
+    case VSCODE_KEYWORD:
+      return await handleVSCodeRequest(msg);
     default:
       // todo: probably refactor this sooner or later
       const isGeneralHelpRequest =
