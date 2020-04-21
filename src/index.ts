@@ -7,6 +7,7 @@ import {
   FORMATTING_KEYWORD,
   CODE_KEYWORD,
   VSCODE_KEYWORD,
+  JOB_POSTING_KEYWORD,
 } from './utils/urlTools';
 
 import * as errors from './utils/errors';
@@ -26,6 +27,7 @@ import handleFormattingRequest from './commands/formatting';
 import handleVSCodeRequest from './commands/vscode';
 import { Provider } from './utils/discordTools';
 import handleCodeRequest from './commands/code';
+import handleJobPostingRequest from './commands/post';
 
 const client = new Client();
 
@@ -88,6 +90,8 @@ const handleMessage = async (msg: Message) => {
       return await handleCodeRequest(msg);
     case VSCODE_KEYWORD:
       return await handleVSCodeRequest(msg);
+    case JOB_POSTING_KEYWORD:
+      return await handleJobPostingRequest(msg);
     default:
       // todo: probably refactor this sooner or later
       const isGeneralHelpRequest =
