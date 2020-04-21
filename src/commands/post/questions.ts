@@ -2,7 +2,7 @@ const isNotEmpty = (s: string): boolean =>
   !s || s.trim().length == 0 ? false : true;
 
 export default {
-  isRemote: {
+  remote: {
     body: 'Is your position remote? `Yes/No`',
     validate: (answer) => {
       const acceptableResults = ['yes', 'no'];
@@ -14,7 +14,7 @@ export default {
       'Please, in a single message, provide a location if you can.\nIf you do not wish to reveal the location, answer simply with `no`',
     validate: isNotEmpty,
   },
-  desc: {
+  description: {
     body:
       'Please, in a single message, provide a short description of the job.\nIt may include details such as hours and languages/frameworks/specific tooling (such as JS, PHP, Wordpress, etc.).',
     validate: isNotEmpty,
