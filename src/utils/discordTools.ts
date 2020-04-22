@@ -180,6 +180,11 @@ export const createMarkdownListItem = (index: number, content: string) =>
 export const createMarkdownBash = (string: string) =>
   ['```bash', string, '```'].join('\n');
 
+export const createMarkdownCodeBlock = (
+  string: string,
+  language: string = ''
+) => ['```' + language, string, '```'].join('\n');
+
 export const createDescription = (items: any[]) =>
   items.concat(BASE_DESCRIPTION).join('\n');
 

@@ -1,5 +1,5 @@
 import * as errors from '../../utils/errors';
-import { createEmbed } from '../../utils/discordTools';
+import { createEmbed, createMarkdownCodeBlock } from '../../utils/discordTools';
 import { Message, CollectorFilter } from 'discord.js';
 import questions from './questions';
 
@@ -10,11 +10,14 @@ const capitalize = (s: string): string =>
 
 const getReply = async (channel, filter: CollectorFilter) => {
   try {
-    const res = await channel.awaitMessages(filter, { max: 1, time: 60000 }); // Timeout in a minute
+    const res = await channel.awaitMessages(filter, {
+      max: 1,
+      time: parseInt(process.env.AWAIT_MESSAGE_TIMEOUT) * 1000,
+    }); // Timeout in a minute
     const content = trimContent(res.first().content);
-    return content === 'cancel' ? false : content; // Return false if the user explicitly cancels the form
-  } catch (error) {
-    console.error(error);
+    return content.toLowerCase() === 'cancel' ? false : content; // Return false if the user explicitly cancels the form
+  } catch {
+    throw Error('Timeout ensued. Please try again.');
   }
 };
 
@@ -57,16 +60,14 @@ function sendAlert({
         },
         {
           name: 'User Input',
-          value: ['```\n', userInput, '\n```'].join(''),
+          value: createMarkdownCodeBlock(userInput),
           inline: false,
         },
         {
           name: 'Command',
-          value: [
-            '```\n',
-            `?ban ${user} Attempting to create a job post with no compensation.`,
-            '\n```',
-          ].join(''),
+          value: createMarkdownCodeBlock(
+            `?ban ${user} Attempting to create a job post with no compensation.`
+          ),
           inline: false,
         },
         {
@@ -86,7 +87,7 @@ function generateFields(answers): Array<OutputField> {
       value = value.includes('$') ? value : `${value}$`;
     response.push({
       name: capitalize(key),
-      value: ['```\n', value, '\n```'].join(''),
+      value: createMarkdownCodeBlock(value),
       inline: false,
     });
   }
