@@ -43,7 +43,7 @@ function sendAlert({
   targetChannel.send(
     createEmbed({
       url,
-      description: `A user tried creating a job post whilst providing no compensation.`,
+      description: `A user tried creating a job post whilst providing invalid compensation.`,
       title: 'Alert!',
       footerText: 'Job Posting Module',
       provider: 'spam',
@@ -127,14 +127,14 @@ function createJobPost({
 }
 
 const handleJobPostingRequest = async (msg: Message) => {
+  const send = (str) => msg.author.send(str);
   try {
     const filter: CollectorFilter = (m) => m.author.id === msg.author.id;
-    const send = (str) => msg.author.send(str);
     const { guild } = msg;
     const { username, discriminator } = msg.author;
     // Notify the user regarding the rules, and get the channel
     const { channel }: Message = await send(
-      'Heads up!\nPosts without financial compensation are not allowed. This includes any kind of equity. Trying to circumvent this in any way will result in a ban.\nIf you are not willing to continue, type `cancel`.\nOtherwise, type `ok` to continue.'
+      'Heads up!\nPosts without financial compensation are not allowed. Trying to circumvent this in any way will result in a ban.\nIf you are not willing to continue, type `cancel`.\nOtherwise, type `ok` or anything else to continue.'
     );
     const proceed = await getReply(channel, filter);
     if (!proceed) return send('Canceled.');
@@ -177,6 +177,8 @@ const handleJobPostingRequest = async (msg: Message) => {
       // Otherwise, store the answer in the output map
       answers.set(key, reply);
     }
+    // Notify the user that the form is now complete
+    await send('Your job posting has been created!');
     return createJobPost({
       answers,
       guild,
@@ -187,7 +189,7 @@ const handleJobPostingRequest = async (msg: Message) => {
     });
   } catch (error) {
     console.error(error);
-    await msg.author.send(errors.unknownError);
+    await send(errors.unknownError);
   }
 };
 
