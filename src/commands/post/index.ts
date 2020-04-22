@@ -9,9 +9,13 @@ const capitalize = (s: string): string =>
   `${s[0].toUpperCase()}${s.substring(1, s.length).toLowerCase()}`;
 
 const getReply = async (channel, filter: CollectorFilter) => {
-  const res = await channel.awaitMessages(filter, { max: 1, time: 60000 }); // Timeout in a minute
-  const content = trimContent(res.first().content);
-  return content === 'cancel' ? false : content; // Return false if the user explicitly cancels the form
+  try {
+    const res = await channel.awaitMessages(filter, { max: 1, time: 60000 }); // Timeout in a minute
+    const content = trimContent(res.first().content);
+    return content === 'cancel' ? false : content; // Return false if the user explicitly cancels the form
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 type OutputField = {
@@ -19,9 +23,6 @@ type OutputField = {
   value: string;
   inline: boolean;
 };
-
-// const getChannel = (guild, target) =>
-//   guild.channels.cache.find(({ name }) => name === target);
 
 function sendAlert({
   guild,
@@ -100,7 +101,6 @@ function createJobPost({
   channelID,
   msgID,
 }) {
-  // Data is the answers map returned from the new command
   const targetChannel = guild.channels.cache.find(
     ({ name }) => name === process.env.JOB_POSTINGS_CHANNEL
   );
