@@ -20,9 +20,69 @@ type OutputField = {
   inline: boolean;
 };
 
+// const getChannel = (guild, target) =>
+//   guild.channels.cache.find(({ name }) => name === target);
+
+function sendAlert({
+  guild,
+  username,
+  discriminator,
+  channel,
+  msgID,
+  userInput,
+}): void {
+  const targetChannel = guild.channels.cache.find(
+    ({ name }) => name === process.env.MOD_CHANNEL
+  );
+  const user = `@${username}#${discriminator}`;
+  const url = `https://discordapp.com/channels/${guild.id}/${channel.id}/${msgID}`;
+  targetChannel.send(
+    createEmbed({
+      url,
+      description: `A user tried creating a job post whilst providing no compensation.`,
+      title: 'Alert!',
+      footerText: 'Job Posting Module',
+      provider: 'spam',
+      fields: [
+        {
+          name: 'User',
+          value: user,
+          inline: true,
+        },
+        {
+          name: 'Channel',
+          value: channel.name,
+          inline: true,
+        },
+        {
+          name: 'User Input',
+          value: ['```\n', userInput, '\n```'].join(''),
+          inline: false,
+        },
+        {
+          name: 'Command',
+          value: [
+            '```\n',
+            `?ban ${user} Attempting to create a job post with no compensation.`,
+            '\n```',
+          ].join(''),
+          inline: false,
+        },
+        {
+          name: 'Message Link',
+          value: url,
+          inline: false,
+        },
+      ],
+    })
+  );
+}
+
 function generateFields(answers): Array<OutputField> {
   let response: Array<OutputField> = [];
   for (let [key, value] of answers) {
+    if (key === 'compensation')
+      value = value.includes('$') ? value : `${value}$`;
     response.push({
       name: capitalize(key),
       value: ['```\n', value, '\n```'].join(''),
@@ -32,7 +92,14 @@ function generateFields(answers): Array<OutputField> {
   return response;
 }
 
-function createJobPost({ answers, guild, username, discriminator }) {
+function createJobPost({
+  answers,
+  guild,
+  username,
+  discriminator,
+  channelID,
+  msgID,
+}) {
   // Data is the answers map returned from the new command
   const targetChannel = guild.channels.cache.find(
     ({ name }) => name === process.env.JOB_POSTINGS_CHANNEL
@@ -41,7 +108,7 @@ function createJobPost({ answers, guild, username, discriminator }) {
   const user = `@${username}#${discriminator}`;
   targetChannel.send(
     createEmbed({
-      url: `https://discordapp.com/channels/434487340535382016/460881799430537237/674830949325864960`, // Rules message link
+      url: `https://discordapp.com/channels/${guild.id}/${channelID}/${msgID}`,
       description: `A user has created a new job post!`,
       title: 'New Job Posting!',
       footerText: 'Job Posting Module',
@@ -95,11 +162,28 @@ const handleJobPostingRequest = async (msg: Message) => {
       }
       // If the input is not valid, cancel the form and notify the user.
       const isValid = q.validate(reply);
+      // Alert the moderators if the compensation is invalid.
+      if (key === 'compensation' && !isValid)
+        sendAlert({
+          guild,
+          username,
+          discriminator,
+          msgID: msg.id,
+          channel: msg.channel,
+          userInput: reply,
+        });
       if (!isValid) return await send('Invalid input. Cancelling form.');
       // Otherwise, store the answer in the output map
       answers.set(key, reply);
     }
-    return createJobPost({ answers, guild, username, discriminator });
+    return createJobPost({
+      answers,
+      guild,
+      username,
+      discriminator,
+      channelID: msg.channel.id,
+      msgID: msg.id,
+    });
   } catch (error) {
     console.error(error);
     await msg.author.send(errors.unknownError);
