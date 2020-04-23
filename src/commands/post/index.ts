@@ -1,25 +1,19 @@
-import * as errors from '../../utils/errors';
-import { createEmbed, createMarkdownCodeBlock } from '../../utils/discordTools';
-import { Message, CollectorFilter } from 'discord.js';
 import questions from './questions';
+import { createEmbed, createMarkdownCodeBlock } from '../../utils/discordTools';
+import {
+  Message,
+  CollectorFilter,
+  TextChannel,
+  DMChannel,
+  NewsChannel,
+} from 'discord.js';
 
-const trimContent = (s: string): string => s.trim();
-
-const capitalize = (s: string): string =>
-  `${s[0].toUpperCase()}${s.substring(1, s.length).toLowerCase()}`;
-
-const getReply = async (channel, filter: CollectorFilter) => {
-  try {
-    const res = await channel.awaitMessages(filter, {
-      max: 1,
-      time: parseInt(process.env.AWAIT_MESSAGE_TIMEOUT) * 1000,
-    }); // Timeout in a minute
-    const content = trimContent(res.first().content);
-    return content.toLowerCase() === 'cancel' ? false : content; // Return false if the user explicitly cancels the form
-  } catch {
-    throw Error('Timeout ensued. Please try again.');
-  }
-};
+const {
+  AWAIT_MESSAGE_TIMEOUT,
+  MOD_CHANNEL,
+  JOB_POSTINGS_CHANNEL,
+  MINIMAL_COMPENSATION,
+} = process.env;
 
 type OutputField = {
   name: string;
@@ -27,16 +21,37 @@ type OutputField = {
   inline: boolean;
 };
 
-function sendAlert({
+const trimContent = (s: string): string => s.trim();
+
+const capitalize = (s: string): string =>
+  `${s[0].toUpperCase()}${s.substring(1, s.length).toLowerCase()}`;
+
+const getReply = async (
+  channel: DMChannel | TextChannel | NewsChannel,
+  filter: CollectorFilter
+) => {
+  try {
+    const res = await channel.awaitMessages(filter, {
+      max: 1,
+      time: parseInt(AWAIT_MESSAGE_TIMEOUT) * 1000, // Miliseconds
+    });
+    const content = trimContent(res.first().content);
+    return content.toLowerCase() === 'cancel' ? false : content; // Return false if the user explicitly cancels the form
+  } catch {
+    throw new Error('You have timed out. Please try again.');
+  }
+};
+
+const sendAlert = ({
   guild,
   username,
   discriminator,
   channel,
   msgID,
   userInput,
-}): void {
-  const targetChannel = guild.channels.cache.find(
-    ({ name }) => name === process.env.MOD_CHANNEL
+}): void => {
+  const targetChannel: TextChannel = guild.channels.cache.find(
+    ({ name }) => name === MOD_CHANNEL
   );
   const user = `@${username}#${discriminator}`;
   const url = `https://discordapp.com/channels/${guild.id}/${channel.id}/${msgID}`;
@@ -78,9 +93,9 @@ function sendAlert({
       ],
     })
   );
-}
+};
 
-function generateFields(answers): Array<OutputField> {
+const generateFields = (answers): Array<OutputField> => {
   let response: Array<OutputField> = [];
   for (let [key, value] of answers) {
     if (key === 'compensation')
@@ -92,18 +107,18 @@ function generateFields(answers): Array<OutputField> {
     });
   }
   return response;
-}
+};
 
-function createJobPost({
+const createJobPost = ({
   answers,
   guild,
   username,
   discriminator,
   channelID,
   msgID,
-}) {
-  const targetChannel = guild.channels.cache.find(
-    ({ name }) => name === process.env.JOB_POSTINGS_CHANNEL
+}) => {
+  const targetChannel: TextChannel = guild.channels.cache.find(
+    ({ name }) => name === JOB_POSTINGS_CHANNEL
   );
   if (!targetChannel) console.error('Channel does not exist.');
   const user = `@${username}#${discriminator}`;
@@ -124,7 +139,7 @@ function createJobPost({
       ],
     })
   );
-}
+};
 
 const handleJobPostingRequest = async (msg: Message) => {
   const send = (str) => msg.author.send(str);
@@ -134,7 +149,9 @@ const handleJobPostingRequest = async (msg: Message) => {
     const { username, discriminator } = msg.author;
     // Notify the user regarding the rules, and get the channel
     const { channel }: Message = await send(
-      'Heads up!\nPosts without financial compensation are not allowed. Trying to circumvent this in any way will result in a ban.\nIf you are not willing to continue, type `cancel`.\nOtherwise, type `ok` or anything else to continue.'
+      'Heads up!\nPosts without financial compensation are not allowed. Also, posts with compensation that are listed being lower than ' +
+        MINIMAL_COMPENSATION +
+        '$ are not allowed.\nTrying to circumvent this in any way will result in a ban.\nIf you are not willing to continue, type `cancel`.\nOtherwise, type `ok` or anything else to continue.'
     );
     const proceed = await getReply(channel, filter);
     if (!proceed) return send('Canceled.');
@@ -188,8 +205,8 @@ const handleJobPostingRequest = async (msg: Message) => {
       msgID: msg.id,
     });
   } catch (error) {
+    await send(error);
     console.error(error);
-    await send(errors.unknownError);
   }
 };
 

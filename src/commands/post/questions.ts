@@ -1,12 +1,14 @@
 const isNotEmpty = (s: string): boolean =>
   !s || s.trim().length == 0 ? false : true;
 
+const { MINIMAL_COMPENSATION } = process.env;
+
 export default {
   remote: {
     body: 'Is your position remote? `Yes/No`',
     validate: (answer) => {
       const acceptableResults = ['yes', 'no'];
-      return acceptableResults.includes(answer);
+      return acceptableResults.includes(answer.toLowerCase());
     },
   },
   location: {
@@ -22,10 +24,13 @@ export default {
   compensation: {
     body:
       'Please provide the amount that you are willing to pay for the project in USD `$`.\nPlease be precise. Do not include anything else besides the amount, with or without the dollar sign.',
-    validate: (answer) =>
-      /^[1-9]\d*(((,\d{3}){1})?(\.\d{0,9})?)$/.test(
-        parseFloat(answer.split('$').join('')).toFixed(2)
-      ),
+    validate: (answer) => {
+      const val = answer.split('$').join(''),
+        regex = /^[1-9]\d*(((,\d{3}){1})?(\.\d{0,9})?)$/;
+      if (regex.test(parseFloat(val).toFixed(2)) && val >= MINIMAL_COMPENSATION)
+        return true;
+      return false;
+    },
   },
   notes: {
     body:
