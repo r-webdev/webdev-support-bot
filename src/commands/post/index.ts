@@ -30,16 +30,12 @@ const getReply = async (
   channel: DMChannel | TextChannel | NewsChannel,
   filter: CollectorFilter
 ) => {
-  try {
-    const res = await channel.awaitMessages(filter, {
-      max: 1,
-      time: parseInt(AWAIT_MESSAGE_TIMEOUT) * 1000, // Miliseconds
-    });
-    const content = trimContent(res.first().content);
-    return content.toLowerCase() === 'cancel' ? false : content; // Return false if the user explicitly cancels the form
-  } catch {
-    throw new Error('You have timed out. Please try again.');
-  }
+  const res = await channel.awaitMessages(filter, {
+    max: 1,
+    time: parseInt(AWAIT_MESSAGE_TIMEOUT) * 1000, // Miliseconds
+  });
+  const content = trimContent(res.first().content);
+  return content.toLowerCase() === 'cancel' ? false : content; // Return false if the user explicitly cancels the form
 };
 
 const sendAlert = ({
@@ -205,8 +201,8 @@ const handleJobPostingRequest = async (msg: Message) => {
       msgID: msg.id,
     });
   } catch (error) {
-    await send(error);
     console.error(error);
+    await send('You have timed out. Please try again.');
   }
 };
 
