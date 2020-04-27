@@ -23,7 +23,11 @@ type OutputField = {
   inline: boolean;
 };
 
+type OutputFields = Array<OutputField>;
+
 type Channel = TextChannel | NewsChannel | DMChannel;
+
+type Answers = Map<string, string>;
 
 interface TargetChannel extends GuildChannel {
   send?: Function;
@@ -66,6 +70,9 @@ const trimContent = (s: string): string => s.trim();
 const capitalize = (s: string): string =>
   `${s[0].toUpperCase()}${s.substring(1, s.length).toLowerCase()}`;
 
+const getTargetChannel = (guild: Guild, name: string): TargetChannel =>
+  guild.channels.cache.find(({ name: n }) => n === name);
+
 const getReply = async (channel: Channel, filter: CollectorFilter) => {
   const res = await channel.awaitMessages(filter, {
     max: 1,
@@ -83,9 +90,7 @@ const sendAlert = (
   msgID: string,
   userInput: string
 ): void => {
-  const targetChannel: TargetChannel = guild.channels.cache.find(
-    ({ name }) => name === MOD_CHANNEL
-  );
+  const targetChannel: TargetChannel = getTargetChannel(guild, MOD_CHANNEL);
   const user = `@${username}#${discriminator}`;
   const url = `https://discordapp.com/channels/${guild.id}/${channel.id}/${msgID}`;
   targetChannel.send(
@@ -123,9 +128,7 @@ const sendAlert = (
   );
 };
 
-type OutputFields = Array<OutputField>;
-
-const generateFields = (answers): OutputFields => {
+const generateFields = (answers: Answers): OutputFields => {
   let response: OutputFields = [];
   for (let [key, value] of answers) {
     if (key === 'compensation')
@@ -140,16 +143,17 @@ const generateFields = (answers): OutputFields => {
   return response;
 };
 
-const createJobPost = ({
-  answers,
-  guild,
-  username,
-  discriminator,
-  channelID,
-  msgID,
-}) => {
-  const targetChannel: TextChannel = guild.channels.cache.find(
-    ({ name }) => name === JOB_POSTINGS_CHANNEL
+const createJobPost = (
+  answers: Answers,
+  guild: Guild,
+  username: string,
+  discriminator: string,
+  channelID: string,
+  msgID: string
+) => {
+  const targetChannel: TargetChannel = getTargetChannel(
+    guild,
+    JOB_POSTINGS_CHANNEL
   );
   if (!targetChannel) console.error('Channel does not exist.');
   const user = `@${username}#${discriminator}`;
@@ -177,8 +181,6 @@ const createJobPost = ({
   );
 };
 
-type Answers = Promise<Map<string, string> | boolean>;
-
 const formAndValidateAnswers = async (
   channel: Channel,
   filter: CollectorFilter,
@@ -187,7 +189,7 @@ const formAndValidateAnswers = async (
   username: string,
   discriminator: string,
   msgID: string
-): Answers => {
+): Promise<Answers | false> => {
   const answers = new Map();
   // Iterate over questions
   for (const key in questions) {
@@ -255,14 +257,14 @@ const handleJobPostingRequest = async (msg: Message) => {
     if (!answers) return; // Just return if the iteration breaks due to invalid input
     // Notify the user that the form is now complete
     await send('Your job posting has been created!');
-    return createJobPost({
+    return createJobPost(
       answers,
       guild,
       username,
       discriminator,
       channelID,
-      msgID,
-    });
+      msgID
+    );
   } catch (error) {
     console.error(error);
     await send('You have timed out. Please try again.');
