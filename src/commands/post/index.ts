@@ -23,6 +23,12 @@ type OutputField = {
   inline: boolean;
 };
 
+type Metadata = {
+  username: string;
+  discriminator: string;
+  msgID: string;
+};
+
 type Channel = TextChannel | NewsChannel | DMChannel;
 
 type Answers = Map<string, string>;
@@ -72,22 +78,25 @@ const getTargetChannel = (guild: Guild, name: string): TargetChannel =>
   guild.channels.cache.find(({ name: n }) => n === name);
 
 const getReply = async (channel: Channel, filter: CollectorFilter) => {
-  const res = await channel.awaitMessages(filter, {
-    max: 1,
-    time: parseInt(AWAIT_MESSAGE_TIMEOUT) * 1000, // Miliseconds
-  });
-  const content = trimContent(res.first().content);
-  return content.toLowerCase() === 'cancel' ? false : content; // Return false if the user explicitly cancels the form
+  try {
+    const res = await channel.awaitMessages(filter, {
+      max: 1,
+      time: parseInt(AWAIT_MESSAGE_TIMEOUT) * 1000, // Miliseconds
+    });
+    const content = trimContent(res.first().content);
+    return content.toLowerCase() === 'cancel' ? false : content; // Return false if the user explicitly cancels the form
+  } catch {
+    channel.send('You have timed out. Please try again.');
+  }
 };
 
 const sendAlert = (
   guild: Guild,
-  username: string,
-  discriminator: string,
   channel: Channel,
-  msgID: string,
-  userInput: string
+  userInput: string,
+  metadata: Metadata
 ): void => {
+  const { username, discriminator, msgID } = metadata;
   const targetChannel: TargetChannel = getTargetChannel(guild, MOD_CHANNEL);
   const user = `@${username}#${discriminator}`;
   const url = `https://discordapp.com/channels/${guild.id}/${channel.id}/${msgID}`;
@@ -144,11 +153,10 @@ const generateFields = (answers: Answers): Array<OutputField> => {
 const createJobPost = (
   answers: Answers,
   guild: Guild,
-  username: string,
-  discriminator: string,
   channelID: string,
-  msgID: string
+  metadata: Metadata
 ) => {
+  const { username, discriminator, msgID } = metadata;
   const targetChannel: TargetChannel = getTargetChannel(
     guild,
     JOB_POSTINGS_CHANNEL
@@ -182,12 +190,11 @@ const createJobPost = (
 const formAndValidateAnswers = async (
   channel: Channel,
   filter: CollectorFilter,
-  send: Function,
   guild: Guild,
-  username: string,
-  discriminator: string,
-  msgID: string
+  send: Function,
+  metadata: Metadata
 ): Promise<Answers | false> => {
+  const { username, discriminator, msgID } = metadata;
   const answers = new Map();
   // Iterate over questions
   for (const key in questions) {
@@ -217,7 +224,7 @@ const formAndValidateAnswers = async (
     const isValid = q.validate(reply);
     // Alert the moderators if the compensation is invalid.
     if (key === 'compensation' && !isValid)
-      sendAlert(guild, username, discriminator, channel, msgID, reply);
+      sendAlert(guild, channel, reply, { username, discriminator, msgID });
     if (!isValid) {
       await send('Invalid input. Cancelling form.');
       return false;
@@ -243,29 +250,21 @@ const handleJobPostingRequest = async (msg: Message) => {
     const { id: channelID } = msg.channel;
     const proceed = await getReply(channel, filter);
     if (!proceed) return send('Canceled.');
-    const answers = await formAndValidateAnswers(
-      channel,
-      filter,
-      send,
-      guild,
+    const answers = await formAndValidateAnswers(channel, filter, guild, send, {
       username,
       discriminator,
-      msgID
-    );
+      msgID,
+    });
     if (!answers) return; // Just return if the iteration breaks due to invalid input
     // Notify the user that the form is now complete
     await send('Your job posting has been created!');
-    return createJobPost(
-      answers,
-      guild,
+    return createJobPost(answers, guild, channelID, {
       username,
       discriminator,
-      channelID,
-      msgID
-    );
+      msgID,
+    });
   } catch (error) {
     console.error(error);
-    await send('You have timed out. Please try again.');
   }
 };
 

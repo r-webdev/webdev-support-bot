@@ -27,9 +27,11 @@ export default {
     validate: (answer) => {
       const val = answer.split('$').join(''),
         regex = /^[0-9]+(\.[0-9]{1,2})?$/gm;
+
+      const floatVal = parseFloat(val);
       return (
-        regex.test(parseFloat(val).toFixed(2)) &&
-        parseFloat(val) >= parseFloat(MINIMAL_COMPENSATION)
+        regex.test(floatVal.toFixed(2)) &&
+        floatVal >= parseFloat(MINIMAL_COMPENSATION)
       );
     },
   },
