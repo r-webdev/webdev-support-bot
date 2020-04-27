@@ -26,10 +26,11 @@ export default {
       'Please provide the amount that you are willing to pay for the project in USD `$`.\nPlease be precise. Do not include anything else besides the amount, with or without the dollar sign.',
     validate: (answer) => {
       const val = answer.split('$').join(''),
-        regex = /^[1-9]\d*(((,\d{3}){1})?(\.\d{0,9})?)$/;
-      if (regex.test(parseFloat(val).toFixed(2)) && val >= MINIMAL_COMPENSATION)
-        return true;
-      return false;
+        regex = /^[0-9]+(\.[0-9]{1,2})?$/gm;
+      return (
+        regex.test(parseFloat(val).toFixed(2)) &&
+        parseFloat(val) >= parseFloat(MINIMAL_COMPENSATION)
+      );
     },
   },
   notes: {

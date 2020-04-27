@@ -21,6 +21,38 @@ type OutputField = {
   inline: boolean;
 };
 
+enum Days {
+  Sunday = 0,
+  Monday,
+  Tuesday,
+  Wednesday,
+  Thursday,
+  Friday,
+  Saturday,
+}
+
+enum Months {
+  January = 0,
+  February,
+  March,
+  April,
+  May,
+  June,
+  July,
+  August,
+  September,
+  October,
+  November,
+  December,
+}
+
+const getCurrentDate = (): string => {
+  const date = new Date();
+  return `${Days[date.getDay()]}, ${
+    Months[date.getMonth()]
+  } ${date.getDate()}, ${date.getFullYear()}`;
+};
+
 const trimContent = (s: string): string => s.trim();
 
 const capitalize = (s: string): string =>
@@ -96,6 +128,7 @@ const generateFields = (answers): Array<OutputField> => {
   for (let [key, value] of answers) {
     if (key === 'compensation')
       value = value.includes('$') ? value : `${value}$`;
+    if (key !== 'remote' && value === 'no') value = 'Not provided.'; // If the value is "no", don't print that field
     response.push({
       name: capitalize(key),
       value: createMarkdownCodeBlock(value),
@@ -113,6 +146,7 @@ const createJobPost = ({
   channelID,
   msgID,
 }) => {
+  const date = new Date();
   const targetChannel: TextChannel = guild.channels.cache.find(
     ({ name }) => name === JOB_POSTINGS_CHANNEL
   );
@@ -129,7 +163,12 @@ const createJobPost = ({
         {
           name: 'User',
           value: user,
-          inline: false,
+          inline: true,
+        },
+        {
+          name: 'Created At',
+          value: getCurrentDate(),
+          inline: true,
         },
         ...generateFields(answers),
       ],
