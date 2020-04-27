@@ -1,5 +1,6 @@
 import questions from './questions';
 import { createEmbed, createMarkdownCodeBlock } from '../../utils/discordTools';
+import { cache } from '../../spam_filter';
 import {
   Message,
   CollectorFilter,
@@ -15,6 +16,7 @@ const {
   MOD_CHANNEL,
   JOB_POSTINGS_CHANNEL,
   MINIMAL_COMPENSATION,
+  POST_LIMITER_IN_HOURS,
 } = process.env;
 
 type OutputField = {
@@ -36,6 +38,11 @@ type Answers = Map<string, string>;
 interface TargetChannel extends GuildChannel {
   send?: Function;
 }
+
+type CacheEntry = {
+  key: string;
+  value: Date;
+};
 
 enum Days {
   Sunday = 0,
@@ -235,17 +242,38 @@ const formAndValidateAnswers = async (
   return answers;
 };
 
+const generateCacheEntry = (key: string): CacheEntry => ({
+  key: `jp-${key}`, // JP stands for Job Posting, for the sake of key differentiation
+  value: new Date(),
+});
+
 const handleJobPostingRequest = async (msg: Message) => {
   const filter: CollectorFilter = (m) => m.author.id === msg.author.id;
   const send = (str) => msg.author.send(str);
   try {
     const { guild, id: msgID } = msg;
-    const { username, discriminator } = msg.author;
+    const { username, discriminator, id } = msg.author;
+    // Generate cache entry
+    const entry = generateCacheEntry(id);
+    // Check if the user has been cached
+    const isCached = cache.get(entry.key);
+    if (isCached) {
+      send(
+        'You cannot create a job posting right now. Please try again later.'
+      );
+      return;
+    }
+    // Store the post attempt in the cache
+    cache.set(
+      entry.key,
+      entry.value,
+      parseFloat(POST_LIMITER_IN_HOURS) * 360 // Convert hours into seconds (H*60*60)
+    );
     // Notify the user regarding the rules, and get the channel
     const { channel }: Message = await send(
-      'Heads up!\nPosts without financial compensation are not allowed. Also, posts with compensation that are listed being lower than ' +
+      'Heads up!\nPosts without financial compensation are not allowed. Also, attempting to create a post with compensation that is lower than ' +
         MINIMAL_COMPENSATION +
-        '$ are not allowed.\nTrying to circumvent this in any way will result in a ban.\nIf you are not willing to continue, type `cancel`.\nOtherwise, type `ok` or anything else to continue.'
+        '$ is not allowed.\nTrying to circumvent these rules in any way will result in a ban.\nIf you are not willing to continue, type `cancel`.\nOtherwise, type `ok` or anything else to continue.'
     );
     const { id: channelID } = msg.channel;
     const proceed = await getReply(channel, filter);
