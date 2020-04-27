@@ -184,7 +184,7 @@ const extractFieldsFromLatestRelease = ({
     fields.push({
       name: `${keywords} keywords`,
       value: keywords
-        .map((keyword) => createMarkdownLink(keyword, createTagLink(keyword)))
+        .map(keyword => createMarkdownLink(keyword, createTagLink(keyword)))
         .join(', '),
       inline: false,
     });
@@ -212,7 +212,7 @@ const extractFieldsFromLatestRelease = ({
     fields.push({
       name: `${license} license`,
       value: license
-        .map((license) =>
+        .map(license =>
           createMarkdownLink(
             license,
             `https://choosealicense.com/licenses/${license.toLowerCase()}`
@@ -272,7 +272,7 @@ const extractFieldsFromLatestRelease = ({
     fields.push(EMPTY_FIELD);
   }
 
-  authors.forEach((author) => {
+  authors.forEach(author => {
     fields.push({
       name: `${language} author`,
       value: author.name,

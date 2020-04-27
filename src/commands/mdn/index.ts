@@ -63,7 +63,7 @@ const handleMDNQuery = async (msg: Message, searchTerm: string) => {
 
     // remove excerpt if its forseeable to go over embed.description Discord cap
     if (expectedLength + BASE_DESCRIPTION.length + 10 * '\n'.length > 2048) {
-      preparedDescription = preparedDescription.map((string) => {
+      preparedDescription = preparedDescription.map(string => {
         // split at markdown link ending
         const [title, ...rest] = string.split('...]');
 

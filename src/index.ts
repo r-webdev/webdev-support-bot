@@ -1,4 +1,5 @@
-require('dotenv').config();
+import { config } from 'dotenv';
+config();
 import { Client, Message } from 'discord.js';
 import {
   providers,
@@ -9,6 +10,7 @@ import {
   VSCODE_KEYWORD,
   JOB_POSTING_KEYWORD,
 } from './utils/urlTools';
+import { Provider } from './utils/discordTools';
 
 import * as errors from './utils/errors';
 
@@ -25,7 +27,6 @@ import handleGithubQuery from './commands/github';
 import handleBundlephobiaQuery from './commands/bundlephobia';
 import handleFormattingRequest from './commands/formatting';
 import handleVSCodeRequest from './commands/vscode';
-import { Provider } from './utils/discordTools';
 import handleCodeRequest from './commands/code';
 import handleJobPostingRequest from './commands/post';
 
@@ -104,7 +105,7 @@ const handleMessage = async (msg: Message) => {
         return await msg.reply(
           [
             '\ntry one of these:',
-            ...Object.values(help).map((str) => `> ${str}`),
+            ...Object.values(help).map(str => `> ${str}`),
             'or',
             '> !formatting',
             '> !code',

@@ -8,7 +8,7 @@ const delayedMessageAutoDeletion = (
   timeout = THIRTY_SECONDS_IN_MS
 ) => {
   setTimeout(() => {
-    msg.delete().catch((error) => {
+    msg.delete().catch(error => {
       console.warn("Couldn't delete message", error);
 
       msg.edit(missingRightsDeletion).catch(() => {

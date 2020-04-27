@@ -34,7 +34,7 @@ const handleBundlephobiaQuery = async (msg: Message, searchTerm: string) => {
       provider,
       msg,
       searchTerm,
-      isInvalidData: (json) => json.length === 0,
+      isInvalidData: json => json.length === 0,
     });
 
     if (!json) {
@@ -307,7 +307,7 @@ const getSimilarPackages = async (pkg: string) => {
 
   const packages = await Promise.all(
     similar
-      .map(async (otherPackage) => {
+      .map(async otherPackage => {
         const { error, json } = await useData<ExtendedBundlephobiaResponse>(
           getExtendedInfoUrl(provider, otherPackage)
         );

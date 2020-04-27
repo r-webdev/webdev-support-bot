@@ -38,8 +38,8 @@ const handleCanIUseQuery = async (msg: Message, searchTerm: string) => {
       msg,
       searchTerm,
       provider,
-      sanitizeData: (text) => text.replace('"', ''),
-      isInvalidData: (text) => text.length === 0,
+      sanitizeData: text => text.replace('"', ''),
+      isInvalidData: text => text.length === 0,
     });
 
     if (!text) {
@@ -230,7 +230,7 @@ const extractCompatibilityFromBCD = (path: string): CompatStatement => {
   if (finalProp.includes('-')) {
     const capitalizedProp = finalProp
       .split('-')
-      .map((str) => str.charAt(0).toUpperCase() + str.slice(1))
+      .map(str => str.charAt(0).toUpperCase() + str.slice(1))
       .join('-');
 
     return compatObj[capitalizedProp].__compat;

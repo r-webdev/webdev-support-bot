@@ -26,7 +26,7 @@ const handleNPMQuery = async (msg: Message, searchTerm: string) => {
       msg,
       searchTerm,
       provider,
-      isInvalidData: (json) => json.length === 0,
+      isInvalidData: json => json.length === 0,
     });
 
     if (!json) {
@@ -148,7 +148,7 @@ const createFields = (
   {
     name: 'add to your project',
     value: createMarkdownBash(
-      ['npm install', 'yarn add'].map((cmd) => [cmd, name].join(' ')).join('\n')
+      ['npm install', 'yarn add'].map(cmd => [cmd, name].join(' ')).join('\n')
     ),
     inline: false,
   },

@@ -4,7 +4,7 @@ function formatFn(fn: Function) {
   return fn
     .toString()
     .split(LINE_SEPARATOR)
-    .map((line) => '> ' + line)
+    .map(line => '> ' + line)
     .join(LINE_SEPARATOR);
 }
 
