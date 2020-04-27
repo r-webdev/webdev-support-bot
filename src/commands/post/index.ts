@@ -23,8 +23,6 @@ type OutputField = {
   inline: boolean;
 };
 
-type OutputFields = Array<OutputField>;
-
 type Channel = TextChannel | NewsChannel | DMChannel;
 
 type Answers = Map<string, string>;
@@ -128,8 +126,8 @@ const sendAlert = (
   );
 };
 
-const generateFields = (answers: Answers): OutputFields => {
-  let response: OutputFields = [];
+const generateFields = (answers: Answers): Array<OutputField> => {
+  let response: Array<OutputField> = [];
   for (let [key, value] of answers) {
     if (key === 'compensation')
       value = value.includes('$') ? value : `${value}$`;
