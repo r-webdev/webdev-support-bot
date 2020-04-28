@@ -116,12 +116,11 @@ const sendAlert = (
   }
 
   const user = createUserTag(username, discriminator);
-  const url = 'DM channel - not applicable';
 
   try {
     targetChannel.send(
       createEmbed({
-        url,
+        url: 'https://discord.gg',
         description:
           'A user tried creating a job post whilst providing invalid compensation.',
         title: 'Alert!',
@@ -147,7 +146,7 @@ const sendAlert = (
           },
           {
             name: 'Message Link',
-            value: url,
+            value: 'DM channel - not applicable',
             inline: false,
           },
         ],
