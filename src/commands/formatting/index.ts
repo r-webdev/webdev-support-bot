@@ -12,13 +12,13 @@ const getSnippetElements = () =>
     exampleFns[getRandomArbitrary(0, exampleFns.length - 1)]
       .toString()
       .split(LINE_SEPARATOR)
-      .map((line) => `> ${line}`)
+      .map(line => `> ${line}`)
       .join(LINE_SEPARATOR),
     '> \\`\\`\\`',
   ].join(LINE_SEPARATOR);
 
 const otherLanguageExamples = ['php', 'css', 'html', 'ts', 'sql', 'md']
-  .map((str) => `\`${str}\``)
+  .map(str => `\`${str}\``)
   .join(', ');
 
 const handleFormattingRequest = async (msg: Message) => {

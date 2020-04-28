@@ -180,6 +180,11 @@ export const createMarkdownListItem = (index: number, content: string) =>
 export const createMarkdownBash = (string: string) =>
   ['```bash', string, '```'].join('\n');
 
+export const createMarkdownCodeBlock = (
+  string: string,
+  language: string = ''
+) => ['```' + language, string, '```'].join('\n');
+
 export const createDescription = (items: any[]) =>
   items.concat(BASE_DESCRIPTION).join('\n');
 
@@ -191,11 +196,11 @@ export const findEarlyReaction = (
   reactions.cache.find(
     ({ users, emoji: { name } }) =>
       currentlyValidEmojis.includes(name) &&
-      !!users.cache.find((user) => user.id === id)
+      !!users.cache.find(user => user.id === id)
   );
 
 export const clearReactions = ({ reactions }: Message) =>
-  reactions.removeAll().catch((error) => {
+  reactions.removeAll().catch(error => {
     console.error(error);
     console.info(
       'Attempting to remove reactions: message probably deleted or insufficient rights.'
@@ -242,7 +247,7 @@ export const getChosenResult = async <T>(
     }
 
     const index = validReactions.indices.findIndex(
-      (emoji) => emoji === emojiName
+      emoji => emoji === emojiName
     );
 
     clearReactions(sentMsg);
@@ -264,7 +269,7 @@ export const getChosenResult = async <T>(
     }
 
     const index = validReactions.indices.findIndex(
-      (emoji) => emoji === emojiName
+      emoji => emoji === emojiName
     );
 
     clearReactions(sentMsg);

@@ -14,7 +14,7 @@ const createMessage = (vsCodeIcon: GuildEmoji) =>
 
 const handleVSCodeRequest = async (msg: Message) => {
   const vsCodeIcon = msg.client.emojis.cache.find(
-    (emoji) => emoji.name === 'vscode'
+    emoji => emoji.name === 'vscode'
   );
 
   await msg.channel.send(createMessage(vsCodeIcon));

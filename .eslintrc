@@ -1,11 +1,25 @@
 {
   "extends": ["eslint:recommended", "prettier"],
   "env": {
-    "node": true,
-    "es6": true
+    "node": true
   },
   "parserOptions": {
     "ecmaVersion": 2020
   },
-  "globals": {}
+  "rules": {
+    "import/order": [
+      "warn",
+      {
+        "groups": [
+          ["builtin", "external", "internal"],
+          ["unknown", "parent", "sibling"],
+          "index"
+        ],
+        "alphabetize": {
+          "order": "asc"
+        },
+        "newlines-between": "always"
+      }
+    ]
+  }
 }
