@@ -35,14 +35,14 @@ type Channel = TextChannel | NewsChannel | DMChannel;
 
 type Answers = Map<string, string>;
 
-interface TargetChannel extends GuildChannel {
-  send?: (message: string | { embed: Partial<MessageEmbed> }) => Promise<void>;
-}
-
 type CacheEntry = {
   key: string;
   value: Date;
 };
+
+interface TargetChannel extends GuildChannel {
+  send?: (message: string | { embed: Partial<MessageEmbed> }) => Promise<void>;
+}
 
 enum Days {
   Sunday = 0,
@@ -246,7 +246,7 @@ const formAndValidateAnswers = async (
       // Check if the `isRemote` value has been set to "yes"
       const isRemote = answers.get('remote');
       // If the value is set to "yes", skip this iteration
-      if (isRemote === 'yes') {
+      if (isRemote.toLowerCase() === 'yes') {
         continue;
       }
     }

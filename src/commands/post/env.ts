@@ -4,7 +4,9 @@ const AWAIT_MESSAGE_TIMEOUT =
 
 // convert hours into seconds (H*60*60)
 const POST_LIMITER_IN_HOURS =
-  parseFloat(process.env.POST_LIMITER_IN_HOURS) * 3600;
+  process.env.NODE_ENV === 'production'
+    ? parseFloat(process.env.POST_LIMITER_IN_HOURS) * 3600
+    : 0.01 * 3600; // Shorten limiter to 30 seconds for development purposes
 
 const { MOD_CHANNEL, JOB_POSTINGS_CHANNEL, MINIMAL_COMPENSATION } = process.env;
 
