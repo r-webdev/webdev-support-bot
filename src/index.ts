@@ -9,6 +9,7 @@ import {
   CODE_KEYWORD,
   VSCODE_KEYWORD,
   JOB_POSTING_KEYWORD,
+  FORMATTING_KEYWORD_ALT,
 } from './utils/urlTools';
 import { Provider } from './utils/discordTools';
 
@@ -86,6 +87,7 @@ const handleMessage = async (msg: Message) => {
 
   switch (cleanContent) {
     case FORMATTING_KEYWORD:
+    case FORMATTING_KEYWORD_ALT:
       return await handleFormattingRequest(msg);
     case CODE_KEYWORD:
       return await handleCodeRequest(msg);
