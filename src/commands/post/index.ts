@@ -126,7 +126,7 @@ const sendAlert = (
   try {
     targetChannel.send(
       createEmbed({
-        url: generateURL(guild.id, channel.id, msgID),
+        url: 'https://discord.gg/',
         description:
           'A user tried creating a job post whilst providing invalid compensation.',
         title: 'Alert!',
