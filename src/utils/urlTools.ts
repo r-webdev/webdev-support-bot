@@ -80,6 +80,7 @@ export const providers: ProviderMap = {
 
 export const HELP_KEYWORD = '--help';
 export const FORMATTING_KEYWORD = '!formatting';
+export const FORMATTING_KEYWORD_ALT = '!format';
 export const CODE_KEYWORD = '!code';
 export const VSCODE_KEYWORD = '!vscode';
 export const JOB_POSTING_KEYWORD = '!post';

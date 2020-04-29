@@ -121,7 +121,6 @@ const sendAlert = (
   }
 
   const user = createUserTag(username, discriminator);
-  const url = 'DM channel - not applicable';
 
   try {
     targetChannel.send(
@@ -152,7 +151,7 @@ const sendAlert = (
           },
           {
             name: 'Message Link',
-            value: url,
+            value: 'DM channel - not applicable',
             inline: false,
           },
         ],
