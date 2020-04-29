@@ -41,7 +41,9 @@ type CacheEntry = {
 };
 
 interface TargetChannel extends GuildChannel {
-  send?: (message: string | { embed: Partial<MessageEmbed> }) => Promise<void>;
+  send?: (
+    message: string | { embed: Partial<MessageEmbed> }
+  ) => Promise<Message>;
 }
 
 enum Days {
@@ -85,6 +87,9 @@ const capitalize = (str: string) =>
 const getTargetChannel = (guild: Guild, name: string): TargetChannel =>
   guild.channels.cache.find(({ name: n }) => n === name);
 
+const generateURL = (guildID: string, channelID: string, msgID: string) =>
+  `https://discordapp.com/channels/${guildID}/${channelID}/${msgID}`;
+
 const getReply = async (channel: Channel, filter: CollectorFilter) => {
   try {
     const res = await channel.awaitMessages(filter, {
@@ -120,7 +125,7 @@ const sendAlert = (
   try {
     targetChannel.send(
       createEmbed({
-        url: 'https://discord.gg',
+        url: 'https://discord.gg/',
         description:
           'A user tried creating a job post whilst providing invalid compensation.',
         title: 'Alert!',
@@ -140,7 +145,7 @@ const sendAlert = (
           {
             name: 'Command',
             value: createMarkdownCodeBlock(
-              `?ban ${user} Attempting to create a job post with no compensation.`
+              `?ban ${user} Attempting to create a job post with invalid compensation.`
             ),
             inline: false,
           },
@@ -197,10 +202,10 @@ const createJobPost = async (
   }
 
   const user = createUserTag(username, discriminator);
-  const url = `https://discordapp.com/channels/${guild.id}/${channelID}/${msgID}`;
+  const url = generateURL(guild.id, channelID, msgID);
 
   try {
-    await targetChannel.send(
+    const msg = await targetChannel.send(
       createEmbed({
         url,
         description: `A user has created a new job post!`,
@@ -223,7 +228,7 @@ const createJobPost = async (
       })
     );
 
-    return url;
+    return generateURL(guild.id, msg.channel.id, msg.id);
   } catch (error) {
     console.error('post.createJobPost', error);
   }
