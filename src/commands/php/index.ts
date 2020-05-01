@@ -33,8 +33,7 @@ const handlePHPQuery = async (msg: Message, searchTerm: string) => {
     // Check if we were directed directly to the result.
     let isDirect = document.getElementById('quickref_functions') === null;
     if (isDirect) {
-      await msg.channel.send(buildDirectUrl(provider, searchTerm) as string);
-
+      await msg.channel.send(buildDirectUrl(provider, searchTerm));
       return;
     }
 
@@ -90,9 +89,9 @@ const handlePHPQuery = async (msg: Message, searchTerm: string) => {
 const extractMetadataFromResult = (result: any) => {
   const titleElement = result.textContent;
 
-  const title = escapeMarkdown(entities.decode(titleElement)) as string;
+  const title = escapeMarkdown(entities.decode(titleElement));
 
-  const url = buildDirectUrl(provider, result.getAttribute('href')) as string;
+  const url = buildDirectUrl(provider, result.getAttribute('href'));
 
   return {
     title,
