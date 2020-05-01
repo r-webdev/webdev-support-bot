@@ -22,7 +22,7 @@ ${emojis.light} *react with a number (:one:, :two:, ...) to filter your result*
 ${emojis.neutral_face} *react with \`❌\` to delete*
 ${
   emojis.point_up
-} *supports \`!mdn\`, \`!github\`, \`!caniuse\`, \`!npm\`, \`!composer\` and \`!bundlephobia\`*
+} *supports \`!mdn\`, \`!github\`, \`!caniuse\`, \`!npm\`, \`!composer\`, \`!bundlephobia\`, and \`!php\`*
 ${emojis.gear} *issues? feature requests? head over to ${createMarkdownLink(
   'github',
   process.env.REPO_LINK
@@ -34,7 +34,8 @@ export type Provider =
   | 'github'
   | 'composer'
   | 'mdn'
-  | 'bundlephobia';
+  | 'bundlephobia'
+  | 'php';
 
 interface ListEmbed {
   provider: Provider;

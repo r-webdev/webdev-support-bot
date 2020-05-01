@@ -30,6 +30,7 @@ import handleFormattingRequest from './commands/formatting';
 import handleVSCodeRequest from './commands/vscode';
 import handleCodeRequest from './commands/code';
 import handleJobPostingRequest from './commands/post';
+import handlePHPQuery from './commands/php';
 
 const client = new Client();
 
@@ -149,6 +150,8 @@ const handleMessage = async (msg: Message) => {
             return await handleGithubQuery(msg, searchTerm);
           case keywordMap.bundlephobia:
             return await handleBundlephobiaQuery(msg, searchTerm);
+          case keywordMap.php:
+            return await handlePHPQuery(msg, searchTerm);
           default:
             throw new Error('classic "shouldnt be here" scenario');
         }

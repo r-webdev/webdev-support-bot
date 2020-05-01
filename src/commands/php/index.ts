@@ -10,16 +10,14 @@ import {
   getChosenResult,
   attemptEdit,
   adjustTitleLength,
-  BASE_DESCRIPTION,
 } from '../../utils/discordTools';
 import useData from '../../utils/useData';
-import delayedMessageAutoDeletion from '../../utils/delayedMessageAutoDeletion';
 import { Message } from 'discord.js';
 
-const provider = 'mdn';
+const provider = 'php';
 const entities = new Entities();
 
-const handleMDNQuery = async (msg: Message, searchTerm: string) => {
+const handlePHPQuery = async (msg: Message, searchTerm: string) => {
   try {
     const searchUrl = getSearchUrl(provider, searchTerm);
     const { error, text } = await useData(searchUrl, 'text');
@@ -32,28 +30,26 @@ const handleMDNQuery = async (msg: Message, searchTerm: string) => {
     const parser = new DOMParser();
     const document = parser.parseFromString(text);
 
-    // meta provides information about the amount of results found
-    const meta = document.getElementsByClassName('result-meta')[0].textContent;
-    if (meta.startsWith('0 documents found')) {
-      const sentMsg = await msg.reply(errors.noResults(searchTerm));
-
-      delayedMessageAutoDeletion(sentMsg);
+    // Check if we were directed directly to the result.
+    let isDirect = document.getElementById('quickref_functions') === null;
+    if (isDirect) {
+      await msg.channel.send(buildDirectUrl(provider, searchTerm));
       return;
     }
 
-    const results = document.getElementsByClassName('result');
-
+    const results = document
+      .getElementById('quickref_functions')
+      .getElementsByTagName('li')
+      .slice(0, 10);
     let expectedLength = 0;
 
     let preparedDescription = results.map((result, index) => {
-      const { title, url, excerpt } = extractMetadataFromResult(result);
+      const link = result.firstChild;
+      const { title, url } = extractMetadataFromResult(link);
 
       const item = createMarkdownListItem(
         index,
-        createMarkdownLink(
-          adjustTitleLength([`**${title}**`, excerpt].join(' - ')),
-          url
-        )
+        createMarkdownLink(adjustTitleLength([`**${title}**`].join(' - ')), url)
       );
 
       expectedLength += item.length;
@@ -61,25 +57,12 @@ const handleMDNQuery = async (msg: Message, searchTerm: string) => {
       return item;
     });
 
-    // remove excerpt if its forseeable to go over embed.description Discord cap
-    if (expectedLength + BASE_DESCRIPTION.length + 10 * '\n'.length > 2048) {
-      preparedDescription = preparedDescription.map(string => {
-        // split at markdown link ending
-        const [title, ...rest] = string.split('...]');
-
-        // split title on title - excerpt glue
-        // concat with rest
-        // fix broken markdown link ending
-        return [title.split(' - ')[0], rest.join('')].join(']');
-      });
-    }
-
     const sentMsg = await msg.channel.send(
       createListEmbed({
         provider,
         searchTerm,
         url: searchUrl,
-        footerText: meta.split('for')[0],
+        footerText: '',
         description: createDescription(preparedDescription),
       })
     );
@@ -90,7 +73,7 @@ const handleMDNQuery = async (msg: Message, searchTerm: string) => {
       return;
     }
 
-    const { url } = extractMetadataFromResult(result);
+    const { url } = extractMetadataFromResult(result.firstChild);
 
     await attemptEdit(sentMsg, url, { embed: null });
   } catch (error) {
@@ -104,19 +87,14 @@ const handleMDNQuery = async (msg: Message, searchTerm: string) => {
  * @param {any} result [document.parseFromString return type]
  */
 const extractMetadataFromResult = (result: any) => {
-  const titleElement = result.getElementsByClassName('result-title')[0];
-  const excerptElement = result.getElementsByClassName('result-excerpt')[0];
+  const titleElement = result.textContent;
 
-  const title = escapeMarkdown(entities.decode(titleElement.textContent));
-  const url = buildDirectUrl(provider, titleElement.getAttribute('href'));
+  const title = escapeMarkdown(entities.decode(titleElement));
 
-  const excerpt = sanitizeExcerpt(
-    escapeMarkdown(entities.decode(excerptElement.textContent))
-  );
+  const url = buildDirectUrl(provider, result.getAttribute('href'));
 
   return {
     title,
-    excerpt,
     url,
   };
 };
@@ -139,4 +117,4 @@ const sanitizeExcerpt = (excerpt: string) => {
  */
 const escapeMarkdown = (text: string) => text.replace(/(\*|_|`|~|\\)/g, '\\$1');
 
-export default handleMDNQuery;
+export default handlePHPQuery;

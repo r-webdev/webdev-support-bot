@@ -76,6 +76,14 @@ export const providers: ProviderMap = {
     icon: 'https://bundlephobia.com/android-chrome-192x192.png',
     help: '!bundlephobia @chakra-ui/core',
   },
+  php: {
+    search: `https://www.php.net/${SEARCH_TERM}`,
+    direct: `https://www.php.net/${TERM}`,
+    color: 0x8892bf,
+    createTitle: (searchTerm: string) => `PHP.net results for *${searchTerm}*`,
+    icon: 'https://www.php.net/images/logos/php-logo.svg',
+    help: '!php echo',
+  },
 };
 
 export const HELP_KEYWORD = '--help';
