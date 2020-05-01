@@ -107,14 +107,8 @@ const extractMetadataFromResult = (result: any) => {
   const titleElement = result.getElementsByClassName('result-title')[0];
   const excerptElement = result.getElementsByClassName('result-excerpt')[0];
 
-  const title = escapeMarkdown(
-    entities.decode(titleElement.textContent)
-  ) as string;
-
-  const url = buildDirectUrl(
-    provider,
-    titleElement.getAttribute('href')
-  ) as string;
+  const title = escapeMarkdown(entities.decode(titleElement.textContent));
+  const url = buildDirectUrl(provider, titleElement.getAttribute('href'));
 
   const excerpt = sanitizeExcerpt(
     escapeMarkdown(entities.decode(excerptElement.textContent))
