@@ -82,10 +82,6 @@ const handleMessage = async (msg: Message) => {
     return;
   }
 
-  if (cleanContent === FORMATTING_KEYWORD) {
-    return await handleFormattingRequest(msg);
-  }
-
   switch (cleanContent) {
     case FORMATTING_KEYWORD:
     case FORMATTING_KEYWORD_ALT:
