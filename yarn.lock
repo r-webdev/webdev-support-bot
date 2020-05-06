@@ -2114,10 +2114,10 @@ typedarray-to-buffer@^3.1.5:
   dependencies:
     is-typedarray "^1.0.0"
 
-typescript@^4.0.0-dev.20200504:
-  version "4.0.0-dev.20200504"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.0.0-dev.20200504.tgz#2834ad3c388d6ae43e0854fe685e6cca0e61d107"
-  integrity sha512-K1SWra3OBG3IMflXWznncRLWsaR7D6iWcSk4/O45r/SlXmi35bH/b5Dprl5swYtJQGh7hjplmtvGXnlDaTeQeQ==
+typescript@^4.0.0-dev.20200505:
+  version "4.0.0-dev.20200505"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.0.0-dev.20200505.tgz#e6f7336dbccbc8dbfb9d3b66d2d7bc2eb377906e"
+  integrity sha512-4dvUc7PW9K7Ei9N81kfriqKiuGU4DrsC8er4tTaGTVoeGZJ6YxEzuL2eb+UCYH/Iwp9uN9PBrlDNrn/G5YoRzg==
 
 undefsafe@^2.0.2:
   version "2.0.3"
