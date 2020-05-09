@@ -169,13 +169,16 @@ const generateFields = (answers: Answers): OutputField[] => {
     if (key === 'compensation')
       value = value.includes('$') ? value : `${value}$`;
 
-    if (key !== 'remote' && value === 'no') {
+    if (key !== 'remote' && value.trim().toLowerCase() === 'no')
       value = 'Not provided.'; // If the value is "no", don't print that field
-    }
 
     response.push({
-      name: capitalize(key),
-      value: createMarkdownCodeBlock(value),
+      name: capitalize(key.includes('_') ? key.replace('_', ' ') : key),
+      value: createMarkdownCodeBlock(
+        key === 'compensation_type' || key === 'remote'
+          ? capitalize(value)
+          : value
+      ),
       inline: false,
     });
   }
@@ -293,6 +296,28 @@ const generateCacheEntry = (key: string): CacheEntry => ({
   value: new Date(),
 });
 
+const greeterMessage = `Please adhere to the following guidelines when creating a job posting:
+${createMarkdownCodeBlock(
+  `
+\n* Your job must provide monetary compensation.\n
+* Your job must provide at least $${MINIMAL_COMPENSATION} in compensation.\n
+* You can only post a job every ${POST_LIMITER_IN_HOURS} hours.\n
+* You agree not to abuse our job posting service or circumvent any server rules, and you understand that doing so will result in a ban.\n
+`,
+  'md'
+)}
+To continue, have the following information available:
+${createMarkdownCodeBlock(
+  `
+\n* Job location information (optional).\n
+* A short description of the job posting with no special formatting.\n
+* The amount of compensation in USD for the job.\n
+* Contact information for potential job seekers to apply for your job.\n
+`,
+  'md'
+)}
+If you agree to these guidelines, type ${'`ok`'}. If not, or you want to exit the form explicitly at any time, type ${'`cancel`'}.`;
+
 const handleJobPostingRequest = async (msg: Message) => {
   const filter: CollectorFilter = m => m.author.id === msg.author.id;
   const send = (str: string) => msg.author.send(str);
@@ -311,17 +336,9 @@ const handleJobPostingRequest = async (msg: Message) => {
       );
       return;
     }
-    // Store the post attempt in the cache
-    cache.set(entry.key, entry.value, POST_LIMITER_IN_HOURS);
+
     // Notify the user regarding the rules, and get the channel
-    const { channel } = await send(
-      `Heads up!
-Posts without financial compensation are not allowed.
-Also, attempting to create a post with compensation that is lower than \`$${MINIMAL_COMPENSATION}\` is not allowed.
-Trying to circumvent these rules in any way will result in a ban.
-If you are not willing to continue, type \`cancel\`.
-Otherwise, type \`ok\` or anything else to continue.`
-    );
+    const { channel } = await send(greeterMessage);
 
     const { id: channelID } = msg.channel;
     const proceed = await getReply(channel, filter);
@@ -329,6 +346,9 @@ Otherwise, type \`ok\` or anything else to continue.`
     if (!proceed) {
       return send('Canceled.');
     }
+
+    // Store the post attempt in the cache
+    cache.set(entry.key, entry.value, POST_LIMITER_IN_HOURS);
 
     const answers = await formAndValidateAnswers(channel, filter, guild, send, {
       username,
@@ -348,7 +368,7 @@ Otherwise, type \`ok\` or anything else to continue.`
     });
 
     // Notify the user that the form is now complete
-    await send('Your job posting has been created! - ' + url);
+    await send('Your job posting has been created!\n' + url);
   } catch (error) {
     await msg.reply(
       'Please temporarily enable direct messages as the bot cares about your privacy.'
