@@ -336,8 +336,6 @@ const handleJobPostingRequest = async (msg: Message) => {
       );
       return;
     }
-    // Store the post attempt in the cache
-    cache.set(entry.key, entry.value, POST_LIMITER_IN_HOURS);
 
     // Notify the user regarding the rules, and get the channel
     const { channel } = await send(greeterMessage);
@@ -348,6 +346,9 @@ const handleJobPostingRequest = async (msg: Message) => {
     if (!proceed) {
       return send('Canceled.');
     }
+
+    // Store the post attempt in the cache
+    cache.set(entry.key, entry.value, POST_LIMITER_IN_HOURS);
 
     const answers = await formAndValidateAnswers(channel, filter, guild, send, {
       username,
