@@ -195,6 +195,8 @@ const generateFields = (answers: Answers): OutputField[] => {
       value = 'Not provided.'; // If the value is "no", don't print that field
     }
 
+    if (key.includes('_')) key.replace('_', ' ');
+
     response.push({
       name: capitalize(key),
       value: createMarkdownCodeBlock(value),
