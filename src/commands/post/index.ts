@@ -367,7 +367,7 @@ const handleJobPostingRequest = async (msg: Message) => {
     });
 
     // Notify the user that the form is now complete
-    await send('Your job posting has been created! - ' + url);
+    await send('Your job posting has been created!\n' + url);
   } catch (error) {
     await msg.reply(
       'Please temporarily enable direct messages as the bot cares about your privacy.'
