@@ -71,7 +71,8 @@ enum Months {
   December,
 }
 
-const greeterMessage = `Please adhere to the following guidelines when creating a job posting:\n${createMarkdownCodeBlock(
+const greeterMessage = `Please adhere to the following guidelines when creating a job posting:
+${createMarkdownCodeBlock(
   `
 \n* Your job must provide monetary compensation.\n
 * Your job must provide at least $${MINIMAL_COMPENSATION} in compensation.\n
@@ -79,7 +80,18 @@ const greeterMessage = `Please adhere to the following guidelines when creating 
 * You agree not to abuse our job posting service or circumvent any server rules, and you understand that doing so will result in a ban.\n
 `,
   'md'
-)}\n Type ${'`ok`'} to continue. Otherwise, you can type ${'`cancel`'} to exit the form at any time.`;
+)}
+To continue, have the following information available:
+${createMarkdownCodeBlock(
+  `
+\n* Job location information (optional).\n
+* A short description of the job posting with no special formatting.\n
+* The amount of compensation in USD for the job.\n
+* Contact information for potential job seekers to apply for your job.\n
+`,
+  'md'
+)}
+If you agree to these guidelines, type ${'`ok`'}. If not, or you want to exit the form explicitly at any time, type ${'`cancel`'}.`;
 
 const getCurrentDate = () => {
   const date = new Date();
