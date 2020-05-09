@@ -71,6 +71,16 @@ enum Months {
   December,
 }
 
+const greeterMessage = `Please adhere to the following guidelines when creating a job posting:\n${createMarkdownCodeBlock(
+  `
+\n* Your job must provide monetary compensation.\n
+* Your job must provide at least $${MINIMAL_COMPENSATION} in compensation.\n
+* You can only post a job every ${POST_LIMITER_IN_HOURS} hours.\n
+* You agree not to abuse our job posting service or circumvent any server rules, and you understand that doing so will result in a ban.\n
+`,
+  'md'
+)}\n Type ${'`ok`'} to continue. Otherwise, you can type ${'`cancel`'} to exit the form at any time.`;
+
 const getCurrentDate = () => {
   const date = new Date();
 
@@ -314,14 +324,17 @@ const handleJobPostingRequest = async (msg: Message) => {
     // Store the post attempt in the cache
     cache.set(entry.key, entry.value, POST_LIMITER_IN_HOURS);
     // Notify the user regarding the rules, and get the channel
-    const { channel } = await send(
-      `Heads up!
-Posts without financial compensation are not allowed.
-Also, attempting to create a post with compensation that is lower than \`$${MINIMAL_COMPENSATION}\` is not allowed.
-Trying to circumvent these rules in any way will result in a ban.
-If you are not willing to continue, type \`cancel\`.
-Otherwise, type \`ok\` or anything else to continue.`
-    );
+
+    //     const { channel } = await send(
+    //       `Heads up!
+    // Posts without financial compensation are not allowed.
+    // Also, attempting to create a post with compensation that is lower than \`$${MINIMAL_COMPENSATION}\` is not allowed.
+    // Trying to circumvent these rules in any way will result in a ban.
+    // If you are not willing to continue, type \`cancel\`.
+    // Otherwise, type \`ok\` or anything else to continue.`
+    //     );
+
+    const { channel } = await send(greeterMessage);
 
     const { id: channelID } = msg.channel;
     const proceed = await getReply(channel, filter);
