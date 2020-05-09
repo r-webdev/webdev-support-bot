@@ -15,6 +15,7 @@ import {
   AWAIT_MESSAGE_TIMEOUT,
   MOD_CHANNEL,
   JOB_POSTINGS_CHANNEL,
+  POST_LIMITER,
   POST_LIMITER_IN_HOURS,
   MINIMAL_COMPENSATION,
 } from './env';
@@ -348,7 +349,7 @@ const handleJobPostingRequest = async (msg: Message) => {
     }
 
     // Store the post attempt in the cache
-    cache.set(entry.key, entry.value, POST_LIMITER_IN_HOURS);
+    cache.set(entry.key, entry.value, POST_LIMITER);
 
     const answers = await formAndValidateAnswers(channel, filter, guild, send, {
       username,
