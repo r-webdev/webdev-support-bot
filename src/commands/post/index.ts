@@ -169,13 +169,16 @@ const generateFields = (answers: Answers): OutputField[] => {
     if (key === 'compensation')
       value = value.includes('$') ? value : `${value}$`;
 
-    if (key !== 'remote' && value === 'no') value = 'Not provided.'; // If the value is "no", don't print that field
-
-    if (key.includes('_')) key.replace('_', ' ');
+    if (key !== 'remote' && value.trim().toLowerCase() === 'no')
+      value = 'Not provided.'; // If the value is "no", don't print that field
 
     response.push({
-      name: capitalize(key),
-      value: createMarkdownCodeBlock(value),
+      name: capitalize(key.includes('_') ? key.replace('_', ' ') : key),
+      value: createMarkdownCodeBlock(
+        key === 'compensation_type' || key === 'remote'
+          ? capitalize(value)
+          : value
+      ),
       inline: false,
     });
   }

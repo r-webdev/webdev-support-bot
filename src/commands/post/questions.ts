@@ -28,7 +28,7 @@ export default {
       ['project', 'hourly'].includes(answer.toLowerCase()),
   },
   compensation: {
-    body: 'Provide the compensation amount for this job using only numbers',
+    body: 'Provide the compensation amount for this job using only numbers.',
     validate: (answer: string) => {
       const value = parseFloat(answer.split('$').join(''));
 
