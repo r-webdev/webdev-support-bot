@@ -344,12 +344,17 @@ ${createMarkdownCodeBlock(
 If you agree to these guidelines, type ${'`ok`'}. If not, or you want to exit the form explicitly at any time, type ${'`cancel`'}.`;
 
 const handleJobPostingRequest = async (msg: Message) => {
+  const { guild, id: msgID } = msg;
+  const { username, discriminator, id } = msg.author;
+  const { type: msgChannelType } = msg.channel;
+
   const filter: CollectorFilter = m => m.author.id === msg.author.id;
   const send = (str: string) => msg.author.send(str);
 
   try {
-    const { guild, id: msgID } = msg;
-    const { username, discriminator, id } = msg.author;
+    // Bail if the user is pinging the bot directly
+    if (msgChannelType === 'dm') return;
+
     // Generate cache entry
     const entry = generateCacheEntry(id);
     // Check if the user has been cached
@@ -407,6 +412,9 @@ const handleJobPostingRequest = async (msg: Message) => {
       'Please temporarily enable direct messages as the bot cares about your privacy.'
     );
     console.error('post.handleJobPostingRequest', error);
+  } finally {
+    // Remove the message
+    await msg.delete();
   }
 };
 
