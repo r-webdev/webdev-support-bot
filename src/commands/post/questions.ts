@@ -9,9 +9,8 @@ const allowCertainAnswers = (allowed: Array<string>, answer: string) =>
   Since checking if the input string is empty is not practical for this use-case,
   this function checks if the provided input has at the very least `MINIMAL_AMOUNT_OF_WORDS` words in it.
 */
-
 const isNotShort = (str: string) =>
-  str.split(' ').length > MINIMAL_AMOUNT_OF_WORDS;
+  str.split(' ').length >= MINIMAL_AMOUNT_OF_WORDS;
 
 export default {
   remote: {
@@ -27,7 +26,7 @@ export default {
   description: {
     body:
       'With a single message provide a short description of the job.\nTypically job postings include a description of the job, estimated hours, technical knowledge requirements, scope, and desired qualifications.',
-    validate: isNotEmpty,
+    validate: isNotShort,
   },
   compensation_type: {
     body:
@@ -44,8 +43,9 @@ export default {
       return !isNaN(value) && value >= minimalCompensation;
     },
   },
-  notes: {
+  contact: {
     body:
       'Provide the method that applicants should apply for your job (e.g., DM, email, website application, etc.) and any additional information that you think would be helpful to potential applicants.',
+    validation: isNotEmpty,
   },
 };

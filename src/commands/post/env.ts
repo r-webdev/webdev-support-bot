@@ -11,7 +11,10 @@ const {
 const AWAIT_MESSAGE_TIMEOUT = parseInt(AMT) * 1000;
 
 // convert hours into seconds (H*60*60)
-const POST_LIMITER = parseFloat(POST_LIMITER_IN_HOURS) * 3600;
+const POST_LIMITER =
+  process.env.NODE_ENV === 'production'
+    ? parseInt(POST_LIMITER_IN_HOURS) * 3600
+    : 0.01 * 3600; // Shorten limiter to 30 seconds for development purposes
 
 // convert string to int
 const MINIMAL_AMOUNT_OF_WORDS = parseInt(MAOW);

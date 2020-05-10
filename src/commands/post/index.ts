@@ -301,7 +301,7 @@ const formAndValidateAnswers = async (
           );
       }
       await send('Invalid input. Cancelling form.');
-      return null;
+      return;
     }
 
     // Otherwise, store the answer in the output map
@@ -356,10 +356,15 @@ const handleJobPostingRequest = async (msg: Message) => {
 
     if (isCached) {
       const diff =
+        parseInt(POST_LIMITER_IN_HOURS) -
         Math.abs(new Date().getTime() - entry.value.getTime()) / 3600000;
       send(
         `You cannot create a job posting right now.\nPlease try again ${
-          diff === 0 ? 'later' : diff === 1 ? 'in an hour' : `in ${diff} hours`
+          diff === 0
+            ? 'in a bit'
+            : diff === 1
+            ? 'in an hour'
+            : `in ${diff} hours`
         }.`
       );
       return;
