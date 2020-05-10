@@ -98,11 +98,15 @@ const getTargetChannel = (guild: Guild, name: string): TargetChannel =>
 const generateURL = (guildID: string, channelID: string, msgID: string) =>
   `https://discordapp.com/channels/${guildID}/${channelID}/${msgID}`;
 
-const getReply = async (channel: Channel, filter: CollectorFilter) => {
+const getReply = async (
+  channel: Channel,
+  filter: CollectorFilter,
+  timeMultiplier: number = 1
+) => {
   try {
     const res = await channel.awaitMessages(filter, {
       max: 1,
-      time: AWAIT_MESSAGE_TIMEOUT,
+      time: AWAIT_MESSAGE_TIMEOUT * timeMultiplier,
     });
 
     const content = res.first().content.trim();
@@ -272,7 +276,11 @@ const formAndValidateAnswers = async (
     // Send out the question
     await send(q.body);
     // Await the input
-    const reply = await getReply(channel, filter);
+    const reply = await getReply(
+      channel,
+      filter,
+      key === 'description' ? 2 : 1 // Double up `AWAIT_TIMEOUT` when waiting for the job description
+    );
 
     // If the reply is equal to "cancel" (aka, returns false), cancel the form
     if (!reply) {
