@@ -1,9 +1,6 @@
 import { MINIMAL_COMPENSATION } from './env';
 
-const isNotEmpty = (str: string) => str.trim().length > 0;
-
-const minimalCompensation = parseFloat(MINIMAL_COMPENSATION);
-const compensationRegExp = /^[0-9]+(\.[0-9]{1,2})?$/gm;
+const isNotEmpty = (str: string) => str.length > 0;
 
 export default {
   remote: {
@@ -27,14 +24,12 @@ export default {
     validate: (answer: string) => ['project', 'hourly'].includes(answer),
   },
   compensation: {
-    body: 'Provide the compensation amount for this job using only numbers.',
-    validate: (answer: string) => {
+    body:
+      'Provide the compensation amount for this job using **only** numbers.',
+    validate: answer => {
       const value = parseFloat(answer.split('$').join(''));
-
-      return (
-        compensationRegExp.test(value.toFixed(2)) &&
-        value >= minimalCompensation
-      );
+      const minimalCompensation = parseFloat(MINIMAL_COMPENSATION);
+      return !isNaN(value) && value >= minimalCompensation;
     },
   },
   notes: {

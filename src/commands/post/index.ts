@@ -144,14 +144,14 @@ const sendAlert = (
             inline: true,
           },
           {
-            name: 'User Input',
+            name: 'Input',
             value: createMarkdownCodeBlock(userInput),
             inline: false,
           },
           {
             name: 'Command',
             value: createMarkdownCodeBlock(
-              `?ban ${user} Attempting to create a job post with invalid compensation.`
+              `?ban ${user} Invalid compensation.`
             ),
             inline: false,
           },
