@@ -18,6 +18,7 @@ import {
   POST_LIMITER,
   POST_LIMITER_IN_HOURS,
   MINIMAL_COMPENSATION,
+  MINIMAL_AMOUNT_OF_WORDS,
 } from './env';
 
 type OutputField = {
@@ -221,7 +222,7 @@ const createJobPost = async (
       createEmbed({
         url,
         description: `A user has created a new job post!`,
-        title: 'New Job Posting!',
+        title: 'New Job Post',
         footerText: 'Job Posting Module',
         provider: 'spam', // Using the spam provider because we only need the color/icon, which it provides anyway
         fields: [
@@ -288,12 +289,17 @@ const formAndValidateAnswers = async (
     // If the input is not valid, cancel the form and notify the user.
     const isValid = q.validate(reply.toLowerCase());
 
-    // Alert the moderators if the compensation is invalid.
-    if (key === 'compensation' && !isValid) {
-      sendAlert(guild, reply, { username, discriminator });
-    }
-
     if (!isValid) {
+      switch (key) {
+        // Alert the moderators if the compensation is invalid.
+        case 'compensation':
+          await sendAlert(guild, reply, { username, discriminator });
+          break;
+        case 'description':
+          await send(
+            `The job description should contain more than ${MINIMAL_AMOUNT_OF_WORDS} words.`
+          );
+      }
       await send('Invalid input. Cancelling form.');
       return null;
     }

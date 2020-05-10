@@ -1,12 +1,23 @@
-import { MINIMAL_COMPENSATION } from './env';
+import { MINIMAL_COMPENSATION, MINIMAL_AMOUNT_OF_WORDS } from './env';
 
 const isNotEmpty = (str: string) => str.length > 0;
+
+const allowCertainAnswers = (allowed: Array<string>, answer: string) =>
+  allowed.includes(answer);
+
+/*
+  Since checking if the input string is empty is not practical for this use-case,
+  this function checks if the provided input has at the very least `MINIMAL_AMOUNT_OF_WORDS` words in it.
+*/
+
+const isNotShort = (str: string) =>
+  str.split(' ').length > MINIMAL_AMOUNT_OF_WORDS;
 
 export default {
   remote: {
     body:
       'Type `yes` if your position is remote and `no` if it requires a location.',
-    validate: (answer: string) => ['yes', 'no'].includes(answer),
+    validate: (answer: string) => allowCertainAnswers(['yes', 'no'], answer),
   },
   location: {
     body:
@@ -21,7 +32,8 @@ export default {
   compensation_type: {
     body:
       'Type `project` if your compensation amount is for the project or type `hourly` if your compensation amount is for an hourly rate.',
-    validate: (answer: string) => ['project', 'hourly'].includes(answer),
+    validate: (answer: string) =>
+      allowCertainAnswers(['project', 'hourly'], answer),
   },
   compensation: {
     body:
