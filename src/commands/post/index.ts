@@ -29,7 +29,7 @@ type OutputField = {
 type Metadata = {
   username: string;
   discriminator: string;
-  msgID: string;
+  msgID?: string;
 };
 
 type Channel = TextChannel | NewsChannel | DMChannel;
@@ -80,10 +80,16 @@ const getCurrentDate = () => {
   } ${date.getDate()}, ${date.getFullYear()}`;
 };
 
-const trimContent = (str: string) => str.trim();
+/*
+  The `capitalize` function does **not** capitalize only one word in a string.
+  It capitalizes all words present in the string itself, separated with a space.
+*/
 
 const capitalize = (str: string) =>
-  `${str[0].toUpperCase()}${str.substring(1).toLowerCase()}`;
+  str
+    .split(' ')
+    .map(s => `${s[0].toUpperCase()}${s.substring(1).toLowerCase()}`)
+    .join(' ');
 
 const getTargetChannel = (guild: Guild, name: string): TargetChannel =>
   guild.channels.cache.find(({ name: n }) => n === name);
@@ -98,9 +104,9 @@ const getReply = async (channel: Channel, filter: CollectorFilter) => {
       time: AWAIT_MESSAGE_TIMEOUT,
     });
 
-    const content = trimContent(res.first().content);
+    const content = res.first().content.trim();
 
-    return content.toLowerCase() === 'cancel' ? null : content; // Return false if the user explicitly cancels the form
+    return content.toLowerCase() === 'cancel' ? false : content; // Return false if the user explicitly cancels the form
   } catch {
     channel.send('You have timed out. Please try again.');
   }
@@ -108,9 +114,8 @@ const getReply = async (channel: Channel, filter: CollectorFilter) => {
 
 const sendAlert = (
   guild: Guild,
-  channel: Channel,
   userInput: string,
-  { username, discriminator, msgID }: Metadata
+  { username, discriminator }: Metadata
 ): void => {
   const targetChannel = getTargetChannel(guild, MOD_CHANNEL);
 
@@ -128,7 +133,7 @@ const sendAlert = (
       createEmbed({
         url: 'https://discord.gg/',
         description:
-          'A user tried creating a job post whilst providing invalid compensation.',
+          'A user attempted creating a job post whilst providing invalid compensation.',
         title: 'Alert!',
         footerText: 'Job Posting Module',
         provider: 'spam',
@@ -152,7 +157,7 @@ const sendAlert = (
           },
           {
             name: 'Message Link',
-            value: 'DM channel - not applicable',
+            value: 'DM Channel - Not Applicable.',
             inline: false,
           },
         ],
@@ -170,11 +175,14 @@ const generateFields = (answers: Answers): OutputField[] => {
     if (key === 'compensation')
       value = value.includes('$') ? value : `${value}$`;
 
-    if (key !== 'remote' && value.trim().toLowerCase() === 'no')
-      value = 'Not provided.'; // If the value is "no", don't print that field
+    /* 
+      If the value is "no", don't print the location field.
+      The location field is optional.
+    */
+    if (key === 'location' && value.toLowerCase() === 'no') continue;
 
     response.push({
-      name: capitalize(key.includes('_') ? key.replace('_', ' ') : key),
+      name: capitalize(key.replace('_', ' ')),
       value: createMarkdownCodeBlock(
         key === 'compensation_type' || key === 'remote'
           ? capitalize(value)
@@ -243,7 +251,7 @@ const formAndValidateAnswers = async (
   filter: CollectorFilter,
   guild: Guild,
   send: Function,
-  { username, discriminator, msgID }: Metadata
+  { username, discriminator }: Metadata
 ): Promise<Answers> => {
   const answers = new Map();
 
@@ -252,9 +260,9 @@ const formAndValidateAnswers = async (
     // Check if the current question is the location question
     if (key === 'location') {
       // Check if the `isRemote` value has been set to "yes"
-      const isRemote = answers.get('remote');
+      const isRemote = answers.get('remote').toLowerCase();
       // If the value is set to "yes", skip this iteration
-      if (isRemote.toLowerCase() === 'yes') {
+      if (isRemote === 'yes') {
         continue;
       }
     }
@@ -264,27 +272,32 @@ const formAndValidateAnswers = async (
     await send(q.body);
     // Await the input
     const reply = await getReply(channel, filter);
-    // If the reply is equal to "cancel", cancel the form
+
+    // If the reply is equal to "cancel" (aka, returns false), cancel the form
     if (!reply) {
       await send('Explicitly cancelled job post form. Exiting.');
-      return null;
+      return;
     }
+
     // If there is a validation method appended to the question, use it
     if (!q.validate) {
       answers.set(key, reply);
       continue;
     }
+
     // If the input is not valid, cancel the form and notify the user.
-    const isValid = q.validate(reply);
+    const isValid = q.validate(reply.toLowerCase());
+
     // Alert the moderators if the compensation is invalid.
     if (key === 'compensation' && !isValid) {
-      sendAlert(guild, channel, reply, { username, discriminator, msgID });
+      sendAlert(guild, reply, { username, discriminator });
     }
 
     if (!isValid) {
       await send('Invalid input. Cancelling form.');
       return null;
     }
+
     // Otherwise, store the answer in the output map
     answers.set(key, reply);
   }
@@ -300,20 +313,24 @@ const generateCacheEntry = (key: string): CacheEntry => ({
 const greeterMessage = `Please adhere to the following guidelines when creating a job posting:
 ${createMarkdownCodeBlock(
   `
-\n* Your job must provide monetary compensation.\n
-* Your job must provide at least $${MINIMAL_COMPENSATION} in compensation.\n
-* You can only post a job every ${POST_LIMITER_IN_HOURS} hours.\n
-* You agree not to abuse our job posting service or circumvent any server rules, and you understand that doing so will result in a ban.\n
+1. Your job must provide monetary compensation.\n
+2. Your job must provide at least $${MINIMAL_COMPENSATION} in compensation.\n
+3. You can only post a job every once ${
+    parseInt(POST_LIMITER_IN_HOURS, 10) === 1
+      ? 'hour'
+      : `${POST_LIMITER_IN_HOURS} hours`
+  }.\n
+4. You agree not to abuse our job posting service or circumvent any server rules, and you understand that doing so will result in a ban.\n
 `,
   'md'
 )}
 To continue, have the following information available:
 ${createMarkdownCodeBlock(
   `
-\n* Job location information (optional).\n
-* A short description of the job posting with no special formatting.\n
-* The amount of compensation in USD for the job.\n
-* Contact information for potential job seekers to apply for your job.\n
+1. Job location information (optional).\n
+2. A short description of the job posting with no special formatting.\n
+3. The amount of compensation in USD for the job.\n
+4. Contact information for potential job seekers to apply for your job.\n
 `,
   'md'
 )}
@@ -332,8 +349,12 @@ const handleJobPostingRequest = async (msg: Message) => {
     const isCached = cache.get(entry.key);
 
     if (isCached) {
+      const diff =
+        Math.abs(new Date().getTime() - entry.value.getTime()) / 3600000;
       send(
-        'You cannot create a job posting right now. Please try again later.'
+        `You cannot create a job posting right now.\nPlease try again ${
+          diff === 0 ? 'later' : diff === 1 ? 'in an hour' : `in ${diff} hours`
+        }.`
       );
       return;
     }
@@ -348,13 +369,9 @@ const handleJobPostingRequest = async (msg: Message) => {
       return send('Canceled.');
     }
 
-    // Store the post attempt in the cache
-    cache.set(entry.key, entry.value, POST_LIMITER);
-
     const answers = await formAndValidateAnswers(channel, filter, guild, send, {
       username,
       discriminator,
-      msgID,
     });
 
     // Just return if the iteration breaks due to invalid input
@@ -370,6 +387,9 @@ const handleJobPostingRequest = async (msg: Message) => {
 
     // Notify the user that the form is now complete
     await send('Your job posting has been created!\n' + url);
+
+    // Store the job post in the cache
+    cache.set(entry.key, entry.value, POST_LIMITER);
   } catch (error) {
     await msg.reply(
       'Please temporarily enable direct messages as the bot cares about your privacy.'

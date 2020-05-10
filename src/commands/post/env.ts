@@ -2,7 +2,7 @@ const {
   MOD_CHANNEL,
   JOB_POSTINGS_CHANNEL,
   MINIMAL_COMPENSATION,
-  POST_LIMITER_IN_HOURS,
+  POST_LIMITER_IN_HOURS, // Used for informing the user about the limiter
 } = process.env;
 
 // seconds to ms

@@ -1,15 +1,15 @@
-import { AWAIT_MESSAGE_TIMEOUT } from './env';
+import { MINIMAL_COMPENSATION } from './env';
 
 const isNotEmpty = (str: string) => str.trim().length > 0;
 
-const MINIMAL_COMPENSATION = parseFloat(process.env.MINIMAL_COMPENSATION);
+const minimalCompensation = parseFloat(MINIMAL_COMPENSATION);
 const compensationRegExp = /^[0-9]+(\.[0-9]{1,2})?$/gm;
 
 export default {
   remote: {
     body:
       'Type `yes` if your position is remote and `no` if it requires a location.',
-    validate: (answer: string) => ['yes', 'no'].includes(answer.toLowerCase()),
+    validate: (answer: string) => ['yes', 'no'].includes(answer),
   },
   location: {
     body:
@@ -24,8 +24,7 @@ export default {
   compensation_type: {
     body:
       'Type `project` if your compensation amount is for the project or type `hourly` if your compensation amount is for an hourly rate.',
-    validate: (answer: string) =>
-      ['project', 'hourly'].includes(answer.toLowerCase()),
+    validate: (answer: string) => ['project', 'hourly'].includes(answer),
   },
   compensation: {
     body: 'Provide the compensation amount for this job using only numbers.',
@@ -34,7 +33,7 @@ export default {
 
       return (
         compensationRegExp.test(value.toFixed(2)) &&
-        value >= MINIMAL_COMPENSATION
+        value >= minimalCompensation
       );
     },
   },
