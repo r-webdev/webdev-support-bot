@@ -334,7 +334,7 @@ To continue, have the following information available:
 ${createMarkdownCodeBlock(
   `
 1. Job location information (optional).\n
-2. A short description of the job posting with no special formatting.\n
+2. A short description of the job posting with no special formatting (at least ${MINIMAL_AMOUNT_OF_WORDS} words long).\n
 3. The amount of compensation in USD for the job.\n
 4. Contact information for potential job seekers to apply for your job.\n
 `,
