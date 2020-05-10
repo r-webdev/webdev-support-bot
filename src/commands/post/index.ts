@@ -291,14 +291,15 @@ const formAndValidateAnswers = async (
 
     if (!isValid) {
       switch (key) {
-        // Alert the moderators if the compensation is invalid.
         case 'compensation':
+          // Alert the moderators if the compensation is invalid.
           await sendAlert(guild, reply, { username, discriminator });
           break;
         case 'description':
           await send(
             `The job description should contain more than ${MINIMAL_AMOUNT_OF_WORDS} words.`
           );
+          break;
       }
       await send('Invalid input. Cancelling form.');
       return;
