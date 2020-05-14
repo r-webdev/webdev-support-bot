@@ -31,6 +31,7 @@ type Metadata = {
   username: string;
   discriminator: string;
   msgID?: string;
+  userID?: string;
 };
 
 type Channel = TextChannel | NewsChannel | DMChannel;
@@ -207,7 +208,7 @@ const createJobPost = async (
   answers: Answers,
   guild: Guild,
   channelID: string,
-  { username, discriminator, msgID }: Metadata
+  { username, discriminator, msgID, userID }: Metadata
 ) => {
   const targetChannel = getTargetChannel(guild, JOB_POSTINGS_CHANNEL);
 
@@ -232,7 +233,7 @@ const createJobPost = async (
         fields: [
           {
             name: 'User',
-            value: user,
+            value: `<@!${userID}>`,
             inline: true,
           },
           {
@@ -408,6 +409,7 @@ const handleJobPostingRequest = async (msg: Message) => {
       username,
       discriminator,
       msgID,
+      userID: id,
     });
 
     // Notify the user that the form is now complete
