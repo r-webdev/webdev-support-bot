@@ -31,6 +31,7 @@ type Metadata = {
   username: string;
   discriminator: string;
   msgID?: string;
+  userID?: string;
 };
 
 type Channel = TextChannel | NewsChannel | DMChannel;
@@ -201,13 +202,13 @@ const generateFields = (answers: Answers): OutputField[] => {
 };
 
 const createUserTag = (username: string, discriminator: string) =>
-  `@${username}#${discriminator}`;
+  `${username}#${discriminator}`;
 
 const createJobPost = async (
   answers: Answers,
   guild: Guild,
   channelID: string,
-  { username, discriminator, msgID }: Metadata
+  { username, discriminator, msgID, userID }: Metadata
 ) => {
   const targetChannel = getTargetChannel(guild, JOB_POSTINGS_CHANNEL);
 
@@ -224,6 +225,9 @@ const createJobPost = async (
   try {
     const msg = await targetChannel.send(
       createEmbed({
+        author: {
+          name: user,
+        },
         url,
         description: `A user has created a new job post!`,
         title: 'New Job Post',
@@ -232,7 +236,7 @@ const createJobPost = async (
         fields: [
           {
             name: 'User',
-            value: user,
+            value: `<@!${userID}>`,
             inline: true,
           },
           {
@@ -279,7 +283,7 @@ const formAndValidateAnswers = async (
     const reply = await getReply(
       channel,
       filter,
-      key === 'description' ? 2 : 1 // Double up `AWAIT_TIMEOUT` when waiting for the job description
+      key === 'description' ? 5 : 1 // Increase the timeout up to 5x of `AWAIT_TIMEOUT` when waiting for the job description
     );
 
     // If the reply is equal to "cancel" (aka, returns false), cancel the form
@@ -330,7 +334,7 @@ ${createMarkdownCodeBlock(
   `
 1. Your job must provide monetary compensation.\n
 2. Your job must provide at least $${MINIMAL_COMPENSATION} in compensation.\n
-3. You can only post a job every once ${
+3. You can only post a job once every ${
     parseInt(POST_LIMITER_IN_HOURS, 10) === 1
       ? 'hour'
       : `${POST_LIMITER_IN_HOURS} hours`
@@ -408,6 +412,7 @@ const handleJobPostingRequest = async (msg: Message) => {
       username,
       discriminator,
       msgID,
+      userID: id,
     });
 
     // Notify the user that the form is now complete
