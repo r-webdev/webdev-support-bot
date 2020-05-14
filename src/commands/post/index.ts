@@ -280,7 +280,7 @@ const formAndValidateAnswers = async (
     const reply = await getReply(
       channel,
       filter,
-      key === 'description' ? 2 : 1 // Double up `AWAIT_TIMEOUT` when waiting for the job description
+      key === 'description' ? 5 : 1 // Increase the timeout up to 5x of `AWAIT_TIMEOUT` when waiting for the job description
     );
 
     // If the reply is equal to "cancel" (aka, returns false), cancel the form
@@ -331,7 +331,7 @@ ${createMarkdownCodeBlock(
   `
 1. Your job must provide monetary compensation.\n
 2. Your job must provide at least $${MINIMAL_COMPENSATION} in compensation.\n
-3. You can only post a job every once ${
+3. You can only post a job once every ${
     parseInt(POST_LIMITER_IN_HOURS, 10) === 1
       ? 'hour'
       : `${POST_LIMITER_IN_HOURS} hours`
