@@ -202,7 +202,7 @@ const generateFields = (answers: Answers): OutputField[] => {
 };
 
 const createUserTag = (username: string, discriminator: string) =>
-  `@${username}#${discriminator}`;
+  `${username}#${discriminator}`;
 
 const createJobPost = async (
   answers: Answers,
@@ -225,6 +225,9 @@ const createJobPost = async (
   try {
     const msg = await targetChannel.send(
       createEmbed({
+        author: {
+          name: user,
+        },
         url,
         description: `A user has created a new job post!`,
         title: 'New Job Post',
