@@ -22,11 +22,15 @@ Supports
 
 `!npm` via unofficial `npmjs.com API`,
 
-`!mdn` via parsing [Mozilla Developer Network](http://developer.mozilla.org/) and
+`!mdn` via parsing [Mozilla Developer Network](http://developer.mozilla.org/),
 
-`!caniuse` via unofficial `caniuse API` and [mdn-browser-combat-data](https://github.com/mdn/browser-compat-data).
+`!caniuse` via unofficial `caniuse API` and [mdn-browser-combat-data](https://github.com/mdn/browser-compat-data),
 
-`!bundlephobia` via unofficial `bundlephobia API`
+`!bundlephobia` via unofficial `bundlephobia API`,
+
+`!jquery` as explanation on why not to use jquery,
+
+`!php` via parsing [official PHP Docs](http://php.net/).
 
 ## Usage / TLDR
 
