@@ -10,6 +10,7 @@ import {
   VSCODE_KEYWORD,
   JOB_POSTING_KEYWORD,
   FORMATTING_KEYWORD_ALT,
+  JQUERY_KEYWORD,
 } from './utils/urlTools';
 import { Provider } from './utils/discordTools';
 
@@ -31,6 +32,7 @@ import handleVSCodeRequest from './commands/vscode';
 import handleCodeRequest from './commands/code';
 import handleJobPostingRequest from './commands/post';
 import handlePHPQuery from './commands/php';
+import handleJQueryCommand from './commands/jquery';
 
 const client = new Client();
 
@@ -92,6 +94,8 @@ const handleMessage = async (msg: Message) => {
       return await handleVSCodeRequest(msg);
     case JOB_POSTING_KEYWORD:
       return await handleJobPostingRequest(msg);
+    case JQUERY_KEYWORD:
+      return await handleJQueryCommand(msg);
     default:
       // todo: probably refactor this sooner or later
       const isGeneralHelpRequest =
