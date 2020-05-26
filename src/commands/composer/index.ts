@@ -1,9 +1,8 @@
-import {
-  getExtendedInfoUrl,
-  buildDirectUrl,
-  getData,
-} from '../../utils/urlTools';
-import * as errors from '../../utils/errors';
+import * as compareVersions from 'compare-versions';
+import { formatDistanceToNow } from 'date-fns';
+import { Message, EmbedField } from 'discord.js';
+import { URL } from 'url';
+
 import {
   createMarkdownLink,
   createListEmbed,
@@ -16,18 +15,14 @@ import {
   EMPTY_FIELD,
   attemptEdit,
 } from '../../utils/discordTools';
-import useData from '../../utils/useData';
-import * as compareVersions from 'compare-versions';
-import { formatDistanceToNow } from 'date-fns';
+import { dependencies, website, language } from '../../utils/emojis';
+import * as errors from '../../utils/errors';
 import {
-  dependencies,
-  keywords,
-  license,
-  website,
-  language,
-} from '../../utils/emojis';
-import { Message, EmbedField } from 'discord.js';
-import { URL } from 'url';
+  getExtendedInfoUrl,
+  buildDirectUrl,
+  getData,
+} from '../../utils/urlTools';
+import useData from '../../utils/useData';
 import {
   PackagistResponse,
   ExtendedPackagistResponse,
@@ -41,12 +36,12 @@ const provider = 'composer';
 const handleComposerQuery = async (msg: Message, searchTerm: string) => {
   try {
     const json = await getData<PackagistResponse>({
-      provider,
-      msg,
-      searchTerm,
       isInvalidData(json: PackagistResponse) {
         return json.results.length === 0;
       },
+      msg,
+      provider,
+      searchTerm,
     });
 
     if (!json) {
@@ -58,19 +53,15 @@ const handleComposerQuery = async (msg: Message, searchTerm: string) => {
     const firstTenResults = results
       .splice(0, 10)
       .map(({ name, description, repository, url, downloads, favers }) => ({
-        name,
         description,
-        url,
-        repository,
         downloads,
+        name,
+        repository,
         stars: favers,
+        url,
       }));
 
     const embed = createListEmbed({
-      provider,
-      searchTerm,
-      url: `https://packagist.org/?query=${encodeURI(searchTerm)}`,
-      footerText: `${total} packages found`,
       description: createDescription(
         firstTenResults.map(({ name, description, url }, index) => {
           const truncatedDescription =
@@ -89,6 +80,10 @@ const handleComposerQuery = async (msg: Message, searchTerm: string) => {
           );
         })
       ),
+      footerText: `${total} packages found`,
+      provider,
+      searchTerm,
+      url: `https://packagist.org/?query=${encodeURI(searchTerm)}`,
     });
 
     const sentMsg = await msg.channel.send(embed);
@@ -101,6 +96,7 @@ const handleComposerQuery = async (msg: Message, searchTerm: string) => {
 
     const { name: resultName } = result;
 
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const { error, json: extendedJson } = await useData<
       ExtendedPackagistResponse
     >(getExtendedInfoUrl(provider, resultName));
@@ -119,16 +115,16 @@ const handleComposerQuery = async (msg: Message, searchTerm: string) => {
     await attemptEdit(
       sentMsg,
       createEmbed({
-        provider,
-        title: `${name} *(${version})*`,
-        footerText: generateDetailedFooter(downloads, released),
-        description,
         author: {
           icon_url: maintainers[0].avatar_url,
           name: maintainers[0].name,
         },
-        url: buildDirectUrl(provider, name),
+        description,
         fields: extractFieldsFromLatestRelease(versions[version]),
+        footerText: generateDetailedFooter(downloads, released),
+        provider,
+        title: `${name} *(${version})*`,
+        url: buildDirectUrl(provider, name),
       })
     );
   } catch (error) {
@@ -158,8 +154,8 @@ const findLatestRelease = (versions: Versions) => {
   );
 
   return {
-    version,
     released: formatDistanceToNow(new Date(time)),
+    version,
   };
 };
 
@@ -174,19 +170,19 @@ const extractFieldsFromLatestRelease = ({
 }: Version): EmbedField[] => {
   const fields = [
     {
+      inline: false,
       name: 'add to your project',
       value: createMarkdownBash(`composer require ${name}`),
-      inline: false,
     },
   ];
 
   if (keywords.length > 0) {
     fields.push({
+      inline: false,
       name: `${keywords} keywords`,
       value: keywords
         .map(keyword => createMarkdownLink(keyword, createTagLink(keyword)))
         .join(', '),
-      inline: false,
     });
   }
 
@@ -196,20 +192,21 @@ const extractFieldsFromLatestRelease = ({
 
   if (phpRequirement) {
     fields.push({
+      inline: true,
       name: 'PHP version',
       value: '' + phpRequirement[1],
-      inline: true,
     });
   }
 
   fields.push({
+    inline: true,
     name: `${dependencies} dependencies`,
     value: (Object.keys(require).length - (phpRequirement ? 1 : 0)).toString(),
-    inline: true,
   });
 
   if (license) {
     fields.push({
+      inline: true,
       name: `${license} license`,
       value: license
         .map(license =>
@@ -219,7 +216,6 @@ const extractFieldsFromLatestRelease = ({
           )
         )
         .join(' '),
-      inline: true,
     });
   }
 
@@ -235,12 +231,12 @@ const extractFieldsFromLatestRelease = ({
     const { protocol } = new URL(homepage);
 
     fields.push({
+      inline: true,
       name: `${website} homepage`,
       value: createMarkdownLink(
         homepage.replace(`${protocol}//`, ''),
         homepage
       ),
-      inline: true,
     });
 
     addedLinks++;
@@ -251,12 +247,12 @@ const extractFieldsFromLatestRelease = ({
       const { pathname } = new URL(source.url);
 
       fields.push({
+        inline: true,
         name: 'repository',
         value: createMarkdownLink(
           pathname.substr(1).replace('.git', ''),
           source.url.replace('.git', '')
         ),
-        inline: true,
       });
 
       addedLinks++;
@@ -274,9 +270,9 @@ const extractFieldsFromLatestRelease = ({
 
   authors.forEach(author => {
     fields.push({
+      inline: true,
       name: `${language} author`,
       value: author.name,
-      inline: true,
     });
   });
 

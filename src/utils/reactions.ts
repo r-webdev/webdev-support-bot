@@ -15,7 +15,7 @@ export const reactionFilterBuilder = (
   currentlyValidEmojis.includes(name);
 
 export const awaitReactionConfig = {
+  errors: ['time'],
   max: 1,
   time: 60 * 1000,
-  errors: ['time'],
 };

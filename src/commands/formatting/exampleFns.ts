@@ -14,9 +14,9 @@ function annoyTitan() {
 
 function getActualName(user: string) {
   const map = {
+    emnudge: 'imnudeguy',
     gerrit: 'gerratata',
     innovati: 'innevada',
-    emnudge: 'imnudeguy',
   };
 
   return map[user] ?? 'no match found';

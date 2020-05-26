@@ -1,6 +1,7 @@
-import { SpammerMetadata } from 'spam_filter';
-import { createEmbed, createMarkdownBash } from '../utils/discordTools';
 import { TextChannel, GuildChannel } from 'discord.js';
+import { SpammerMetadata } from 'spam_filter';
+
+import { createEmbed, createMarkdownBash } from '../utils/discordTools';
 
 type ModChannel = TextChannel & Pick<GuildChannel, 'name'>;
 
@@ -30,28 +31,28 @@ export default async ({
   try {
     await targetChannel.send(
       createEmbed({
-        provider: 'spam',
-        description: 'Spam has been detected on the server.',
         author: { name: userID },
-        url,
-        title: 'Alert!',
+        description: 'Spam has been detected on the server.',
         fields: [
-          { name: 'User', value: user, inline: true },
+          { inline: true, name: 'User', value: user },
           {
+            inline: true,
             name: 'Channel',
             value: channelName,
-            inline: true,
           },
           {
+            inline: false,
             name: 'Command',
             value: createMarkdownBash(
               `?mute ${user} 5h Spamming in #${channelName}`
             ),
-            inline: false,
           },
-          { name: 'Message Link', value: url, inline: false },
+          { inline: false, name: 'Message Link', value: url },
         ],
         footerText: 'Spam Filter',
+        provider: 'spam',
+        title: 'Alert!',
+        url,
       })
     );
   } catch (error) {

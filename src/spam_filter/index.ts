@@ -1,12 +1,5 @@
+import { Message, Guild, GuildChannel } from 'discord.js';
 import * as NodeCache from 'node-cache';
-import {
-  Message,
-  TextChannel,
-  Guild,
-  DMChannel,
-  NewsChannel,
-  GuildChannel,
-} from 'discord.js';
 
 const numberOfAllowedMessages = parseInt(
   process.env.NUMBER_OF_ALLOWED_MESSAGES
@@ -15,8 +8,8 @@ const cacheRevalidationWindow =
   parseInt(process.env.CACHE_REVALIDATION_IN_SECONDS) * 1000;
 
 export const cache = new NodeCache({
-  stdTTL: parseInt(process.env.FINAL_CACHE_EXPIRATION_IN_SECONDS),
   checkperiod: cacheRevalidationWindow,
+  stdTTL: parseInt(process.env.FINAL_CACHE_EXPIRATION_IN_SECONDS),
 });
 
 /**
@@ -74,8 +67,8 @@ export default ({
   if (!previousEntry) {
     // create entry and bail
     cache.set(userID, {
-      wasRecentlyWarned: false,
       timestamps: [now],
+      wasRecentlyWarned: false,
     });
     return null;
   }
@@ -117,12 +110,12 @@ export default ({
 
   // return metadata about spammer
   return {
-    userID,
-    username,
-    discriminator,
     channelId: channel.id,
     channelName: (channel as GuildChannel).name,
-    msgID,
+    discriminator,
     guild,
+    msgID,
+    userID,
+    username,
   };
 };

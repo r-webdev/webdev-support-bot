@@ -1,9 +1,6 @@
-import {
-  getExtendedInfoUrl,
-  buildDirectUrl,
-  getData,
-} from '../../utils/urlTools';
-import * as errors from '../../utils/errors';
+import * as compareVersions from 'compare-versions';
+import { Message, EmbedField } from 'discord.js';
+
 import {
   createMarkdownLink,
   createListEmbed,
@@ -15,10 +12,14 @@ import {
   EMPTY_FIELD,
   attemptEdit,
 } from '../../utils/discordTools';
-import useData from '../../utils/useData';
 import * as emojis from '../../utils/emojis';
-import * as compareVersions from 'compare-versions';
-import { Message, EmbedField } from 'discord.js';
+import * as errors from '../../utils/errors';
+import {
+  getExtendedInfoUrl,
+  buildDirectUrl,
+  getData,
+} from '../../utils/urlTools';
+import useData from '../../utils/useData';
 import {
   BundlephobiaResponse,
   ExtendedBundlephobiaResponse,
@@ -31,10 +32,10 @@ const provider = 'bundlephobia';
 const handleBundlephobiaQuery = async (msg: Message, searchTerm: string) => {
   try {
     const json = await getData<BundlephobiaResponse[]>({
-      provider,
-      msg,
-      searchTerm,
       isInvalidData: json => json.length === 0,
+      msg,
+      provider,
+      searchTerm,
     });
 
     if (!json) {
@@ -46,8 +47,8 @@ const handleBundlephobiaQuery = async (msg: Message, searchTerm: string) => {
     const firstTenResults = json
       .splice(0, 10)
       .map(({ package: { name, version, description, links } }) => ({
-        name: `${name}@${version}`,
         description,
+        name: `${name}@${version}`,
         url: links.npm,
       }));
 
@@ -57,10 +58,6 @@ const handleBundlephobiaQuery = async (msg: Message, searchTerm: string) => {
     }
 
     const embed = createListEmbed({
-      provider,
-      searchTerm,
-      url: '',
-      footerText: `${total} packages found`,
       description: createDescription(
         firstTenResults.map(({ name, description, url }, index) => {
           const truncatedDescription =
@@ -79,6 +76,10 @@ const handleBundlephobiaQuery = async (msg: Message, searchTerm: string) => {
           );
         })
       ),
+      footerText: `${total} packages found`,
+      provider,
+      searchTerm,
+      url: '',
     });
 
     const sentMsg = await msg.channel.send(embed);
@@ -100,6 +101,7 @@ const handleResult = async (
   { name, description }: { name: string; description: string },
   sentMsg: Message
 ) => {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const { error, json: extendedJson } = await useData<
     ExtendedBundlephobiaResponse
   >(getExtendedInfoUrl(provider, name));
@@ -123,21 +125,21 @@ const handleResult = async (
   const similarPackages = await getSimilarPackages(name);
 
   const embed = createEmbed({
-    provider,
-    title: name,
-    footerText: 'Sizes are always gzipped.',
     description,
-    url: buildDirectUrl(provider, name),
     fields: createFields({
-      gzip,
-      previousVersionSize,
       dependencies,
-      hasSideEffects,
-      isTreeShakeable,
       estDownloadTimeEdge,
       estDownloadTimeEmerging3g,
+      gzip,
+      hasSideEffects,
+      isTreeShakeable,
+      previousVersionSize,
       similarPackages,
     }),
+    footerText: 'Sizes are always gzipped.',
+    provider,
+    title: name,
+    url: buildDirectUrl(provider, name),
   });
 
   if (!sentMsg) {
@@ -176,48 +178,48 @@ const createFields = ({
 }: Fields) => {
   const fields: EmbedField[] = [
     {
+      inline: true,
       name: 'size (latest)',
       value: getInitialFieldValue(gzip, previousVersionSize),
-      inline: true,
     },
   ];
 
   fields.push({
+    inline: true,
     name: 'size (previous)',
     value: previousVersionSize ? toKilobytes(previousVersionSize) : 'unknown',
-    inline: true,
   });
 
   fields.push({
+    inline: true,
     name: 'dependencies',
     value: '' + dependencies,
-    inline: true,
   });
 
   fields.push(EMPTY_FIELD);
 
   fields.push({
+    inline: true,
     name: 'treeshakable?',
     value: isTreeShakeable ? emojis.yes : emojis.no,
-    inline: true,
   });
 
   fields.push({
+    inline: true,
     name: 'side effects?',
     value: hasSideEffects ? emojis.exclamation + ' yes' : emojis.yes + ' no',
-    inline: true,
   });
 
   fields.push({
+    inline: true,
     name: 'download on edge',
     value: estDownloadTimeEdge,
-    inline: true,
   });
 
   fields.push({
+    inline: true,
     name: 'download on 3g',
     value: estDownloadTimeEmerging3g,
-    inline: true,
   });
 
   if (similarPackages.packages.length > 0) {
@@ -226,9 +228,9 @@ const createFields = ({
     fields.push(EMPTY_FIELD);
 
     fields.push({
+      inline: false,
       name: 'Similar packages',
       value: `labelled as _${label}_`,
-      inline: false,
     });
 
     for (let i = 0; i <= 2; i++) {
@@ -236,9 +238,9 @@ const createFields = ({
         const { name, size } = packages[i];
 
         fields.push({
+          inline: true,
           name,
           value: toKilobytes(size),
-          inline: true,
         });
       }
     }
@@ -251,6 +253,7 @@ const calcDiffInPercent = (current: number, previous: number) =>
   (current / previous) * 100 - 100;
 
 const getPreviousVersionSize = async (pkg: string) => {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const { error, json } = await useData(
     `https://bundlephobia.com/api/package-history?package=${pkg}`
   );
@@ -297,6 +300,7 @@ const calcDownloadTime = (size: number, type: '3g' | 'edge') => {
 
 const getSimilarPackages = async (pkg: string) => {
   const url = `https://bundlephobia.com/api/similar-packages?package=${pkg}`;
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const { error, json } = await useData<SimilarPackagesResponse>(url);
 
   if (error || !json.category.similar) {
@@ -308,6 +312,7 @@ const getSimilarPackages = async (pkg: string) => {
   const packages = await Promise.all(
     similar
       .map(async otherPackage => {
+        // eslint-disable-next-line react-hooks/rules-of-hooks
         const { error, json } = await useData<ExtendedBundlephobiaResponse>(
           getExtendedInfoUrl(provider, otherPackage)
         );

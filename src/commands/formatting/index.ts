@@ -1,4 +1,5 @@
 import { Message } from 'discord.js';
+
 import { point_up, paintbrush } from '../../utils/emojis';
 import { LINE_SEPARATOR, exampleFns } from './exampleFns';
 

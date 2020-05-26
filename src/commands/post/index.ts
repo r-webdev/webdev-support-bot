@@ -1,6 +1,3 @@
-import questions from './questions';
-import { createEmbed, createMarkdownCodeBlock } from '../../utils/discordTools';
-import { cache } from '../../spam_filter';
 import {
   Message,
   CollectorFilter,
@@ -11,6 +8,9 @@ import {
   GuildChannel,
   MessageEmbed,
 } from 'discord.js';
+
+import { cache } from '../../spam_filter';
+import { createEmbed, createMarkdownCodeBlock } from '../../utils/discordTools';
 import {
   AWAIT_MESSAGE_TIMEOUT,
   MOD_CHANNEL,
@@ -20,6 +20,7 @@ import {
   MINIMAL_COMPENSATION,
   MINIMAL_AMOUNT_OF_WORDS,
 } from './env';
+import questions from './questions';
 
 type OutputField = {
   name: string;
@@ -137,36 +138,36 @@ const sendAlert = (
   try {
     targetChannel.send(
       createEmbed({
-        url: 'https://discord.gg/',
         description:
           'A user attempted creating a job post whilst providing invalid compensation.',
-        title: 'Alert!',
-        footerText: 'Job Posting Module',
-        provider: 'spam',
         fields: [
           {
+            inline: true,
             name: 'User',
             value: user,
-            inline: true,
           },
           {
+            inline: false,
             name: 'Input',
             value: createMarkdownCodeBlock(userInput),
-            inline: false,
           },
           {
+            inline: false,
             name: 'Command',
             value: createMarkdownCodeBlock(
               `?ban ${user} Invalid compensation.`
             ),
-            inline: false,
           },
           {
+            inline: false,
             name: 'Message Link',
             value: 'DM Channel - Not Applicable.',
-            inline: false,
           },
         ],
+        footerText: 'Job Posting Module',
+        provider: 'spam',
+        title: 'Alert!',
+        url: 'https://discord.gg/',
       })
     );
   } catch (error) {
@@ -188,13 +189,13 @@ const generateFields = (answers: Answers): OutputField[] => {
     if (key === 'location' && value.toLowerCase() === 'no') continue;
 
     response.push({
+      inline: false,
       name: capitalize(key.replace('_', ' ')),
       value: createMarkdownCodeBlock(
         key === 'compensation_type' || key === 'remote'
           ? capitalize(value)
           : value
       ),
-      inline: false,
     });
   }
 
@@ -228,24 +229,28 @@ const createJobPost = async (
         author: {
           name: user,
         },
-        url,
         description: `A user has created a new job post!`,
-        title: 'New Job Post',
-        footerText: 'Job Posting Module',
-        provider: 'spam', // Using the spam provider because we only need the color/icon, which it provides anyway
+        // Using the spam provider because we only need the color/icon, which it provides anyway
         fields: [
           {
+            inline: true,
             name: 'User',
             value: `<@!${userID}>`,
-            inline: true,
           },
           {
+            inline: true,
             name: 'Created At',
             value: getCurrentDate(),
-            inline: true,
           },
           ...generateFields(answers),
         ],
+
+        footerText: 'Job Posting Module',
+
+        provider: 'spam',
+
+        title: 'New Job Post',
+        url,
       })
     );
 
@@ -305,7 +310,7 @@ const formAndValidateAnswers = async (
       switch (key) {
         case 'compensation':
           // Alert the moderators if the compensation is invalid.
-          await sendAlert(guild, reply, { username, discriminator });
+          await sendAlert(guild, reply, { discriminator, username });
           break;
         case 'description':
           await send(
@@ -399,8 +404,8 @@ const handleJobPostingRequest = async (msg: Message) => {
     }
 
     const answers = await formAndValidateAnswers(channel, filter, guild, send, {
-      username,
       discriminator,
+      username,
     });
 
     // Just return if the iteration breaks due to invalid input
@@ -409,10 +414,10 @@ const handleJobPostingRequest = async (msg: Message) => {
     }
 
     const url = await createJobPost(answers, guild, channelID, {
-      username,
       discriminator,
       msgID,
       userID: id,
+      username,
     });
 
     // Notify the user that the form is now complete

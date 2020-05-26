@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "nodemon -x ts-node --files ./src/index.ts",
     "start": "node build/index.js",
-    "build": "tsc"
+    "build": "tsc",
+    "lint": "eslint src",
+    "lint-fix": "eslint --fix src && prettier --write src"
   },
   "keywords": [],
   "author": "",
@@ -28,10 +30,8 @@
     "typescript": "^4.0.0-dev.20200525"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^2.34.0",
-    "@typescript-eslint/parser": "^2.34.0",
-    "eslint": "^6.8.0",
-    "eslint-config-prettier": "^6.11.0",
+    "eslint": "^7.1.0",
+    "eslint-config-galex": "^0.2.0",
     "husky": "^4.2.5",
     "lint-staged": "^10.2.6",
     "nodemon": "^2.0.4",

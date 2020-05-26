@@ -1,5 +1,7 @@
-import { getData } from '../../utils/urlTools';
-import * as errors from '../../utils/errors';
+import { formatDistanceToNow } from 'date-fns';
+import { Message, EmbedField } from 'discord.js';
+import { URL } from 'url';
+
 import {
   createMarkdownLink,
   createListEmbed,
@@ -12,10 +14,9 @@ import {
   attemptEdit,
   Embed,
 } from '../../utils/discordTools';
-import { formatDistanceToNow } from 'date-fns';
 import { website, language } from '../../utils/emojis';
-import { Message, EmbedField } from 'discord.js';
-import { URL } from 'url';
+import * as errors from '../../utils/errors';
+import { getData } from '../../utils/urlTools';
 import { NPMResponse } from './types';
 
 const provider = 'npm';
@@ -23,10 +24,10 @@ const provider = 'npm';
 const handleNPMQuery = async (msg: Message, searchTerm: string) => {
   try {
     const json = await getData<NPMResponse[]>({
-      msg,
-      searchTerm,
-      provider,
       isInvalidData: json => json.length === 0,
+      msg,
+      provider,
+      searchTerm,
     });
 
     if (!json) {
@@ -36,20 +37,20 @@ const handleNPMQuery = async (msg: Message, searchTerm: string) => {
     const firstTenResults = json
       .splice(0, 10)
       .map(({ name, date, description, links, publisher, maintainers }) => ({
-        lastUpdate: `${formatDistanceToNow(new Date(date))} ago`,
-        url: links.npm,
-        externalUrls: {
-          homepage: links.homepage,
-          repository: links.repository,
-        },
         author: {
           name: publisher.username,
           //icon_url: publisher.avatars.small,
           url: `https://www.npmjs.com/~${publisher.username}`,
         },
-        name,
         description,
+        externalUrls: {
+          homepage: links.homepage,
+          repository: links.repository,
+        },
+        lastUpdate: `${formatDistanceToNow(new Date(date))} ago`,
         maintainers: maintainers.length,
+        name,
+        url: links.npm,
       }));
 
     if (firstTenResults.length === 1) {
@@ -84,14 +85,14 @@ const handleNPMQuery = async (msg: Message, searchTerm: string) => {
 
     const sentMsg = await msg.channel.send(
       createListEmbed({
-        provider,
-        url: `https://npmjs.com/search?q=${encodeURI(searchTerm)}`,
+        description,
         footerText:
           firstTenResults.length < 10
             ? `${firstTenResults.length} packages found`
             : `at least ${firstTenResults.length.toLocaleString()} packages found`,
+        provider,
         searchTerm,
-        description,
+        url: `https://npmjs.com/search?q=${encodeURI(searchTerm)}`,
       })
     );
 
@@ -127,13 +128,13 @@ const createNPMEmbed = ({
   maintainers,
   author,
 }: NPMEmbed): Embed => ({
+  author,
+  description,
+  fields: createFields(name, externalUrls, maintainers),
+  footerText: `last updated ${lastUpdate}`,
   provider,
   title: name,
   url,
-  footerText: `last updated ${lastUpdate}`,
-  description,
-  author,
-  fields: createFields(name, externalUrls, maintainers),
 });
 
 /**
@@ -146,11 +147,11 @@ const createFields = (
   maintainers: number
 ): EmbedField[] => [
   {
+    inline: false,
     name: 'add to your project',
     value: createMarkdownBash(
       ['npm install', 'yarn add'].map(cmd => [cmd, name].join(' ')).join('\n')
     ),
-    inline: false,
   },
   ...Object.entries(externalUrls)
     .filter(([, url]) => !!url)
@@ -160,6 +161,7 @@ const createFields = (
       const emoji = host === 'homepage' ? website : false;
 
       return {
+        inline: true,
         name: emoji ? `${emoji} ${host}` : host,
         value: createMarkdownLink(
           markdownTitle.endsWith('/')
@@ -167,13 +169,12 @@ const createFields = (
             : markdownTitle,
           url
         ),
-        inline: true,
       };
     }),
   {
+    inline: true,
     name: `${language} maintainers`,
     value: maintainers.toString(),
-    inline: true,
   },
 ];
 

@@ -1,7 +1,11 @@
 import { Message } from 'discord.js';
+import * as bcd from 'mdn-browser-compat-data';
+import {
+  CompatStatement,
+  SupportStatement,
+} from 'mdn-browser-compat-data/types';
 
-import { getExtendedInfoUrl, getData } from '../../utils/urlTools';
-import * as errors from '../../utils/errors';
+import delayedMessageAutoDeletion from '../../utils/delayedMessageAutoDeletion';
 import {
   createMarkdownLink,
   createListEmbed,
@@ -11,15 +15,11 @@ import {
   getChosenResult,
   attemptEdit,
 } from '../../utils/discordTools';
-import useData from '../../utils/useData';
-import * as bcd from 'mdn-browser-compat-data';
 import { warning, yes, no } from '../../utils/emojis';
-import delayedMessageAutoDeletion from '../../utils/delayedMessageAutoDeletion';
+import * as errors from '../../utils/errors';
+import { getExtendedInfoUrl, getData } from '../../utils/urlTools';
+import useData from '../../utils/useData';
 import { ExtendedCanIUseData } from './types';
-import {
-  CompatStatement,
-  SupportStatement,
-} from 'mdn-browser-compat-data/types';
 
 const provider = 'caniuse';
 
@@ -35,17 +35,18 @@ const browserNameMap = Object.entries(bcd.browsers).reduce(
 const handleCanIUseQuery = async (msg: Message, searchTerm: string) => {
   try {
     const text = await getData<string>({
+      isInvalidData: text => text.length === 0,
       msg,
-      searchTerm,
       provider,
       sanitizeData: text => text.replace('"', ''),
-      isInvalidData: text => text.length === 0,
+      searchTerm,
     });
 
     if (!text) {
       return;
     }
 
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const { error: extendedQueryError, json } = await useData<
       ExtendedCanIUseData[]
     >(getExtendedInfoUrl(provider, text));
@@ -83,23 +84,23 @@ const handleCanIUseQuery = async (msg: Message, searchTerm: string) => {
       .splice(0, 10)
       .map(({ title, path }, index) => {
         return {
+          compatibilityMap: extractCompatibilityFromBCD(path),
           title,
           url: buildHashUrl(hashes[index]),
-          compatibilityMap: extractCompatibilityFromBCD(path),
         };
       });
 
     const sentMsg = await msg.channel.send(
       createListEmbed({
-        url: `https://caniuse.com/#search=${encodeURI(searchTerm)}`,
-        footerText: `${resultAmount} results found`,
-        provider,
-        searchTerm,
         description: createDescription(
           firstTenResults.map(({ title, url }, index) =>
             createMarkdownListItem(index, createMarkdownLink(title, url))
           )
         ),
+        footerText: `${resultAmount} results found`,
+        provider,
+        searchTerm,
+        url: `https://caniuse.com/#search=${encodeURI(searchTerm)}`,
       })
     );
 
@@ -126,8 +127,8 @@ const handleCanIUseQuery = async (msg: Message, searchTerm: string) => {
         } = getFeatureMetadata(data);
 
         return {
-          name: browserNameMap[id],
           inline: true,
+          name: browserNameMap[id],
           value: [
             isSupported,
             hasRuntimeFlag && `${warning} behind a flag`,
@@ -145,16 +146,16 @@ const handleCanIUseQuery = async (msg: Message, searchTerm: string) => {
     await attemptEdit(
       sentMsg,
       createEmbed({
-        provider,
-        url,
-        title: `CanIUse... ${title}`,
-        footerText:
-          'This bot only considers the **latest stable version** of a browser.',
         description: createMarkdownLink(
           'visit MDN for more information about this specific API',
           compatibilityMap.mdn_url
         ),
         fields,
+        footerText:
+          'This bot only considers the **latest stable version** of a browser.',
+        provider,
+        title: `CanIUse... ${title}`,
+        url,
       })
     );
   } catch (error) {
@@ -177,8 +178,8 @@ const getFeatureMetadata = (data: SupportStatement) => {
   } = Array.isArray(data) ? data[0] : data;
 
   const flagInformation = {
-    isUserPreference: false,
     hasRuntimeFlag: false,
+    isUserPreference: false,
   };
 
   if (flags) {
@@ -196,11 +197,11 @@ const getFeatureMetadata = (data: SupportStatement) => {
     version_added && !flagInformation.hasRuntimeFlag ? yes : no;
 
   return {
-    isSupported,
-    flags: flagInformation,
     altName: alternative_name && alternative_name,
-    prefix: prefix && prefix,
+    flags: flagInformation,
     isPartialImplementation: !!partial_implementation,
+    isSupported,
+    prefix: prefix && prefix,
   };
 };
 

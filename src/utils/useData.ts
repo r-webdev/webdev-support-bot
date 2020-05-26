@@ -37,8 +37,8 @@ export default async <T>(
 
     return {
       error: false,
-      text: null,
       json,
+      text: null,
     };
   }
 

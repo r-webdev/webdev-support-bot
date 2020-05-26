@@ -1,7 +1,8 @@
-import { getSearchUrl, buildDirectUrl } from '../../utils/urlTools';
-import { Html5Entities as Entities } from 'html-entities';
+import { Message } from 'discord.js';
 import * as DOMParser from 'dom-parser';
-import * as errors from '../../utils/errors';
+import { Html5Entities as Entities } from 'html-entities';
+
+import delayedMessageAutoDeletion from '../../utils/delayedMessageAutoDeletion';
 import {
   createMarkdownLink,
   createDescription,
@@ -12,9 +13,9 @@ import {
   adjustTitleLength,
   BASE_DESCRIPTION,
 } from '../../utils/discordTools';
+import * as errors from '../../utils/errors';
+import { getSearchUrl, buildDirectUrl } from '../../utils/urlTools';
 import useData from '../../utils/useData';
-import delayedMessageAutoDeletion from '../../utils/delayedMessageAutoDeletion';
-import { Message } from 'discord.js';
 
 const provider = 'mdn';
 const entities = new Entities();
@@ -22,6 +23,7 @@ const entities = new Entities();
 const handleMDNQuery = async (msg: Message, searchTerm: string) => {
   try {
     const searchUrl = getSearchUrl(provider, searchTerm);
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const { error, text } = await useData(searchUrl, 'text');
 
     if (error) {
@@ -76,11 +78,11 @@ const handleMDNQuery = async (msg: Message, searchTerm: string) => {
 
     const sentMsg = await msg.channel.send(
       createListEmbed({
+        description: createDescription(preparedDescription),
+        footerText: meta.split('for')[0],
         provider,
         searchTerm,
         url: searchUrl,
-        footerText: meta.split('for')[0],
-        description: createDescription(preparedDescription),
       })
     );
 
@@ -115,8 +117,8 @@ const extractMetadataFromResult = (result: any) => {
   );
 
   return {
-    title,
     excerpt,
+    title,
     url,
   };
 };

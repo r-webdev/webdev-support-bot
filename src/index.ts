@@ -1,6 +1,25 @@
-import { config } from 'dotenv';
-config();
 import { Client, Message } from 'discord.js';
+import { config } from 'dotenv';
+
+// Spam filtering module
+
+// commands begin here
+import handleBundlephobiaQuery from './commands/bundlephobia';
+import handleCanIUseQuery from './commands/caniuse';
+import handleCodeRequest from './commands/code';
+import handleComposerQuery from './commands/composer';
+import handleFormattingRequest from './commands/formatting';
+import handleGithubQuery from './commands/github';
+import handleJQueryCommand from './commands/jquery';
+import handleMDNQuery from './commands/mdn';
+import handleNPMQuery from './commands/npm';
+import handlePHPQuery from './commands/php';
+import handleJobPostingRequest from './commands/post';
+import handleVSCodeRequest from './commands/vscode';
+import spamFilter from './spam_filter';
+import handleSpam from './spam_filter/handler';
+import { Provider } from './utils/discordTools';
+import * as errors from './utils/errors';
 import {
   providers,
   KEYWORD_REGEXP,
@@ -12,27 +31,7 @@ import {
   FORMATTING_KEYWORD_ALT,
   JQUERY_KEYWORD,
 } from './utils/urlTools';
-import { Provider } from './utils/discordTools';
-
-import * as errors from './utils/errors';
-
-// Spam filtering module
-import spamFilter from './spam_filter';
-import handleSpam from './spam_filter/handler';
-
-// commands begin here
-import handleMDNQuery from './commands/mdn';
-import handleNPMQuery from './commands/npm';
-import handleComposerQuery from './commands/composer';
-import handleCanIUseQuery from './commands/caniuse';
-import handleGithubQuery from './commands/github';
-import handleBundlephobiaQuery from './commands/bundlephobia';
-import handleFormattingRequest from './commands/formatting';
-import handleVSCodeRequest from './commands/vscode';
-import handleCodeRequest from './commands/code';
-import handleJobPostingRequest from './commands/post';
-import handlePHPQuery from './commands/php';
-import handleJQueryCommand from './commands/jquery';
+config();
 
 const client = new Client();
 

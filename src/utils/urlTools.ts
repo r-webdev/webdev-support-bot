@@ -1,9 +1,10 @@
-import { noResults, invalidResponse } from './errors';
-import useData from './useData';
-import delayedMessageAutoDeletion from './delayedMessageAutoDeletion';
-import { Provider } from './discordTools';
 import { Message } from 'discord.js';
 import { HeadersInit } from 'node-fetch';
+
+import delayedMessageAutoDeletion from './delayedMessageAutoDeletion';
+import { Provider } from './discordTools';
+import { noResults, invalidResponse } from './errors';
+import useData from './useData';
 
 const SEARCH_TERM = '%SEARCH%';
 const TERM = '%TERM%';
@@ -21,68 +22,68 @@ type ProviderMap = {
 };
 
 export const providers: ProviderMap = {
-  mdn: {
-    search: `https://developer.mozilla.org/en-US/search?q=${SEARCH_TERM}`,
-    direct: `https://developer.mozilla.org${TERM}`,
-    color: 0x83d0f2,
-    createTitle: (searchTerm: string) => `MDN results for *${searchTerm}*`,
-    icon: 'https://avatars0.githubusercontent.com/u/7565578',
-    help: '!mdn localStorage',
-  },
-  npm: {
-    search: `https://www.npmjs.com/search/suggestions?q=${SEARCH_TERM}`,
-    color: 0xfb3e44,
-    createTitle: (searchTerm: string) => `NPM results for *${searchTerm}*`,
-    icon: 'https://avatars0.githubusercontent.com/u/6078720',
-    help: '!npm react',
-  },
-  composer: {
-    search: `https://packagist.org/search.json?q=${SEARCH_TERM}`,
-    direct: `https://packagist.org/packages/${TERM}`,
-    color: 0xf28d1a,
-    createTitle: (searchTerm: string) => `Packagist results for ${searchTerm}`,
-    icon: 'https://packagist.org/bundles/packagistweb/img/logo-small.png',
-    getExtendedInfoUrl: (pkg: string) =>
-      `https://packagist.org/packages/${pkg}.json`,
-    help: '!composer sentry',
-  },
-  caniuse: {
-    search: `https://caniuse.com/process/query.php?search=${SEARCH_TERM}`,
-    direct: `https://caniuse.com/#feat=${TERM}`,
-    color: 0xdb5600,
-    createTitle: (searchTerm: string) => `CanIUse results for *${searchTerm}*`,
-    icon: 'https://caniuse.com/img/favicon-128.png',
-    getExtendedInfoUrl: (text: string) =>
-      `https://caniuse.com/process/get_feat_data.php?type=support-data&feat=${text}`,
-    help: '!caniuse IntersectionObserver',
-  },
-  github: {
-    search: `https://api.github.com/search/repositories?q=${SEARCH_TERM}`,
-    direct: `https://github.com/${TERM}`,
-    color: 0x24292e,
-    createTitle: (searchTerm: string) => `GitHub results for *${searchTerm}*`,
-    icon:
-      'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png',
-    help: '!github react',
-  },
   bundlephobia: {
-    search: `https://api.npms.io/v2/search/suggestions?q=${SEARCH_TERM}`,
-    direct: `https://bundlephobia.com/result?p=${TERM}`,
     color: 0xffffff,
     createTitle: (searchTerm: string) =>
       `Bundlephobia results for *${searchTerm}*`,
+    direct: `https://bundlephobia.com/result?p=${TERM}`,
     getExtendedInfoUrl: (pkg: string) =>
       `https://bundlephobia.com/api/size?package=${pkg}&record=true`,
-    icon: 'https://bundlephobia.com/android-chrome-192x192.png',
     help: '!bundlephobia @chakra-ui/core',
+    icon: 'https://bundlephobia.com/android-chrome-192x192.png',
+    search: `https://api.npms.io/v2/search/suggestions?q=${SEARCH_TERM}`,
+  },
+  caniuse: {
+    color: 0xdb5600,
+    createTitle: (searchTerm: string) => `CanIUse results for *${searchTerm}*`,
+    direct: `https://caniuse.com/#feat=${TERM}`,
+    getExtendedInfoUrl: (text: string) =>
+      `https://caniuse.com/process/get_feat_data.php?type=support-data&feat=${text}`,
+    help: '!caniuse IntersectionObserver',
+    icon: 'https://caniuse.com/img/favicon-128.png',
+    search: `https://caniuse.com/process/query.php?search=${SEARCH_TERM}`,
+  },
+  composer: {
+    color: 0xf28d1a,
+    createTitle: (searchTerm: string) => `Packagist results for ${searchTerm}`,
+    direct: `https://packagist.org/packages/${TERM}`,
+    getExtendedInfoUrl: (pkg: string) =>
+      `https://packagist.org/packages/${pkg}.json`,
+    help: '!composer sentry',
+    icon: 'https://packagist.org/bundles/packagistweb/img/logo-small.png',
+    search: `https://packagist.org/search.json?q=${SEARCH_TERM}`,
+  },
+  github: {
+    color: 0x24292e,
+    createTitle: (searchTerm: string) => `GitHub results for *${searchTerm}*`,
+    direct: `https://github.com/${TERM}`,
+    help: '!github react',
+    icon:
+      'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png',
+    search: `https://api.github.com/search/repositories?q=${SEARCH_TERM}`,
+  },
+  mdn: {
+    color: 0x83d0f2,
+    createTitle: (searchTerm: string) => `MDN results for *${searchTerm}*`,
+    direct: `https://developer.mozilla.org${TERM}`,
+    help: '!mdn localStorage',
+    icon: 'https://avatars0.githubusercontent.com/u/7565578',
+    search: `https://developer.mozilla.org/en-US/search?q=${SEARCH_TERM}`,
+  },
+  npm: {
+    color: 0xfb3e44,
+    createTitle: (searchTerm: string) => `NPM results for *${searchTerm}*`,
+    help: '!npm react',
+    icon: 'https://avatars0.githubusercontent.com/u/6078720',
+    search: `https://www.npmjs.com/search/suggestions?q=${SEARCH_TERM}`,
   },
   php: {
-    search: `https://www.php.net/${SEARCH_TERM}`,
-    direct: `https://www.php.net/${TERM}`,
     color: 0x8892bf,
     createTitle: (searchTerm: string) => `PHP.net results for *${searchTerm}*`,
-    icon: 'https://www.php.net/images/logos/php-logo.svg',
+    direct: `https://www.php.net/${TERM}`,
     help: '!php echo',
+    icon: 'https://www.php.net/images/logos/php-logo.svg',
+    search: `https://www.php.net/${SEARCH_TERM}`,
   },
 };
 
@@ -151,6 +152,7 @@ export const getData = async <T>({
   headers,
 }: GetDataParams): Promise<Partial<T>> => {
   const searchUrl = getSearchUrl(provider, searchTerm);
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const { error, json: data } = await useData<T>(searchUrl, 'json', headers);
 
   if (error) {

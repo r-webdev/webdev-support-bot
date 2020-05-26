@@ -1,7 +1,7 @@
-import { getSearchUrl, buildDirectUrl } from '../../utils/urlTools';
-import { Html5Entities as Entities } from 'html-entities';
+import { Message } from 'discord.js';
 import * as DOMParser from 'dom-parser';
-import * as errors from '../../utils/errors';
+import { Html5Entities as Entities } from 'html-entities';
+
 import {
   createMarkdownLink,
   createDescription,
@@ -11,8 +11,9 @@ import {
   attemptEdit,
   adjustTitleLength,
 } from '../../utils/discordTools';
+import * as errors from '../../utils/errors';
+import { getSearchUrl, buildDirectUrl } from '../../utils/urlTools';
 import useData from '../../utils/useData';
-import { Message } from 'discord.js';
 
 const provider = 'php';
 const entities = new Entities();
@@ -20,6 +21,7 @@ const entities = new Entities();
 const handlePHPQuery = async (msg: Message, searchTerm: string) => {
   try {
     const searchUrl = getSearchUrl(provider, searchTerm);
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const { error, text } = await useData(searchUrl, 'text');
 
     if (error) {
@@ -41,7 +43,6 @@ const handlePHPQuery = async (msg: Message, searchTerm: string) => {
       .getElementById('quickref_functions')
       .getElementsByTagName('li')
       .slice(0, 10);
-    let expectedLength = 0;
 
     let preparedDescription = results.map((result, index) => {
       const link = result.firstChild;
@@ -52,18 +53,16 @@ const handlePHPQuery = async (msg: Message, searchTerm: string) => {
         createMarkdownLink(adjustTitleLength([`**${title}**`].join(' - ')), url)
       );
 
-      expectedLength += item.length;
-
       return item;
     });
 
     const sentMsg = await msg.channel.send(
       createListEmbed({
+        description: createDescription(preparedDescription),
+        footerText: '',
         provider,
         searchTerm,
         url: searchUrl,
-        footerText: '',
-        description: createDescription(preparedDescription),
       })
     );
 
@@ -97,19 +96,6 @@ const extractMetadataFromResult = (result: any) => {
     title,
     url,
   };
-};
-
-const sanitizeExcerpt = (excerpt: string) => {
-  let sanitized = excerpt;
-
-  if (
-    sanitized.includes(')') &&
-    sanitized.indexOf(')') < sanitized.indexOf('(')
-  ) {
-    sanitized = sanitized.replace(')', '');
-  }
-
-  return sanitized.replace(/\[|\]/g, '');
 };
 
 /**

@@ -1,25 +1,9 @@
 {
-  "extends": ["eslint:recommended", "prettier"],
+  "extends": ["galex"],
   "env": {
     "node": true
   },
   "parserOptions": {
     "ecmaVersion": 2020
-  },
-  "rules": {
-    "import/order": [
-      "warn",
-      {
-        "groups": [
-          ["builtin", "external", "internal"],
-          ["unknown", "parent", "sibling"],
-          "index"
-        ],
-        "alphabetize": {
-          "order": "asc"
-        },
-        "newlines-between": "always"
-      }
-    ]
   }
 }

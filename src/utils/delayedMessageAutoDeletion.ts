@@ -1,4 +1,5 @@
 import { Message } from 'discord.js';
+
 import { missingRightsDeletion } from './errors';
 
 const THIRTY_SECONDS_IN_MS = 30 * 1000;

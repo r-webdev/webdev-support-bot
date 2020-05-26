@@ -1,18 +1,19 @@
-import { providers } from './urlTools';
-import {
-  reactionFilterBuilder,
-  awaitReactionConfig,
-  validReactions,
-} from './reactions';
-import delayedMessageAutoDeletion from './delayedMessageAutoDeletion';
-import { unknownError } from './errors';
-import * as emojis from './emojis';
 import {
   Message,
   MessageEditOptions,
   EmbedField,
   MessageEmbed,
 } from 'discord.js';
+
+import delayedMessageAutoDeletion from './delayedMessageAutoDeletion';
+import * as emojis from './emojis';
+import { unknownError } from './errors';
+import {
+  reactionFilterBuilder,
+  awaitReactionConfig,
+  validReactions,
+} from './reactions';
+import { providers } from './urlTools';
 
 export const createMarkdownLink = (title: string, url: string) =>
   `[${title}](${url.replace(/\)/g, '\\)')})`;
@@ -56,11 +57,11 @@ export const createListEmbed = ({
     const { createTitle } = providers[provider];
 
     return createEmbed({
+      description,
+      footerText,
       provider,
       title: createTitle(searchTerm),
       url: url.substr(0, 2048),
-      footerText,
-      description,
     });
   }
 
@@ -99,16 +100,16 @@ export const createEmbed = ({
 
     return {
       embed: {
-        title,
+        author,
         color,
-        url,
+        description,
+        fields,
         footer: {
           iconURL: icon,
           text: footerText,
         },
-        description,
-        fields,
-        author,
+        title,
+        url,
       },
     };
   }
@@ -288,9 +289,9 @@ export const getChosenResult = async <T>(
 };
 
 export const EMPTY_FIELD: EmbedField = {
+  inline: true,
   name: '\u200B',
   value: '\u200B',
-  inline: true,
 };
 
 export const attemptEdit = async (
