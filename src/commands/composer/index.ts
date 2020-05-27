@@ -96,7 +96,6 @@ const handleComposerQuery = async (msg: Message, searchTerm: string) => {
 
     const { name: resultName } = result;
 
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const { error, json: extendedJson } = await useData<
       ExtendedPackagistResponse
     >(getExtendedInfoUrl(provider, resultName));

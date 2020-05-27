@@ -46,7 +46,6 @@ const handleCanIUseQuery = async (msg: Message, searchTerm: string) => {
       return;
     }
 
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const { error: extendedQueryError, json } = await useData<
       ExtendedCanIUseData[]
     >(getExtendedInfoUrl(provider, text));

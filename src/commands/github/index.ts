@@ -259,7 +259,6 @@ const createFields = ({
 };
 
 const extractAndCacheLicense = async ({ url, spdx_id }: License) => {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const { error, json } = await useData<LicenseContent>(url);
 
   if (error) {

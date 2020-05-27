@@ -21,7 +21,6 @@ const entities = new Entities();
 const handlePHPQuery = async (msg: Message, searchTerm: string) => {
   try {
     const searchUrl = getSearchUrl(provider, searchTerm);
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const { error, text } = await useData(searchUrl, 'text');
 
     if (error) {

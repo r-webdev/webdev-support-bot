@@ -23,7 +23,6 @@ const entities = new Entities();
 const handleMDNQuery = async (msg: Message, searchTerm: string) => {
   try {
     const searchUrl = getSearchUrl(provider, searchTerm);
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const { error, text } = await useData(searchUrl, 'text');
 
     if (error) {

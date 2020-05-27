@@ -101,7 +101,6 @@ const handleResult = async (
   { name, description }: { name: string; description: string },
   sentMsg: Message
 ) => {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const { error, json: extendedJson } = await useData<
     ExtendedBundlephobiaResponse
   >(getExtendedInfoUrl(provider, name));
@@ -253,7 +252,6 @@ const calcDiffInPercent = (current: number, previous: number) =>
   (current / previous) * 100 - 100;
 
 const getPreviousVersionSize = async (pkg: string) => {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const { error, json } = await useData(
     `https://bundlephobia.com/api/package-history?package=${pkg}`
   );
@@ -300,7 +298,6 @@ const calcDownloadTime = (size: number, type: '3g' | 'edge') => {
 
 const getSimilarPackages = async (pkg: string) => {
   const url = `https://bundlephobia.com/api/similar-packages?package=${pkg}`;
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const { error, json } = await useData<SimilarPackagesResponse>(url);
 
   if (error || !json.category.similar) {
@@ -312,7 +309,6 @@ const getSimilarPackages = async (pkg: string) => {
   const packages = await Promise.all(
     similar
       .map(async otherPackage => {
-        // eslint-disable-next-line react-hooks/rules-of-hooks
         const { error, json } = await useData<ExtendedBundlephobiaResponse>(
           getExtendedInfoUrl(provider, otherPackage)
         );

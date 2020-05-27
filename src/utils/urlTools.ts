@@ -152,7 +152,6 @@ export const getData = async <T>({
   headers,
 }: GetDataParams): Promise<Partial<T>> => {
   const searchUrl = getSearchUrl(provider, searchTerm);
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const { error, json: data } = await useData<T>(searchUrl, 'json', headers);
 
   if (error) {
