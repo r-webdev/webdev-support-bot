@@ -177,10 +177,15 @@
     "@types/node" "*"
     form-data "^3.0.0"
 
-"@types/node@*", "@types/node@^14.0.5":
+"@types/node@*":
   version "14.0.5"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-14.0.5.tgz#3d03acd3b3414cf67faf999aed11682ed121f22b"
   integrity sha512-90hiq6/VqtQgX8Sp0EzeIsv3r+ellbGj4URKj5j30tLlZvRUpnAe9YbYnjl3pJM93GyXU0tghHhvXHq+5rnCKA==
+
+"@types/node@^14.0.6":
+  version "14.0.6"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.0.6.tgz#f9e178b2da31a4b0ec60b64649e244c31ce18daf"
+  integrity sha512-FbNmu4F67d3oZMWBV6Y4MaPER+0EpE9eIYf2yaHhCWovc1dlXCZkqGX4NLHfVVr6umt20TNBdRzrNJIzIKfdbw==
 
 "@types/normalize-package-data@^2.4.0":
   version "2.4.0"
@@ -4746,10 +4751,10 @@ typedarray@^0.0.6:
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
   integrity sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
 
-typescript@^4.0.0-dev.20200528:
-  version "4.0.0-dev.20200528"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.0.0-dev.20200528.tgz#604c2ad48a34ec87ea6b567025926c41509e87a7"
-  integrity sha512-tQE2cCwjRGYSO8g8ghX6k1HKvOz5LAafQEzhFwUwN0frqBOuuS7c5/Cdgjct0Sci/7LLuFLP+gg59LiIb1BtkQ==
+typescript@^4.0.0-dev.20200530:
+  version "4.0.0-dev.20200530"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.0.0-dev.20200530.tgz#1e4bb80031ebac4c418dd97134651fef3154fd27"
+  integrity sha512-4NeVeGEF0Uegn4LyLF3fuCv7N1jeBcdKhLTN+dRkdSJ2ElkBC47N6Vl+RhIWL4S2eoWXwu2MjxuW9e9BRAJH/A==
 
 undefsafe@^2.0.2:
   version "2.0.3"
