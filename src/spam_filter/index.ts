@@ -1,15 +1,18 @@
 import { Message, Guild, GuildChannel } from 'discord.js';
 import * as NodeCache from 'node-cache';
 
-const numberOfAllowedMessages = parseInt(
-  process.env.NUMBER_OF_ALLOWED_MESSAGES
-);
-const cacheRevalidationWindow =
-  parseInt(process.env.CACHE_REVALIDATION_IN_SECONDS) * 1000;
+import {
+  NUMBER_OF_ALLOWED_MESSAGES,
+  CACHE_REVALIDATION_IN_SECONDS,
+  FINAL_CACHE_EXPIRATION_IN_SECONDS,
+} from '../env';
+
+const numberOfAllowedMessages = parseInt(NUMBER_OF_ALLOWED_MESSAGES);
+const cacheRevalidationWindow = parseInt(CACHE_REVALIDATION_IN_SECONDS) * 1000;
 
 export const cache = new NodeCache({
   checkperiod: cacheRevalidationWindow,
-  stdTTL: parseInt(process.env.FINAL_CACHE_EXPIRATION_IN_SECONDS),
+  stdTTL: parseInt(FINAL_CACHE_EXPIRATION_IN_SECONDS),
 });
 
 /**

@@ -1,10 +1,6 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
     "lib": ["es2016"],
-    "paths": {
-      "*": ["src/*"]
-    },
     "allowJs": true,
     "target": "es2016",
     "module": "commonjs",

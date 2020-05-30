@@ -1,9 +1,5 @@
 import { Client, Message } from 'discord.js';
-import { config } from 'dotenv';
 
-// Spam filtering module
-
-// commands begin here
 import handleBundlephobiaQuery from './commands/bundlephobia';
 import handleCanIUseQuery from './commands/caniuse';
 import handleCodeRequest from './commands/code';
@@ -16,6 +12,7 @@ import handleNPMQuery from './commands/npm';
 import handlePHPQuery from './commands/php';
 import handleJobPostingRequest from './commands/post';
 import handleVSCodeRequest from './commands/vscode';
+import { DISCORD_TOKEN, IS_PROD, DUMMY_TOKEN } from './env';
 import spamFilter from './spam_filter';
 import handleSpam from './spam_filter/handler';
 import { Provider } from './utils/discordTools';
@@ -31,7 +28,6 @@ import {
   FORMATTING_KEYWORD_ALT,
   JQUERY_KEYWORD,
 } from './utils/urlTools';
-config();
 
 const client = new Client();
 
@@ -164,11 +160,7 @@ const handleMessage = async (msg: Message) => {
 client.on('message', handleMessage);
 
 try {
-  client.login(
-    process.env.NODE_ENV !== 'production'
-      ? process.env.DUMMY_TOKEN
-      : process.env.DISCORD_TOKEN
-  );
+  client.login(IS_PROD ? DISCORD_TOKEN : DUMMY_TOKEN);
 } catch (error) {
   console.error('Boot Error: token invalid');
 }

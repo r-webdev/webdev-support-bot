@@ -1,7 +1,9 @@
 import { TextChannel, GuildChannel } from 'discord.js';
-import { SpammerMetadata } from 'spam_filter';
 
+import { MOD_CHANNEL } from '../env';
 import { createEmbed, createMarkdownBash } from '../utils/discordTools';
+
+import { SpammerMetadata } from './';
 
 type ModChannel = TextChannel & Pick<GuildChannel, 'name'>;
 
@@ -15,13 +17,11 @@ export default async ({
   guild,
 }: SpammerMetadata) => {
   const targetChannel = guild.channels.cache.find(
-    ({ name }) => name === process.env.MOD_CHANNEL
+    ({ name }) => name === MOD_CHANNEL
   ) as ModChannel;
 
   if (!targetChannel) {
-    console.warn(
-      `channel ${process.env.MOD_CHANNEL} does not exist on this server`
-    );
+    console.warn(`channel ${MOD_CHANNEL} does not exist on this server`);
     return;
   }
 

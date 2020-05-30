@@ -5,6 +5,7 @@ import {
   MessageEmbed,
 } from 'discord.js';
 
+import { REPO_LINK } from '../env';
 import delayedMessageAutoDeletion from './delayedMessageAutoDeletion';
 import * as emojis from './emojis';
 import { unknownError } from './errors';
@@ -15,8 +16,10 @@ import {
 } from './reactions';
 import { providers } from './urlTools';
 
-export const createMarkdownLink = (title: string, url: string) =>
-  `[${title}](${url.replace(/\)/g, '\\)')})`;
+export const createMarkdownLink = (title: string, url: string) => {
+  console.log({ title, url });
+  return `[${title}](${url.replace(/\)/g, '\\)')})`;
+};
 
 export const BASE_DESCRIPTION = `
 ${emojis.light} *react with a number (:one:, :two:, ...) to filter your result*
@@ -26,7 +29,7 @@ ${
 } *supports \`!mdn\`, \`!github\`, \`!caniuse\`, \`!npm\`, \`!composer\`, \`!bundlephobia\`, and \`!php\`*
 ${emojis.gear} *issues? feature requests? head over to ${createMarkdownLink(
   'github',
-  process.env.REPO_LINK
+  REPO_LINK
 )}*`;
 
 export type Provider =
