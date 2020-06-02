@@ -16,10 +16,8 @@ import {
 } from './reactions';
 import { providers } from './urlTools';
 
-export const createMarkdownLink = (title: string, url: string) => {
-  console.log({ title, url });
-  return `[${title}](${url.replace(/\)/g, '\\)')})`;
-};
+export const createMarkdownLink = (title: string, url: string) =>
+  `[${title}](${url.replace(/\)/g, '\\)')})`;
 
 export const BASE_DESCRIPTION = `
 ${emojis.light} *react with a number (:one:, :two:, ...) to filter your result*
