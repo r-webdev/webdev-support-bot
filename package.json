@@ -8,6 +8,7 @@
     "start": "node build/index.js",
     "build": "tsc",
     "lint": "eslint src && tsc --noEmit",
+    "test": "jest",
     "lint-fix": "eslint --fix src && prettier --write src"
   },
   "keywords": [],
