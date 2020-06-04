@@ -1,0 +1,315 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`npm awaits user response when request works 1`] = `
+Array [
+  Object {
+    "embed": Object {
+      "author": null,
+      "color": 16465476,
+      "description": "1. [**react** - *React is a JavaScript library for building user interfaces.*](https://www.npmjs.com/package/react)
+2. [**react-select** - *A Select control built with and for ReactJS*](https://www.npmjs.com/package/react-select)
+3. [**react-draggable** - *React draggable component*](https://www.npmjs.com/package/react-draggable)
+4. [**react-popper** - *Official library to use Popper on React projects*](https://www.npmjs.com/package/react-popper)
+5. [**react-dropzone** - *Simple HTML5 drag-drop zone with React.js*](https://www.npmjs.com/package/react-dropzone)
+6. [**react-redux** - *Official React bindings for Redux*](https://www.npmjs.com/package/react-redux)
+7. [**react-color** - *A Collection of Color Pickers from Sketch, Photoshop,...*](https://www.npmjs.com/package/react-color)
+8. [**react-dom** - *React package for working with the DOM.*](https://www.npmjs.com/package/react-dom)
+9. [**react-docgen** - *A CLI and toolkit to extract information from React...*](https://www.npmjs.com/package/react-docgen)
+10. [**react-table** - *Hooks for building lightweight, fast and extendable...*](https://www.npmjs.com/package/react-table)
+
+:bulb: *react with a number (:one:, :two:, ...) to filter your result*
+:neutral_face: *react with \`❌\` to delete*
+:point_up: *supports \`!mdn\`, \`!github\`, \`!caniuse\`, \`!npm\`, \`!composer\`, \`!bundlephobia\`, and \`!php\`*
+:gear: *issues? feature requests? head over to [github](https://github.com/ljosberinn/discord-mdn-bot)*",
+      "fields": Array [],
+      "footer": Object {
+        "iconURL": "https://avatars0.githubusercontent.com/u/6078720",
+        "text": "at least 10 packages found",
+      },
+      "title": "NPM results for *search term*",
+      "url": "https://npmjs.com/search?q=search%20term",
+    },
+  },
+]
+`;
+
+exports[`npm awaits user response when request works 2`] = `
+Array [
+  Object {
+    "edit": [MockFunction] {
+      "calls": Array [
+        Array [
+          Object {
+            "embed": Object {
+              "author": Object {
+                "name": "",
+                "url": "",
+              },
+              "color": 16465476,
+              "description": "",
+              "fields": Array [
+                Object {
+                  "inline": false,
+                  "name": "add to your project",
+                  "value": "\`\`\`bash
+npm install React
+yarn add React
+\`\`\`",
+                },
+                Object {
+                  "inline": true,
+                  "name": ":writing_hand: maintainers",
+                  "value": "10",
+                },
+              ],
+              "footer": Object {
+                "iconURL": "https://avatars0.githubusercontent.com/u/6078720",
+                "text": "last updated ",
+              },
+              "title": "React",
+              "url": "http://react",
+            },
+          },
+          undefined,
+        ],
+      ],
+      "results": Array [
+        Object {
+          "type": "return",
+          "value": undefined,
+        },
+      ],
+    },
+  },
+  Object {
+    "channel": Object {
+      "send": [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "embed": Object {
+                "author": null,
+                "color": 16465476,
+                "description": "1. [**react** - *React is a JavaScript library for building user interfaces.*](https://www.npmjs.com/package/react)
+2. [**react-select** - *A Select control built with and for ReactJS*](https://www.npmjs.com/package/react-select)
+3. [**react-draggable** - *React draggable component*](https://www.npmjs.com/package/react-draggable)
+4. [**react-popper** - *Official library to use Popper on React projects*](https://www.npmjs.com/package/react-popper)
+5. [**react-dropzone** - *Simple HTML5 drag-drop zone with React.js*](https://www.npmjs.com/package/react-dropzone)
+6. [**react-redux** - *Official React bindings for Redux*](https://www.npmjs.com/package/react-redux)
+7. [**react-color** - *A Collection of Color Pickers from Sketch, Photoshop,...*](https://www.npmjs.com/package/react-color)
+8. [**react-dom** - *React package for working with the DOM.*](https://www.npmjs.com/package/react-dom)
+9. [**react-docgen** - *A CLI and toolkit to extract information from React...*](https://www.npmjs.com/package/react-docgen)
+10. [**react-table** - *Hooks for building lightweight, fast and extendable...*](https://www.npmjs.com/package/react-table)
+
+:bulb: *react with a number (:one:, :two:, ...) to filter your result*
+:neutral_face: *react with \`❌\` to delete*
+:point_up: *supports \`!mdn\`, \`!github\`, \`!caniuse\`, \`!npm\`, \`!composer\`, \`!bundlephobia\`, and \`!php\`*
+:gear: *issues? feature requests? head over to [github](https://github.com/ljosberinn/discord-mdn-bot)*",
+                "fields": Array [],
+                "footer": Object {
+                  "iconURL": "https://avatars0.githubusercontent.com/u/6078720",
+                  "text": "at least 10 packages found",
+                },
+                "title": "NPM results for *search term*",
+                "url": "https://npmjs.com/search?q=search%20term",
+              },
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Promise {},
+          },
+        ],
+      },
+    },
+    "reply": [MockFunction],
+  },
+  Array [
+    Object {
+      "author": Object {
+        "name": "acdlite",
+        "url": "https://www.npmjs.com/~acdlite",
+      },
+      "description": "React is a JavaScript library for building user interfaces.",
+      "externalUrls": Object {
+        "homepage": "https://reactjs.org/",
+        "repository": "https://github.com/facebook/react",
+      },
+      "lastUpdate": "3 months ago",
+      "maintainers": 8,
+      "name": "react",
+      "url": "https://www.npmjs.com/package/react",
+    },
+    Object {
+      "author": Object {
+        "name": "react-select-release-bot",
+        "url": "https://www.npmjs.com/~react-select-release-bot",
+      },
+      "description": "A Select control built with and for ReactJS",
+      "externalUrls": Object {
+        "homepage": "https://github.com/JedWatson/react-select#readme",
+        "repository": "https://github.com/JedWatson/react-select",
+      },
+      "lastUpdate": "2 months ago",
+      "maintainers": 5,
+      "name": "react-select",
+      "url": "https://www.npmjs.com/package/react-select",
+    },
+    Object {
+      "author": Object {
+        "name": "strml",
+        "url": "https://www.npmjs.com/~strml",
+      },
+      "description": "React draggable component",
+      "externalUrls": Object {
+        "homepage": "https://github.com/mzabriskie/react-draggable",
+        "repository": "https://github.com/mzabriskie/react-draggable",
+      },
+      "lastUpdate": "21 days ago",
+      "maintainers": 2,
+      "name": "react-draggable",
+      "url": "https://www.npmjs.com/package/react-draggable",
+    },
+    Object {
+      "author": Object {
+        "name": "fezvrasta",
+        "url": "https://www.npmjs.com/~fezvrasta",
+      },
+      "description": "Official library to use Popper on React projects",
+      "externalUrls": Object {
+        "homepage": "https://github.com/popperjs/react-popper",
+        "repository": "https://github.com/popperjs/react-popper",
+      },
+      "lastUpdate": "about 1 month ago",
+      "maintainers": 2,
+      "name": "react-popper",
+      "url": "https://www.npmjs.com/package/react-popper",
+    },
+    Object {
+      "author": Object {
+        "name": "rolandjitsu",
+        "url": "https://www.npmjs.com/~rolandjitsu",
+      },
+      "description": "Simple HTML5 drag-drop zone with React.js",
+      "externalUrls": Object {
+        "homepage": "https://github.com/react-dropzone/react-dropzone",
+        "repository": "https://github.com/react-dropzone/react-dropzone",
+      },
+      "lastUpdate": "about 1 month ago",
+      "maintainers": 3,
+      "name": "react-dropzone",
+      "url": "https://www.npmjs.com/package/react-dropzone",
+    },
+    Object {
+      "author": Object {
+        "name": "acemarke",
+        "url": "https://www.npmjs.com/~acemarke",
+      },
+      "description": "Official React bindings for Redux",
+      "externalUrls": Object {
+        "homepage": "https://github.com/reduxjs/react-redux",
+        "repository": "https://github.com/reduxjs/react-redux",
+      },
+      "lastUpdate": "4 months ago",
+      "maintainers": 2,
+      "name": "react-redux",
+      "url": "https://www.npmjs.com/package/react-redux",
+    },
+    Object {
+      "author": Object {
+        "name": "case",
+        "url": "https://www.npmjs.com/~case",
+      },
+      "description": "A Collection of Color Pickers from Sketch, Photoshop, Chrome & more",
+      "externalUrls": Object {
+        "homepage": "http://casesandberg.github.io/react-color/",
+        "repository": undefined,
+      },
+      "lastUpdate": "about 1 month ago",
+      "maintainers": 1,
+      "name": "react-color",
+      "url": "https://www.npmjs.com/package/react-color",
+    },
+    Object {
+      "author": Object {
+        "name": "acdlite",
+        "url": "https://www.npmjs.com/~acdlite",
+      },
+      "description": "React package for working with the DOM.",
+      "externalUrls": Object {
+        "homepage": "https://reactjs.org/",
+        "repository": "https://github.com/facebook/react",
+      },
+      "lastUpdate": "3 months ago",
+      "maintainers": 9,
+      "name": "react-dom",
+      "url": "https://www.npmjs.com/package/react-dom",
+    },
+    Object {
+      "author": Object {
+        "name": "danez",
+        "url": "https://www.npmjs.com/~danez",
+      },
+      "description": "A CLI and toolkit to extract information from React components for documentation generation.",
+      "externalUrls": Object {
+        "homepage": "https://github.com/reactjs/react-docgen#readme",
+        "repository": "https://github.com/reactjs/react-docgen",
+      },
+      "lastUpdate": "3 months ago",
+      "maintainers": 2,
+      "name": "react-docgen",
+      "url": "https://www.npmjs.com/package/react-docgen",
+    },
+    Object {
+      "author": Object {
+        "name": "tannerlinsley",
+        "url": "https://www.npmjs.com/~tannerlinsley",
+      },
+      "description": "Hooks for building lightweight, fast and extendable datagrids for React",
+      "externalUrls": Object {
+        "homepage": "https://react-table.js.org",
+        "repository": "https://github.com/tannerlinsley/react-table",
+      },
+      "lastUpdate": "20 days ago",
+      "maintainers": 2,
+      "name": "react-table",
+      "url": "https://www.npmjs.com/package/react-table",
+    },
+  ],
+]
+`;
+
+exports[`npm awaits user response when request works 3`] = `
+Array [
+  Object {
+    "embed": Object {
+      "author": null,
+      "color": 16465476,
+      "description": "1. [**react** - *React is a JavaScript library for building user interfaces.*](https://www.npmjs.com/package/react)
+2. [**react-select** - *A Select control built with and for ReactJS*](https://www.npmjs.com/package/react-select)
+3. [**react-draggable** - *React draggable component*](https://www.npmjs.com/package/react-draggable)
+4. [**react-popper** - *Official library to use Popper on React projects*](https://www.npmjs.com/package/react-popper)
+5. [**react-dropzone** - *Simple HTML5 drag-drop zone with React.js*](https://www.npmjs.com/package/react-dropzone)
+6. [**react-redux** - *Official React bindings for Redux*](https://www.npmjs.com/package/react-redux)
+7. [**react-color** - *A Collection of Color Pickers from Sketch, Photoshop,...*](https://www.npmjs.com/package/react-color)
+8. [**react-dom** - *React package for working with the DOM.*](https://www.npmjs.com/package/react-dom)
+9. [**react-docgen** - *A CLI and toolkit to extract information from React...*](https://www.npmjs.com/package/react-docgen)
+10. [**react-table** - *Hooks for building lightweight, fast and extendable...*](https://www.npmjs.com/package/react-table)
+
+:bulb: *react with a number (:one:, :two:, ...) to filter your result*
+:neutral_face: *react with \`❌\` to delete*
+:point_up: *supports \`!mdn\`, \`!github\`, \`!caniuse\`, \`!npm\`, \`!composer\`, \`!bundlephobia\`, and \`!php\`*
+:gear: *issues? feature requests? head over to [github](https://github.com/ljosberinn/discord-mdn-bot)*",
+      "fields": Array [],
+      "footer": Object {
+        "iconURL": "https://avatars0.githubusercontent.com/u/6078720",
+        "text": "at least 10 packages found",
+      },
+      "title": "NPM results for *search term*",
+      "url": "https://npmjs.com/search?q=search%20term",
+    },
+  },
+]
+`;

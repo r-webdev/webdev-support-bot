@@ -21,9 +21,12 @@ import { NPMResponse } from './types';
 
 const provider = 'npm';
 
-const handleNPMQuery = async (msg: Message, searchTerm: string) => {
+export const buildNPMQueryHandler = (
+  fetch: typeof getData = getData,
+  waitForResponse: typeof getChosenResult = getChosenResult
+) => async (msg: Message, searchTerm: string) => {
   try {
-    const json = await getData<NPMResponse[]>({
+    const json = await fetch<NPMResponse[]>({
       isInvalidData: json => json.length === 0,
       msg,
       provider,
@@ -96,7 +99,7 @@ const handleNPMQuery = async (msg: Message, searchTerm: string) => {
       })
     );
 
-    const result = await getChosenResult(sentMsg, msg, firstTenResults);
+    const result = await waitForResponse(sentMsg, msg, firstTenResults);
 
     if (!result) {
       return;
@@ -192,4 +195,4 @@ const sanitizePackageLink = (host: string, link: string) => {
   return link;
 };
 
-export default handleNPMQuery;
+export default buildNPMQueryHandler();
