@@ -113,8 +113,6 @@ describe('handleMDNQuery', () => {
 
     expect(msg.channel.send).toHaveBeenCalledTimes(1);
     const sentMessage = msg.channel.send.mock.calls[0][0];
-    expect(sentMessage.embed.description).toContain(
-      '1. [**Example** - ](http://www.example.com)'
-    );
+    expect(sentMessage).toMatchSnapshot();
   });
 });

@@ -7,7 +7,6 @@ test('shows why jQuery is awful', async () => {
   };
 
   await handleCodeRequest(msg);
-  expect(msg.channel.send).toHaveBeenCalledWith(
-    expect.stringContaining('jQuery is a legacy library')
-  );
+  const jqueryBad = msg.channel.send.mock.calls[0][0];
+  expect(jqueryBad).toMatchSnapshot();
 });
