@@ -36,7 +36,8 @@ export interface ExtendedPackagistResponse {
 }
 
 export interface Versions {
-  'dev-master': Version;
+  'dev-master': Version; // dev-master is only a pointer to an actual version we care about
+  [otherVersions: string]: Version;
 }
 
 export interface Version {

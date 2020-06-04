@@ -33,9 +33,13 @@ import {
 
 const provider = 'composer';
 
-const handleComposerQuery = async (msg: Message, searchTerm: string) => {
+export const buildComposerQueryHandler = (
+  fetch: typeof getData = getData,
+  fetchUse: typeof useData = useData,
+  waitForChoice: typeof getChosenResult = getChosenResult
+) => async (msg: Message, searchTerm: string) => {
   try {
-    const json = await getData<PackagistResponse>({
+    const json = await fetch<PackagistResponse>({
       isInvalidData(json: PackagistResponse) {
         return json.results.length === 0;
       },
@@ -88,7 +92,7 @@ const handleComposerQuery = async (msg: Message, searchTerm: string) => {
 
     const sentMsg = await msg.channel.send(embed);
 
-    const result = await getChosenResult(sentMsg, msg, firstTenResults);
+    const result = await waitForChoice(sentMsg, msg, firstTenResults);
 
     if (!result) {
       return;
@@ -96,7 +100,7 @@ const handleComposerQuery = async (msg: Message, searchTerm: string) => {
 
     const { name: resultName } = result;
 
-    const { error, json: extendedJson } = await useData<
+    const { error, json: extendedJson } = await fetchUse<
       ExtendedPackagistResponse
     >(getExtendedInfoUrl(provider, resultName));
 
@@ -133,8 +137,12 @@ const handleComposerQuery = async (msg: Message, searchTerm: string) => {
 };
 
 const findLatestRelease = (versions: Versions) => {
-  const { version, time } = Object.values(versions).reduce<Version>(
+  const maybeResult = Object.values(versions).reduce<Version | null>(
     (latest, item) => {
+      if (!latest) {
+        return item;
+      }
+
       const { version_normalized: itemVersion } = item;
 
       if (
@@ -151,6 +159,8 @@ const findLatestRelease = (versions: Versions) => {
     },
     null
   );
+
+  const { version, time } = maybeResult;
 
   return {
     released: formatDistanceToNow(new Date(time)),
@@ -287,4 +297,4 @@ const generateDetailedFooter = (downloads: Downloads, released: string) =>
     .map(([period, amount]) => `${amount.toLocaleString()} ${period}`)
     .join(' | ')}\nlast updated ${released} ago`;
 
-export default handleComposerQuery;
+export default buildComposerQueryHandler();
