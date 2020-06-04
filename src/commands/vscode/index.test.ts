@@ -12,7 +12,5 @@ test('inform users that visual studio code is great and free', async () => {
   };
 
   await handleVSCodeRequest(msg);
-  expect(msg.channel.send).toBeCalledWith(
-    expect.stringContaining('Visual Studio Code')
-  );
+  expect(msg.channel.send.mock.calls[0][0]).toMatchSnapshot();
 });
