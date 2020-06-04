@@ -137,28 +137,21 @@ export const buildComposerQueryHandler = (
 };
 
 const findLatestRelease = (versions: Versions) => {
-  const maybeResult = Object.values(versions).reduce<Version | null>(
-    (latest, item) => {
-      if (!latest) {
-        return item;
-      }
+  const maybeResult = Object.values(versions).reduce((latest, item) => {
+    const { version_normalized: itemVersion } = item;
 
-      const { version_normalized: itemVersion } = item;
+    if (
+      // ignore custom branch names as far as possible
+      itemVersion.includes('.') &&
+      !itemVersion.includes('/') &&
+      !itemVersion.includes('-') &&
+      compareVersions(latest.version_normalized, itemVersion) === -1
+    ) {
+      return item;
+    }
 
-      if (
-        // ignore custom branch names as far as possible
-        itemVersion.includes('.') &&
-        !itemVersion.includes('/') &&
-        !itemVersion.includes('-') &&
-        compareVersions(latest.version_normalized, itemVersion) === -1
-      ) {
-        return item;
-      }
-
-      return latest;
-    },
-    null
-  );
+    return latest;
+  });
 
   const { version, time } = maybeResult;
 

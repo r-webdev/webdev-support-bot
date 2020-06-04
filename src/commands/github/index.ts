@@ -28,9 +28,12 @@ const headers = {
 
 const licenseCache = {};
 
-const handleGithubQuery = async (msg: Message, searchTerm: string) => {
+export const buildGithubQueryHandler = (
+  fetch: typeof getData = getData,
+  waitForResponse: typeof getChosenResult = getChosenResult
+) => async (msg: Message, searchTerm: string) => {
   try {
-    const json = await getData<GithubResponse>({
+    const json = await fetch<GithubResponse>({
       headers,
       isInvalidData: json => json.total_count === 0 || json.items.length === 0,
       msg,
@@ -130,7 +133,7 @@ const handleGithubQuery = async (msg: Message, searchTerm: string) => {
       })
     );
 
-    const result = await getChosenResult(sentMsg, msg, firstTenResults);
+    const result = await waitForResponse(sentMsg, msg, firstTenResults);
 
     if (!result) {
       return;
@@ -271,4 +274,4 @@ const extractAndCacheLicense = async ({ url, spdx_id }: License) => {
   return json.html_url;
 };
 
-export default handleGithubQuery;
+export default buildGithubQueryHandler();
