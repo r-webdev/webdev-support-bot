@@ -114,6 +114,12 @@ yarn dev # or npm dev
 git clone https://github.com/ljosberinn/webdev-support-bot/ && cd webdev-support-bot && cp .env.example .env && yarn install && code . && yarn dev
 ```
 
+### Running tests:
+
+```bash
+$ npm test
+```
+
 ## Found a bug/want to contribute?
 
 Please head over to [GitHub](https://github.com/ljosberinn/webdev-support-bot/issues).
