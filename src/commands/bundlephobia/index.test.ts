@@ -35,7 +35,7 @@ describe('buildBundlephobiaQueryHandler', () => {
     fetch.mockResolvedValue(response);
   });
 
-  afterEach(() => jest.resetAllMocks());
+  afterEach(() => jest.clearAllMocks());
 
   test('fails when API request responds with error', async () => {
     fetch.mockResolvedValueOnce(null);
@@ -60,7 +60,7 @@ describe('buildBundlephobiaQueryHandler', () => {
       description: 'Parse, validate, manipulate, and display dates',
     });
 
-    fetchDetail.mockResolvedValue({
+    fetchDetail.mockResolvedValueOnce({
       error: true,
       json: null,
       text: null,
@@ -116,6 +116,7 @@ describe('buildBundlephobiaQueryHandler', () => {
     const handler = buildBundlephobiaQueryHandler(fetch, fetchDetail, choose);
     await handler(msg, 'moment.js');
 
-    expect(editMock.mock.calls[0]).toMatchSnapshot();
+    expect(editMock.mock.calls[0]).toBeDefined();
+    expect(editMock.mock.calls[0][0]).toMatchSnapshot();
   });
 });

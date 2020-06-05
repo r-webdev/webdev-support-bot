@@ -30,6 +30,7 @@ const licenseCache = {};
 
 export const buildGithubQueryHandler = (
   fetch: typeof getData = getData,
+  fetchDetails: typeof useData = useData,
   waitForResponse: typeof getChosenResult = getChosenResult
 ) => async (msg: Message, searchTerm: string) => {
   try {
@@ -71,7 +72,7 @@ export const buildGithubQueryHandler = (
               // eslint-disable-next-line require-atomic-updates
               license.url = licenseCache[key]
                 ? licenseCache[key]
-                : await extractAndCacheLicense(license);
+                : await extractAndCacheLicense(license, fetchDetails);
             }
 
             return {
@@ -261,8 +262,11 @@ const createFields = ({
   return fields;
 };
 
-const extractAndCacheLicense = async ({ url, spdx_id }: License) => {
-  const { error, json } = await useData<LicenseContent>(url);
+const extractAndCacheLicense = async (
+  { url, spdx_id }: License,
+  fetch: typeof useData
+) => {
+  const { error, json } = await fetch<LicenseContent>(url);
 
   if (error) {
     return '';

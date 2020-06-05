@@ -2,6 +2,7 @@ import { getData } from '../../utils/urlTools';
 import { getChosenResult } from '../../utils/discordTools';
 import { buildGithubQueryHandler } from './index';
 import { response } from './__fixtures__/response';
+import useData from '../../utils/useData';
 
 describe('github', () => {
   const sendMock = jest.fn();
@@ -12,9 +13,10 @@ describe('github', () => {
   };
 
   const fetch: jest.MockedFunction<typeof getData> = jest.fn();
+  const fetchDetails: jest.MockedFunction<typeof useData> = jest.fn();
   const choose: jest.MockedFunction<typeof getChosenResult> = jest.fn();
 
-  afterEach(() => jest.resetAllMocks());
+  afterEach(() => jest.clearAllMocks());
 
   test('returns when request fails', async () => {
     fetch.mockResolvedValue(null);
@@ -53,9 +55,30 @@ describe('github', () => {
       forks: '',
       issues: 0,
     });
+
+    fetchDetails.mockResolvedValue({
+      error: false,
+      json: {
+        key: 'key',
+        name: 'MIT',
+        spdx_id: 'mit',
+        url: 'http://choosealicense.com/licenses/mit',
+        node_id: '',
+        html_url: 'http://choosealicense.com/licenses/mit',
+        description: 'MIT',
+        implementation: 'MIT',
+        permissions: [],
+        conditions: [],
+        limitations: [],
+        body: 'MIT',
+        featured: true,
+      },
+      text: null,
+    });
+
     msg.channel.send.mockResolvedValue({ edit: editMock });
 
-    const handler = buildGithubQueryHandler(fetch, choose);
+    const handler = buildGithubQueryHandler(fetch, fetchDetails, choose);
     await handler(msg, 'search term');
 
     expect(fetch).toBeCalledWith({

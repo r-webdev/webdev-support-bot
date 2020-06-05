@@ -151,7 +151,7 @@ git clone https://facebook.com/react
       "language": "JavaScript",
       "license": Object {
         "name": "MIT License",
-        "url": "http://choosealicense.com/licenses/mit/",
+        "url": "http://choosealicense.com/licenses/mit",
       },
       "name": "facebook/react",
       "owner": Object {
@@ -172,7 +172,7 @@ git clone https://facebook.com/react
       "language": "JavaScript",
       "license": Object {
         "name": "MIT License",
-        "url": "http://choosealicense.com/licenses/mit/",
+        "url": "http://choosealicense.com/licenses/mit",
       },
       "name": "duxianwei520/react",
       "owner": Object {
@@ -193,7 +193,7 @@ git clone https://facebook.com/react
       "language": "JavaScript",
       "license": Object {
         "name": "Creative Commons Attribution 4.0 International",
-        "url": "http://choosealicense.com/licenses/cc-by-4.0/",
+        "url": "http://choosealicense.com/licenses/mit",
       },
       "name": "discountry/react",
       "owner": Object {
@@ -232,7 +232,7 @@ git clone https://facebook.com/react
       "language": "JavaScript",
       "license": Object {
         "name": "MIT License",
-        "url": "http://choosealicense.com/licenses/mit/",
+        "url": "http://choosealicense.com/licenses/mit",
       },
       "name": "react-redux-antd-es6/react",
       "owner": Object {
@@ -307,7 +307,7 @@ git clone https://facebook.com/react
       "language": "JavaScript",
       "license": Object {
         "name": "MIT License",
-        "url": "http://choosealicense.com/licenses/mit/",
+        "url": "http://choosealicense.com/licenses/mit",
       },
       "name": "ReactTraining/react-router",
       "owner": Object {
@@ -328,7 +328,7 @@ git clone https://facebook.com/react
       "language": "JavaScript",
       "license": Object {
         "name": "MIT License",
-        "url": "http://choosealicense.com/licenses/mit/",
+        "url": "http://choosealicense.com/licenses/mit",
       },
       "name": "vercel/next.js",
       "owner": Object {
