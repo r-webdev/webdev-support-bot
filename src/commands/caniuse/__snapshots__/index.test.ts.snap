@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`caniuse awaits user response when request works 1`] = `undefined`;
+
+exports[`caniuse awaits user response when request works 2`] = `undefined`;
+
+exports[`caniuse awaits user response when request works 3`] = `undefined`;

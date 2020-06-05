@@ -32,9 +32,13 @@ const browserNameMap = Object.entries(bcd.browsers).reduce(
   {}
 );
 
-const handleCanIUseQuery = async (msg: Message, searchTerm: string) => {
+export const buildCanIUseQueryHandler = (
+  fetch: typeof getData = getData,
+  fetchDetails: typeof useData = useData,
+  waitForResponse: typeof getChosenResult = getChosenResult
+) => async (msg: Message, searchTerm: string) => {
   try {
-    const text = await getData<string>({
+    const text = await fetch<string>({
       isInvalidData: text => text.length === 0,
       msg,
       provider,
@@ -46,7 +50,7 @@ const handleCanIUseQuery = async (msg: Message, searchTerm: string) => {
       return;
     }
 
-    const { error: extendedQueryError, json } = await useData<
+    const { error: extendedQueryError, json } = await fetchDetails<
       ExtendedCanIUseData[]
     >(getExtendedInfoUrl(provider, text));
 
@@ -103,7 +107,7 @@ const handleCanIUseQuery = async (msg: Message, searchTerm: string) => {
       })
     );
 
-    const result = await getChosenResult<typeof firstTenResults[number]>(
+    const result = await waitForResponse<typeof firstTenResults[number]>(
       sentMsg,
       msg,
       firstTenResults
@@ -241,4 +245,4 @@ const extractCompatibilityFromBCD = (path: string): CompatStatement => {
 
 const buildHashUrl = (hash: string) => `https://caniuse.com/#feat=${hash}`;
 
-export default handleCanIUseQuery;
+export default buildCanIUseQueryHandler();
