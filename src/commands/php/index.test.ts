@@ -1,4 +1,5 @@
 import * as errors from '../../utils/errors';
+
 import { buildPHPQueryHandler } from './index';
 
 describe('buildPHPQueryHandler', () => {
@@ -15,8 +16,8 @@ describe('buildPHPQueryHandler', () => {
     const handler = buildPHPQueryHandler(async searchTerm => {
       return {
         error: true,
-        text: '',
         searchUrl: `http://php.net/?q=${searchTerm}`,
+        text: '',
       };
     });
 
@@ -29,8 +30,8 @@ describe('buildPHPQueryHandler', () => {
       async searchTerm => {
         return {
           error: false,
-          text: '',
           searchUrl: `http://php.net/?q=${searchTerm}`,
+          text: '',
         };
       },
       text => {
@@ -50,8 +51,8 @@ describe('buildPHPQueryHandler', () => {
       async searchTerm => {
         return {
           error: false,
-          text: '',
           searchUrl: `http://php.net/?q=${searchTerm}`,
+          text: '',
         };
       },
       () => {

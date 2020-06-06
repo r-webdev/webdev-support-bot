@@ -1,7 +1,7 @@
-import { buildBundlephobiaQueryHandler } from './index';
-import { getData } from '../../utils/urlTools';
 import { getChosenResult } from '../../utils/discordTools';
 import * as errors from '../../utils/errors';
+import { getData } from '../../utils/urlTools';
+import useData from '../../utils/useData';
 import {
   response,
   detailResponse,
@@ -9,7 +9,8 @@ import {
   similar,
   previousVersion,
 } from './__fixtures__/response';
-import useData from '../../utils/useData';
+
+import { buildBundlephobiaQueryHandler } from './index';
 
 describe('buildBundlephobiaQueryHandler', () => {
   const editMock = jest.fn();
@@ -55,9 +56,9 @@ describe('buildBundlephobiaQueryHandler', () => {
 
   test('works when reply response, but dies on detail', async () => {
     choose.mockResolvedValueOnce({
+      description: 'Parse, validate, manipulate, and display dates',
       name: 'moment',
       url: 'http://big.thick.dates',
-      description: 'Parse, validate, manipulate, and display dates',
     });
 
     fetchDetail.mockResolvedValueOnce({
@@ -74,9 +75,9 @@ describe('buildBundlephobiaQueryHandler', () => {
 
   test('works when API request responds and details responds', async () => {
     choose.mockResolvedValueOnce({
+      description: 'Parse, validate, manipulate, and display dates',
       name: 'moment',
       url: 'http://big.thick.dates',
-      description: 'Parse, validate, manipulate, and display dates',
     });
 
     // Mock the implementation since there's no way in hell I am going to
@@ -84,31 +85,31 @@ describe('buildBundlephobiaQueryHandler', () => {
     fetchDetail.mockImplementation(async (url: string) => {
       if (url.includes('similar-packages')) {
         return {
-          json: similar,
           error: false,
+          json: similar,
           text: null,
         };
       }
 
       if (url.includes('date-fn')) {
         return {
-          json: dateFn,
           error: false,
+          json: dateFn,
           text: null,
         };
       }
 
       if (url.includes('package-history')) {
         return {
-          json: previousVersion,
           error: false,
+          json: previousVersion,
           text: null,
         };
       }
 
       return {
-        json: detailResponse,
         error: false,
+        json: detailResponse,
         text: null,
       };
     });

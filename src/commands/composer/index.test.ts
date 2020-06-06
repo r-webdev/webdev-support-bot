@@ -1,9 +1,10 @@
-import { buildComposerQueryHandler } from './index';
-import { getData } from '../../utils/urlTools';
-import { PackagistResponse } from './types';
-import useData from '../../utils/useData';
 import { getChosenResult } from '../../utils/discordTools';
 import * as errors from '../../utils/errors';
+import { getData } from '../../utils/urlTools';
+import useData from '../../utils/useData';
+import { PackagistResponse } from './types';
+
+import { buildComposerQueryHandler } from './index';
 
 describe('handleComposerQuery', () => {
   const sendMock = jest.fn();
@@ -38,12 +39,12 @@ describe('handleComposerQuery', () => {
     const packageRes: PackagistResponse = {
       results: [
         {
-          name: 'Symfony',
           description: 'Better than Laravel',
-          url: 'https://symfony.com',
-          repository: 'https://github.com/symfony/symfony',
           downloads: 10000,
           favers: 10000,
+          name: 'Symfony',
+          repository: 'https://github.com/symfony/symfony',
+          url: 'https://symfony.com',
         },
       ],
       total: 1,
@@ -77,12 +78,12 @@ describe('handleComposerQuery', () => {
     const packageRes: PackagistResponse = {
       results: [
         {
-          name: 'Symfony',
           description: 'Better than Laravel',
-          url: 'https://symfony.com',
-          repository: 'https://github.com/symfony/symfony',
           downloads: 10000,
           favers: 10000,
+          name: 'Symfony',
+          repository: 'https://github.com/symfony/symfony',
+          url: 'https://symfony.com',
         },
       ],
       total: 1,
@@ -90,12 +91,12 @@ describe('handleComposerQuery', () => {
 
     fetch.mockResolvedValue(packageRes);
     choose.mockResolvedValue({
-      name: 'Symfony',
       description: 'Better than Laravel',
-      url: 'https://symfony.com',
-      repository: 'https://github.com/symfony/symfony',
       downloads: 10000,
+      name: 'Symfony',
+      repository: 'https://github.com/symfony/symfony',
       stars: 10000,
+      url: 'https://symfony.com',
     });
     fetchUse.mockResolvedValue({
       error: true,
@@ -127,12 +128,12 @@ describe('handleComposerQuery', () => {
     const packageRes: PackagistResponse = {
       results: [
         {
-          name: 'Symfony',
           description: 'Better than Laravel',
-          url: 'https://symfony.com',
-          repository: 'https://github.com/symfony/symfony',
           downloads: 10000,
           favers: 10000,
+          name: 'Symfony',
+          repository: 'https://github.com/symfony/symfony',
+          url: 'https://symfony.com',
         },
       ],
       total: 1,
@@ -140,26 +141,40 @@ describe('handleComposerQuery', () => {
 
     fetch.mockResolvedValue(packageRes);
     choose.mockResolvedValue({
-      name: 'Symfony',
       description: 'Better than Laravel',
-      url: 'https://symfony.com',
-      repository: 'https://github.com/symfony/symfony',
       downloads: 10000,
+      name: 'Symfony',
+      repository: 'https://github.com/symfony/symfony',
       stars: 10000,
+      url: 'https://symfony.com',
     });
     fetchUse.mockResolvedValue({
       error: false,
       json: {
         package: {
-          name: 'Symfony',
           description: 'Better than Laravel',
-          time: new Date('2020-01-01'),
+          github_forks: 1000,
+          github_open_issues: 0,
+          dependents: 10,
+          github_stars: 10000,
+          downloads: {
+            monthly: 1234,
+            total: 1000000,
+            daily: 1234,
+          },
           maintainers: [
             {
               avatar_url: 'http://avatar',
               name: 'A Name',
             },
           ],
+          favers: 1234,
+          name: 'Symfony',
+          github_watchers: 10000,
+          time: new Date('2020-01-01'),
+          language: 'PHP',
+          type: 'Framework',
+          repository: 'https://github.com/symfony/symfony',
           versions: {
             'dev-master': {
               name: 'master',
@@ -186,21 +201,7 @@ describe('handleComposerQuery', () => {
               authors: [{ name: 'Example ' }],
             },
           },
-          type: 'Framework',
-          repository: 'https://github.com/symfony/symfony',
-          github_stars: 10000,
-          github_watchers: 10000,
-          github_forks: 1000,
-          github_open_issues: 0,
-          language: 'PHP',
-          dependents: 10,
           suggesters: 1000,
-          downloads: {
-            total: 1000000,
-            monthly: 1234,
-            daily: 1234,
-          },
-          favers: 1234,
         },
       },
       text: null,

@@ -1,6 +1,7 @@
-import { getData } from '../../utils/urlTools';
 import { getChosenResult } from '../../utils/discordTools';
+import { getData } from '../../utils/urlTools';
 import { response } from './__fixtures__/response';
+
 import { buildNPMQueryHandler } from './index';
 
 describe('npm', () => {
@@ -35,13 +36,13 @@ describe('npm', () => {
     const editMock = jest.fn();
     fetch.mockResolvedValue(response);
     choose.mockResolvedValue({
-      externalUrls: { homepage: '', repository: '' },
-      name: 'React',
-      url: 'http://react',
+      author: { name: '', url: '' },
       description: '',
+      externalUrls: { homepage: '', repository: '' },
       lastUpdate: '',
       maintainers: '10',
-      author: { name: '', url: '' },
+      name: 'React',
+      url: 'http://react',
     });
 
     msg.channel.send.mockResolvedValue({ edit: editMock });

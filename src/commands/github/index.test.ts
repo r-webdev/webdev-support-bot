@@ -1,8 +1,9 @@
-import { getData } from '../../utils/urlTools';
 import { getChosenResult } from '../../utils/discordTools';
-import { buildGithubQueryHandler } from './index';
-import { response } from './__fixtures__/response';
+import { getData } from '../../utils/urlTools';
 import useData from '../../utils/useData';
+import { response } from './__fixtures__/response';
+
+import { buildGithubQueryHandler } from './index';
 
 describe('github', () => {
   const sendMock = jest.fn();
@@ -40,38 +41,38 @@ describe('github', () => {
     const editMock = jest.fn();
     fetch.mockResolvedValue(response);
     choose.mockResolvedValue({
-      name: 'React',
-      owner: {
-        name: 'Facebook',
-        type: 'something',
-        avatar: 'some_avator',
-      },
-      description: 'React',
-      url: 'https://facebook.com/react',
-      updated: new Date(),
       created: new Date(),
-      language: 'en-US',
-      stars: 10000,
+      description: 'React',
       forks: '',
       issues: 0,
+      language: 'en-US',
+      name: 'React',
+      owner: {
+        avatar: 'some_avator',
+        name: 'Facebook',
+        type: 'something',
+      },
+      stars: 10000,
+      updated: new Date(),
+      url: 'https://facebook.com/react',
     });
 
     fetchDetails.mockResolvedValue({
       error: false,
       json: {
+        conditions: [],
+        description: 'MIT',
+        body: 'MIT',
+        html_url: 'http://choosealicense.com/licenses/mit',
+        featured: true,
         key: 'key',
+        implementation: 'MIT',
         name: 'MIT',
+        limitations: [],
+        node_id: '',
+        permissions: [],
         spdx_id: 'mit',
         url: 'http://choosealicense.com/licenses/mit',
-        node_id: '',
-        html_url: 'http://choosealicense.com/licenses/mit',
-        description: 'MIT',
-        implementation: 'MIT',
-        permissions: [],
-        conditions: [],
-        limitations: [],
-        body: 'MIT',
-        featured: true,
       },
       text: null,
     });

@@ -1,8 +1,10 @@
-import useData from '../../utils/useData';
-import { getSearchUrl } from '../../utils/urlTools';
-import { queryBuilder } from './index';
-import * as errors from '../../utils/errors';
 import * as DomParser from 'dom-parser';
+
+import * as errors from '../../utils/errors';
+import { getSearchUrl } from '../../utils/urlTools';
+import useData from '../../utils/useData';
+
+import { queryBuilder } from './index';
 
 jest.mock('dom-parser');
 jest.mock('../../utils/urlTools');
@@ -28,8 +30,8 @@ describe('handleMDNQuery', () => {
   test('replies with invalid response error if search URL fails', async () => {
     mockUseData.mockResolvedValue({
       error: true,
-      text: null,
       json: null,
+      text: null,
     });
 
     await queryBuilder()(msg, 'Search Term');
@@ -41,16 +43,16 @@ describe('handleMDNQuery', () => {
   test('replies with 0 documents found', async () => {
     mockUseData.mockResolvedValue({
       error: false,
-      text: 'Example',
       json: null,
+      text: 'Example',
     });
 
     await queryBuilder(text => {
       expect(text).toEqual('Example');
       return {
         isEmpty: true,
-        results: [],
         meta: '',
+        results: [],
       };
     })(msg, 'Search Term');
 
@@ -60,8 +62,8 @@ describe('handleMDNQuery', () => {
   test('responds with list embedded', async () => {
     mockUseData.mockResolvedValue({
       error: false,
-      text: 'Example',
       json: null,
+      text: 'Example',
     });
 
     await queryBuilder(
@@ -69,6 +71,7 @@ describe('handleMDNQuery', () => {
         expect(text).toEqual('Example');
         return {
           isEmpty: false,
+          meta: '',
           results: [
             {
               getElementsByClassName(
@@ -77,10 +80,10 @@ describe('handleMDNQuery', () => {
                 if (className == 'result-title') {
                   return [
                     {
-                      textContent: '',
                       getAttribute() {
                         return 'http://example.com';
                       },
+                      textContent: '',
                     } as any,
                   ];
                 }
@@ -92,14 +95,13 @@ describe('handleMDNQuery', () => {
               },
             } as any,
           ],
-          meta: '',
         };
       },
       () => {
         return {
+          excerpt: '',
           title: 'Example',
           url: 'http://www.example.com',
-          excerpt: '',
         };
       },
       async () => {

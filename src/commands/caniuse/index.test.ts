@@ -1,8 +1,9 @@
-import { getData } from '../../utils/urlTools';
 import { getChosenResult } from '../../utils/discordTools';
-import { simpleResponse, detailedResponse } from './__fixtures__/response';
-import { buildCanIUseQueryHandler } from './index';
+import { getData } from '../../utils/urlTools';
 import useData from '../../utils/useData';
+import { simpleResponse, detailedResponse } from './__fixtures__/response';
+
+import { buildCanIUseQueryHandler } from './index';
 
 describe('caniuse', () => {
   const sendMock = jest.fn();
@@ -20,8 +21,8 @@ describe('caniuse', () => {
     fetch.mockResolvedValue(simpleResponse);
     fetchDetails.mockResolvedValue({
       error: false,
-      text: null,
       json: detailedResponse,
+      text: null,
     });
   });
 
@@ -46,13 +47,13 @@ describe('caniuse', () => {
   test('awaits user response when request works', async () => {
     const editMock = jest.fn();
     choose.mockResolvedValue({
-      externalUrls: { homepage: '', repository: '' },
-      name: 'React',
-      url: 'http://react',
+      author: { name: '', url: '' },
       description: '',
+      externalUrls: { homepage: '', repository: '' },
       lastUpdate: '',
       maintainers: '10',
-      author: { name: '', url: '' },
+      name: 'React',
+      url: 'http://react',
     });
 
     msg.channel.send.mockResolvedValue({ edit: editMock });

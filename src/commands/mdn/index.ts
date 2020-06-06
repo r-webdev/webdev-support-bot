@@ -38,17 +38,17 @@ const defaultParser = (text: string): ParserResult => {
   const meta = document.getElementsByClassName('result-meta')[0].textContent;
   if (meta.startsWith('0 documents found')) {
     return {
-      results: [],
       isEmpty: true,
       meta,
+      results: [],
     };
   }
 
   const results = document.getElementsByClassName('result');
   return {
-    results,
     isEmpty: false,
     meta,
+    results,
   };
 };
 

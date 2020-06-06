@@ -31,8 +31,8 @@ const textParser = (text: string): ParseResult => {
   let isDirect = document.getElementById('quickref_functions') === null;
   if (isDirect) {
     return {
-      results: [],
       isDirect,
+      results: [],
     };
   }
 
@@ -42,8 +42,8 @@ const textParser = (text: string): ParseResult => {
     .slice(0, 10);
 
   return {
-    results,
     isDirect,
+    results,
   };
 };
 
