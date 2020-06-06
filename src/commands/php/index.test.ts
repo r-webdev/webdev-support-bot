@@ -13,13 +13,16 @@ describe('buildPHPQueryHandler', () => {
   afterEach(() => jest.resetAllMocks());
 
   test('replies with error', async () => {
-    const handler = buildPHPQueryHandler(async searchTerm => {
-      return {
-        error: true,
-        searchUrl: `http://php.net/?q=${searchTerm}`,
-        text: '',
-      };
-    });
+    const handler = buildPHPQueryHandler(
+      searchTerm =>
+        new Promise(resolve =>
+          resolve({
+            error: true,
+            searchUrl: `http://php.net/?q=${searchTerm}`,
+            text: '',
+          })
+        )
+    );
 
     await handler(msg, 'Wrong');
     expect(msg.reply).toBeCalledWith(errors.invalidResponse);
@@ -27,13 +30,14 @@ describe('buildPHPQueryHandler', () => {
 
   test('replies with a direct URL', async () => {
     const handler = buildPHPQueryHandler(
-      async searchTerm => {
-        return {
-          error: false,
-          searchUrl: `http://php.net/?q=${searchTerm}`,
-          text: '',
-        };
-      },
+      searchTerm =>
+        new Promise(resolve =>
+          resolve({
+            error: false,
+            searchUrl: `http://php.net/?q=${searchTerm}`,
+            text: '',
+          })
+        ),
       text => {
         return {
           isDirect: true,
@@ -48,23 +52,22 @@ describe('buildPHPQueryHandler', () => {
 
   test('parses the body', async () => {
     const handler = buildPHPQueryHandler(
-      async searchTerm => {
-        return {
-          error: false,
-          searchUrl: `http://php.net/?q=${searchTerm}`,
-          text: '',
-        };
-      },
-      () => {
-        return {
-          isDirect: false,
-          results: [
-            {
-              firstChild: {},
-            } as any,
-          ],
-        };
-      },
+      searchTerm =>
+        new Promise(resolve =>
+          resolve({
+            error: false,
+            searchUrl: `http://php.net/?q=${searchTerm}`,
+            text: '',
+          })
+        ),
+      () => ({
+        isDirect: false,
+        results: [
+          {
+            firstChild: {},
+          } as any,
+        ],
+      }),
       () => {
         return {
           title: 'array_pop is a PHP function',

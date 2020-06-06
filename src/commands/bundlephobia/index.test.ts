@@ -82,37 +82,40 @@ describe('buildBundlephobiaQueryHandler', () => {
 
     // Mock the implementation since there's no way in hell I am going to
     // extract each call into a service function.
-    fetchDetail.mockImplementation(async (url: string) => {
-      if (url.includes('similar-packages')) {
-        return {
-          error: false,
-          json: similar,
-          text: null,
-        };
-      }
+    fetchDetail.mockImplementation(
+      (url: string) =>
+        new Promise(resolve => {
+          if (url.includes('similar-packages')) {
+            resolve({
+              error: false,
+              json: similar,
+              text: null,
+            });
+          }
 
-      if (url.includes('date-fn')) {
-        return {
-          error: false,
-          json: dateFn,
-          text: null,
-        };
-      }
+          if (url.includes('date-fn')) {
+            resolve({
+              error: false,
+              json: dateFn,
+              text: null,
+            });
+          }
 
-      if (url.includes('package-history')) {
-        return {
-          error: false,
-          json: previousVersion,
-          text: null,
-        };
-      }
+          if (url.includes('package-history')) {
+            resolve({
+              error: false,
+              json: previousVersion,
+              text: null,
+            });
+          }
 
-      return {
-        error: false,
-        json: detailResponse,
-        text: null,
-      };
-    });
+          resolve({
+            error: false,
+            json: detailResponse,
+            text: null,
+          });
+        })
+    );
 
     const handler = buildBundlephobiaQueryHandler(fetch, fetchDetail, choose);
     await handler(msg, 'moment.js');

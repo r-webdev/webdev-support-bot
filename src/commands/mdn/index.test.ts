@@ -77,7 +77,7 @@ describe('handleMDNQuery', () => {
               getElementsByClassName(
                 className: string
               ): DomParser.Node[] | null {
-                if (className == 'result-title') {
+                if (className === 'result-title') {
                   return [
                     {
                       getAttribute() {
@@ -97,20 +97,17 @@ describe('handleMDNQuery', () => {
           ],
         };
       },
-      () => {
-        return {
-          excerpt: '',
-          title: 'Example',
-          url: 'http://www.example.com',
-        };
-      },
-      async () => {
-        return [
+      () => ({
+        excerpt: '',
+        title: 'Example',
+        url: 'http://www.example.com',
+      }),
+      () =>
+        [
           {
             url: 'http://www.example.com',
           },
-        ] as any;
-      }
+        ] as any
     )(msg, 'Search Term');
 
     expect(msg.channel.send).toHaveBeenCalledTimes(1);
