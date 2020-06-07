@@ -151,10 +151,8 @@ export const getData = async <T>({
   isInvalidData,
   headers,
 }: GetDataParams): Promise<Partial<T>> => {
-  console.time('API request');
   const searchUrl = getSearchUrl(provider, searchTerm);
   const { error, json: data } = await useData<T>(searchUrl, 'json', headers);
-  console.timeEnd('API request');
 
   if (error) {
     await msg.reply(invalidResponse);
