@@ -43,6 +43,15 @@ type FetchWithFormat<Format> = (
   init?: RequestInit
 ) => Promise<Format>;
 
+/**
+ * Given a cache key and a function that maps the fetch response to a arbitrary
+ * data structure, return a function when invoked, lower cases the cache key and
+ * returns the cached formatted response when found.
+ *
+ * If the cache entry is _not_ found, delegate the call to an actual fetch implementation
+ * to make the HTTP request. This response is then formatted with the function
+ * above and saved into the cache. HTTP requests times/durations are also logged.
+ */
 const doFetch: <TParsedResponse>(
   cacheKey: string,
   mapper: ResponseMapper<TParsedResponse>
