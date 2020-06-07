@@ -26,7 +26,19 @@ describe('useData', () => {
     });
   });
 
-  test.each([
+  test.each<
+    [
+      'text' | 'json',
+      () => jest.MockedFunction<
+        () => {
+          error: boolean;
+          json: object;
+          text: string;
+        }
+      >,
+      (resp: any) => void
+    ]
+  >([
     [
       'json',
       () => {
@@ -67,15 +79,15 @@ describe('useData', () => {
       const url = urlGen();
       const mockTarget = mock();
 
-      const response = await useData(url, type as any);
+      const response = await useData(url, type);
       expect(fetchMock).toBeCalledWith(url, headers);
       assertResponse(response);
 
       const allCachedResponses = await Promise.all([
-        useData(url, type as any),
-        useData(url, type as any),
-        useData(url, type as any),
-        useData(url, type as any),
+        useData(url, type),
+        useData(url, type),
+        useData(url, type),
+        useData(url, type),
       ]);
 
       expect(mockTarget).toBeCalledTimes(1);
