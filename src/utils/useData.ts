@@ -18,6 +18,8 @@ const apiCache = new NodeCache({
   maxKeys: parseInt(API_CACHE_ENTRIES_LIMIT, 10),
 });
 
+type ResponseTypes = 'json' | 'text';
+
 type UnknownData<T> =
   | {
       error: true;
@@ -63,7 +65,7 @@ const doFetch: <TParsedResponse>(
 };
 
 const responseMapper: <T>(
-  type: 'json' | 'text'
+  type: ResponseTypes
 ) => (response: Response) => Promise<UnknownData<T>> = (
   type: string
 ) => async response => {
@@ -97,7 +99,7 @@ const responseMapper: <T>(
 
 export default async <T>(
   url: string,
-  type: 'json' | 'text' = 'json',
+  type: ResponseTypes = 'json',
   headers: HeaderInit = {}
 ): Promise<UnknownData<T>> => {
   return doFetch(url, responseMapper<T>(type))(url, { headers });
