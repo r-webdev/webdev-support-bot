@@ -36,7 +36,8 @@ const provider = 'composer';
 export const buildComposerQueryHandler = (
   fetch: typeof getData = getData,
   fetchUse: typeof useData = useData,
-  waitForChoice: typeof getChosenResult = getChosenResult
+  waitForChoice: typeof getChosenResult = getChosenResult,
+  formatDateToNow: typeof formatDistanceToNow = formatDistanceToNow
 ) => async (msg: Message, searchTerm: string) => {
   try {
     const json = await fetch<PackagistResponse>({
@@ -113,7 +114,7 @@ export const buildComposerQueryHandler = (
       package: { name, downloads, description, maintainers, versions },
     } = extendedJson;
 
-    const { version, released } = findLatestRelease(versions);
+    const { version, released } = findLatestRelease(versions, formatDateToNow);
 
     await attemptEdit(
       sentMsg,
@@ -136,7 +137,10 @@ export const buildComposerQueryHandler = (
   }
 };
 
-const findLatestRelease = (versions: Versions) => {
+const findLatestRelease = (
+  versions: Versions,
+  formatDateToNow: typeof formatDistanceToNow
+) => {
   const maybeResult = Object.values(versions).reduce((latest, item) => {
     const { version_normalized: itemVersion } = item;
 
@@ -156,7 +160,7 @@ const findLatestRelease = (versions: Versions) => {
   const { version, time } = maybeResult;
 
   return {
-    released: formatDistanceToNow(new Date(time)),
+    released: formatDateToNow(new Date(time)),
     version,
   };
 };

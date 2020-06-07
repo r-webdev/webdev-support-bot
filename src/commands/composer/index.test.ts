@@ -207,7 +207,12 @@ describe('handleComposerQuery', () => {
       text: null,
     });
 
-    const handler = buildComposerQueryHandler(fetch, fetchUse, choose);
+    const handler = buildComposerQueryHandler(
+      fetch,
+      fetchUse,
+      choose,
+      () => '5 months'
+    );
     await handler(msg, 'search term');
 
     expect(fetch).toBeCalledWith({
