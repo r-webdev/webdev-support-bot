@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon -x ts-node --files ./src/index.ts",
     "start": "node build/index.js",
-    "build": "tsc",
+    "build": "yarn test:ci && tsc",
     "lint": "eslint src && tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
