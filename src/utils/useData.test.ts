@@ -27,11 +27,16 @@ describe('useData', () => {
       text: null,
     });
 
-    await useData(url);
-    await useData(url);
-    await useData(url);
-    const lastResponse = await useData(url);
+    const allCachedResponses = await Promise.all([
+      useData(url),
+      useData(url),
+      useData(url),
+      useData(url),
+    ]);
+
     expect(fetchMock).toBeCalledTimes(1);
-    expect(lastResponse.json).toEqual({ test: 'cached' });
+    allCachedResponses.forEach(lastResponse => {
+      expect(lastResponse.json).toEqual({ test: 'cached' });
+    });
   });
 });
