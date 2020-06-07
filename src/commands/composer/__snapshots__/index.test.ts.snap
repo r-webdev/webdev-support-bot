@@ -65,3 +65,67 @@ Object {
   },
 }
 `;
+
+exports[`handleComposerQuery calls the use useData method and succeeds 3`] = `
+Object {
+  "embed": Object {
+    "author": Object {
+      "icon_url": "http://avatar",
+      "name": "A Name",
+    },
+    "color": 15895834,
+    "description": "Better than Laravel",
+    "fields": Array [
+      Object {
+        "inline": false,
+        "name": "add to your project",
+        "value": "\`\`\`bash
+composer require master
+\`\`\`",
+      },
+      Object {
+        "inline": false,
+        "name": "PHP keywords",
+        "value": "[PHP](https://packagist.org/search/?tags=PHP)",
+      },
+      Object {
+        "inline": true,
+        "name": ":chains: dependencies",
+        "value": "2",
+      },
+      Object {
+        "inline": true,
+        "name": "MIT license",
+        "value": "[MIT](https://choosealicense.com/licenses/mit)",
+      },
+      Object {
+        "inline": true,
+        "name": "​",
+        "value": "​",
+      },
+      Object {
+        "inline": true,
+        "name": ":globe_with_meridians: homepage",
+        "value": "[github.com/symfony/symfony](https://github.com/symfony/symfony)",
+      },
+      Object {
+        "inline": true,
+        "name": "​",
+        "value": "​",
+      },
+      Object {
+        "inline": true,
+        "name": ":writing_hand: author",
+        "value": "Example ",
+      },
+    ],
+    "footer": Object {
+      "iconURL": "https://packagist.org/bundles/packagistweb/img/logo-small.png",
+      "text": "Downloads: 1,000,000 total | 1,234 monthly | 1,234 daily
+last updated 5 months ago",
+    },
+    "title": "Symfony *(1.0.0)*",
+    "url": "https://packagist.org/packages/Symfony",
+  },
+}
+`;

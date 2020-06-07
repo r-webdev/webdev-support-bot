@@ -167,7 +167,10 @@ interface ModifiedGithubResponseItem {
   license?: { url: string; name: string };
 }
 
-const createGithubEmbed = (result: ModifiedGithubResponseItem): Embed => {
+const createGithubEmbed = (
+  result: ModifiedGithubResponseItem,
+  formatDateFromNow: typeof formatDistanceToNow = formatDistanceToNow
+): Embed => {
   const { name: title, owner, description, url, updated, created } = result;
 
   return {
@@ -181,8 +184,8 @@ const createGithubEmbed = (result: ModifiedGithubResponseItem): Embed => {
     description,
     fields: createFields(result),
     footerText: [
-      `updated ${formatDistanceToNow(new Date(updated))} ago`,
-      `created ${formatDistanceToNow(new Date(created))} ago`,
+      `updated ${formatDateFromNow(new Date(updated))} ago`,
+      `created ${formatDateFromNow(new Date(created))} ago`,
     ].join(' - '),
     provider,
     title,

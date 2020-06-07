@@ -123,7 +123,7 @@ describe('handleComposerQuery', () => {
 
   test('calls the use useData method and succeeds', async () => {
     const editMock = jest.fn();
-    sendMock.mockResolvedValue({ edit: editMock });
+    msg.channel.send.mockResolvedValue({ edit: editMock });
 
     const packageRes: PackagistResponse = {
       results: [
@@ -207,8 +207,6 @@ describe('handleComposerQuery', () => {
       text: null,
     });
 
-    msg.channel.send.mockResolvedValue(null);
-
     const handler = buildComposerQueryHandler(fetch, fetchUse, choose);
     await handler(msg, 'search term');
 
@@ -232,5 +230,7 @@ describe('handleComposerQuery', () => {
 
     const editPayload = sendMock.mock.calls[0][0];
     expect(editPayload).toMatchSnapshot();
+    expect(editMock).toBeCalled();
+    expect(editMock.mock.calls[0][0]).toMatchSnapshot();
   });
 });
