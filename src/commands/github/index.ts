@@ -28,9 +28,13 @@ const headers = {
 
 const licenseCache = {};
 
-const handleGithubQuery = async (msg: Message, searchTerm: string) => {
+export const buildGithubQueryHandler = (
+  fetch: typeof getData = getData,
+  fetchDetails: typeof useData = useData,
+  waitForResponse: typeof getChosenResult = getChosenResult
+) => async (msg: Message, searchTerm: string) => {
   try {
-    const json = await getData<GithubResponse>({
+    const json = await fetch<GithubResponse>({
       headers,
       isInvalidData: json => json.total_count === 0 || json.items.length === 0,
       msg,
@@ -68,7 +72,7 @@ const handleGithubQuery = async (msg: Message, searchTerm: string) => {
               // eslint-disable-next-line require-atomic-updates
               license.url = licenseCache[key]
                 ? licenseCache[key]
-                : await extractAndCacheLicense(license);
+                : await extractAndCacheLicense(license, fetchDetails);
             }
 
             return {
@@ -130,7 +134,7 @@ const handleGithubQuery = async (msg: Message, searchTerm: string) => {
       })
     );
 
-    const result = await getChosenResult(sentMsg, msg, firstTenResults);
+    const result = await waitForResponse(sentMsg, msg, firstTenResults);
 
     if (!result) {
       return;
@@ -163,7 +167,10 @@ interface ModifiedGithubResponseItem {
   license?: { url: string; name: string };
 }
 
-const createGithubEmbed = (result: ModifiedGithubResponseItem): Embed => {
+const createGithubEmbed = (
+  result: ModifiedGithubResponseItem,
+  formatDateFromNow: typeof formatDistanceToNow = formatDistanceToNow
+): Embed => {
   const { name: title, owner, description, url, updated, created } = result;
 
   return {
@@ -177,8 +184,8 @@ const createGithubEmbed = (result: ModifiedGithubResponseItem): Embed => {
     description,
     fields: createFields(result),
     footerText: [
-      `updated ${formatDistanceToNow(new Date(updated))} ago`,
-      `created ${formatDistanceToNow(new Date(created))} ago`,
+      `updated ${formatDateFromNow(new Date(updated))} ago`,
+      `created ${formatDateFromNow(new Date(created))} ago`,
     ].join(' - '),
     provider,
     title,
@@ -258,8 +265,11 @@ const createFields = ({
   return fields;
 };
 
-const extractAndCacheLicense = async ({ url, spdx_id }: License) => {
-  const { error, json } = await useData<LicenseContent>(url);
+const extractAndCacheLicense = async (
+  { url, spdx_id }: License,
+  fetch: typeof useData
+) => {
+  const { error, json } = await fetch<LicenseContent>(url);
 
   if (error) {
     return '';
@@ -271,4 +281,4 @@ const extractAndCacheLicense = async ({ url, spdx_id }: License) => {
   return json.html_url;
 };
 
-export default handleGithubQuery;
+export default buildGithubQueryHandler();

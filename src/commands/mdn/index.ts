@@ -20,34 +20,91 @@ import useData from '../../utils/useData';
 const provider = 'mdn';
 const entities = new Entities();
 
-const handleMDNQuery = async (msg: Message, searchTerm: string) => {
+interface ParserResult {
+  results: DOMParser.Node[];
+  isEmpty: boolean;
+  meta: string;
+}
+
+interface ResultMeta {
+  getElementsByClassName(cls: string): DOMParser.Node[];
+}
+
+const defaultParser = (text: string): ParserResult => {
+  const parser = new DOMParser();
+  const document = parser.parseFromString(text);
+
+  // meta provides information about the amount of results found
+  const meta = document.getElementsByClassName('result-meta')[0].textContent;
+  if (meta.startsWith('0 documents found')) {
+    return {
+      isEmpty: true,
+      meta,
+      results: [],
+    };
+  }
+
+  const results = document.getElementsByClassName('result');
+  return {
+    isEmpty: false,
+    meta,
+    results,
+  };
+};
+
+/**
+ *
+ * @param {any} result [document.parseFromString return type]
+ */
+const extractMetadataFromResult = (result: ResultMeta) => {
+  const titleElement = result.getElementsByClassName('result-title')[0];
+  const excerptElement = result.getElementsByClassName('result-excerpt')[0];
+
+  const title = escapeMarkdown(entities.decode(titleElement.textContent));
+  const url = buildDirectUrl(provider, titleElement.getAttribute('href'));
+
+  const excerpt = sanitizeExcerpt(
+    escapeMarkdown(entities.decode(excerptElement.textContent))
+  );
+
+  return {
+    excerpt,
+    title,
+    url,
+  };
+};
+
+/**
+ * Poor man's dependency injection without introducing classes, just use closures
+ * and higher order functions instead. Also provides a default so we don't have
+ * to actual do it ourselves, just for unit testing purposes.
+ */
+export const queryBuilder = (
+  mdnParser: typeof defaultParser = defaultParser,
+  metaDataExtraction: typeof extractMetadataFromResult = extractMetadataFromResult,
+  waitForChosenResult: typeof getChosenResult = getChosenResult
+) => async (msg: Message, searchTerm: string) => {
   try {
     const searchUrl = getSearchUrl(provider, searchTerm);
     const { error, text } = await useData(searchUrl, 'text');
 
     if (error) {
-      msg.reply(errors.invalidResponse);
+      await msg.reply(errors.invalidResponse);
       return;
     }
 
-    const parser = new DOMParser();
-    const document = parser.parseFromString(text);
-
-    // meta provides information about the amount of results found
-    const meta = document.getElementsByClassName('result-meta')[0].textContent;
-    if (meta.startsWith('0 documents found')) {
+    const { results, isEmpty, meta } = mdnParser(text);
+    if (isEmpty) {
       const sentMsg = await msg.reply(errors.noResults(searchTerm));
 
       delayedMessageAutoDeletion(sentMsg);
       return;
     }
 
-    const results = document.getElementsByClassName('result');
-
     let expectedLength = 0;
 
     let preparedDescription = results.map((result, index) => {
-      const { title, url, excerpt } = extractMetadataFromResult(result);
+      const { title, url, excerpt } = metaDataExtraction(result);
 
       const item = createMarkdownListItem(
         index,
@@ -85,41 +142,19 @@ const handleMDNQuery = async (msg: Message, searchTerm: string) => {
       })
     );
 
-    const result = await getChosenResult(sentMsg, msg, results);
+    const result = await waitForChosenResult(sentMsg, msg, results);
 
     if (!result) {
       return;
     }
 
-    const { url } = extractMetadataFromResult(result);
+    const { url } = metaDataExtraction(result);
 
     await attemptEdit(sentMsg, url, { embed: null });
   } catch (error) {
     console.error(error);
     await msg.reply(errors.unknownError);
   }
-};
-
-/**
- *
- * @param {any} result [document.parseFromString return type]
- */
-const extractMetadataFromResult = (result: any) => {
-  const titleElement = result.getElementsByClassName('result-title')[0];
-  const excerptElement = result.getElementsByClassName('result-excerpt')[0];
-
-  const title = escapeMarkdown(entities.decode(titleElement.textContent));
-  const url = buildDirectUrl(provider, titleElement.getAttribute('href'));
-
-  const excerpt = sanitizeExcerpt(
-    escapeMarkdown(entities.decode(excerptElement.textContent))
-  );
-
-  return {
-    excerpt,
-    title,
-    url,
-  };
 };
 
 const sanitizeExcerpt = (excerpt: string) => {
@@ -140,4 +175,4 @@ const sanitizeExcerpt = (excerpt: string) => {
  */
 const escapeMarkdown = (text: string) => text.replace(/(\*|_|`|~|\\)/g, '\\$1');
 
-export default handleMDNQuery;
+export default queryBuilder();

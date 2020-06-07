@@ -29,9 +29,13 @@ import {
 
 const provider = 'bundlephobia';
 
-const handleBundlephobiaQuery = async (msg: Message, searchTerm: string) => {
+export const buildBundlephobiaQueryHandler = (
+  fetch: typeof getData = getData,
+  fetchDetail: typeof useData = useData,
+  waitForResponse: typeof getChosenResult = getChosenResult
+) => async (msg: Message, searchTerm: string) => {
   try {
-    const json = await getData<BundlephobiaResponse[]>({
+    const json = await fetch<BundlephobiaResponse[]>({
       isInvalidData: json => json.length === 0,
       msg,
       provider,
@@ -53,7 +57,7 @@ const handleBundlephobiaQuery = async (msg: Message, searchTerm: string) => {
       }));
 
     if (firstTenResults.length === 1) {
-      await handleResult(msg, firstTenResults[0], null);
+      await handleResult(msg, firstTenResults[0], null, fetchDetail);
       return;
     }
 
@@ -83,13 +87,13 @@ const handleBundlephobiaQuery = async (msg: Message, searchTerm: string) => {
     });
 
     const sentMsg = await msg.channel.send(embed);
-    const result = await getChosenResult(sentMsg, msg, firstTenResults);
+    const result = await waitForResponse(sentMsg, msg, firstTenResults);
 
     if (!result) {
       return;
     }
 
-    await handleResult(msg, result, sentMsg);
+    await handleResult(msg, result, sentMsg, fetchDetail);
   } catch (error) {
     console.error(error);
     await msg.reply(errors.unknownError);
@@ -99,9 +103,10 @@ const handleBundlephobiaQuery = async (msg: Message, searchTerm: string) => {
 const handleResult = async (
   msg: Message,
   { name, description }: { name: string; description: string },
-  sentMsg: Message
+  sentMsg: Message,
+  fetch: typeof useData
 ) => {
-  const { error, json: extendedJson } = await useData<
+  const { error, json: extendedJson } = await fetch<
     ExtendedBundlephobiaResponse
   >(getExtendedInfoUrl(provider, name));
 
@@ -120,8 +125,8 @@ const handleResult = async (
   const estDownloadTimeEmerging3g = calcDownloadTime(gzip, '3g');
   const estDownloadTimeEdge = calcDownloadTime(gzip, 'edge');
 
-  const previousVersionSize = await getPreviousVersionSize(name);
-  const similarPackages = await getSimilarPackages(name);
+  const previousVersionSize = await getPreviousVersionSize(name, fetch);
+  const similarPackages = await getSimilarPackages(name, fetch);
 
   const embed = createEmbed({
     description,
@@ -251,8 +256,29 @@ const createFields = ({
 const calcDiffInPercent = (current: number, previous: number) =>
   (current / previous) * 100 - 100;
 
-const getPreviousVersionSize = async (pkg: string) => {
-  const { error, json } = await useData(
+const toKilobytes = (size: number) => (size / 1024).toFixed(2) + 'kb';
+
+const calcDownloadTime = (size: number, type: '3g' | 'edge') => {
+  switch (type) {
+    case '3g':
+      if (size > 1024) {
+        return (size / 1024 / 50).toFixed(2) + 's';
+      }
+
+      return (size / 50).toFixed(2) + 'ms';
+    case 'edge':
+      if (size > 1024) {
+        return (size / 1024 / 30).toFixed(2) + 's';
+      }
+
+      return (size / 30).toFixed(2) + 'ms';
+    default:
+      throw new Error('unimplemented calcDownloadTime case');
+  }
+};
+
+const getPreviousVersionSize = async (pkg: string, fetch: typeof useData) => {
+  const { error, json } = await fetch(
     `https://bundlephobia.com/api/package-history?package=${pkg}`
   );
 
@@ -275,30 +301,9 @@ const getPreviousVersionSize = async (pkg: string) => {
   }
 };
 
-const toKilobytes = (size: number) => (size / 1024).toFixed(2) + 'kb';
-
-const calcDownloadTime = (size: number, type: '3g' | 'edge') => {
-  switch (type) {
-    case '3g':
-      if (size > 1024) {
-        return (size / 1024 / 50).toFixed(2) + 's';
-      }
-
-      return (size / 50).toFixed(2) + 'ms';
-    case 'edge':
-      if (size > 1024) {
-        return (size / 1024 / 30).toFixed(2) + 's';
-      }
-
-      return (size / 30).toFixed(2) + 'ms';
-    default:
-      throw new Error('unimplemented calcDownloadTime case');
-  }
-};
-
-const getSimilarPackages = async (pkg: string) => {
+const getSimilarPackages = async (pkg: string, fetch: typeof useData) => {
   const url = `https://bundlephobia.com/api/similar-packages?package=${pkg}`;
-  const { error, json } = await useData<SimilarPackagesResponse>(url);
+  const { error, json } = await fetch<SimilarPackagesResponse>(url);
 
   if (error || !json.category.similar) {
     return undefined;
@@ -309,7 +314,7 @@ const getSimilarPackages = async (pkg: string) => {
   const packages = await Promise.all(
     similar
       .map(async otherPackage => {
-        const { error, json } = await useData<ExtendedBundlephobiaResponse>(
+        const { error, json } = await fetch<ExtendedBundlephobiaResponse>(
           getExtendedInfoUrl(provider, otherPackage)
         );
 
@@ -331,4 +336,4 @@ const getSimilarPackages = async (pkg: string) => {
   };
 };
 
-export default handleBundlephobiaQuery;
+export default buildBundlephobiaQueryHandler();

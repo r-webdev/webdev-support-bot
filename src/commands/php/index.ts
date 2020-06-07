@@ -3,56 +3,88 @@ import * as DOMParser from 'dom-parser';
 import { Html5Entities as Entities } from 'html-entities';
 
 import {
-  createMarkdownLink,
+  adjustTitleLength,
+  attemptEdit,
   createDescription,
   createListEmbed,
+  createMarkdownLink,
   createMarkdownListItem,
   getChosenResult,
-  attemptEdit,
-  adjustTitleLength,
 } from '../../utils/discordTools';
 import * as errors from '../../utils/errors';
-import { getSearchUrl, buildDirectUrl } from '../../utils/urlTools';
+import { buildDirectUrl, getSearchUrl } from '../../utils/urlTools';
 import useData from '../../utils/useData';
 
 const provider = 'php';
 const entities = new Entities();
 
-const handlePHPQuery = async (msg: Message, searchTerm: string) => {
-  try {
-    const searchUrl = getSearchUrl(provider, searchTerm);
-    const { error, text } = await useData(searchUrl, 'text');
+interface ParseResult {
+  isDirect: boolean;
+  results: DOMParser.Node[];
+}
 
+const textParser = (text: string): ParseResult => {
+  const parser = new DOMParser();
+  const document = parser.parseFromString(text);
+
+  // Check if we were directed directly to the result.
+  let isDirect = document.getElementById('quickref_functions') === null;
+  if (isDirect) {
+    return {
+      isDirect,
+      results: [],
+    };
+  }
+
+  const results = document
+    .getElementById('quickref_functions')
+    .getElementsByTagName('li')
+    .slice(0, 10);
+
+  return {
+    isDirect,
+    results,
+  };
+};
+
+const requester = async (
+  searchTerm: string
+): Promise<{ error: boolean; text: string; searchUrl: string }> => {
+  const searchUrl = getSearchUrl(provider, searchTerm);
+  const response = await useData(searchUrl, 'text');
+  return {
+    ...response,
+    searchUrl,
+  };
+};
+
+export const buildPHPQueryHandler = (
+  makeRequest: typeof requester = requester,
+  parseText: typeof textParser = textParser,
+  metadataExtractor: typeof extractMetadataFromResult = extractMetadataFromResult,
+  waitForResult: typeof getChosenResult = getChosenResult
+) => async (msg: Message, searchTerm: string) => {
+  try {
+    const { error, text, searchUrl } = await makeRequest(searchTerm);
     if (error) {
-      msg.reply(errors.invalidResponse);
+      await msg.reply(errors.invalidResponse);
       return;
     }
 
-    const parser = new DOMParser();
-    const document = parser.parseFromString(text);
-
-    // Check if we were directed directly to the result.
-    let isDirect = document.getElementById('quickref_functions') === null;
+    const { isDirect, results } = parseText(text);
     if (isDirect) {
       await msg.channel.send(buildDirectUrl(provider, searchTerm));
       return;
     }
 
-    const results = document
-      .getElementById('quickref_functions')
-      .getElementsByTagName('li')
-      .slice(0, 10);
-
     let preparedDescription = results.map((result, index) => {
       const link = result.firstChild;
-      const { title, url } = extractMetadataFromResult(link);
+      const { title, url } = metadataExtractor(link);
 
-      const item = createMarkdownListItem(
+      return createMarkdownListItem(
         index,
         createMarkdownLink(adjustTitleLength([`**${title}**`].join(' - ')), url)
       );
-
-      return item;
     });
 
     const sentMsg = await msg.channel.send(
@@ -65,13 +97,13 @@ const handlePHPQuery = async (msg: Message, searchTerm: string) => {
       })
     );
 
-    const result = await getChosenResult(sentMsg, msg, results);
+    const result = await waitForResult(sentMsg, msg, results);
 
     if (!result) {
       return;
     }
 
-    const { url } = extractMetadataFromResult(result.firstChild);
+    const { url } = metadataExtractor(result.firstChild);
 
     await attemptEdit(sentMsg, url, { embed: null });
   } catch (error) {
@@ -102,4 +134,4 @@ const extractMetadataFromResult = (result: any) => {
  */
 const escapeMarkdown = (text: string) => text.replace(/(\*|_|`|~|\\)/g, '\\$1');
 
-export default handlePHPQuery;
+export default buildPHPQueryHandler();
