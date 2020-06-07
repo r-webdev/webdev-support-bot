@@ -23,7 +23,8 @@ const provider = 'npm';
 
 export const buildNPMQueryHandler = (
   fetch: typeof getData = getData,
-  waitForResponse: typeof getChosenResult = getChosenResult
+  waitForResponse: typeof getChosenResult = getChosenResult,
+  formatDateFromNow: typeof formatDistanceToNow = formatDistanceToNow
 ) => async (msg: Message, searchTerm: string) => {
   try {
     const json = await fetch<NPMResponse[]>({
@@ -50,7 +51,7 @@ export const buildNPMQueryHandler = (
           homepage: links.homepage,
           repository: links.repository,
         },
-        lastUpdate: `${formatDistanceToNow(new Date(date))} ago`,
+        lastUpdate: `${formatDateFromNow(new Date(date))} ago`,
         maintainers: maintainers.length,
         name,
         url: links.npm,

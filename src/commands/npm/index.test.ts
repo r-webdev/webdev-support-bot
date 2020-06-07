@@ -47,7 +47,7 @@ describe('npm', () => {
 
     msg.channel.send.mockResolvedValue({ edit: editMock });
 
-    const handler = buildNPMQueryHandler(fetch, choose);
+    const handler = buildNPMQueryHandler(fetch, choose, () => '20 days');
     await handler(msg, 'search term');
 
     expect(fetch).toBeCalledWith({
