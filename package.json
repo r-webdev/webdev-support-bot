@@ -33,7 +33,7 @@
     "typescript": "^4.0.0-dev.20200608"
   },
   "devDependencies": {
-    "@types/jest": "^25.2.3",
+    "@types/jest": "^26.0.0",
     "eslint": "^7.2.0",
     "eslint-config-galex": "^0.3.9",
     "husky": "^4.2.5",
