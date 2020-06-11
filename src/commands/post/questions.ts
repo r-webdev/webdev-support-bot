@@ -38,7 +38,7 @@ export default {
   compensation: {
     body:
       'Provide the compensation amount for this job using **only** numbers.',
-    validate: answer => {
+    validate: (answer: string) => {
       const value = Number.parseFloat(answer.split('$').join(''));
       const minimalCompensation = Number.parseFloat(MINIMAL_COMPENSATION);
       return !Number.isNaN(value) && value >= minimalCompensation;

@@ -69,7 +69,6 @@ export const buildGithubQueryHandler = (
 
             if (hasLicense) {
               const key = license.spdx_id;
-              // eslint-disable-next-line require-atomic-updates
               license.url = licenseCache[key]
                 ? licenseCache[key]
                 : await extractAndCacheLicense(license, fetchDetails);
