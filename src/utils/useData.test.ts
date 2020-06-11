@@ -1,4 +1,5 @@
 import fetch from 'node-fetch';
+
 import useData from './useData';
 
 jest.mock('node-fetch');
@@ -8,7 +9,7 @@ describe('useData', () => {
   const headers = { headers: {} };
   const fetchMock: jest.MockedFunction<typeof fetch> = fetch as any;
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(jest.clearAllMocks);
 
   test('returns errors when response is not ok', async () => {
     const url = urlGen();
@@ -26,19 +27,7 @@ describe('useData', () => {
     });
   });
 
-  test.each<
-    [
-      'text' | 'json',
-      () => jest.MockedFunction<
-        () => {
-          error: boolean;
-          json: object;
-          text: string;
-        }
-      >,
-      (resp: any) => void
-    ]
-  >([
+  test.each([
     [
       'json',
       () => {
@@ -46,8 +35,8 @@ describe('useData', () => {
         jsonMock.mockResolvedValue({ test: 'cached' });
 
         fetchMock.mockResolvedValue({
-          ok: true,
           json: jsonMock,
+          ok: true,
         } as any);
 
         return jsonMock;
@@ -75,7 +64,7 @@ describe('useData', () => {
     ],
   ])(
     'should cache entries for type: `%s`',
-    async (type, mock, assertResponse) => {
+    async (type: Parameters<typeof useData>['1'], mock, assertResponse) => {
       const url = urlGen();
       const mockTarget = mock();
 

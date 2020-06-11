@@ -1,10 +1,10 @@
+import * as NodeCache from 'node-cache';
 import fetch, {
   HeaderInit,
   RequestInfo,
   RequestInit,
   Response,
 } from 'node-fetch';
-import * as NodeCache from 'node-cache';
 
 import {
   API_CACHE_ENTRIES_LIMIT,
@@ -13,9 +13,9 @@ import {
 } from '../env';
 
 const apiCache = new NodeCache({
-  checkperiod: parseInt(API_CACHE_REVALIDATION_WINDOW_IN_SECONDS, 10),
-  stdTTL: parseInt(API_CACHE_EXPIRATION_IN_SECONDS, 10),
-  maxKeys: parseInt(API_CACHE_ENTRIES_LIMIT, 10),
+  checkperiod: Number.parseInt(API_CACHE_REVALIDATION_WINDOW_IN_SECONDS, 10),
+  maxKeys: Number.parseInt(API_CACHE_ENTRIES_LIMIT, 10),
+  stdTTL: Number.parseInt(API_CACHE_EXPIRATION_IN_SECONDS, 10),
 });
 
 type ResponseTypes = 'json' | 'text';
@@ -59,7 +59,7 @@ const doFetch: <TParsedResponse>(
   const casedCacheKey = cacheKey.toLowerCase();
   const cachedResponse = apiCache.get<TParsedResponse>(casedCacheKey);
   if (cachedResponse) {
-    return async () => cachedResponse;
+    return () => cachedResponse;
   }
 
   return async (url, fetchOptions) => {
@@ -106,7 +106,7 @@ const responseMapper: <T>(
   }
 };
 
-export default async <T>(
+export default <T>(
   url: string,
   type: ResponseTypes = 'json',
   headers: HeaderInit = {}
