@@ -9,15 +9,15 @@ import {
 } from '../../env';
 
 // seconds to ms
-const AWAIT_MESSAGE_TIMEOUT = parseInt(AMT) * 1000;
+const AWAIT_MESSAGE_TIMEOUT = Number.parseInt(AMT) * 1000;
 
 // convert hours into seconds (H*60*60)
 const POST_LIMITER = IS_PROD
-  ? parseInt(POST_LIMITER_IN_HOURS) * 3600
+  ? Number.parseInt(POST_LIMITER_IN_HOURS) * 3600
   : 0.01 * 3600; // Shorten limiter to 30 seconds for development purposes
 
 // convert string to int
-const MINIMAL_AMOUNT_OF_WORDS = parseInt(MAOW);
+const MINIMAL_AMOUNT_OF_WORDS = Number.parseInt(MAOW);
 
 export {
   MOD_CHANNEL,

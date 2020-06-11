@@ -39,9 +39,9 @@ export default {
     body:
       'Provide the compensation amount for this job using **only** numbers.',
     validate: answer => {
-      const value = parseFloat(answer.split('$').join(''));
-      const minimalCompensation = parseFloat(MINIMAL_COMPENSATION);
-      return !isNaN(value) && value >= minimalCompensation;
+      const value = Number.parseFloat(answer.split('$').join(''));
+      const minimalCompensation = Number.parseFloat(MINIMAL_COMPENSATION);
+      return !Number.isNaN(value) && value >= minimalCompensation;
     },
   },
   contact: {

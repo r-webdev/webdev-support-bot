@@ -1,4 +1,4 @@
-import handleCodeRequest from './index';
+import handleCodeRequest from '.';
 
 test('sandbox replies', async () => {
   const send = jest.fn();

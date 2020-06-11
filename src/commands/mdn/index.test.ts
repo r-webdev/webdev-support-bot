@@ -4,7 +4,7 @@ import * as errors from '../../utils/errors';
 import { getSearchUrl } from '../../utils/urlTools';
 import useData from '../../utils/useData';
 
-import { queryBuilder } from './index';
+import { queryBuilder } from '.';
 
 jest.mock('dom-parser');
 jest.mock('../../utils/urlTools');

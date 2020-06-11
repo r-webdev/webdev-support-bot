@@ -17,6 +17,7 @@ import {
 import { providers } from './urlTools';
 
 export const createMarkdownLink = (title: string, url: string) =>
+  // eslint-disable-next-line unicorn/prefer-replace-all
   `[${title}](${url.replace(/\)/g, '\\)')})`;
 
 export const BASE_DESCRIPTION = `
@@ -62,7 +63,7 @@ export const createListEmbed = ({
       footerText,
       provider,
       title: createTitle(searchTerm),
-      url: url.substr(0, 2048),
+      url: url.slice(0, 2048),
     });
   }
 
@@ -171,7 +172,10 @@ export const adjustTitleLength = (title: string) => {
 
   const cleansedTitle =
     titleLength > DESCRIPTION_LENGTH_LIMIT
-      ? title.substr(0, DESCRIPTION_LENGTH_LIMIT - SEPARATOR_LENGTH) + '...'
+      ? title.slice(
+          0,
+          Math.max(0, DESCRIPTION_LENGTH_LIMIT - SEPARATOR_LENGTH)
+        ) + '...'
       : title;
 
   return cleansedTitle.replace(/\n/gm, ' ');
@@ -233,7 +237,7 @@ export const getChosenResult = async <T>(
 
     try {
       await sentMsg.react(emoji);
-    } catch (error) {
+    } catch {
       console.info(
         'Add reaction failed: message was apparently deleted by someone else.'
       );
@@ -278,9 +282,9 @@ export const getChosenResult = async <T>(
     clearReactions(sentMsg);
 
     return results[index];
-  } catch (collected) {
-    if (!(collected instanceof Map)) {
-      console.error(`${collected.name}: ${collected.message}`);
+  } catch (error) {
+    if (!(error instanceof Map)) {
+      console.error(`${error.name}: ${error.message}`);
       await attemptEdit(sentMsg, unknownError);
       return;
     }
@@ -298,11 +302,11 @@ export const EMPTY_FIELD: EmbedField = {
 export const attemptEdit = async (
   sentMsg: Message,
   content: string | any[] | number | { embed: Partial<MessageEmbed> },
-  options: MessageEmbed | MessageEditOptions = undefined
+  options?: MessageEmbed | MessageEditOptions
 ) => {
   try {
     await sentMsg.edit(content, options);
-  } catch (error) {
+  } catch {
     console.info('Attempting to edit message: message probably deleted.');
   }
 };

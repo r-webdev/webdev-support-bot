@@ -1,4 +1,4 @@
-import handleCodeRequest from './index';
+import handleCodeRequest from '.';
 
 test('shows why jQuery is awful', async () => {
   const sendMock = jest.fn();

@@ -1,9 +1,0 @@
-{
-  "extends": ["galex"],
-  "env": {
-    "node": true
-  },
-  "parserOptions": {
-    "ecmaVersion": 2020
-  }
-}

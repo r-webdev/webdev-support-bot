@@ -10,7 +10,7 @@ import {
   previousVersion,
 } from './__fixtures__/response';
 
-import { buildBundlephobiaQueryHandler } from './index';
+import { buildBundlephobiaQueryHandler } from '.';
 
 describe('buildBundlephobiaQueryHandler', () => {
   const editMock = jest.fn();

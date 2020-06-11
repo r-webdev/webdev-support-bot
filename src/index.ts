@@ -41,7 +41,7 @@ client.once('ready', async () => {
   try {
     await client.user.setAvatar('./logo.png');
     // eslint-disable-next-line no-empty
-  } catch (error) {}
+  } catch {}
 });
 
 // { mdn: 'mdn', /* etc */ }
@@ -54,7 +54,7 @@ const keywordMap = Object.keys(providers).reduce<{ [key: string]: Provider }>(
 );
 
 const trimCleanContent = (provider: Provider, cleanContent: string) =>
-  cleanContent.substr(keywordMap[provider].length + 2);
+  cleanContent.slice(keywordMap[provider].length + 2);
 
 const linebreakPattern = /\n/gim;
 
@@ -119,7 +119,7 @@ const handleMessage = async (msg: Message) => {
         return;
       }
 
-      const keyword = cleanContent.split(' ', 1)[0].substr(1);
+      const keyword = cleanContent.split(' ', 1)[0].slice(1);
       const searchTerm = trimCleanContent(keywordMap[keyword], cleanContent);
 
       const isSpecificHelpRequest =
@@ -161,6 +161,6 @@ client.on('message', handleMessage);
 
 try {
   client.login(IS_PROD ? DISCORD_TOKEN : DUMMY_TOKEN);
-} catch (error) {
+} catch {
   console.error('Boot Error: token invalid');
 }

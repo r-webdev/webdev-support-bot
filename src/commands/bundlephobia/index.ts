@@ -283,21 +283,21 @@ const getPreviousVersionSize = async (pkg: string, fetch: typeof useData) => {
   );
 
   if (error) {
-    return undefined;
+    return;
   }
 
   const versions = Object.keys(json);
 
   if (versions.length <= 1) {
-    return undefined;
+    return;
   }
 
   try {
     const [, previous] = versions.sort(compareVersions).reverse();
 
     return json[previous].gzip || undefined;
-  } catch (error) {
-    return undefined;
+  } catch {
+    return;
   }
 };
 
@@ -306,7 +306,7 @@ const getSimilarPackages = async (pkg: string, fetch: typeof useData) => {
   const { error, json } = await fetch<SimilarPackagesResponse>(url);
 
   if (error || !json.category.similar) {
-    return undefined;
+    return;
   }
 
   const { similar, label } = json.category;
@@ -319,7 +319,7 @@ const getSimilarPackages = async (pkg: string, fetch: typeof useData) => {
         );
 
         if (error) {
-          return undefined;
+          return;
         }
 
         return {

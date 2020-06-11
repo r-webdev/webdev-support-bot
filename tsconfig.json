@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "lib": ["es2016"],
+    "lib": ["esnext"],
     "allowJs": true,
-    "target": "es2016",
+    "target": "es2018",
     "module": "commonjs",
     "moduleResolution": "node",
     "sourceMap": true,

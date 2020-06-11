@@ -2,7 +2,7 @@ import { getChosenResult } from '../../utils/discordTools';
 import { getData } from '../../utils/urlTools';
 import { response } from './__fixtures__/response';
 
-import { buildNPMQueryHandler } from './index';
+import { buildNPMQueryHandler } from '.';
 
 describe('npm', () => {
   const sendMock = jest.fn();

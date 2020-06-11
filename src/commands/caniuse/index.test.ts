@@ -3,7 +3,7 @@ import { getData } from '../../utils/urlTools';
 import useData from '../../utils/useData';
 import { simpleResponse, detailedResponse } from './__fixtures__/response';
 
-import { buildCanIUseQueryHandler } from './index';
+import { buildCanIUseQueryHandler } from '.';
 
 describe('caniuse', () => {
   const sendMock = jest.fn();

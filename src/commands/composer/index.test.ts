@@ -4,7 +4,7 @@ import { getData } from '../../utils/urlTools';
 import useData from '../../utils/useData';
 import { PackagistResponse } from './types';
 
-import { buildComposerQueryHandler } from './index';
+import { buildComposerQueryHandler } from '.';
 
 describe('handleComposerQuery', () => {
   const sendMock = jest.fn();
@@ -51,6 +51,7 @@ describe('handleComposerQuery', () => {
     };
 
     fetch.mockResolvedValue(packageRes);
+    // eslint-disable-next-line unicorn/no-useless-undefined
     choose.mockResolvedValue(undefined);
     msg.channel.send.mockResolvedValue(null);
 

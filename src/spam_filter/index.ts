@@ -7,12 +7,13 @@ import {
   FINAL_CACHE_EXPIRATION_IN_SECONDS,
 } from '../env';
 
-const numberOfAllowedMessages = parseInt(NUMBER_OF_ALLOWED_MESSAGES);
-const cacheRevalidationWindow = parseInt(CACHE_REVALIDATION_IN_SECONDS) * 1000;
+const numberOfAllowedMessages = Number.parseInt(NUMBER_OF_ALLOWED_MESSAGES);
+const cacheRevalidationWindow =
+  Number.parseInt(CACHE_REVALIDATION_IN_SECONDS) * 1000;
 
 export const cache = new NodeCache({
   checkperiod: cacheRevalidationWindow,
-  stdTTL: parseInt(FINAL_CACHE_EXPIRATION_IN_SECONDS),
+  stdTTL: Number.parseInt(FINAL_CACHE_EXPIRATION_IN_SECONDS),
 });
 
 /**

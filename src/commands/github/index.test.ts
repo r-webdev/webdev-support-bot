@@ -3,7 +3,7 @@ import { getData } from '../../utils/urlTools';
 import useData from '../../utils/useData';
 import { response } from './__fixtures__/response';
 
-import { buildGithubQueryHandler } from './index';
+import { buildGithubQueryHandler } from '.';
 
 describe('github', () => {
   const sendMock = jest.fn();

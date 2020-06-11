@@ -1,6 +1,6 @@
 import * as errors from '../../utils/errors';
 
-import { buildPHPQueryHandler } from './index';
+import { buildPHPQueryHandler } from '.';
 
 describe('buildPHPQueryHandler', () => {
   const sendMock = jest.fn();

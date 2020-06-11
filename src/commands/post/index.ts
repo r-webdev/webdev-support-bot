@@ -91,7 +91,7 @@ const getCurrentDate = () => {
 const capitalize = (str: string) =>
   str
     .split(' ')
-    .map(s => `${s[0].toUpperCase()}${s.substring(1).toLowerCase()}`)
+    .map(s => `${s[0].toUpperCase()}${s.slice(1).toLowerCase()}`)
     .join(' ');
 
 const getTargetChannel = (guild: Guild, name: string): TargetChannel =>
@@ -340,7 +340,7 @@ ${createMarkdownCodeBlock(
 1. Your job must provide monetary compensation.\n
 2. Your job must provide at least $${MINIMAL_COMPENSATION} in compensation.\n
 3. You can only post a job once every ${
-    parseInt(POST_LIMITER_IN_HOURS, 10) === 1
+    Number.parseInt(POST_LIMITER_IN_HOURS, 10) === 1
       ? 'hour'
       : `${POST_LIMITER_IN_HOURS} hours`
   }.\n
@@ -379,7 +379,7 @@ const handleJobPostingRequest = async (msg: Message) => {
 
     if (isCached) {
       const diff =
-        parseInt(POST_LIMITER_IN_HOURS) -
+        Number.parseInt(POST_LIMITER_IN_HOURS) -
         Math.abs(new Date().getTime() - entry.value.getTime()) / 3600000;
       send(
         `You cannot create a job posting right now.\nPlease try again ${

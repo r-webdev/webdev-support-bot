@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/prefer-query-selector */
 import { Message } from 'discord.js';
 import * as DOMParser from 'dom-parser';
 import { Html5Entities as Entities } from 'html-entities';
@@ -132,6 +133,6 @@ const extractMetadataFromResult = (result: any) => {
 /**
  * Escapes *, _, `, ~, \
  */
-const escapeMarkdown = (text: string) => text.replace(/(\*|_|`|~|\\)/g, '\\$1');
+const escapeMarkdown = (text: string) => text.replace(/([*\\_`~])/g, '\\$1');
 
 export default buildPHPQueryHandler();

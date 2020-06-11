@@ -256,7 +256,7 @@ const extractFieldsFromLatestRelease = ({
         inline: true,
         name: 'repository',
         value: createMarkdownLink(
-          pathname.substr(1).replace('.git', ''),
+          pathname.slice(1).replace('.git', ''),
           source.url.replace('.git', '')
         ),
       });

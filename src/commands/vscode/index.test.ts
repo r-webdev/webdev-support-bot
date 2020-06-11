@@ -1,4 +1,4 @@
-import handleVSCodeRequest from './index';
+import handleVSCodeRequest from '.';
 
 test('inform users that visual studio code is great and free', async () => {
   const sendMock = jest.fn();

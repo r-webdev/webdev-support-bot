@@ -3,7 +3,7 @@ import { TextChannel, GuildChannel } from 'discord.js';
 import { MOD_CHANNEL } from '../env';
 import { createEmbed, createMarkdownBash } from '../utils/discordTools';
 
-import { SpammerMetadata } from './';
+import { SpammerMetadata } from '.';
 
 type ModChannel = TextChannel & Pick<GuildChannel, 'name'>;
 

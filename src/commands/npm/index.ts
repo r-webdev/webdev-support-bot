@@ -169,7 +169,7 @@ const createFields = (
         name: emoji ? `${emoji} ${host}` : host,
         value: createMarkdownLink(
           markdownTitle.endsWith('/')
-            ? markdownTitle.substr(0, markdownTitle.length - 1)
+            ? markdownTitle.slice(0, Math.max(0, markdownTitle.length - 1))
             : markdownTitle,
           url
         ),
@@ -190,7 +190,7 @@ const sanitizePackageLink = (host: string, link: string) => {
   }
 
   if (host === 'repository') {
-    return pathname.startsWith('/') ? pathname.substring(1) : pathname;
+    return pathname.startsWith('/') ? pathname.slice(1) : pathname;
   }
 
   return link;

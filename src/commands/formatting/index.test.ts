@@ -1,4 +1,4 @@
-import handleFormattingRequest from './index';
+import handleFormattingRequest from '.';
 
 test(`informs people who can't bother to ask their questions properly on how to do it right`, async () => {
   const sendMock = jest.fn();
