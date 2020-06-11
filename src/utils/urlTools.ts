@@ -123,7 +123,7 @@ export const buildDirectUrl = (provider: Provider, href: string) => {
     return providers[provider].direct.replace(TERM, href);
   }
 
-  throw new Error(`provider not implemeted: ${provider}`);
+  throw new Error(`provider not implemented: ${provider}`);
 };
 
 export const getExtendedInfoUrl = (provider: Provider, term: string) => {
