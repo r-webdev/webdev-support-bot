@@ -4,25 +4,25 @@ import * as errors from '../../utils/errors';
 import { getSearchUrl } from '../../utils/urlTools';
 import useData from '../../utils/useData';
 
-import { queryBuilder, updatedQueryBuilder } from '.';
+import { queryBuilder } from './dom';
 import { getChosenResult } from '../../utils/discordTools';
-import { searchResponse } from './__fixtures__/responses';
 
-// jest.mock('dom-parser');
-// jest.mock('../../utils/urlTools');
-// jest.mock('../../utils/useData');
+jest.mock('dom-parser');
+jest.mock('../../utils/urlTools');
+jest.mock('../../utils/useData');
+
+const mockGetSearchUrl: jest.MockedFunction<typeof getSearchUrl> = getSearchUrl as any;
+const mockUseData: jest.MockedFunction<typeof useData> = useData as any;
+const mockChoose: jest.MockedFunction<typeof getChosenResult> = getChosenResult as any;
 
 describe('handleMDNQuery', () => {
   const sendMock = jest.fn();
   const replyMock = jest.fn();
   const msg: any = {
     channel: { send: sendMock },
+    delete: replyMock,
     reply: replyMock,
   };
-
-  const mockGetSearchUrl: jest.MockedFunction<typeof getSearchUrl> = getSearchUrl as any;
-  const mockUseData: jest.MockedFunction<typeof useData> = useData as any;
-  const mockChoose: jest.MockedFunction<typeof getChosenResult> = getChosenResult as any;
 
   beforeEach(() => {
     mockGetSearchUrl.mockReturnValue('Search Term');
@@ -116,41 +116,5 @@ describe('handleMDNQuery', () => {
     expect(msg.channel.send).toHaveBeenCalledTimes(1);
     const sentMessage = msg.channel.send.mock.calls[0][0];
     expect(sentMessage).toMatchSnapshot();
-  });
-});
-
-describe('updatedMDNQuery', () => {
-  const sendMock = jest.fn();
-  const replyMock = jest.fn();
-  const msg: any = {
-    channel: { send: sendMock },
-    reply: replyMock,
-  };
-  const editMock = {
-    edit: jest.fn(),
-  };
-
-  const mockUseData: jest.MockedFunction<typeof useData> = jest.fn();
-  const mockChoose: jest.MockedFunction<typeof getChosenResult> = jest.fn();
-
-  test('should work', async () => {
-    mockUseData.mockResolvedValueOnce({
-      error: false,
-      text: null,
-      json: searchResponse,
-    });
-    sendMock.mockResolvedValue(editMock);
-    mockChoose.mockResolvedValueOnce({
-      title: 'DOM (Document Object Model)',
-      slug: 'Glossary/DOM',
-      locale: 'en-US',
-      excerpt:
-        'The DOM (Document Object Model) is an API that represents and interacts with any HTML or XML document. The DOM is a document model loaded in the browser and representing the document as a node tree, where each node represents part of the document (e.g. an element, text string, or comment).',
-    });
-
-    const handler = updatedQueryBuilder(mockUseData, mockChoose);
-
-    await handler(msg, 'Document');
-    expect(editMock.edit.mock.calls).toMatchSnapshot();
   });
 });

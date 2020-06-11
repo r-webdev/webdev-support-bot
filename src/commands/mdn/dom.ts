@@ -107,65 +107,6 @@ const extractMetadataFromResult = (result: ResultMeta) => {
   };
 };
 
-export const updatedQueryBuilder = (
-  searchUrl: typeof getSearchUrl = getSearchUrl,
-  fetch: typeof useData = useData,
-  waitForChosenResult: typeof getChosenResult = getChosenResult
-) => async (msg: Message, searchTerm: string) => {
-  const url = searchUrl(provider, searchTerm);
-  const { error, json } = await fetch<SearchResponse>(url, 'json');
-  if (!error) {
-    return msg.reply(errors.invalidResponse);
-  }
-
-  if (json.documents.length === 0) {
-    const sentMsg = await msg.reply(errors.noResults(searchTerm));
-    return delayedMessageAutoDeletion(sentMsg);
-  }
-
-  let preparedDescription = json.documents.map(
-    ({ title, excerpt, slug }, index) =>
-      createMarkdownListItem(
-        index,
-        createMarkdownLink(
-          adjustTitleLength([`**${title}**`, excerpt].join(' - ')),
-          buildDirectUrl(provider, slug)
-        )
-      )
-  );
-
-  const expectedLength = preparedDescription.reduce(
-    (sum, item) => sum + item.length,
-    0
-  );
-  if (expectedLength + BASE_DESCRIPTION.length + 10 * '\n'.length > 2048) {
-    preparedDescription = preparedDescription.map(string => {
-      // split at markdown link ending
-      const [title, ...rest] = string.split('...]');
-
-      // split title on title - excerpt glue
-      // concat with rest
-      // fix broken markdown link ending
-      return [title.split(' - ')[0], rest.join('')].join(']');
-    });
-  }
-
-  const sentMsg = await msg.channel.send(
-    createListEmbed({
-      description: createDescription(preparedDescription),
-      footerText: 'Powered by the search API',
-      provider,
-      searchTerm,
-      url,
-    })
-  );
-
-  const result = await waitForChosenResult(sentMsg, msg, json.documents);
-  if (!result) {
-    return;
-  }
-};
-
 /**
  * Poor man's dependency injection without introducing classes, just use closures
  * and higher order functions instead. Also provides a default so we don't have
