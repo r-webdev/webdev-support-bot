@@ -168,7 +168,6 @@ const sanitizeExcerpt = (excerpt: string) => {
     sanitized = sanitized.replace(')', '');
   }
 
-  // eslint-disable-next-line unicorn/prefer-replace-all
   return sanitized.replace(/\[]/g, '');
 };
 

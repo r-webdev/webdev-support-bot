@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "lib": ["esnext"],
+    "lib": ["es2019"],
     "allowJs": true,
-    "target": "es2018",
+    "target": "es2019",
     "module": "commonjs",
     "moduleResolution": "node",
     "sourceMap": true,
