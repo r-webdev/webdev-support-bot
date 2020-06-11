@@ -114,6 +114,10 @@ yarn dev # or npm dev
 git clone https://github.com/ljosberinn/webdev-support-bot/ && cd webdev-support-bot && cp .env.example .env && yarn install && code . && yarn dev
 ```
 
+## Environment variables
+
+In development, you generally want to take the `.env.example` and rename it to `.env`. You also _shouldn't_ commit your `.env` file. If you make any changes to the environment variables, you should update `.env.example`. accordingly.
+
 ### Running tests:
 
 ```bash
