@@ -75,7 +75,7 @@ export const providers: ProviderMap = {
     createTitle: (searchTerm: string) => `NPM results for *${searchTerm}*`,
     help: '!npm react',
     icon: 'https://avatars0.githubusercontent.com/u/6078720',
-    search: `https://www.npmjs.com/search/suggestions?q=${SEARCH_TERM}`,
+    search: `https://developer.mozilla.org/api/v1/search/en-US?highlight=false&q=${SEARCH_TERM}`,
   },
   php: {
     color: 0x8892bf,

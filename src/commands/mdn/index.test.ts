@@ -4,7 +4,9 @@ import * as errors from '../../utils/errors';
 import { getSearchUrl } from '../../utils/urlTools';
 import useData from '../../utils/useData';
 
-import { queryBuilder } from '.';
+import { queryBuilder, updatedQueryBuilder } from '.';
+import { getChosenResult } from '../../utils/discordTools';
+import { searchResponse } from './__fixtures__/responses';
 
 jest.mock('dom-parser');
 jest.mock('../../utils/urlTools');
@@ -12,6 +14,7 @@ jest.mock('../../utils/useData');
 
 const mockGetSearchUrl: jest.MockedFunction<typeof getSearchUrl> = getSearchUrl as any;
 const mockUseData: jest.MockedFunction<typeof useData> = useData as any;
+const mockChoose: jest.MockedFunction<typeof getChosenResult> = getChosenResult as any;
 
 describe('handleMDNQuery', () => {
   const sendMock = jest.fn();
@@ -114,5 +117,30 @@ describe('handleMDNQuery', () => {
     expect(msg.channel.send).toHaveBeenCalledTimes(1);
     const sentMessage = msg.channel.send.mock.calls[0][0];
     expect(sentMessage).toMatchSnapshot();
+  });
+});
+
+describe('updatedMDNQuery', () => {
+  const sendMock = jest.fn();
+  const replyMock = jest.fn();
+  const msg: any = {
+    channel: { send: sendMock },
+    reply: replyMock,
+  };
+
+  test('should work', async () => {
+    mockGetSearchUrl.mockReturnValue('http://example.com');
+    mockUseData.mockResolvedValueOnce({
+      error: false,
+      text: null,
+      json: searchResponse,
+    });
+
+    const handler = updatedQueryBuilder(
+      mockGetSearchUrl,
+      mockUseData,
+      mockChoose
+    );
+    await handler(msg, 'Search Term');
   });
 });
