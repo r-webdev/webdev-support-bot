@@ -38,9 +38,17 @@ client.on('ready', () => {
 client.once('ready', async () => {
   client.user.setActivity(`@${client.user.username} --help`);
 
+  console.table(
+    client.guilds.cache.map(({ name, id, joinedAt, memberCount }) => ({
+      id,
+      joinedAt: joinedAt.toLocaleDateString(),
+      memberCount,
+      name,
+    }))
+  );
+
   try {
     await client.user.setAvatar('./logo.png');
-    // eslint-disable-next-line no-empty
   } catch {}
 });
 
