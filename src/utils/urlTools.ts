@@ -65,7 +65,7 @@ export const providers: ProviderMap = {
   mdn: {
     color: 0x83d0f2,
     createTitle: (searchTerm: string) => `MDN results for *${searchTerm}*`,
-    direct: `https://developer.mozilla.org${TERM}`,
+    direct: `https://developer.mozilla.org/${TERM}`,
     help: '!mdn localStorage',
     icon: 'https://avatars0.githubusercontent.com/u/7565578',
     search: `https://developer.mozilla.org/en-US/search?q=${SEARCH_TERM}`,

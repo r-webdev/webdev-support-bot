@@ -1,0 +1,47 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`updatedMDNQuery should work 1`] = `
+Array [
+  Array [
+    Object {
+      "embed": Object {
+        "author": null,
+        "color": 8638706,
+        "description": "1. [**Document directive** - CSP document directives are used in a Conten...](https://developer.mozilla.orgGlossary/Document_directive)
+2. [**document environment** - When the JavaScript global environment is ...](https://developer.mozilla.orgGlossary/document_environment)
+3. [**DOM (Document Object Model)** - The DOM (Document Object Model) is ...](https://developer.mozilla.orgGlossary/DOM)
+4. [**Archived open Web documentation** - The documentation listed below ...](https://developer.mozilla.orgArchive/Web)
+5. [**Document.documentElement** - Document.documentElement returns the E...](https://developer.mozilla.orgWeb/API/Document/documentElement)
+6. [**Document.documentURI** - The documentURI read-only property of the ...](https://developer.mozilla.orgWeb/API/Document/documentURI)
+7. [**Document.documentURIObject** - The Document.documentURIObject read-...](https://developer.mozilla.orgWeb/API/Document/documentURIObject)
+8. [**Document** - The Document interface represents any web page loaded ...](https://developer.mozilla.orgWeb/API/Document)
+9. [**Document()** - The Document constructor creates a new Document obje...](https://developer.mozilla.orgWeb/API/Document/Document)
+10. [**@document** - The @document CSS at-rule restricts the style rules c...](https://developer.mozilla.orgWeb/CSS/@document)
+
+:bulb: *react with a number (:one:, :two:, ...) to filter your result*
+:neutral_face: *react with \`❌\` to delete*
+:point_up: *supports \`!mdn\`, \`!github\`, \`!caniuse\`, \`!npm\`, \`!composer\`, \`!bundlephobia\`, and \`!php\`*
+:gear: *issues? feature requests? head over to [github](https://github.com/ljosberinn/webdev-support-bot)*",
+        "fields": Array [],
+        "footer": Object {
+          "iconURL": "https://avatars0.githubusercontent.com/u/7565578",
+          "text": "10 results found",
+        },
+        "title": "MDN results for *Search Term*",
+        "url": "https://developer.mozilla.org/en-US/search?q=Search%20Term",
+      },
+    },
+  ],
+]
+`;
+
+exports[`updatedMDNQuery should work 2`] = `
+Array [
+  Array [
+    "https://developer.mozilla.org/Glossary/DOM",
+    Object {
+      "embed": null,
+    },
+  ],
+]
+`;

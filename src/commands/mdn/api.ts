@@ -108,7 +108,7 @@ export const updatedQueryBuilder = (
       return;
     }
 
-    const editableUrl = buildDirectUrl(provider, `/` + result.slug);
+    const editableUrl = buildDirectUrl(provider, result.slug);
     await attemptEdit(sentMsg, editableUrl, { embed: null });
   } catch (error) {
     console.error(error);
