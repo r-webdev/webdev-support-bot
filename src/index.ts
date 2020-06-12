@@ -10,7 +10,7 @@ import handleFormattingRequest from './commands/formatting';
 import handleGithubQuery from './commands/github';
 import handleJQueryCommand from './commands/jquery';
 import handleLeaderboardRequest from './commands/leaderboard';
-import handleMDNQuery from './commands/mdn/dom';
+import handleMDNQuery from './commands/mdn/api';
 import handleNPMQuery from './commands/npm';
 import handlePHPQuery from './commands/php';
 import handlePointsRequest from './commands/points';
