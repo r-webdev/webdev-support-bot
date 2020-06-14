@@ -1,7 +1,6 @@
 import { Schema, model } from 'mongoose';
 
 const schema = new Schema({
-  _id: Schema.Types.ObjectId,
   points: {
     default: 0,
     type: Number,
@@ -12,4 +11,4 @@ const schema = new Schema({
   },
 });
 
-export default model('helpfulRoleMember', schema, 'helpful-role-members');
+export default model('helpfulRoleMember', schema);
