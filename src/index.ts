@@ -1,4 +1,4 @@
-import { Client, Message } from 'discord.js';
+import { Client, Message, MessageReaction, User } from 'discord.js';
 
 import handleBundlephobiaQuery from './commands/bundlephobia';
 import handleCanIUseQuery from './commands/caniuse';
@@ -13,6 +13,7 @@ import handlePHPQuery from './commands/php';
 import handleJobPostingRequest from './commands/post';
 import handleVSCodeRequest from './commands/vscode';
 import { DISCORD_TOKEN, IS_PROD, DUMMY_TOKEN } from './env';
+import handleHelpfulRole from './helpful_role';
 import spamFilter from './spam_filter';
 import handleSpam from './spam_filter/handler';
 import { Provider } from './utils/discordTools';
@@ -29,7 +30,7 @@ import {
   JQUERY_KEYWORD,
 } from './utils/urlTools';
 
-const client = new Client();
+const client = new Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] });
 
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
@@ -165,7 +166,32 @@ const handleMessage = async (msg: Message) => {
   }
 };
 
+const handleReactionAdd = async (reaction: MessageReaction, user: User) => {
+  /**
+   * Implementation:
+   * 1. Check if the author of the reaction is a bot. If it is, break.
+   * 2. Execute valid handler depending on the reaction itself.
+   */
+
+  if (reaction.me) return;
+  if (reaction.partial) await reaction.fetch();
+
+  /**
+   * If you are not sure what the unicode for a certain emoji is,
+   * consult the emojipedia. https://emojipedia.org/
+   */
+  switch (reaction.emoji.name) {
+    case '✅':
+      handleHelpfulRole(reaction.message);
+      break;
+    // Add more cases if necessary
+    default:
+      return;
+  }
+};
+
 client.on('message', handleMessage);
+client.on('messageReactionAdd', handleReactionAdd);
 
 try {
   client.login(IS_PROD ? DISCORD_TOKEN : DUMMY_TOKEN);
