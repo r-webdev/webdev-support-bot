@@ -8,7 +8,7 @@ const schema = new Schema({
   },
   user: {
     required: true,
-    type: Number,
+    type: String,
   },
 });
 
