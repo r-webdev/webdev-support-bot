@@ -1,4 +1,5 @@
 import { Client, Message, MessageReaction, User } from 'discord.js';
+import * as mongoose from 'mongoose';
 
 import handleBundlephobiaQuery from './commands/bundlephobia';
 import handleCanIUseQuery from './commands/caniuse';
@@ -29,6 +30,8 @@ import {
   FORMATTING_KEYWORD_ALT,
   JQUERY_KEYWORD,
 } from './utils/urlTools';
+
+import { MONGO_URI } from './env';
 
 const client = new Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] });
 
@@ -189,6 +192,15 @@ const handleReactionAdd = async (reaction: MessageReaction, user: User) => {
       return;
   }
 };
+
+// Establish a connection with the database
+mongoose
+  .connect(MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log('MongoDB connection established.'))
+  .catch(err => console.error('mongoose.connect(): ', err));
 
 client.on('message', handleMessage);
 client.on('messageReactionAdd', handleReactionAdd);

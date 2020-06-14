@@ -27,4 +27,5 @@ export const API_CACHE_EXPIRATION_IN_SECONDS =
 export const API_CACHE_REVALIDATION_WINDOW_IN_SECONDS =
   process.env.API_CACHE_REVALIDATION_WINDOW_IN_SECONDS;
 
+export const MONGO_URI = process.env.MONGO_URI;
 export const HELPFUL_ROLE_ID = process.env.HELPFUL_ROLE_ID;
