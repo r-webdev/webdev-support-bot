@@ -1,6 +1,6 @@
 {
   "editor.fontLigatures": true,
-  "editor.fontFamily": "'Fira Code', Consolas, 'Courier New', monospace",
+  "editor.fontFamily": "'Fira Code', 'JetBrains Mono', Consolas, 'Courier New', monospace",
   "workbench.tree.renderIndentGuides": "always",
   "editor.suggestSelection": "first",
   "references.preferredLocation": "view",
