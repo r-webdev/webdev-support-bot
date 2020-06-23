@@ -5,6 +5,7 @@ import { HELPFUL_ROLE_ID } from '../env';
 import HelpfulRoleMemberModel from './db_model';
 
 export interface IUser extends Document {
+  user?: string;
   points?: number;
 }
 
