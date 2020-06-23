@@ -8,6 +8,7 @@ import handleComposerQuery from './commands/composer';
 import handleFormattingRequest from './commands/formatting';
 import handleGithubQuery from './commands/github';
 import handleJQueryCommand from './commands/jquery';
+import handleLeaderboardRequest from './commands/leaderboard';
 import handleMDNQuery from './commands/mdn';
 import handleNPMQuery from './commands/npm';
 import handlePHPQuery from './commands/php';
@@ -32,6 +33,7 @@ import {
   FORMATTING_KEYWORD_ALT,
   JQUERY_KEYWORD,
   POINTS_KEYWORD,
+  LEADERBOARD_KEYWORD,
 } from './utils/urlTools';
 
 const client = new Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] });
@@ -106,6 +108,8 @@ const handleMessage = async (msg: Message) => {
       return await handleJQueryCommand(msg);
     case POINTS_KEYWORD:
       return await handlePointsRequest(msg);
+    case LEADERBOARD_KEYWORD:
+      return await handleLeaderboardRequest(msg);
     default:
       // todo: probably refactor this sooner or later
       const isGeneralHelpRequest =
