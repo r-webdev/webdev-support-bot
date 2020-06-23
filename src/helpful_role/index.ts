@@ -1,9 +1,10 @@
 import { Message } from 'discord.js';
-import { HELPFUL_ROLE_ID } from '../env';
 import { Document } from 'mongoose';
+
+import { HELPFUL_ROLE_ID } from '../env';
 import HelpfulRoleMemberModel from './db_model';
 
-interface IUser extends Document {
+export interface IUser extends Document {
   points?: number;
 }
 
@@ -30,5 +31,5 @@ export default async (message: Message) => {
   user
     .save()
     .then(updated => console.log(`${updated.id} => ${updated.points}`))
-    .catch(err => console.error('user.save(): ', err));
+    .catch(error => console.error('user.save():', error));
 };

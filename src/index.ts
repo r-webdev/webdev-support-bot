@@ -11,9 +11,11 @@ import handleJQueryCommand from './commands/jquery';
 import handleMDNQuery from './commands/mdn';
 import handleNPMQuery from './commands/npm';
 import handlePHPQuery from './commands/php';
+import handlePointsRequest from './commands/points';
 import handleJobPostingRequest from './commands/post';
 import handleVSCodeRequest from './commands/vscode';
 import { DISCORD_TOKEN, IS_PROD, DUMMY_TOKEN } from './env';
+import { MONGO_URI } from './env';
 import handleHelpfulRole from './helpful_role';
 import spamFilter from './spam_filter';
 import handleSpam from './spam_filter/handler';
@@ -29,9 +31,8 @@ import {
   JOB_POSTING_KEYWORD,
   FORMATTING_KEYWORD_ALT,
   JQUERY_KEYWORD,
+  POINTS_KEYWORD,
 } from './utils/urlTools';
-
-import { MONGO_URI } from './env';
 
 const client = new Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] });
 
@@ -103,6 +104,8 @@ const handleMessage = async (msg: Message) => {
       return await handleJobPostingRequest(msg);
     case JQUERY_KEYWORD:
       return await handleJQueryCommand(msg);
+    case POINTS_KEYWORD:
+      return await handlePointsRequest(msg);
     default:
       // todo: probably refactor this sooner or later
       const isGeneralHelpRequest =
@@ -200,7 +203,7 @@ mongoose
     useUnifiedTopology: true,
   })
   .then(() => console.log('MongoDB connection established.'))
-  .catch(err => console.error('mongoose.connect(): ', err));
+  .catch(error => console.error('mongoose.connect():', error));
 
 client.on('message', handleMessage);
 client.on('messageReactionAdd', handleReactionAdd);
