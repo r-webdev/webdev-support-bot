@@ -22,7 +22,7 @@ import {
 } from './env';
 import questions from './questions';
 
-type OutputField = {
+export type OutputField = {
   name: string;
   value: string;
   inline: boolean;
