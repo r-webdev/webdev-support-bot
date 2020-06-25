@@ -27,11 +27,12 @@ export default async (msg: Message) => {
       footerText: 'Leaderboard: Helpful Users',
       provider: 'spam',
       title: 'Leaderboard: Helpful Users',
-      url: 'https://discord.com/',
     });
 
     msg.channel.send(output);
   } catch (error) {
     console.error('catch -> leaderboard/index.ts', error);
+  } finally {
+    msg.delete();
   }
 };

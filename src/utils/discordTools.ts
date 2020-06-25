@@ -73,7 +73,7 @@ export const createListEmbed = ({
 export interface Embed {
   provider: Provider | 'spam';
   title: string;
-  url: string;
+  url?: string;
   footerText: string;
   description: string;
   fields?: EmbedField[];
@@ -89,7 +89,7 @@ const spamMeta = {
 export const createEmbed = ({
   provider,
   title,
-  url,
+  url = null,
   footerText,
   description,
   fields = [],
