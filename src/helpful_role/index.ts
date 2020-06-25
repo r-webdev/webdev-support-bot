@@ -1,4 +1,4 @@
-import { Message } from 'discord.js';
+import { MessageReaction } from 'discord.js';
 import { Document } from 'mongoose';
 
 import { HELPFUL_ROLE_ID } from '../env';
@@ -9,20 +9,23 @@ export interface IUser extends Document {
   points?: number;
 }
 
-export default async (message: Message) => {
+export default async (reaction: MessageReaction) => {
+  // Break if the author of the message is trying to upvote his own solution
+  if (reaction.users.cache.find(u => u.id === reaction.message.id)) return;
+
   // Check if the message author has the helpful role
-  const isHelpfulRoleMember = message.member.roles.cache.find(
+  const isHelpfulRoleMember = reaction.message.member.roles.cache.find(
     r => r.id === HELPFUL_ROLE_ID
   );
-  if (!isHelpfulRoleMember) return;
+  if (!isHelpfulRoleMember) return; // Handle the case if the user does not have the helpful role
 
   // Find or create a database entry
   let user: IUser = await HelpfulRoleMemberModel.findOne({
-    user: message.member.id,
+    user: reaction.message.member.id,
   });
   if (!user)
     user = await HelpfulRoleMemberModel.create({
-      user: message.member.id,
+      user: reaction.message.member.id,
     });
 
   // Add a point to the user
