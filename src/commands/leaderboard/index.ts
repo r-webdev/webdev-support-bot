@@ -16,7 +16,7 @@ export default async (msg: Message) => {
         return {
           inline: false,
           name: `${i + 1}.`,
-          value: `<@!${user}>: ${points} point${points === 1 ? 's' : ''}.`,
+          value: `<@!${user}>: ${points} point${points === 1 ? '' : 's'}.`,
         };
       }
     );
