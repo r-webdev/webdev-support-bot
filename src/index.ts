@@ -192,6 +192,12 @@ const handleReactionAdd = async (reaction: MessageReaction, user: User) => {
    */
   switch (reaction.emoji.name) {
     case '✅':
+    case '✔️':
+    case '☑️':
+    case '🆙':
+    case '⬆️':
+    case '⏫':
+    case '🔼':
       handleHelpfulRole(reaction);
       break;
     // Add more cases if necessary
