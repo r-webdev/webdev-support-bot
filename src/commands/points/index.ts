@@ -7,7 +7,7 @@ import { createEmbed } from '../../utils/discordTools';
 export default async (msg: Message) => {
   try {
     const user: IUser = await User.findOne({ user: msg.author.id });
-    const points = user.points ? user.points : 0;
+    const points = user ? user.points : 0;
 
     const output = createEmbed({
       description: `You have accumulated ${points} point${
