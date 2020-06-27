@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`retuns with sample leaderboard message 1`] = `
+Array [
+  Object {
+    "embed": Object {
+      "author": null,
+      "color": 16670549,
+      "description": "No users found.",
+      "fields": Array [],
+      "footer": Object {
+        "iconURL": "https://github.com/ljosberinn/webdev-support-bot/blob/master/logo.png?raw=true",
+        "text": "Leaderboard: Helpful Users",
+      },
+      "title": "Leaderboard: Helpful Users",
+      "url": null,
+    },
+  },
+]
+`;

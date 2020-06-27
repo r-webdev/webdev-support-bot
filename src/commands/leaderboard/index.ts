@@ -5,11 +5,12 @@ import User from '../../helpful_role/db_model';
 import { createEmbed } from '../../utils/discordTools';
 import { OutputField } from '../post';
 
-export default async (msg: Message) => {
+export default async (msg: Message, limit = 10) => {
   try {
-    const topUsers: IUser[] = [
-      ...(await User.find().sort({ points: -1 }).limit(10)),
-    ];
+    const topUsers: IUser[] =
+      limit > 0
+        ? [...(await User.find().sort({ points: -1 }).limit(limit))]
+        : [];
 
     const fields: OutputField[] = topUsers.map(
       ({ user, points }, i): OutputField => {
@@ -22,7 +23,9 @@ export default async (msg: Message) => {
     );
 
     const output = createEmbed({
-      description: 'Top helpful users:',
+      description: `${
+        fields.length > 0 ? 'Top helpful users:' : 'No users found.'
+      }`,
       fields,
       footerText: 'Leaderboard: Helpful Users',
       provider: 'spam',
