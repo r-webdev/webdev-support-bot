@@ -1,17 +1,18 @@
-import { userNotFound } from '../../utils/errors';
+import { dbConnect } from '../..';
 
 import pointsHandler from '.';
 
 test('should throw an error if no user has been found', async () => {
-  const sendMock = jest.fn();
-  const replyMock = jest.fn();
+  // Connect to database
+  dbConnect();
 
   const msg: any = {
     author: { id: '1', tag: 'test#1234' },
-    channel: { send: sendMock },
-    reply: replyMock,
+    channel: { send: jest.fn() },
+    delete: jest.fn(),
+    reply: jest.fn(),
   };
 
-  const res = await pointsHandler(msg);
-  expect(res).toThrowError(userNotFound);
+  await pointsHandler(msg);
+  expect(msg.channel.send.mock.calls[0]).toMatchSnapshot();
 });
