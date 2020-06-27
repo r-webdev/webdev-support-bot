@@ -3,16 +3,15 @@ import { Message } from 'discord.js';
 import { IUser } from '../../helpful_role';
 import User from '../../helpful_role/db_model';
 import { createEmbed } from '../../utils/discordTools';
-import { userNotFound } from '../../utils/errors';
 
 export default async (msg: Message) => {
   try {
     const user: IUser = await User.findOne({ user: msg.author.id });
-    if (!user) throw new Error(userNotFound);
+    const points = user.points ? user.points : 0;
 
     const output = createEmbed({
-      description: `You have accumulated ${user.points} point${
-        user.points !== 1 ? 's' : ''
+      description: `You have accumulated ${points} point${
+        points !== 1 ? 's' : ''
       }.`,
       footerText: 'Helpful User Points',
       provider: 'spam',
