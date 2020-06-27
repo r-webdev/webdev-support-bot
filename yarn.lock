@@ -4617,10 +4617,10 @@ md5.js@^1.3.4:
     inherits "^2.0.1"
     safe-buffer "^5.1.2"
 
-mdn-browser-compat-data@^1.0.27:
-  version "1.0.27"
-  resolved "https://registry.yarnpkg.com/mdn-browser-compat-data/-/mdn-browser-compat-data-1.0.27.tgz#71ac989c819e033d140b583d89e2e19c0a2755c7"
-  integrity sha512-zuuqs6GnxVia8xz1KQLbju/TfZVsi2WtR2Xs+7aCHmS7ZnrOfol4Th0fOkudWWLTqTe9Bm8Ixiy4LXed1CB/xA==
+mdn-browser-compat-data@^1.0.28:
+  version "1.0.28"
+  resolved "https://registry.yarnpkg.com/mdn-browser-compat-data/-/mdn-browser-compat-data-1.0.28.tgz#ff008bbca910127760b27a75a53c995a41992622"
+  integrity sha512-UDP91qC3BHm+idnMjiZw8rVwXp40txUAXOXWky/486G+vyVUIhm0I/7ts1ROT+gLYWBMLE2tzt7FsDEgPTF+Mw==
   dependencies:
     extend "3.0.2"
 
@@ -6719,10 +6719,10 @@ typedarray@^0.0.6:
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
   integrity sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
 
-typescript@^4.0.0-dev.20200624:
-  version "4.0.0-dev.20200624"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.0.0-dev.20200624.tgz#68a3b1c49531fec88d73c7507b84710ad3f5b0fd"
-  integrity sha512-I0M2pHvB8wxZthCzG2OlRofHggGOOtfFfCKLp0cVZxnnWlvKdRbIdnrXH/AZFbmChWzy5/l9mvNzAc+FTUn3EA==
+typescript@^4.0.0-dev.20200625:
+  version "4.0.0-dev.20200625"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.0.0-dev.20200625.tgz#7c74dd8ddb98e62f7ee02227f667cbe13f6538d0"
+  integrity sha512-llreNfYudY1xhJ6JjshUDf7+vJ852Md1Hx2xhpOMTtEbDdYj3j2/zP5oNpY+gIm/YhkrngLGHmxCubYE4ExeQw==
 
 undefsafe@^2.0.2:
   version "2.0.3"
