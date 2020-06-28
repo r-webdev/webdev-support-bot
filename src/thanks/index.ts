@@ -4,8 +4,6 @@ import { HELPFUL_ROLE_ID } from '../env';
 import pointHandler from '../helpful_role/point_handler';
 import { createEmbed } from '../utils/discordTools';
 
-const userID_Delimiter = { end: '>', start: '<@!' };
-
 const isHelpfulUser = (guild: Guild, userID: string) => {
   // Find the mentioned user within the guild
   const user = guild.members.cache.find(u => u.id === userID);
@@ -15,11 +13,10 @@ const isHelpfulUser = (guild: Guild, userID: string) => {
   return user.roles.cache.find(r => r.id === HELPFUL_ROLE_ID);
 };
 
-export const extractUserID = (s: string) =>
-  s.split(userID_Delimiter.start)[1].replace(userID_Delimiter.end, '');
+export const extractUserID = (s: string) => s.split('<@!')[1].replace('>', '');
 
 export default async (msg: Message) => {
-  if (!msg.content.includes(userID_Delimiter.start)) return; // Break if no user has been mentioned
+  if (!msg.content.includes('<@!')) return; // Break if no user has been mentioned
 
   const userID = extractUserID(msg.content);
 
