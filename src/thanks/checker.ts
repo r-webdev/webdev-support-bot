@@ -8,4 +8,4 @@ const abbreviations = [
   'thank',
 ];
 
-export default (msg: String) => abbreviations.find(a => msg.includes(a));
+export default (msg: string) => abbreviations.find(a => msg.includes(a));
