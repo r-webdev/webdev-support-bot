@@ -84,7 +84,7 @@ export default async (msg: Message) => {
     if (content.length > 1 && isModOrAdmin()) {
       const [_, flag, mention] = content;
 
-      const userID = extractUserID(mention);
+      const userID = mention ? extractUserID(mention) : '';
 
       switch (flag) {
         case 'reset':
