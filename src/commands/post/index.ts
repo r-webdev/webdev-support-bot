@@ -35,7 +35,7 @@ type Metadata = {
   userID?: string;
 };
 
-type Channel = TextChannel | NewsChannel | DMChannel;
+export type Channel = TextChannel | NewsChannel | DMChannel;
 
 type Answers = Map<string, string>;
 

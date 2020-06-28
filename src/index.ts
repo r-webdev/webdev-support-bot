@@ -87,6 +87,10 @@ const generateCleanContent = (msg: Message) =>
   msg.cleanContent.replace(linebreakPattern, ' ').toLowerCase();
 
 const handleMessage = async (msg: Message) => {
+  // Points command override due to passing flags
+  if (msg.content.startsWith(POINTS_KEYWORD))
+    return await handlePointsRequest(msg);
+
   const cleanContent = generateCleanContent(msg);
 
   // Pipe the message into the spam filter
@@ -109,10 +113,10 @@ const handleMessage = async (msg: Message) => {
       return await handleJobPostingRequest(msg);
     case JQUERY_KEYWORD:
       return await handleJQueryCommand(msg);
-    case POINTS_KEYWORD:
-      return await handlePointsRequest(msg);
     case LEADERBOARD_KEYWORD:
       return await handleLeaderboardRequest(msg);
+    // case POINTS_KEYWORD:
+    //   return await handlePointsRequest(msg);
     default:
       // todo: probably refactor this sooner or later
       const isGeneralHelpRequest =
