@@ -20,6 +20,7 @@ import { MONGO_URI } from './env';
 import handleHelpfulRole from './helpful_role';
 import spamFilter from './spam_filter';
 import handleSpam from './spam_filter/handler';
+import isThanksMessage from './thanks/checker';
 import { Provider } from './utils/discordTools';
 import * as errors from './utils/errors';
 import {
@@ -180,7 +181,7 @@ const handleMessage = async (msg: Message) => {
 const handleNonCommandMessages = (msg: Message) => {
   const cleanContent = generateCleanContent(msg);
 
-  if (cleanContent.includes('thanks')) console.log('Thanks!');
+  if (isThanksMessage(cleanContent)) console.log('Thanks!');
 };
 
 const handleReactionAdd = async (reaction: MessageReaction, user: User) => {
