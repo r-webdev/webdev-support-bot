@@ -1,13 +1,13 @@
-import HelpfulRoleMemberModel from './db_model';
+import HelpfulRoleMember from './db_model';
 
 import { IUser } from '.';
 
 export default async (userID: string) => {
-  let user: IUser = await HelpfulRoleMemberModel.findOne({
+  let user: IUser = await HelpfulRoleMember.findOne({
     user: userID,
   });
   if (!user)
-    user = await HelpfulRoleMemberModel.create({
+    user = await HelpfulRoleMember.create({
       user: userID,
     });
 

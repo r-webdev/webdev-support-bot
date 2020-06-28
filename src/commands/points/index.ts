@@ -1,12 +1,14 @@
 import { Message } from 'discord.js';
 
 import { IUser } from '../../helpful_role';
-import User from '../../helpful_role/db_model';
+import HelpfulRoleMember from '../../helpful_role/db_model';
 import { createEmbed } from '../../utils/discordTools';
 
 export default async (msg: Message) => {
   try {
-    const user: IUser = await User.findOne({ user: msg.author.id });
+    const user: IUser = await HelpfulRoleMember.findOne({
+      user: msg.author.id,
+    });
     const points = user ? user.points : 0;
 
     const output = createEmbed({
