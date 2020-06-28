@@ -3,9 +3,11 @@ import { Message } from 'discord.js';
 import { ADMIN_ROLE_ID, MOD_ROLE_ID } from '../../env';
 import { IUser } from '../../helpful_role';
 import HelpfulRoleMember from '../../helpful_role/db_model';
+import { extractUserID } from '../../thanks';
 import { createEmbed } from '../../utils/discordTools';
 
-const resetPoints = async (userID: string, adminID: string) => {
+const resetPoints = async (mention: string, adminID: string) => {
+  const userID = extractUserID(mention);
   if (!userID)
     return createEmbed({
       description: `An invalid user ID has been provided.`,
@@ -35,7 +37,7 @@ const resetPoints = async (userID: string, adminID: string) => {
   await user.save();
 
   return createEmbed({
-    description: `<@!${user.user}>'s points have been reset by <@!${adminID}>.`,
+    description: `<@!${user.user}>'s points have been reset.`,
     fields: [
       { inline: true, name: 'Admin/Moderator', value: `<@!${adminID}>` },
     ],
@@ -56,11 +58,11 @@ export default async (msg: Message) => {
 
     // Flags and ID checking users for points are admin/mod-only commands
     if (content.length > 1 && isModOrAdmin()) {
-      const [_, flag, id] = content;
+      const [_, flag, mention] = content;
 
       switch (flag) {
         case 'reset':
-          const res = await resetPoints(id, msg.author.id);
+          const res = await resetPoints(mention, msg.author.id);
           msg.channel.send(res);
           break;
         default:

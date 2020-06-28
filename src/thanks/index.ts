@@ -15,7 +15,7 @@ const isHelpfulUser = (guild: Guild, userID: string) => {
   return user.roles.cache.find(r => r.id === HELPFUL_ROLE_ID);
 };
 
-const extractUserID = (s: string) =>
+export const extractUserID = (s: string) =>
   s.split(userID_Delimiter.start)[1].replace(userID_Delimiter.end, '');
 
 export default async (msg: Message) => {
