@@ -81,10 +81,11 @@ const help: { [key: string]: string } = Object.entries(providers).reduce(
   {}
 );
 
+const generateCleanContent = (msg: Message) =>
+  msg.cleanContent.replace(linebreakPattern, ' ').toLowerCase();
+
 const handleMessage = async (msg: Message) => {
-  const cleanContent = msg.cleanContent
-    .replace(linebreakPattern, ' ')
-    .toLowerCase();
+  const cleanContent = generateCleanContent(msg);
 
   // Pipe the message into the spam filter
   const spamMetadata = spamFilter(msg);
@@ -135,7 +136,7 @@ const handleMessage = async (msg: Message) => {
 
       // bail if no keyword was found
       if (!isCommandQuery) {
-        return;
+        return handleNonCommandMessages(msg);
       }
 
       const keyword = cleanContent.split(' ', 1)[0].slice(1);
@@ -174,6 +175,12 @@ const handleMessage = async (msg: Message) => {
         await msg.reply(errors.unknownError);
       }
   }
+};
+
+const handleNonCommandMessages = (msg: Message) => {
+  const cleanContent = generateCleanContent(msg);
+
+  if (cleanContent.includes('thanks')) console.log('Thanks!');
 };
 
 const handleReactionAdd = async (reaction: MessageReaction, user: User) => {
