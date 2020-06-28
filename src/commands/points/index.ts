@@ -6,8 +6,7 @@ import HelpfulRoleMember from '../../helpful_role/db_model';
 import { extractUserID } from '../../thanks';
 import { createEmbed } from '../../utils/discordTools';
 
-const resetPoints = async (mention: string, adminID: string) => {
-  const userID = extractUserID(mention);
+const resetPoints = async (userID: string, adminID: string) => {
   if (!userID)
     return createEmbed({
       description: `An invalid user ID has been provided.`,
@@ -47,6 +46,31 @@ const resetPoints = async (mention: string, adminID: string) => {
   });
 };
 
+const getPoints = async (userID: string, title: string, admin = false) => {
+  if (!userID && admin)
+    return createEmbed({
+      description: `The provided user ID is invalid.`,
+      footerText: 'Admin: Points Handler',
+      provider: 'spam',
+      title,
+    });
+
+  const user: IUser = await HelpfulRoleMember.findOne({
+    user: userID,
+  });
+
+  const points = user ? user.points : 0;
+
+  return createEmbed({
+    description: `${
+      !admin ? 'You have' : 'The user has'
+    } accumulated ${points} point${points !== 1 ? 's' : ''}.`,
+    footerText: !admin ? 'Helpful User Points' : 'Admin: Points Handler',
+    provider: 'spam',
+    title,
+  });
+};
+
 export default async (msg: Message) => {
   const isModOrAdmin = () =>
     msg.member.roles.cache.find(
@@ -60,31 +84,20 @@ export default async (msg: Message) => {
     if (content.length > 1 && isModOrAdmin()) {
       const [_, flag, mention] = content;
 
+      const userID = extractUserID(mention);
+
       switch (flag) {
         case 'reset':
-          const res = await resetPoints(mention, msg.author.id);
-          msg.channel.send(res);
-          break;
+          return msg.channel.send(await resetPoints(userID, msg.author.id));
+        case 'check':
+          return msg.channel.send(
+            await getPoints(userID, 'Points check for mentioned user', true)
+          );
         default:
           break;
       }
     } else {
-      const user: IUser = await HelpfulRoleMember.findOne({
-        user: msg.author.id,
-      });
-
-      const points = user ? user.points : 0;
-
-      const output = createEmbed({
-        description: `You have accumulated ${points} point${
-          points !== 1 ? 's' : ''
-        }.`,
-        footerText: 'Helpful User Points',
-        provider: 'spam',
-        title: msg.author.tag,
-      });
-
-      msg.channel.send(output);
+      msg.channel.send(await getPoints(msg.author.id, msg.author.tag));
     }
   } catch (error) {
     console.error('catch -> points/index.ts:', error);
