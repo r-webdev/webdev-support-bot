@@ -1,6 +1,8 @@
 import { Message, Guild } from 'discord.js';
 
 import { HELPFUL_ROLE_ID } from '../env';
+import pointHandler from '../helpful_role/point_handler';
+import { createEmbed } from '../utils/discordTools';
 
 const userID_Delimiter = { end: '>', start: '<@!' };
 
@@ -16,7 +18,7 @@ const isHelpfulUser = (guild: Guild, userID: string) => {
 const extractUserID = (s: string) =>
   s.split(userID_Delimiter.start)[1].replace(userID_Delimiter.end, '');
 
-export default (msg: Message) => {
+export default async (msg: Message) => {
   if (!msg.content.includes(userID_Delimiter.start)) return; // Break if no user has been mentioned
 
   const userID = extractUserID(msg.content);
@@ -27,5 +29,14 @@ export default (msg: Message) => {
   // Check if the mentioned user has the helpful role
   if (!isHelpfulUser(msg.guild, userID)) return;
 
-  console.log(userID);
+  await pointHandler(userID);
+
+  const output = createEmbed({
+    description: `<@!${msg.author.id}> has given a point to <@!${userID}>!`,
+    footerText: 'Point Handler',
+    provider: 'spam',
+    title: `Point received!`,
+  });
+
+  msg.channel.send(output);
 };
