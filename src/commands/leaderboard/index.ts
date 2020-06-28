@@ -39,7 +39,5 @@ export default async (msg: Message, limit = 10) => {
     msg.channel.send(output);
   } catch (error) {
     console.error('catch -> leaderboard/index.ts', error);
-  } finally {
-    msg.delete();
   }
 };
