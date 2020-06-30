@@ -40,7 +40,7 @@ export default async (userID: string, msg: Message) => {
   user.points++;
 
   // Check if the user has enough points to be given the helpful role
-  if (user.points >= 10) await grantHelpfulRole(userID, msg);
+  if (user.points >= 3) await grantHelpfulRole(userID, msg);
 
   // Save the user
   user
