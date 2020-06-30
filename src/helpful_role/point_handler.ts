@@ -1,4 +1,4 @@
-import { Message } from 'discord.js';
+import { Message, GuildMember } from 'discord.js';
 
 import { HELPFUL_ROLE_ID, HELPFUL_ROLE_POINT_THRESHOLD } from '../env';
 import { createEmbed } from '../utils/discordTools';
@@ -6,10 +6,7 @@ import HelpfulRoleMember from './db_model';
 
 import { IUser } from '.';
 
-const grantHelpfulRole = async (userID: string, msg: Message) => {
-  const user = msg.guild.members.cache.find(u => u.id === userID);
-  if (!user || user.user.bot) return; // Break if there's no user or the user is a bot.
-
+const grantHelpfulRole = async (user: GuildMember, msg: Message) => {
   // Check if the user has the role
   if (user.roles.cache.find(r => r.id === HELPFUL_ROLE_ID)) return;
 
@@ -19,7 +16,7 @@ const grantHelpfulRole = async (userID: string, msg: Message) => {
   // Send notification message
   msg.channel.send(
     createEmbed({
-      description: `<@!${userID}> has been granted the <@&${HELPFUL_ROLE_ID}> role!`,
+      description: `<@!${user.id}> has been granted the <@&${HELPFUL_ROLE_ID}> role!`,
       footerText: 'Helpful Role Handler',
       provider: 'spam',
       title: 'A user has received the Helpful role!',
@@ -28,6 +25,9 @@ const grantHelpfulRole = async (userID: string, msg: Message) => {
 };
 
 export default async (userID: string, msg: Message) => {
+  const guildMember = msg.guild.members.cache.find(u => u.id === userID);
+  if (!guildMember || guildMember.user.bot) return; // Break if there's no user or the user is a bot.
+
   let user: IUser = await HelpfulRoleMember.findOne({
     user: userID,
   });
@@ -41,7 +41,7 @@ export default async (userID: string, msg: Message) => {
 
   // Check if the user has enough points to be given the helpful role
   if (user.points >= Number(HELPFUL_ROLE_POINT_THRESHOLD))
-    await grantHelpfulRole(userID, msg);
+    await grantHelpfulRole(guildMember, msg);
 
   // Save the user
   user
