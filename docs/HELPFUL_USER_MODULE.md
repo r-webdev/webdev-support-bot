@@ -1,12 +1,10 @@
 # Helpful User Module
 
-> System for adding and managing points for users that have the `Helpful` role.
+> System for adding and managing points for users.
 
 ### Usage:
 
-Moderators and admins will, for the time being, manually add the `Helpful` role to users that they see fit. Once a user has the role, it can now receive points.
-
-A point will be given to a user under the condition that it has the aformentioned role.
+Users can receive points, and once they exceed a certain amount of points, which is set as the `HELPFUL_ROLE_POINT_THRESHOLD` environmental variable, will receive the `Helpful` role.
 
 The way points can be given out are:
 
