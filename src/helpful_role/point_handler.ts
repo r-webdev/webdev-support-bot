@@ -1,6 +1,6 @@
 import { Message } from 'discord.js';
 
-import { HELPFUL_ROLE_ID } from '../env';
+import { HELPFUL_ROLE_ID, HELPFUL_ROLE_POINT_THRESHOLD } from '../env';
 import { createEmbed } from '../utils/discordTools';
 import HelpfulRoleMember from './db_model';
 
@@ -40,7 +40,8 @@ export default async (userID: string, msg: Message) => {
   user.points++;
 
   // Check if the user has enough points to be given the helpful role
-  if (user.points >= 3) await grantHelpfulRole(userID, msg);
+  if (user.points >= Number(HELPFUL_ROLE_POINT_THRESHOLD))
+    await grantHelpfulRole(userID, msg);
 
   // Save the user
   user
