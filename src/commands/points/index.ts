@@ -1,12 +1,17 @@
 import { Message } from 'discord.js';
 
-import { ADMIN_ROLE_ID, MOD_ROLE_ID } from '../../env';
+import { ADMIN_ROLE_ID, MOD_ROLE_ID, HELPFUL_ROLE_ID } from '../../env';
 import { IUser } from '../../helpful_role';
 import HelpfulRoleMember from '../../helpful_role/db_model';
 import { extractUserID } from '../../thanks';
 import { createEmbed } from '../../utils/discordTools';
 
-const resetPoints = async (userID: string, adminID: string) => {
+const resetPoints = async (userID: string, msg: Message) => {
+  const adminID = msg.author.id;
+
+  const guildMember = msg.guild.members.cache.find(u => u.id === userID);
+  if (!guildMember || guildMember.user.bot) return; // Break if there's no user or the user is a bot
+
   if (!userID)
     return createEmbed({
       description: `An invalid user ID has been provided.`,
@@ -34,6 +39,9 @@ const resetPoints = async (userID: string, adminID: string) => {
 
   user.points = 0;
   await user.save();
+
+  // Remove the role from the user
+  await guildMember.roles.remove(HELPFUL_ROLE_ID);
 
   return createEmbed({
     description: `<@!${user.user}>'s points have been reset.`,
@@ -88,7 +96,7 @@ export default async (msg: Message) => {
 
       switch (flag) {
         case 'reset':
-          return msg.channel.send(await resetPoints(userID, msg.author.id));
+          return msg.channel.send(await resetPoints(userID, msg));
         case 'check':
           return msg.channel.send(
             await getPoints(userID, 'Points check for mentioned user', true)
