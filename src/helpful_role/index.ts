@@ -21,5 +21,5 @@ export default async (reaction: MessageReaction) => {
   if (!isHelpfulRoleMember) return; // Handle the case if the user does not have the helpful role
 
   // Give the user a point
-  await pointHandler(reaction.message.member.id);
+  await pointHandler(reaction.message.member.id, reaction.message.guild);
 };
