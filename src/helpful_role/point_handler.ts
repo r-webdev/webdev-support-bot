@@ -8,7 +8,7 @@ import { IUser } from '.';
 
 const grantHelpfulRole = async (userID: string, msg: Message) => {
   const user = msg.guild.members.cache.find(u => u.id === userID);
-  if (!user) return;
+  if (!user || user.user.bot) return; // Break if there's no user or the user is a bot.
 
   // Check if the user has the role
   if (user.roles.cache.find(r => r.id === HELPFUL_ROLE_ID)) return;
