@@ -13,6 +13,9 @@ export default async (msg: Message) => {
   // Break if the user is trying to thank himself
   if (msg.author.id === userID) return;
 
+  const guildMember = msg.guild.members.cache.find(u => u.id === userID);
+  if (!guildMember || guildMember.user.bot) return; // Break if there's no user or the user is a botD
+
   await pointHandler(userID, msg);
 
   const output = createEmbed({
