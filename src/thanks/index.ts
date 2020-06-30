@@ -13,7 +13,7 @@ const isHelpfulUser = (guild: Guild, userID: string) => {
   return user.roles.cache.find(r => r.id === HELPFUL_ROLE_ID);
 };
 
-export const extractUserID = (s: string) => s.split('<@!')[1].replace('>', '');
+export const extractUserID = (s: string) => s.split('<@!')[1].split('>')[0];
 
 export default async (msg: Message) => {
   if (!msg.content.includes('<@!')) return; // Break if no user has been mentioned
