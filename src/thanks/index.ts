@@ -26,7 +26,7 @@ export default async (msg: Message) => {
   // Check if the mentioned user has the helpful role
   if (!isHelpfulUser(msg.guild, userID)) return;
 
-  await pointHandler(userID);
+  await pointHandler(userID, msg.guild);
 
   const output = createEmbed({
     description: `<@!${msg.author.id}> has given a point to <@!${userID}>!`,
