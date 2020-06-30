@@ -1,6 +1,6 @@
 import { dbConnect } from '../..';
 
-import pointsHandler from '.';
+import pointHandler from '.';
 
 beforeAll(() => dbConnect());
 
@@ -11,7 +11,7 @@ test('should throw an error if no user has been found', async () => {
     delete: jest.fn(),
   };
 
-  await pointsHandler(msg);
+  await pointHandler(msg);
 
   expect(msg.channel.send.mock.calls[0]).toMatchSnapshot();
 });
