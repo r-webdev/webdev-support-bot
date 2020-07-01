@@ -31,5 +31,6 @@ export const MONGO_URI = process.env.MONGO_URI;
 export const HELPFUL_ROLE_ID = process.env.HELPFUL_ROLE_ID;
 export const HELPFUL_ROLE_POINT_THRESHOLD =
   process.env.HELPFUL_ROLE_POINT_THRESHOLD;
+export const POINT_DECAY_TIMER = process.env.POINT_DECAY_TIMER;
 export const ADMIN_ROLE_ID = process.env.ADMIN_ROLE_ID;
 export const MOD_ROLE_ID = process.env.MOD_ROLE_ID;
