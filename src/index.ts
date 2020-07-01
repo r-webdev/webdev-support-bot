@@ -18,6 +18,7 @@ import handleVSCodeRequest from './commands/vscode';
 import { DISCORD_TOKEN, IS_PROD, DUMMY_TOKEN } from './env';
 import { MONGO_URI } from './env';
 import handleHelpfulRole from './helpful_role';
+import pointDecaySystem from './helpful_role/point_decay';
 import spamFilter from './spam_filter';
 import handleSpam from './spam_filter/handler';
 import handleThanks from './thanks';
@@ -87,6 +88,9 @@ const generateCleanContent = (msg: Message) =>
   msg.cleanContent.replace(linebreakPattern, ' ').toLowerCase();
 
 const handleMessage = async (msg: Message) => {
+  // Run the point decay system
+  await pointDecaySystem();
+
   // Points command override due to passing flags
   if (msg.content.startsWith(POINTS_KEYWORD))
     return await handlePointsRequest(msg);
