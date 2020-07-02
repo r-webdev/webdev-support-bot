@@ -4,12 +4,13 @@ import pointsCommandHandler from '.';
 
 beforeAll(() => dbConnect());
 
-test('should throw an error if no user has been found', async () => {
+test('should match the snapshot of a notification stating the user has 0 points', async () => {
   const msg: any = {
     author: { id: '1', tag: 'test#1234' },
     channel: { send: jest.fn() },
     content: '!points',
     delete: jest.fn(),
+    guild: { id: '1' },
   };
 
   await pointsCommandHandler(msg);
