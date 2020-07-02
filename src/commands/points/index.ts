@@ -23,7 +23,10 @@ const resetPoints = async (userID: string, msg: Message) => {
       title: 'Points Handler',
     });
 
-  const user: IUser = await HelpfulRoleMember.findOne({ user: userID });
+  const user: IUser = await HelpfulRoleMember.findOne({
+    guild: msg.guild.id,
+    user: userID,
+  });
   if (!user)
     return createEmbed({
       description: `The provided ID: ${
@@ -54,7 +57,12 @@ const resetPoints = async (userID: string, msg: Message) => {
   });
 };
 
-const getPoints = async (userID: string, title: string, admin = false) => {
+const getPoints = async (
+  userID: string,
+  title: string,
+  msg: Message,
+  admin = false
+) => {
   if (!userID && admin)
     return createEmbed({
       description: `The provided user ID is invalid.`,
@@ -64,6 +72,7 @@ const getPoints = async (userID: string, title: string, admin = false) => {
     });
 
   const user: IUser = await HelpfulRoleMember.findOne({
+    guild: msg.guild.id,
     user: userID,
   });
 
@@ -99,13 +108,18 @@ export default async (msg: Message) => {
           return msg.channel.send(await resetPoints(userID, msg));
         case 'check':
           return msg.channel.send(
-            await getPoints(userID, 'Points check for mentioned user', true)
+            await getPoints(
+              userID,
+              'Points check for mentioned user',
+              msg,
+              true
+            )
           );
         default:
           break;
       }
     } else {
-      msg.channel.send(await getPoints(msg.author.id, msg.author.tag));
+      msg.channel.send(await getPoints(msg.author.id, msg.author.tag, msg));
     }
   } catch (error) {
     console.error('catch -> points/index.ts:', error);

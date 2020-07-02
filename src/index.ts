@@ -89,7 +89,7 @@ const generateCleanContent = (msg: Message) =>
 
 const handleMessage = async (msg: Message) => {
   // Run the point decay system
-  await pointDecaySystem();
+  await pointDecaySystem(msg);
 
   // Points command override due to passing flags
   if (msg.content.startsWith(POINTS_KEYWORD))
@@ -226,6 +226,7 @@ const handleReactionAdd = async (reaction: MessageReaction, user: User) => {
 export const dbConnect = () => {
   mongoose
     .connect(MONGO_URI, {
+      useCreateIndex: true,
       useNewUrlParser: true,
       useUnifiedTopology: true,
     })

@@ -10,7 +10,7 @@ export default async (msg: Message, limit = 10) => {
     const topUsers: IUser[] =
       limit > 0
         ? [
-            ...(await HelpfulRoleMember.find()
+            ...(await HelpfulRoleMember.find({ guild: msg.guild.id })
               .sort({ points: -1 })
               .limit(limit)),
           ]
