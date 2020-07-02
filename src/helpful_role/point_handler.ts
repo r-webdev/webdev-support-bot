@@ -25,16 +25,16 @@ const grantHelpfulRole = async (user: GuildMember, msg: Message) => {
 };
 
 export default async (userID: string, msg: Message) => {
+  const details = {
+    guild: msg.guild.id,
+    user: userID,
+  };
+
   const guildMember = msg.guild.members.cache.find(u => u.id === userID);
   if (!guildMember || guildMember.user.bot) return; // Break if there's no user or the user is a bot.
 
-  let user: IUser = await HelpfulRoleMember.findOne({
-    user: userID,
-  });
-  if (!user)
-    user = await HelpfulRoleMember.create({
-      user: userID,
-    });
+  let user: IUser = await HelpfulRoleMember.findOne(details);
+  if (!user) user = await HelpfulRoleMember.create(details);
 
   // Add a point to the user
   user.points++;
