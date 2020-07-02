@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`should throw an error if no user has been found 1`] = `
+exports[`should match the snapshot of a notification stating the user has 0 points 1`] = `
 Array [
   Object {
     "embed": Object {
