@@ -5,7 +5,7 @@ import {
   SupportStatement,
 } from 'mdn-browser-compat-data/types';
 
-import delayedMessageAutoDeletion from '../../utils/delayedMessageAutoDeletion';
+import { delayedMessageAutoDeletion } from '../../utils/delayedMessageAutoDeletion';
 import {
   createMarkdownLink,
   createListEmbed,

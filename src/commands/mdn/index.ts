@@ -3,7 +3,7 @@ import { Message } from 'discord.js';
 import * as DOMParser from 'dom-parser';
 import { Html5Entities as Entities } from 'html-entities';
 
-import delayedMessageAutoDeletion from '../../utils/delayedMessageAutoDeletion';
+import { delayedMessageAutoDeletion } from '../../utils/delayedMessageAutoDeletion';
 import {
   createMarkdownLink,
   createDescription,

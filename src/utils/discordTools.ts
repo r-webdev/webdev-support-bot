@@ -6,7 +6,7 @@ import {
 } from 'discord.js';
 
 import { REPO_LINK } from '../env';
-import delayedMessageAutoDeletion from './delayedMessageAutoDeletion';
+import { delayedMessageAutoDeletion } from './delayedMessageAutoDeletion';
 import * as emojis from './emojis';
 import { unknownError } from './errors';
 import {

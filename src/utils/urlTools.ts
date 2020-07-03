@@ -1,7 +1,7 @@
 import { Message } from 'discord.js';
 import { HeadersInit } from 'node-fetch';
 
-import delayedMessageAutoDeletion from './delayedMessageAutoDeletion';
+import { delayedMessageAutoDeletion } from './delayedMessageAutoDeletion';
 import { Provider } from './discordTools';
 import { noResults, invalidResponse } from './errors';
 import useData from './useData';
