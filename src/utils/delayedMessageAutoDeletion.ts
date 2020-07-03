@@ -8,8 +8,9 @@ export const delayedMessageAutoDeletion = (
   msg: Message,
   timeout = THIRTY_SECONDS_IN_MS
 ) => {
-  setTimeout(() => {
-    try {
+  // required so tests on CI dont crash
+  if (msg) {
+    setTimeout(() => {
       msg.delete().catch(error => {
         // eslint-disable-next-line no-console
         console.warn("Couldn't delete message", error);
@@ -21,11 +22,8 @@ export const delayedMessageAutoDeletion = (
           );
         });
       });
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(error);
-    }
-  }, timeout);
+    }, timeout);
+  }
 
   return;
 };
