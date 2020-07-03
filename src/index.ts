@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/node';
 import { Client, Message, MessageReaction } from 'discord.js';
 import * as mongoose from 'mongoose';
 
@@ -39,27 +40,34 @@ import {
   LEADERBOARD_KEYWORD,
 } from './utils/urlTools';
 
+if (IS_PROD) {
+  Sentry.init({
+    dsn:
+      'https://9902d087a01f4d8883daad5d59d90736@o163592.ingest.sentry.io/5307626',
+  });
+}
+
 const client = new Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] });
 
 const blacklistedServer = new Set([
   '264445053596991498', // Discord Bot List
   '448549361119395850',
-  '657145936207806465',
+  '657145936207806465', // nazi stuff
 ]);
 
-client.on('ready', async () => {
+client.on('ready', () => {
   // eslint-disable-next-line no-console
   console.log(`Logged in as ${client.user.tag}!`);
+});
+
+client.once('ready', async () => {
+  client.user.setActivity(`@${client.user.username} --help`);
 
   await Promise.all(
     client.guilds.cache
       .filter(guild => blacklistedServer.has(guild.id))
       .map(guild => guild.leave())
   );
-});
-
-client.once('ready', async () => {
-  client.user.setActivity(`@${client.user.username} --help`);
 
   // eslint-disable-next-line no-console
   console.table(
