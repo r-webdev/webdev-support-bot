@@ -16,7 +16,7 @@ const grantHelpfulRole = async (user: GuildMember, msg: Message) => {
   await user.roles.add(HELPFUL_ROLE_ID);
 
   // Send notification message
-  msg.channel.send(
+  await msg.channel.send(
     createEmbed({
       description: `<@!${user.id}> has been granted the <@&${HELPFUL_ROLE_ID}> role!`,
       footerText: 'Helpful Role Handler',

@@ -1,4 +1,4 @@
-import { Client, Message, MessageReaction, User } from 'discord.js';
+import { Client, Message, MessageReaction } from 'discord.js';
 import * as mongoose from 'mongoose';
 
 import handleBundlephobiaQuery from './commands/bundlephobia';
@@ -90,12 +90,15 @@ const generateCleanContent = (msg: Message) =>
   msg.cleanContent.replace(linebreakPattern, ' ').toLowerCase();
 
 const handleMessage = async (msg: Message) => {
+  const isWebdevAndWebDesignServer = msg.guild.id === '434487340535382016';
+
   // Run the point decay system
   await pointDecaySystem(msg);
 
   // Points command override due to passing flags
-  if (msg.content.startsWith(POINTS_KEYWORD))
+  if (isWebdevAndWebDesignServer && msg.content.startsWith(POINTS_KEYWORD)) {
     return await handlePointsRequest(msg);
+  }
 
   const cleanContent = generateCleanContent(msg);
 
@@ -147,7 +150,7 @@ const handleMessage = async (msg: Message) => {
         cleanContent.startsWith('!') && KEYWORD_REGEXP.test(cleanContent);
 
       // bail if no keyword was found
-      if (!isCommandQuery) {
+      if (!isCommandQuery && isWebdevAndWebDesignServer) {
         return handleNonCommandMessages(msg);
       }
 
@@ -193,10 +196,18 @@ const handleMessage = async (msg: Message) => {
 const handleNonCommandMessages = (msg: Message) => {
   const cleanContent = generateCleanContent(msg);
 
-  if (isThanksMessage(cleanContent)) handleThanks(msg);
+  if (isThanksMessage(cleanContent)) {
+    handleThanks(msg);
+  }
 };
 
-const handleReactionAdd = async (reaction: MessageReaction, user: User) => {
+const handleReactionAdd = async (reaction: MessageReaction) => {
+  // role id is "hardcoded" through env. in this version of the bot, only the
+  // webdev and web_design server is supported
+  if (reaction.message.guild.id !== '434487340535382016') {
+    return;
+  }
+
   const {
     me,
     partial,
