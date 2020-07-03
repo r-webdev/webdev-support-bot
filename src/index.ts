@@ -41,9 +41,21 @@ import {
 
 const client = new Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] });
 
-client.on('ready', () => {
+const blacklistedServer = new Set([
+  '264445053596991498', // Discord Bot List
+  '448549361119395850',
+  '657145936207806465',
+]);
+
+client.on('ready', async () => {
   // eslint-disable-next-line no-console
   console.log(`Logged in as ${client.user.tag}!`);
+
+  await Promise.all(
+    client.guilds.cache
+      .filter(guild => blacklistedServer.has(guild.id))
+      .map(guild => guild.leave())
+  );
 });
 
 client.once('ready', async () => {
@@ -89,14 +101,18 @@ const help: { [key: string]: string } = Object.entries(providers).reduce(
 const generateCleanContent = (msg: Message) =>
   msg.cleanContent.replace(linebreakPattern, ' ').toLowerCase();
 
-const handleMessage = async (msg: Message) => {
-  const isWebdevAndWebDesignServer = msg.guild.id === '434487340535382016';
+const isWebdevAndWebDesignServer = (msg: Message) =>
+  msg.guild.id === '434487340535382016';
 
+const handleMessage = async (msg: Message) => {
   // Run the point decay system
   await pointDecaySystem(msg);
 
   // Points command override due to passing flags
-  if (isWebdevAndWebDesignServer && msg.content.startsWith(POINTS_KEYWORD)) {
+  if (
+    isWebdevAndWebDesignServer(msg) &&
+    msg.content.startsWith(POINTS_KEYWORD)
+  ) {
     return await handlePointsRequest(msg);
   }
 
@@ -150,7 +166,7 @@ const handleMessage = async (msg: Message) => {
         cleanContent.startsWith('!') && KEYWORD_REGEXP.test(cleanContent);
 
       // bail if no keyword was found
-      if (!isCommandQuery && isWebdevAndWebDesignServer) {
+      if (!isCommandQuery) {
         return handleNonCommandMessages(msg);
       }
 
@@ -196,7 +212,7 @@ const handleMessage = async (msg: Message) => {
 const handleNonCommandMessages = (msg: Message) => {
   const cleanContent = generateCleanContent(msg);
 
-  if (isThanksMessage(cleanContent)) {
+  if (isWebdevAndWebDesignServer(msg) && isThanksMessage(cleanContent)) {
     handleThanks(msg);
   }
 };
