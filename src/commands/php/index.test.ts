@@ -7,6 +7,7 @@ describe('buildPHPQueryHandler', () => {
   const replyMock = jest.fn();
   const msg: any = {
     channel: { send: sendMock },
+    delete: jest.fn(),
     reply: replyMock,
   };
 

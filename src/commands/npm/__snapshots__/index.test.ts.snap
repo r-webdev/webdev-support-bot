@@ -124,6 +124,7 @@ yarn add React
         ],
       },
     },
+    "delete": [MockFunction],
     "reply": [MockFunction],
   },
   Array [

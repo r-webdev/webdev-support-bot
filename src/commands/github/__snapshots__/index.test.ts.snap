@@ -139,6 +139,7 @@ git clone https://facebook.com/react
         ],
       },
     },
+    "delete": [MockFunction],
     "reply": [MockFunction],
   },
   Array [

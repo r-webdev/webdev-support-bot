@@ -11,6 +11,7 @@ describe('handleComposerQuery', () => {
   const replyMock = jest.fn();
   const msg: any = {
     channel: { send: sendMock },
+    delete: replyMock,
     reply: replyMock,
   };
 
