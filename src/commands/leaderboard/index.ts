@@ -1,13 +1,13 @@
 import { Message } from 'discord.js';
 
-import { IUser } from '../../helpful_role';
+import { User } from '../../helpful_role';
 import HelpfulRoleMember from '../../helpful_role/db_model';
 import { createEmbed } from '../../utils/discordTools';
 import { OutputField } from '../post';
 
 export default async (msg: Message, limit = 10) => {
   try {
-    const topUsers: IUser[] =
+    const topUsers: User[] =
       limit > 0
         ? [
             ...(await HelpfulRoleMember.find({ guild: msg.guild.id })
@@ -38,6 +38,7 @@ export default async (msg: Message, limit = 10) => {
 
     msg.channel.send(output);
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('catch -> leaderboard/index.ts', error);
   }
 };

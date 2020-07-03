@@ -3,7 +3,7 @@ import { Document } from 'mongoose';
 
 import pointHandler from './point_handler';
 
-export interface IUser extends Document {
+export interface User extends Document {
   user?: string;
   points?: number;
 }

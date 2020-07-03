@@ -5,15 +5,14 @@ import HelpfulRoleMember from './db_model';
 
 let lastCleanup = new Date();
 
-const cleanup = async (msg: Message) => {
+const cleanup = async ({ guild: { id: guild } }: Message) => {
   try {
-    const res = await HelpfulRoleMember.update(
-      { guild: msg.guild.id, points: { $gt: 0 } },
+    await HelpfulRoleMember.update(
+      { guild, points: { $gt: 0 } },
       { $inc: { points: -1 } }
     );
-
-    console.log(res);
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('catch -> cleanup():', error);
   }
 };
@@ -26,8 +25,5 @@ export default async (msg: Message) => {
     lastCleanup = now;
 
     await cleanup(msg);
-  } else {
-    // TODO: Remove else block before deployment
-    console.log('Cleanup available in', diff, 'hours');
   }
 };
