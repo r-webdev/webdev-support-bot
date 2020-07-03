@@ -108,6 +108,7 @@ export const buildNPMQueryHandler = (
 
     await attemptEdit(sentMsg, createEmbed(createNPMEmbed(result)));
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error(error);
     await msg.reply(errors.unknownError);
   }

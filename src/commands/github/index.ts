@@ -141,6 +141,7 @@ export const buildGithubQueryHandler = (
 
     await attemptEdit(sentMsg, createEmbed(createGithubEmbed(result)));
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error(`${error.name}: ${error.message}`);
     await msg.reply(errors.unknownError);
   }

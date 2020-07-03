@@ -94,6 +94,8 @@ export const CODE_KEYWORD = '!code';
 export const VSCODE_KEYWORD = '!vscode';
 export const JOB_POSTING_KEYWORD = '!post';
 export const JQUERY_KEYWORD = '!jquery';
+export const POINTS_KEYWORD = '!points';
+export const LEADERBOARD_KEYWORD = '!leaderboard';
 
 /**
  * dynamic regExp matching all possible Object.keys(providers) as keyword

@@ -9,6 +9,7 @@ function formatFn(fn: Function) {
 }
 
 function annoyTitan() {
+  // eslint-disable-next-line no-console
   console.log('react > vue');
 }
 

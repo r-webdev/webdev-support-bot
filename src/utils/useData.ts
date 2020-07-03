@@ -64,8 +64,10 @@ const doFetch: <TParsedResponse>(
 
   return async (url, fetchOptions) => {
     const timeLabel = `Time took for url=${encodeURIComponent(url.toString())}`;
+    // eslint-disable-next-line no-console
     console.time(timeLabel);
     const response = await fetch(url, fetchOptions);
+    // eslint-disable-next-line no-console
     console.timeEnd(timeLabel);
     const formattedResponse = await mapper(response);
     apiCache.set(casedCacheKey, formattedResponse);
