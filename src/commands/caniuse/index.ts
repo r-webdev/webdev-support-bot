@@ -162,6 +162,7 @@ export const buildCanIUseQueryHandler = (
       })
     );
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error(error);
     await msg.reply(errors.unknownError);
   }

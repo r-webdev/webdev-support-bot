@@ -95,6 +95,7 @@ export const buildBundlephobiaQueryHandler = (
 
     await handleResult(msg, result, sentMsg, fetchDetail);
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error(error);
     await msg.reply(errors.unknownError);
   }

@@ -208,7 +208,9 @@ export const findEarlyReaction = (
 
 export const clearReactions = ({ reactions }: Message) =>
   reactions.removeAll().catch(error => {
+    // eslint-disable-next-line no-console
     console.error(error);
+    // eslint-disable-next-line no-console
     console.info(
       'Attempting to remove reactions: message probably deleted or insufficient rights.'
     );
@@ -238,6 +240,7 @@ export const getChosenResult = async <T>(
     try {
       await sentMsg.react(emoji);
     } catch {
+      // eslint-disable-next-line no-console
       console.info(
         'Add reaction failed: message was apparently deleted by someone else.'
       );
@@ -284,6 +287,7 @@ export const getChosenResult = async <T>(
     return results[index];
   } catch (error) {
     if (!(error instanceof Map)) {
+      // eslint-disable-next-line no-console
       console.error(`${error.name}: ${error.message}`);
       await attemptEdit(sentMsg, unknownError);
       return;
@@ -307,6 +311,7 @@ export const attemptEdit = async (
   try {
     await sentMsg.edit(content, options);
   } catch {
+    // eslint-disable-next-line no-console
     console.info('Attempting to edit message: message probably deleted.');
   }
 };

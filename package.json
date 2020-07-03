@@ -11,7 +11,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:ci": "jest --ci",
-    "lint-fix": "eslint --fix src && prettier --write src"
+    "lint:fix": "eslint --fix src && prettier --write src"
   },
   "keywords": [],
   "author": "",

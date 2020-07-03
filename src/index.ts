@@ -42,12 +42,14 @@ import {
 const client = new Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] });
 
 client.on('ready', () => {
+  // eslint-disable-next-line no-console
   console.log(`Logged in as ${client.user.tag}!`);
 });
 
 client.once('ready', async () => {
   client.user.setActivity(`@${client.user.username} --help`);
 
+  // eslint-disable-next-line no-console
   console.table(
     client.guilds.cache.map(({ name, id, joinedAt, memberCount }) => ({
       id,
@@ -181,11 +183,13 @@ const handleMessage = async (msg: Message) => {
             throw new Error('classic "shouldnt be here" scenario');
         }
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error(`${error.name}: ${error.message}`);
         await msg.reply(errors.unknownError);
       }
   }
 };
+
 const handleNonCommandMessages = (msg: Message) => {
   const cleanContent = generateCleanContent(msg);
 
@@ -193,20 +197,30 @@ const handleNonCommandMessages = (msg: Message) => {
 };
 
 const handleReactionAdd = async (reaction: MessageReaction, user: User) => {
+  const {
+    me,
+    partial,
+    emoji: { name },
+  } = reaction;
   /**
    * Implementation:
    * 1. Check if the author of the reaction is a bot. If it is, break.
    * 2. Execute valid handler depending on the reaction itself.
    */
 
-  if (reaction.me) return;
-  if (reaction.partial) await reaction.fetch();
+  if (me) {
+    return;
+  }
+
+  if (partial) {
+    await reaction.fetch();
+  }
 
   /**
    * If you are not sure what the unicode for a certain emoji is,
    * consult the emojipedia. https://emojipedia.org/
    */
-  switch (reaction.emoji.name) {
+  switch (name) {
     case '✅':
     case '✔️':
     case '☑️':
@@ -214,7 +228,7 @@ const handleReactionAdd = async (reaction: MessageReaction, user: User) => {
     case '⬆️':
     case '⏫':
     case '🔼':
-      handleHelpfulRole(reaction);
+      await handleHelpfulRole(reaction);
       break;
     // Add more cases if necessary
     default:
@@ -230,7 +244,9 @@ export const dbConnect = () => {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     })
+    // eslint-disable-next-line no-console
     .then(() => console.log('MongoDB connection established.'))
+    // eslint-disable-next-line no-console
     .catch(error => console.error('mongoose.connect():', error));
 };
 
@@ -242,5 +258,6 @@ client.on('messageReactionAdd', handleReactionAdd);
 try {
   client.login(IS_PROD ? DISCORD_TOKEN : DUMMY_TOKEN);
 } catch {
+  // eslint-disable-next-line no-console
   console.error('Boot Error: token invalid');
 }

@@ -127,6 +127,7 @@ const sendAlert = (
   const targetChannel = getTargetChannel(guild, MOD_CHANNEL);
 
   if (!targetChannel) {
+    // eslint-disable-next-line no-console
     console.warn(
       'env.MOD_CHANNEL does not exist on this server - via post.sendAlert'
     );
@@ -171,6 +172,7 @@ const sendAlert = (
       })
     );
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('post.sendAlert', error);
   }
 };
@@ -214,6 +216,7 @@ const createJobPost = async (
   const targetChannel = getTargetChannel(guild, JOB_POSTINGS_CHANNEL);
 
   if (!targetChannel) {
+    // eslint-disable-next-line no-console
     console.warn(
       'env.JOB_POSTINGS_CHANNEL does not exist on this server - via post.createJobPost'
     );
@@ -256,6 +259,7 @@ const createJobPost = async (
 
     return generateURL(guild.id, msg.channel.id, msg.id);
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('post.createJobPost', error);
   }
 };
@@ -288,7 +292,8 @@ const formAndValidateAnswers = async (
     const reply = await getReply(
       channel,
       filter,
-      key === 'description' ? 5 : 1 // Increase the timeout up to 5x of `AWAIT_TIMEOUT` when waiting for the job description
+      // Increase the timeout up to 5x of `AWAIT_TIMEOUT` when waiting for the job description
+      key === 'description' ? 5 : 1
     );
 
     // If the reply is equal to "cancel" (aka, returns false), cancel the form
@@ -360,6 +365,14 @@ ${createMarkdownCodeBlock(
 )}
 If you agree to these guidelines, type ${'`ok`'}. If not, or you want to exit the form explicitly at any time, type ${'`cancel`'}.`;
 
+const calcNextPostingThreshold = (diff: number) => {
+  if (diff === 0) {
+    return 'in a bit';
+  }
+
+  return diff === 1 ? 'in an hour' : `in ${diff} hours`;
+};
+
 const handleJobPostingRequest = async (msg: Message) => {
   const { guild, id: msgID } = msg;
   const { username, discriminator, id } = msg.author;
@@ -382,13 +395,9 @@ const handleJobPostingRequest = async (msg: Message) => {
         Number.parseInt(POST_LIMITER_IN_HOURS) -
         Math.abs(new Date().getTime() - entry.value.getTime()) / 3600000;
       send(
-        `You cannot create a job posting right now.\nPlease try again ${
-          diff === 0
-            ? 'in a bit'
-            : diff === 1
-            ? 'in an hour'
-            : `in ${diff} hours`
-        }.`
+        `You cannot create a job posting right now.\nPlease try again ${calcNextPostingThreshold(
+          diff
+        )}.`
       );
       return;
     }
@@ -429,6 +438,7 @@ const handleJobPostingRequest = async (msg: Message) => {
     await msg.reply(
       'Please temporarily enable direct messages as the bot cares about your privacy.'
     );
+    // eslint-disable-next-line no-console
     console.error('post.handleJobPostingRequest', error);
   } finally {
     // Remove the message
