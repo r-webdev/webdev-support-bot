@@ -1,8 +1,6 @@
 export const IS_PROD = process.env.NODE_ENV === 'production';
 
-export const SERVER_ID = !IS_PROD
-  ? process.env.SERVER_ID
-  : '434487340535382016';
+export const SERVER_ID = IS_PROD ? '434487340535382016' : process.env.SERVER_ID;
 
 export const DUMMY_TOKEN = process.env.DUMMY_TOKEN;
 export const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
