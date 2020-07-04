@@ -10,6 +10,6 @@
 
 // export default (msg: string) => abbreviations.find(a => msg.includes(a));
 
-const abbreviations = /^(ty)|(thanks)|(thx)|(tnx)|(tyvm)|(thank),?$/g;
+const abbreviations = /^(ty)|(thanks)|(thx)|(tnx)|(tyvm)|(thank)$/g;
 
 export default (msg: string) => abbreviations.test(msg);
