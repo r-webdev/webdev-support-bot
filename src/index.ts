@@ -16,8 +16,13 @@ import handlePHPQuery from './commands/php';
 import handlePointsRequest from './commands/points';
 import handleJobPostingRequest from './commands/post';
 import handleVSCodeRequest from './commands/vscode';
-import { DISCORD_TOKEN, IS_PROD, DUMMY_TOKEN } from './env';
-import { MONGO_URI } from './env';
+import {
+  DISCORD_TOKEN,
+  IS_PROD,
+  DUMMY_TOKEN,
+  MONGO_URI,
+  SERVER_ID,
+} from './env';
 import handleHelpfulRole from './helpful_role';
 import pointDecaySystem from './helpful_role/point_decay';
 import spamFilter from './spam_filter';
@@ -109,8 +114,7 @@ const help: { [key: string]: string } = Object.entries(providers).reduce(
 const generateCleanContent = (msg: Message) =>
   msg.cleanContent.replace(linebreakPattern, ' ').toLowerCase();
 
-const isWebdevAndWebDesignServer = (msg: Message) =>
-  msg.guild.id === '434487340535382016';
+const isWebdevAndWebDesignServer = (msg: Message) => msg.guild.id === SERVER_ID;
 
 const handleMessage = async (msg: Message) => {
   // Run the point decay system
@@ -228,7 +232,7 @@ const handleNonCommandMessages = (msg: Message) => {
 const handleReactionAdd = async (reaction: MessageReaction) => {
   // role id is "hardcoded" through env. in this version of the bot, only the
   // webdev and web_design server is supported
-  if (reaction.message.guild.id !== '434487340535382016') {
+  if (reaction.message.guild.id !== SERVER_ID) {
     return;
   }
 
@@ -263,6 +267,7 @@ const handleReactionAdd = async (reaction: MessageReaction) => {
     case '⬆️':
     case '⏫':
     case '🔼':
+    case '👍':
       await handleHelpfulRole(reaction);
       break;
     // Add more cases if necessary
