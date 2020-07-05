@@ -24,6 +24,7 @@ For a point to be awarded to a user, the reaction emoji has to be one of the fol
 5. `⬆️`
 6. `⏫`
 7. `🔼`
+8. `👍`
 
 ##### 2. "Thanking" the user
 
