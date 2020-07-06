@@ -51,7 +51,7 @@ const client = new Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] });
 
 const blacklistedServer = new Set([
   '264445053596991498', // Discord Bot List
-  '448549361119395850',
+  '448549361119395850', // some random bot test server
   '657145936207806465', // nazi stuff
 ]);
 
