@@ -267,7 +267,6 @@ const handleReactionAdd = async (reaction: MessageReaction) => {
     case '⬆️':
     case '⏫':
     case '🔼':
-    case '👍':
       await handleHelpfulRole(reaction);
       break;
     // Add more cases if necessary
