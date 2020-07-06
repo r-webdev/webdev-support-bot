@@ -48,7 +48,7 @@ export default async (userID: string, msg: Message) => {
   user.points++;
 
   // Check if the user has enough points to be given the helpful role
-  if (user.points >= Number(HELPFUL_ROLE_POINT_THRESHOLD)) {
+  if (user.points >= Number.parseInt(HELPFUL_ROLE_POINT_THRESHOLD)) {
     await grantHelpfulRole(guildMember, msg);
   }
 
