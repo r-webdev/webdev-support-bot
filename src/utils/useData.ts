@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/node';
 import * as NodeCache from 'node-cache';
 import fetch, {
   HeaderInit,
@@ -58,11 +59,19 @@ const doFetch: <TParsedResponse>(
 ) => FetchWithFormat<TParsedResponse> = <TParsedResponse>(cacheKey, mapper) => {
   const casedCacheKey = cacheKey.toLowerCase();
   const cachedResponse = apiCache.get<TParsedResponse>(casedCacheKey);
+
   if (cachedResponse) {
     return () => cachedResponse;
   }
 
   return async (url, fetchOptions) => {
+    Sentry.addBreadcrumb({
+      category: 'query',
+      data: typeof url === 'string' ? { url } : undefined,
+      level: Sentry.Severity.Info,
+      timestamp: Date.now(),
+    });
+
     const timeLabel = `Time took for url=${encodeURIComponent(url.toString())}`;
     // eslint-disable-next-line no-console
     console.time(timeLabel);
@@ -108,10 +117,12 @@ const responseMapper: <T>(
   }
 };
 
-export default <T>(
+const useData = <T>(
   url: string,
   type: ResponseTypes = 'json',
   headers: HeaderInit = {}
 ): Promise<UnknownData<T>> => {
   return doFetch(url, responseMapper<T>(type))(url, { headers });
 };
+
+export default useData;

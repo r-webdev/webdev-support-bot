@@ -8,11 +8,14 @@ export interface User extends Document {
   points?: number;
 }
 
-export default async (reaction: MessageReaction) => {
+const handleHelpfulRole = async (reaction: MessageReaction) => {
   // Break if the author of the message is trying to upvote his own solution
-  if (reaction.users.cache.find(u => u.id === reaction.message.author.id))
+  if (reaction.users.cache.find(u => u.id === reaction.message.author.id)) {
     return;
+  }
 
   // Give the user a point
   await pointHandler(reaction.message.member.id, reaction.message);
 };
+
+export default handleHelpfulRole;

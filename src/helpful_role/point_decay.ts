@@ -17,7 +17,7 @@ const cleanup = async ({ guild: { id: guild } }: Message) => {
   }
 };
 
-export default async (msg: Message) => {
+const pointDecaySystem = async (msg: Message) => {
   const now = new Date();
   const diff = (now.getTime() - lastCleanup.getTime()) / (1000 * 3600);
 
@@ -27,3 +27,5 @@ export default async (msg: Message) => {
     await cleanup(msg);
   }
 };
+
+export default pointDecaySystem;

@@ -97,7 +97,7 @@ const getPoints = async (
 const isModOrAdmin = ({ cache }: GuildMemberRoleManager) =>
   cache.find(({ id }) => id === ADMIN_ROLE_ID || id === MOD_ROLE_ID);
 
-export default async (msg: Message) => {
+const handlePointsRequest = async (msg: Message) => {
   try {
     // Check for any flags
     const cleanContent = msg.content.trim().split(' ');
@@ -137,3 +137,5 @@ export default async (msg: Message) => {
     console.error('catch -> points/index.ts:', error);
   }
 };
+
+export default handlePointsRequest;

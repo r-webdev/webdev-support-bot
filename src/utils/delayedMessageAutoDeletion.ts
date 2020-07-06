@@ -10,18 +10,22 @@ export const delayedMessageAutoDeletion = (
 ) => {
   // required so tests on CI dont crash
   if (msg) {
-    setTimeout(() => {
-      msg.delete().catch(error => {
+    setTimeout(async () => {
+      try {
+        await msg.delete();
+      } catch (error) {
         // eslint-disable-next-line no-console
         console.warn("Couldn't delete message", error);
 
-        msg.edit(missingRightsDeletion).catch(() => {
+        try {
+          await msg.edit(missingRightsDeletion);
+        } catch {
           // eslint-disable-next-line no-console
           console.info(
             "Couldn't edit message after trying to delete, probably removed by someone else."
           );
-        });
-      });
+        }
+      }
     }, timeout);
   }
 

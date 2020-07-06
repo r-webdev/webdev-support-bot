@@ -276,17 +276,19 @@ const handleReactionAdd = async (reaction: MessageReaction) => {
 };
 
 // Establish a connection with the database
-export const dbConnect = () => {
-  mongoose
-    .connect(MONGO_URI, {
+export const dbConnect = async () => {
+  try {
+    await mongoose.connect(MONGO_URI, {
       useCreateIndex: true,
       useNewUrlParser: true,
       useUnifiedTopology: true,
-    })
+    });
     // eslint-disable-next-line no-console
-    .then(() => console.log('MongoDB connection established.'))
+    console.log('MongoDB connection established.');
+  } catch (error) {
     // eslint-disable-next-line no-console
-    .catch(error => console.error('mongoose.connect():', error));
+    console.error('mongoose.connect():', error);
+  }
 };
 
 dbConnect();

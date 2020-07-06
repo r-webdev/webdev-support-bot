@@ -13,7 +13,7 @@ const isNotShort = (str: string) =>
   str.split(' ').length >= MINIMAL_AMOUNT_OF_WORDS;
 
 /* eslint-disable sort-keys-fix/sort-keys-fix */
-export default {
+const questions = {
   remote: {
     body:
       'Type `yes` if your position is remote and `no` if it requires a location.',
@@ -50,3 +50,5 @@ export default {
     validation: isNotEmpty,
   },
 };
+
+export default questions;

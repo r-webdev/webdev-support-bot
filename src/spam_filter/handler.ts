@@ -7,7 +7,7 @@ import { SpammerMetadata } from '.';
 
 type ModChannel = TextChannel & Pick<GuildChannel, 'name'>;
 
-export default async ({
+const spamFilterHandler = async ({
   userID,
   username,
   discriminator,
@@ -61,3 +61,5 @@ export default async ({
     console.error(error);
   }
 };
+
+export default spamFilterHandler;

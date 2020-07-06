@@ -5,7 +5,7 @@ import HelpfulRoleMember from '../../helpful_role/db_model';
 import { createEmbed } from '../../utils/discordTools';
 import { OutputField } from '../post';
 
-export default async (msg: Message, limit = 10) => {
+const handleLeaderboardRequest = async (msg: Message, limit = 10) => {
   try {
     const topUsers: User[] =
       limit > 0
@@ -42,3 +42,5 @@ export default async (msg: Message, limit = 10) => {
     console.error('catch -> leaderboard/index.ts', error);
   }
 };
+
+export default handleLeaderboardRequest;

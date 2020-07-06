@@ -12,4 +12,6 @@
 
 const abbreviations = /^(ty)|(thanks)|(thx)|(tnx)|(tyvm)|(thank)$/g;
 
-export default (msg: string) => abbreviations.test(msg);
+const keywordValidator = (msg: string) => abbreviations.test(msg);
+
+export default keywordValidator;

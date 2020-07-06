@@ -54,7 +54,7 @@ interface CacheEntry {
  * - The key for the cache will be set to the user ID
  * - If a user sends `numberOfAllowedMessages` in the span of the `timeWindow`, call the ~~c~~mods
  */
-export default ({
+const spamFilter = ({
   channel,
   id: msgID,
   guild,
@@ -123,3 +123,5 @@ export default ({
     username,
   };
 };
+
+export default spamFilter;

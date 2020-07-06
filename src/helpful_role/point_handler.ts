@@ -26,7 +26,7 @@ const grantHelpfulRole = async (user: GuildMember, msg: Message) => {
   );
 };
 
-export default async (userID: string, msg: Message) => {
+const pointHandler = async (userID: string, msg: Message) => {
   const details = {
     guild: msg.guild.id,
     user: userID,
@@ -52,11 +52,14 @@ export default async (userID: string, msg: Message) => {
     await grantHelpfulRole(guildMember, msg);
   }
 
-  // Save the user
-  user
-    .save()
+  try {
+    const updated = await user.save();
     // eslint-disable-next-line no-console
-    .then(updated => console.log(`${updated.id} => ${updated.points}`))
+    console.log(`${updated.id} => ${updated.points}`);
+  } catch (error) {
     // eslint-disable-next-line no-console
-    .catch(error => console.error('user.save():', error));
+    console.error('user.save():', error);
+  }
 };
+
+export default pointHandler;
