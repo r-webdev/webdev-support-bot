@@ -1,13 +1,13 @@
 import { Message } from 'discord.js';
 
-import { User } from '../../helpful_role';
+import { IUser } from '../../helpful_role';
 import HelpfulRoleMember from '../../helpful_role/db_model';
 import { createEmbed } from '../../utils/discordTools';
 import { OutputField } from '../post';
 
 const handleLeaderboardRequest = async (msg: Message, limit = 10) => {
   try {
-    const topUsers: User[] =
+    const topUsers: IUser[] =
       limit > 0
         ? [
             ...(await HelpfulRoleMember.find({ guild: msg.guild.id })

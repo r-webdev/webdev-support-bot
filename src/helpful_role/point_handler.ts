@@ -1,11 +1,11 @@
 import { Message, GuildMember } from 'discord.js';
 
 import { startTime } from '..';
-import { HELPFUL_ROLE_ID, HELPFUL_ROLE_POINT_THRESHOLD } from '../env';
+import { IS_PROD, HELPFUL_ROLE_ID, HELPFUL_ROLE_POINT_THRESHOLD } from '../env';
 import { createEmbed } from '../utils/discordTools';
 import HelpfulRoleMember from './db_model';
 
-import { User } from '.';
+import { IUser } from '.';
 
 const grantHelpfulRole = async (user: GuildMember, msg: Message) => {
   // Check if the user has the role
@@ -45,7 +45,7 @@ const pointHandler = async (userID: string, msg: Message) => {
     return;
   }
 
-  let user: User = await HelpfulRoleMember.findOne(details);
+  let user: IUser = await HelpfulRoleMember.findOne(details);
   if (!user) {
     user = await HelpfulRoleMember.create(details);
   }
@@ -60,8 +60,11 @@ const pointHandler = async (userID: string, msg: Message) => {
 
   try {
     const updated = await user.save();
-    // eslint-disable-next-line no-console
-    console.log(`${updated.id} => ${updated.points}`);
+
+    if (!IS_PROD) {
+      // eslint-disable-next-line no-console
+      console.log(`${updated.id} => ${updated.points}`);
+    }
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('user.save():', error);
