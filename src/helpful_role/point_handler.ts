@@ -1,7 +1,13 @@
 import { Message, GuildMember } from 'discord.js';
 
 import { startTime } from '..';
-import { IS_PROD, HELPFUL_ROLE_ID, HELPFUL_ROLE_POINT_THRESHOLD } from '../env';
+import {
+  IS_PROD,
+  HELPFUL_ROLE_ID,
+  HELPFUL_ROLE_POINT_THRESHOLD,
+  POINT_LIMITER_IN_SECONDS,
+} from '../env';
+import { cache } from '../spam_filter';
 import { createEmbed } from '../utils/discordTools';
 import HelpfulRoleMember from './db_model';
 
@@ -27,9 +33,22 @@ const grantHelpfulRole = async (user: GuildMember, msg: Message) => {
   );
 };
 
-const pointHandler = async (userID: string, msg: Message) => {
+const pointHandler = async (
+  userID: string,
+  msg: Message,
+  reactionHandlerUserID: string = null
+) => {
+  const cacheKey = `point-${userID}-${
+    reactionHandlerUserID ? reactionHandlerUserID : msg.author.id
+  }`;
+
   // Check if the message's been created before the bot's startup
   if (startTime > msg.createdAt) {
+    return;
+  }
+
+  // Check if the user's on cooldown to give a point to the message author/mentioned user
+  if (cache.has(cacheKey)) {
     return;
   }
 
@@ -52,6 +71,15 @@ const pointHandler = async (userID: string, msg: Message) => {
 
   // Add a point to the user
   user.points++;
+
+  // Cache the action
+  cache.set(
+    `point-${userID}-${
+      reactionHandlerUserID ? reactionHandlerUserID : msg.author.id
+    }`,
+    {},
+    Number.parseInt(POINT_LIMITER_IN_SECONDS)
+  );
 
   // Check if the user has enough points to be given the helpful role
   if (user.points >= Number.parseInt(HELPFUL_ROLE_POINT_THRESHOLD)) {
