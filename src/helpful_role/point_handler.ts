@@ -1,7 +1,13 @@
 import { Message, GuildMember } from 'discord.js';
 
 import { startTime } from '..';
-import { IS_PROD, HELPFUL_ROLE_ID, HELPFUL_ROLE_POINT_THRESHOLD } from '../env';
+import {
+  IS_PROD,
+  HELPFUL_ROLE_ID,
+  HELPFUL_ROLE_POINT_THRESHOLD,
+  POINT_LIMITER_IN_MINUTES,
+} from '../env';
+import { cache } from '../spam_filter';
 import { createEmbed } from '../utils/discordTools';
 import HelpfulRoleMember from './db_model';
 
@@ -27,16 +33,14 @@ const grantHelpfulRole = async (user: GuildMember, msg: Message) => {
   );
 };
 
-const pointHandler = async (userID: string, msg: Message) => {
-  // Check if the message's been created before the bot's startup
-  if (startTime > msg.createdAt) {
-    return;
-  }
-
-  const details = {
-    guild: msg.guild.id,
-    user: userID,
-  };
+const pointHandler = async (
+  userID: string,
+  msg: Message,
+  reactionHandlerUserID: string = null
+) => {
+  const cacheKey = `point-${userID}-${
+    reactionHandlerUserID ? reactionHandlerUserID : msg.author.id
+  }`;
 
   const guildMember = msg.guild.members.cache.find(u => u.id === userID);
 
@@ -45,6 +49,38 @@ const pointHandler = async (userID: string, msg: Message) => {
     return;
   }
 
+  const entry: number = cache.get(cacheKey);
+
+  // Check if the message's been created before the bot's startup
+  if (startTime > msg.createdAt) {
+    return;
+  }
+
+  // Check if the user's on cooldown to give a point to the message author/mentioned user
+  if (entry) {
+    const diff = Math.round(
+      Number.parseInt(POINT_LIMITER_IN_MINUTES) - (Date.now() - entry) / 60000
+    );
+    console.log(`Diff: ${diff}`);
+    const dm = await msg.guild.members.cache
+      .get(reactionHandlerUserID ? reactionHandlerUserID : msg.author.id)
+      .createDM();
+
+    dm.send(
+      `You cannot give a point to <@!${userID}>. Please try again in ${diff} minute${
+        diff === 1 ? '' : 's'
+      }.`
+    );
+
+    console.log(Math.abs(Math.round(diff)));
+    return;
+  }
+
+  const details = {
+    guild: msg.guild.id,
+    user: userID,
+  };
+
   let user: IUser = await HelpfulRoleMember.findOne(details);
   if (!user) {
     user = await HelpfulRoleMember.create(details);
@@ -52,6 +88,15 @@ const pointHandler = async (userID: string, msg: Message) => {
 
   // Add a point to the user
   user.points++;
+
+  // Cache the action
+  cache.set(
+    `point-${userID}-${
+      reactionHandlerUserID ? reactionHandlerUserID : msg.author.id
+    }`,
+    Date.now(),
+    Number.parseInt(POINT_LIMITER_IN_MINUTES) * 60
+  );
 
   // Check if the user has enough points to be given the helpful role
   if (user.points >= Number.parseInt(HELPFUL_ROLE_POINT_THRESHOLD)) {

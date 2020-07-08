@@ -46,7 +46,7 @@ const handleHelpfulRole = async (reaction: MessageReaction, user: User) => {
   }
 
   // Give the user a point
-  await pointHandler(reaction.message.member.id, reaction.message);
+  await pointHandler(reaction.message.member.id, reaction.message, user.id);
 };
 
 export default handleHelpfulRole;
