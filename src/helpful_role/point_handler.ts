@@ -1,5 +1,6 @@
 import { Message, GuildMember } from 'discord.js';
 
+import { startTime } from '..';
 import { HELPFUL_ROLE_ID, HELPFUL_ROLE_POINT_THRESHOLD } from '../env';
 import { createEmbed } from '../utils/discordTools';
 import HelpfulRoleMember from './db_model';
@@ -27,6 +28,11 @@ const grantHelpfulRole = async (user: GuildMember, msg: Message) => {
 };
 
 const pointHandler = async (userID: string, msg: Message) => {
+  // Check if the message's been created before the bot's startup
+  if (startTime > msg.createdAt) {
+    return;
+  }
+
   const details = {
     guild: msg.guild.id,
     user: userID,

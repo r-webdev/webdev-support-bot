@@ -52,6 +52,9 @@ if (IS_PROD) {
   });
 }
 
+// This date is used to check if the message's been created before the bot's started
+export const startTime = new Date();
+
 const client = new Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] });
 
 const blacklistedServer = new Set([
