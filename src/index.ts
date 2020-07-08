@@ -120,7 +120,8 @@ const help: { [key: string]: string } = Object.entries(providers).reduce(
 const generateCleanContent = (msg: Message) =>
   msg.cleanContent.replace(linebreakPattern, ' ').toLowerCase();
 
-const isWebdevAndWebDesignServer = (msg: Message) => msg.guild.id === SERVER_ID;
+const isWebdevAndWebDesignServer = (msg: Message) =>
+  msg.guild?.id === SERVER_ID || false;
 
 const handleMessage = async (msg: Message) => {
   // Run the point decay system
