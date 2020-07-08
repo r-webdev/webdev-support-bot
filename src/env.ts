@@ -35,4 +35,4 @@ export const POINT_DECAY_TIMER = process.env.POINT_DECAY_TIMER;
 export const ADMIN_ROLE_ID = process.env.ADMIN_ROLE_ID;
 export const MOD_ROLE_ID = process.env.MOD_ROLE_ID;
 
-export const POINT_LIMITER_IN_SECONDS = process.env.POINT_LIMITER_IN_SECONDS;
+export const POINT_LIMITER_IN_MINUTES = process.env.POINT_LIMITER_IN_MINUTES;
