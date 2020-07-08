@@ -24,6 +24,27 @@ const handleHelpfulRole = async (reaction: MessageReaction, user: User) => {
     return;
   }
 
+  // Create a list of user IDs to conduct a check if the user has already upvoted the message with another emoji.
+  let users: string[] = [];
+
+  reaction.message.reactions.cache.forEach(r => {
+    if (
+      allowedEmojis
+        .filter(e => e !== reaction.emoji.name)
+        .includes(r.emoji.name)
+    ) {
+      users = [...users, ...r.users.cache.keyArray()];
+    }
+  });
+
+  // Remove duplicates
+  users = [...new Set(users)];
+
+  // Check if the user has already reacted to the message with another "upvote" emoji
+  if (users.includes(user.id)) {
+    return;
+  }
+
   // Give the user a point
   await pointHandler(reaction.message.member.id, reaction.message);
 };
