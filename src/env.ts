@@ -1,3 +1,4 @@
+export const ENV = process.env.NODE_ENV || 'development';
 export const IS_PROD = process.env.NODE_ENV === 'production';
 
 export const SERVER_ID = IS_PROD ? '434487340535382016' : process.env.SERVER_ID;

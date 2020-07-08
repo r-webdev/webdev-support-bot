@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/node';
-import { Client, Message, MessageReaction } from 'discord.js';
+import { Client, Message, MessageReaction, User } from 'discord.js';
 import * as mongoose from 'mongoose';
 
 import handleBundlephobiaQuery from './commands/bundlephobia';
@@ -22,8 +22,11 @@ import {
   DUMMY_TOKEN,
   MONGO_URI,
   SERVER_ID,
+  ENV,
 } from './env';
-import handleHelpfulRole from './helpful_role';
+import handleHelpfulRole, {
+  allowedEmojis as helpfulRoleEmojis,
+} from './helpful_role';
 import pointDecaySystem from './helpful_role/point_decay';
 import spamFilter from './spam_filter';
 import handleSpam from './spam_filter/handler';
@@ -52,6 +55,9 @@ if (IS_PROD) {
   });
 }
 
+// This date is used to check if the message's been created before the bot's started
+export const startTime = new Date();
+
 const client = new Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] });
 
 const blacklistedServer = new Set([
@@ -62,7 +68,7 @@ const blacklistedServer = new Set([
 
 client.on('ready', () => {
   // eslint-disable-next-line no-console
-  console.log(`Logged in as ${client.user.tag}!`);
+  console.log(`Logged in as ${client.user.tag}!\nEnvironment: ${ENV}`);
 });
 
 client.once('ready', async () => {
@@ -229,50 +235,37 @@ const handleNonCommandMessages = (msg: Message) => {
   }
 };
 
-const handleReactionAdd = async (reaction: MessageReaction) => {
+const prepReaction = async (reaction: MessageReaction) => {
   // role id is "hardcoded" through env. in this version of the bot, only the
   // webdev and web_design server is supported
   if (reaction.message.guild.id !== SERVER_ID) {
     return;
   }
 
-  const {
-    me,
-    partial,
-    emoji: { name },
-  } = reaction;
-  /**
-   * Implementation:
-   * 1. Check if the author of the reaction is a bot. If it is, break.
-   * 2. Execute valid handler depending on the reaction itself.
-   */
+  const { me, partial } = reaction;
 
   if (me) {
     return;
   }
 
-  if (partial) {
-    await reaction.fetch();
+  return partial ? await reaction.fetch() : reaction;
+};
+
+const handleReactionAdd = async (reaction: MessageReaction, user: User) => {
+  const prepared = await prepReaction(reaction);
+
+  if (!prepared) {
+    return;
   }
 
-  /**
-   * If you are not sure what the unicode for a certain emoji is,
-   * consult the emojipedia. https://emojipedia.org/
-   */
-  switch (name) {
-    case '✅':
-    case '✔️':
-    case '☑️':
-    case '🆙':
-    case '⬆️':
-    case '⏫':
-    case '🔼':
-      await handleHelpfulRole(reaction);
-      break;
-    // Add more cases if necessary
-    default:
-      return;
+  const {
+    emoji: { name },
+  } = prepared;
+
+  if (helpfulRoleEmojis.includes(name)) {
+    await handleHelpfulRole(reaction, user);
   }
+  // Add more cases if necessary
 };
 
 // Establish a connection with the database

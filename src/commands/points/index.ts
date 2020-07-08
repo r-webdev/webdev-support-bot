@@ -1,7 +1,7 @@
 import { Message, GuildMemberRoleManager } from 'discord.js';
 
 import { ADMIN_ROLE_ID, MOD_ROLE_ID, HELPFUL_ROLE_ID } from '../../env';
-import { User } from '../../helpful_role';
+import { IUser } from '../../helpful_role';
 import HelpfulRoleMember from '../../helpful_role/db_model';
 import { extractUserID } from '../../thanks';
 import { createEmbed } from '../../utils/discordTools';
@@ -28,7 +28,7 @@ const resetPoints = async (userID: string, msg: Message) => {
     });
   }
 
-  const user: User = await HelpfulRoleMember.findOne({
+  const user: IUser = await HelpfulRoleMember.findOne({
     guild: msg.guild.id,
     user: userID,
   });
@@ -77,7 +77,7 @@ const getPoints = async (
     });
   }
 
-  const user: User = await HelpfulRoleMember.findOne({
+  const user: IUser = await HelpfulRoleMember.findOne({
     guild: msg.guild.id,
     user: userID,
   });
