@@ -94,6 +94,55 @@ const getPoints = async (
   });
 };
 
+const setPoints = async (userID: string, points: string, msg: Message) => {
+  if (!points) {
+    return (
+      'Invalid argument provided for the points parameter.\nUsage example: ```' +
+      '!points set @user 10' +
+      '```'
+    );
+  }
+
+  const guildMember = msg.guild.members.cache.find(u => u.id === userID);
+  if (!guildMember) {
+    return (
+      'Invalid user mention provided.\nUsage example: ```' +
+      '!points set @user 10' +
+      '```'
+    );
+  }
+
+  const user: IUser = await HelpfulRoleMember.findOne({
+    guild: msg.guild.id,
+    user: userID,
+  });
+
+  if (user) {
+    user.points = Number.parseInt(points);
+    await user.save();
+  }
+
+  return createEmbed({
+    description:
+      '```' + `!points set @${guildMember.user.username} ${points}` + '```',
+    fields: [
+      {
+        inline: false,
+        name: 'User',
+        value: `<@!${userID}>`,
+      },
+      {
+        inline: false,
+        name: 'Admin/Moderator',
+        value: `<@!${msg.author.id}>`,
+      },
+    ],
+    footerText: 'Admin: Points Handler',
+    provider: 'spam',
+    title: 'Points have been set manually for a user',
+  });
+};
+
 const isModOrAdmin = ({ cache }: GuildMemberRoleManager) =>
   cache.find(({ id }) => id === ADMIN_ROLE_ID || id === MOD_ROLE_ID);
 
@@ -104,7 +153,7 @@ const handlePointsRequest = async (msg: Message) => {
 
     // Flags and ID checking users for points are admin/mod-only commands
     if (cleanContent.length > 1 && isModOrAdmin(msg.member.roles)) {
-      const [, flag, mention] = cleanContent;
+      const [, flag, mention, points] = cleanContent;
 
       const userID = mention ? extractUserID(mention) : '';
 
@@ -122,6 +171,10 @@ const handlePointsRequest = async (msg: Message) => {
           );
 
           return await msg.channel.send(pointsEmbed);
+        case 'set':
+          const setEmbed = await setPoints(userID, points, msg);
+
+          return await msg.channel.send(setEmbed);
         default:
           break;
       }
