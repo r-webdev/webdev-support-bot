@@ -1,6 +1,11 @@
 import { Message, GuildMemberRoleManager } from 'discord.js';
 
-import { ADMIN_ROLE_ID, MOD_ROLE_ID, HELPFUL_ROLE_ID } from '../../env';
+import {
+  ADMIN_ROLE_ID,
+  MOD_ROLE_ID,
+  HELPFUL_ROLE_ID,
+  HELPFUL_ROLE_POINT_THRESHOLD,
+} from '../../env';
 import { IUser } from '../../helpful_role';
 import HelpfulRoleMember from '../../helpful_role/db_model';
 import { extractUserID } from '../../thanks';
@@ -94,6 +99,75 @@ const getPoints = async (
   });
 };
 
+const setPoints = async (userID: string, amount: string, msg: Message) => {
+  const points = Number.parseInt(amount);
+  if (Number.isNaN(points)) {
+    return (
+      'Invalid argument provided for the points parameter.\nUsage example: ```' +
+      '!points set @user 10' +
+      '```'
+    );
+  }
+
+  const guildMember = msg.guild.members.cache.find(u => u.id === userID);
+  if (!guildMember) {
+    return (
+      'Invalid user mention provided.\nUsage example: ```' +
+      '!points set @user 10' +
+      '```'
+    );
+  }
+
+  const user: IUser = await HelpfulRoleMember.findOne({
+    guild: msg.guild.id,
+    user: userID,
+  });
+
+  if (user) {
+    user.points = points;
+    await user.save();
+  }
+
+  const output = createEmbed({
+    description:
+      '```' + `!points set @${guildMember.user.username} ${points}` + '```',
+    fields: [
+      {
+        inline: false,
+        name: 'User',
+        value: `<@!${userID}>`,
+      },
+      {
+        inline: false,
+        name: 'Admin/Moderator',
+        value: `<@!${msg.author.id}>`,
+      },
+    ],
+    footerText: 'Admin: Points Handler',
+    provider: 'spam',
+    title: 'Points have been set manually for a user',
+  });
+
+  // Set or remove the role if necessary
+  if (user.points >= Number.parseInt(HELPFUL_ROLE_POINT_THRESHOLD)) {
+    await guildMember.roles.add(HELPFUL_ROLE_ID);
+    output.embed.fields.push({
+      inline: false,
+      name: 'Role access',
+      value: 'Granted',
+    });
+  } else {
+    await guildMember.roles.remove(HELPFUL_ROLE_ID);
+    output.embed.fields.push({
+      inline: false,
+      name: 'Role access',
+      value: 'Revoked',
+    });
+  }
+
+  return output;
+};
+
 const isModOrAdmin = ({ cache }: GuildMemberRoleManager) =>
   cache.find(({ id }) => id === ADMIN_ROLE_ID || id === MOD_ROLE_ID);
 
@@ -104,7 +178,7 @@ const handlePointsRequest = async (msg: Message) => {
 
     // Flags and ID checking users for points are admin/mod-only commands
     if (cleanContent.length > 1 && isModOrAdmin(msg.member.roles)) {
-      const [, flag, mention] = cleanContent;
+      const [, flag, mention, points] = cleanContent;
 
       const userID = mention ? extractUserID(mention) : '';
 
@@ -122,6 +196,10 @@ const handlePointsRequest = async (msg: Message) => {
           );
 
           return await msg.channel.send(pointsEmbed);
+        case 'set':
+          const setEmbed = await setPoints(userID, points, msg);
+
+          return await msg.channel.send(setEmbed);
         default:
           break;
       }

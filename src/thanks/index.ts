@@ -3,7 +3,8 @@ import { Message } from 'discord.js';
 import pointHandler from '../helpful_role/point_handler';
 import { createEmbed } from '../utils/discordTools';
 
-export const extractUserID = (s: string) => s.split('<@!')[1].split('>')[0];
+export const extractUserID = (s: string) =>
+  s.includes('<@!') ? s.split('<@!')[1].split('>')[0] : null;
 
 const handleThanks = async (msg: Message) => {
   if (!msg.content.includes('<@!')) {

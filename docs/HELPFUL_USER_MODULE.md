@@ -50,3 +50,4 @@ For administrative purposes, flags have been added to the `!points` command. The
 
 1. `!points check <USER_ID || MENTION>` - Displays the amount of points the user has accumulated.
 2. `!points reset <USER_ID || MENTION>` - Resets the user's points back to 0.
+3. `!points set <USER_ID || MENTION> <AMOUNT_OF_POINTS>` - Manually set the amount of points to a user.
