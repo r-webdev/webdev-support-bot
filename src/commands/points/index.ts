@@ -94,8 +94,9 @@ const getPoints = async (
   });
 };
 
-const setPoints = async (userID: string, points: string, msg: Message) => {
-  if (!points) {
+const setPoints = async (userID: string, amount: string, msg: Message) => {
+  const points = Number.parseInt(amount);
+  if (Number.isNaN(points)) {
     return (
       'Invalid argument provided for the points parameter.\nUsage example: ```' +
       '!points set @user 10' +
@@ -118,7 +119,7 @@ const setPoints = async (userID: string, points: string, msg: Message) => {
   });
 
   if (user) {
-    user.points = Number.parseInt(points);
+    user.points = points;
     await user.save();
   }
 
