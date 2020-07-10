@@ -1,6 +1,11 @@
 import { Message, GuildMemberRoleManager } from 'discord.js';
 
-import { ADMIN_ROLE_ID, MOD_ROLE_ID, HELPFUL_ROLE_ID } from '../../env';
+import {
+  ADMIN_ROLE_ID,
+  MOD_ROLE_ID,
+  HELPFUL_ROLE_ID,
+  HELPFUL_ROLE_POINT_THRESHOLD,
+} from '../../env';
 import { IUser } from '../../helpful_role';
 import HelpfulRoleMember from '../../helpful_role/db_model';
 import { extractUserID } from '../../thanks';
@@ -123,7 +128,7 @@ const setPoints = async (userID: string, amount: string, msg: Message) => {
     await user.save();
   }
 
-  return createEmbed({
+  const output = createEmbed({
     description:
       '```' + `!points set @${guildMember.user.username} ${points}` + '```',
     fields: [
@@ -142,6 +147,25 @@ const setPoints = async (userID: string, amount: string, msg: Message) => {
     provider: 'spam',
     title: 'Points have been set manually for a user',
   });
+
+  // Set or remove the role if necessary
+  if (user.points >= Number.parseInt(HELPFUL_ROLE_POINT_THRESHOLD)) {
+    await guildMember.roles.add(HELPFUL_ROLE_ID);
+    output.embed.fields.push({
+      inline: false,
+      name: 'Role access',
+      value: 'Granted',
+    });
+  } else {
+    await guildMember.roles.remove(HELPFUL_ROLE_ID);
+    output.embed.fields.push({
+      inline: false,
+      name: 'Role access',
+      value: 'Revoked',
+    });
+  }
+
+  return output;
 };
 
 const isModOrAdmin = ({ cache }: GuildMemberRoleManager) =>
