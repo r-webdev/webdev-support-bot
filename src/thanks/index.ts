@@ -1,6 +1,9 @@
 import { Message, EmbedField } from 'discord.js';
 
-import pointHandler from '../helpful_role/point_handler';
+import pointHandler, {
+  generatePointsCacheEntryKey,
+} from '../helpful_role/point_handler';
+import { cache } from '../spam_filter';
 import { createEmbed } from '../utils/discordTools';
 
 export const extractUserID = (s: string) =>
@@ -11,13 +14,12 @@ const handleThanks = async (msg: Message) => {
     return; // Break if no user has been mentioned
   }
 
-  const mentionedUsers = msg.mentions.users.filter(u => !u.bot);
+  const mentionedUsers = msg.mentions.users.filter(
+    u => !u.bot && u.id !== msg.author.id
+  );
 
-  // Break if the user is trying to thank himself, or if no users have been mentioned
-  if (
-    mentionedUsers.size === 0 ||
-    mentionedUsers.find(u => u.id === msg.author.id)
-  ) {
+  // Break if no valid users remain
+  if (mentionedUsers.size === 0) {
     return;
   }
 

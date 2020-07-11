@@ -33,14 +33,19 @@ const grantHelpfulRole = async (user: GuildMember, msg: Message) => {
   );
 };
 
+export const generatePointsCacheEntryKey = (
+  receivingUserID: string,
+  pointGiverUserID: string
+) => `point-${receivingUserID}-${pointGiverUserID}`;
+
 const pointHandler = async (
   userID: string,
   msg: Message,
   reactionHandlerUserID: string = null
 ) => {
-  const cacheKey = `point-${userID}-${
-    reactionHandlerUserID ? reactionHandlerUserID : msg.author.id
-  }`;
+  const pointGiverUserID = reactionHandlerUserID || msg.author.id;
+
+  const cacheKey = generatePointsCacheEntryKey(userID, pointGiverUserID);
 
   const guildMember = msg.guild.members.cache.find(u => u.id === userID);
 
@@ -61,10 +66,8 @@ const pointHandler = async (
     const diff = Math.round(
       Number.parseInt(POINT_LIMITER_IN_MINUTES) - (Date.now() - entry) / 60000
     );
-    console.log(`Diff: ${diff}`);
-    const dm = await msg.guild.members.cache
-      .get(reactionHandlerUserID ? reactionHandlerUserID : msg.author.id)
-      .createDM();
+
+    const dm = await msg.guild.members.cache.get(pointGiverUserID).createDM();
 
     dm.send(
       `You cannot give a point to <@!${userID}>. Please try again in ${diff} minute${
@@ -72,7 +75,6 @@ const pointHandler = async (
       }.`
     );
 
-    console.log(Math.abs(Math.round(diff)));
     return;
   }
 
@@ -91,9 +93,7 @@ const pointHandler = async (
 
   // Cache the action
   cache.set(
-    `point-${userID}-${
-      reactionHandlerUserID ? reactionHandlerUserID : msg.author.id
-    }`,
+    cacheKey,
     Date.now(),
     Number.parseInt(POINT_LIMITER_IN_MINUTES) * 60
   );
