@@ -174,7 +174,7 @@ const isModOrAdmin = ({ cache }: GuildMemberRoleManager) =>
 const handlePointsRequest = async (msg: Message) => {
   try {
     // Check for any flags
-    const cleanContent = msg.content.trim().split(' ');
+    const cleanContent = msg.content.trim().toLowerCase().split(' ');
 
     // Flags and ID checking users for points are admin/mod-only commands
     if (cleanContent.length > 1 && isModOrAdmin(msg.member.roles)) {

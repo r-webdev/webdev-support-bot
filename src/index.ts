@@ -127,15 +127,15 @@ const handleMessage = async (msg: Message) => {
   // Run the point decay system
   await pointDecaySystem(msg);
 
+  const cleanContent = generateCleanContent(msg);
+
   // Points command override due to passing flags
   if (
     isWebdevAndWebDesignServer(msg) &&
-    msg.content.startsWith(POINTS_KEYWORD)
+    cleanContent.startsWith(POINTS_KEYWORD)
   ) {
     return await handlePointsRequest(msg);
   }
-
-  const cleanContent = generateCleanContent(msg);
 
   // Pipe the message into the spam filter
   const spamMetadata = spamFilter(msg);
