@@ -35,7 +35,7 @@ type Metadata = {
   userID?: string;
 };
 
-export type Channel = TextChannel | NewsChannel | DMChannel;
+type Channel = TextChannel | NewsChannel | DMChannel;
 
 type Answers = Map<string, string>;
 
@@ -44,7 +44,7 @@ type CacheEntry = {
   value: Date;
 };
 
-interface TargetChannel extends GuildChannel {
+export interface TargetChannel extends GuildChannel {
   send?: (
     message: string | { embed: Partial<MessageEmbed> }
   ) => Promise<Message>;
