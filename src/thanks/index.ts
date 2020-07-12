@@ -14,8 +14,16 @@ const handleThanks = async (msg: Message) => {
     return; // Break if no user has been mentioned
   }
 
+  /**
+   * Filter out all unwanted users.
+   * A unwanted user is anyone who's a bot, is the actual message author itself,
+   * or if the user's already been given a point by the message author.
+   */
   const mentionedUsers = msg.mentions.users.filter(
-    u => !u.bot && u.id !== msg.author.id
+    u =>
+      !u.bot &&
+      u.id !== msg.author.id &&
+      !cache.has(generatePointsCacheEntryKey(u.id, msg.author.id))
   );
 
   // Break if no valid users remain
@@ -37,7 +45,7 @@ const handleThanks = async (msg: Message) => {
     mentionedUsers.size > 1
       ? mentionedUsers.array().map((u, i) => ({
           inline: false,
-          name: (i + 1).toString(),
+          name: (i + 1).toString() + '.',
           value: `<@!${u.id}>`,
         }))
       : [];
