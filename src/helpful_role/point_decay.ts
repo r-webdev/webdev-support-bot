@@ -44,15 +44,21 @@ const decay = async ({ guild, author: { bot } }: Message) => {
   }
 };
 
-export const getTimeDiffToDecay = () =>
-  (Date.now() - lastDecay) / (1000 * 3600);
+export const getTimeDiffToDecay = () => {
+  const now = Date.now();
+
+  return {
+    diff: (now - lastDecay) / (1000 * 3600),
+    timestamp: now,
+  };
+};
 
 const pointDecaySystem = async (msg: Message) => {
-  const diff = getTimeDiffToDecay();
+  const { diff, timestamp } = getTimeDiffToDecay();
   const timer = IS_PROD ? Number.parseInt(POINT_DECAY_TIMER) : 0.01;
 
   if (diff >= timer) {
-    lastDecay = Date.now();
+    lastDecay = timestamp;
 
     await decay(msg);
   }
