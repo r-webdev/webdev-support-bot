@@ -1,7 +1,13 @@
 import { Message } from 'discord.js';
 
 import { TargetChannel } from '../commands/post';
-import { POINT_DECAY_TIMER, MOD_CHANNEL, IS_PROD } from '../env';
+import {
+  POINT_DECAY_TIMER,
+  MOD_CHANNEL,
+  IS_PROD,
+  HELPFUL_ROLE_POINT_THRESHOLD,
+  HELPFUL_ROLE_ID,
+} from '../env';
 import { createEmbed } from '../utils/discordTools';
 import HelpfulRoleMember from './db_model';
 
@@ -20,9 +26,15 @@ const decay = async ({ guild, author: { bot } }: Message) => {
       },
     });
 
-    users.forEach(async user => {
-      user.points--;
-      await user.save();
+    users.forEach(async u => {
+      u.points--;
+      await u.save();
+
+      const user = guild.members.cache.get(u.user);
+
+      if (u.points < Number.parseInt(HELPFUL_ROLE_POINT_THRESHOLD)) {
+        user.roles.remove(HELPFUL_ROLE_ID);
+      }
     });
 
     const modChannel: TargetChannel = guild.channels.cache.find(
@@ -45,17 +57,17 @@ const decay = async ({ guild, author: { bot } }: Message) => {
 };
 
 export const getTimeDiffToDecay = () => {
-  const now = Date.now();
+  const timestamp = Date.now();
 
   return {
-    diff: (now - lastDecay) / (1000 * 3600),
-    timestamp: now,
+    diff: (timestamp - lastDecay) / (1000 * 3600),
+    timestamp,
   };
 };
 
 const pointDecaySystem = async (msg: Message) => {
   const { diff, timestamp } = getTimeDiffToDecay();
-  const timer = IS_PROD ? Number.parseInt(POINT_DECAY_TIMER) : 0.01;
+  const timer = IS_PROD ? Number.parseInt(POINT_DECAY_TIMER) : 0.005;
 
   if (diff >= timer) {
     lastDecay = timestamp;

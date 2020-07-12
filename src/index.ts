@@ -124,10 +124,12 @@ const isWebdevAndWebDesignServer = (msg: Message) =>
   msg.guild?.id === SERVER_ID || false;
 
 const handleMessage = async (msg: Message) => {
-  // Run the point decay system
-  await pointDecaySystem(msg);
-
   const cleanContent = generateCleanContent(msg);
+
+  if (isWebdevAndWebDesignServer(msg)) {
+    // Run the point decay system
+    await pointDecaySystem(msg);
+  }
 
   // Points command override due to passing flags
   if (
