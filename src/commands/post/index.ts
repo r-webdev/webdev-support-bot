@@ -88,7 +88,7 @@ const getCurrentDate = () => {
   It capitalizes all words present in the string itself, separated with a space.
 */
 
-const capitalize = (str: string) =>
+export const capitalize = (str: string) =>
   str
     .split(' ')
     .map(s => `${s[0].toUpperCase()}${s.slice(1).toLowerCase()}`)

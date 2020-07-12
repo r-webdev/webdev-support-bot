@@ -1,6 +1,6 @@
-import { Message } from 'discord.js';
+import { Message, EmbedField } from 'discord.js';
 
-import { TargetChannel } from '../commands/post';
+import { TargetChannel, capitalize } from '../commands/post';
 import {
   POINT_DECAY_TIMER,
   MOD_CHANNEL,
@@ -15,9 +15,10 @@ import { IUser } from '.';
 
 let lastDecay = Date.now();
 
-const decay = async ({ guild, author: { bot } }: Message) => {
-  if (bot) return;
-
+export const decay = async (
+  { guild, author: { id } }: Message,
+  force = false
+) => {
   try {
     const users: IUser[] = await HelpfulRoleMember.find({
       guild: guild.id,
@@ -40,11 +41,29 @@ const decay = async ({ guild, author: { bot } }: Message) => {
     const modChannel: TargetChannel = guild.channels.cache.find(
       c => c.name === MOD_CHANNEL
     );
+
+    const fields: EmbedField[] = [
+      {
+        inline: false,
+        name: 'Forced?',
+        value: capitalize(`${force}`),
+      },
+    ];
+
+    if (force) {
+      fields.push({
+        inline: false,
+        name: 'Admin/Moderator',
+        value: `<@!${id}>`,
+      });
+    }
+
     await modChannel.send(
       createEmbed({
         description: `The point decay affected ${users.length} user${
           users.length === 1 ? '' : 's'
         }.`,
+        fields,
         footerText: 'Point Decay System',
         provider: 'spam',
         title: 'Point Decay Alert',

@@ -119,7 +119,7 @@ const help: { [key: string]: string } = Object.entries(providers).reduce(
   {}
 );
 
-const generateCleanContent = (msg: Message) =>
+export const generateCleanContent = (msg: Message) =>
   msg.cleanContent.replace(linebreakPattern, ' ').toLowerCase();
 
 const isWebdevAndWebDesignServer = (msg: Message) =>

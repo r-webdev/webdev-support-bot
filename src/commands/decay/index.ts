@@ -1,10 +1,11 @@
 import { Message } from 'discord.js';
 
-import { POINT_DECAY_TIMER } from '../../env';
-import { getTimeDiffToDecay } from '../../helpful_role/point_decay';
+import { generateCleanContent } from '../..';
+import { POINT_DECAY_TIMER, ADMIN_ROLE_ID, MOD_ROLE_ID } from '../../env';
+import { getTimeDiffToDecay, decay } from '../../helpful_role/point_decay';
 import { createEmbed } from '../../utils/discordTools';
 
-const handleDecayRequest = (msg: Message) => {
+const getDecayStatus = (msg: Message) => {
   const { diff } = getTimeDiffToDecay();
   const timer = Number.parseInt(POINT_DECAY_TIMER);
 
@@ -38,6 +39,30 @@ const handleDecayRequest = (msg: Message) => {
       title: 'Point Decay Status',
     })
   );
+};
+
+const handleDecayRequest = async (msg: Message) => {
+  const isAdmin = msg.member.roles.cache.find(
+    r => r.id === ADMIN_ROLE_ID || r.id === MOD_ROLE_ID
+  );
+
+  if (!isAdmin) {
+    return;
+  }
+
+  const [_, flag] = generateCleanContent(msg).split(' ');
+
+  if (!flag) {
+    getDecayStatus(msg);
+  }
+
+  switch (flag) {
+    case 'force':
+      await decay(msg, true);
+      break;
+    default:
+      return;
+  }
 };
 
 export default handleDecayRequest;

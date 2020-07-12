@@ -168,7 +168,7 @@ const setPoints = async (userID: string, amount: string, msg: Message) => {
   return output;
 };
 
-const isModOrAdmin = ({ cache }: GuildMemberRoleManager) =>
+export const isModOrAdmin = ({ cache }: GuildMemberRoleManager) =>
   cache.find(({ id }) => id === ADMIN_ROLE_ID || id === MOD_ROLE_ID);
 
 const handlePointsRequest = async (msg: Message) => {
