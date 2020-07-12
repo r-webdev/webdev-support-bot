@@ -48,6 +48,10 @@ This module introduces two commands:
 
 For administrative purposes, flags have been added to the `!points` command. These are only usable by users that have either the `Moderator` or the `Admin` role, hence the introduction of the `MOD_ROLE_ID` and `ADMIN_ROLE_ID` environmental variables.
 
+The `!decay` command, along with it's own flag has been added for administrative purposes to the module.
+
 1. `!points check <USER_ID || MENTION>` - Displays the amount of points the user has accumulated.
 2. `!points reset <USER_ID || MENTION>` - Resets the user's points back to 0.
 3. `!points set <USER_ID || MENTION> <AMOUNT_OF_POINTS>` - Manually set the amount of points to a user.
+4. `!decay` - Tells the time when the next point decay will occur.
+5. `!decay force` - Forces a point decay to occur.
