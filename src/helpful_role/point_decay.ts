@@ -7,12 +7,12 @@ import HelpfulRoleMember from './db_model';
 
 import { IUser } from '.';
 
-let lastCleanup = Date.now();
+let lastDecay = Date.now();
 
-const cleanup = async ({ guild, author: { bot } }: Message) => {
+const decay = async ({ guild, author: { bot } }: Message) => {
+  if (bot) return;
+
   try {
-    if (bot) return;
-
     const users: IUser[] = await HelpfulRoleMember.find({
       guild: guild.id,
       points: {
@@ -40,19 +40,21 @@ const cleanup = async ({ guild, author: { bot } }: Message) => {
     );
   } catch (error) {
     // eslint-disable-next-line no-console
-    console.error('catch -> cleanup():', error);
+    console.error('catch -> decay(msg):', error);
   }
 };
 
+export const getTimeDiffToDecay = () =>
+  (Date.now() - lastDecay) / (1000 * 3600);
+
 const pointDecaySystem = async (msg: Message) => {
-  const now = Date.now();
-  const diff = (now - lastCleanup) / (1000 * 3600);
+  const diff = getTimeDiffToDecay();
   const timer = IS_PROD ? Number.parseInt(POINT_DECAY_TIMER) : 0.01;
 
   if (diff >= timer) {
-    lastCleanup = now;
+    lastDecay = Date.now();
 
-    await cleanup(msg);
+    await decay(msg);
   }
 };
 
