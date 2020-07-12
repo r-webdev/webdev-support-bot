@@ -96,6 +96,7 @@ export const JOB_POSTING_KEYWORD = '!post';
 export const JQUERY_KEYWORD = '!jquery';
 export const POINTS_KEYWORD = '!points';
 export const LEADERBOARD_KEYWORD = '!leaderboard';
+export const DECAY_KEYWORD = '!decay';
 
 /**
  * dynamic regExp matching all possible Object.keys(providers) as keyword

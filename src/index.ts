@@ -6,6 +6,7 @@ import handleBundlephobiaQuery from './commands/bundlephobia';
 import handleCanIUseQuery from './commands/caniuse';
 import handleCodeRequest from './commands/code';
 import handleComposerQuery from './commands/composer';
+import handleDecayRequest from './commands/decay';
 import handleFormattingRequest from './commands/formatting';
 import handleGithubQuery from './commands/github';
 import handleJQueryCommand from './commands/jquery';
@@ -46,6 +47,7 @@ import {
   JQUERY_KEYWORD,
   POINTS_KEYWORD,
   LEADERBOARD_KEYWORD,
+  DECAY_KEYWORD,
 } from './utils/urlTools';
 
 if (IS_PROD) {
@@ -137,6 +139,14 @@ const handleMessage = async (msg: Message) => {
     cleanContent.startsWith(POINTS_KEYWORD)
   ) {
     return await handlePointsRequest(msg);
+  }
+
+  // Decay command override due to passing flags
+  if (
+    isWebdevAndWebDesignServer(msg) &&
+    cleanContent.startsWith(DECAY_KEYWORD)
+  ) {
+    return await handleDecayRequest(msg);
   }
 
   // Pipe the message into the spam filter
