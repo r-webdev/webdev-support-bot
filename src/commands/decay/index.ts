@@ -27,14 +27,7 @@ const getDecayStatus = (msg: Message) => {
   msg.channel.send(
     createEmbed({
       description,
-      fields: [
-        {
-          inline: false,
-          name: 'Admin/Moderator',
-          value: `<@!${msg.author.id}>`,
-        },
-      ],
-      footerText: 'Admin: Point Decay System',
+      footerText: 'Point Decay System',
       provider: 'spam',
       title: 'Point Decay Status',
     })
@@ -42,18 +35,18 @@ const getDecayStatus = (msg: Message) => {
 };
 
 const handleDecayRequest = async (msg: Message) => {
+  const [_, flag] = generateCleanContent(msg).split(' ');
+
+  if (!flag) {
+    return getDecayStatus(msg);
+  }
+
   const isAdmin = msg.member.roles.cache.find(
     r => r.id === ADMIN_ROLE_ID || r.id === MOD_ROLE_ID
   );
 
   if (!isAdmin) {
     return;
-  }
-
-  const [_, flag] = generateCleanContent(msg).split(' ');
-
-  if (!flag) {
-    getDecayStatus(msg);
   }
 
   switch (flag) {
