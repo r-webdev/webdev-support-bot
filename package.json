@@ -17,7 +17,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@sentry/node": "^5.19.0",
+    "@sentry/node": "^5.19.2",
     "@types/dom-parser": "^0.1.0",
     "@types/mongoose": "^5.7.29",
     "@types/node": "^14.0.14",
