@@ -6,6 +6,7 @@ import {
   MOD_CHANNEL,
   IS_PROD,
   HELPFUL_ROLE_POINT_THRESHOLD,
+  HELPFUL_ROLE_EXEMPT_ID,
   HELPFUL_ROLE_ID,
 } from '../env';
 import { createEmbed } from '../utils/discordTools';
@@ -33,7 +34,10 @@ export const decay = async (
 
       const user = guild.members.cache.get(u.user);
 
-      if (u.points < Number.parseInt(HELPFUL_ROLE_POINT_THRESHOLD)) {
+      if (
+        u.points < Number.parseInt(HELPFUL_ROLE_POINT_THRESHOLD) &&
+        !user.roles.cache.has(HELPFUL_ROLE_EXEMPT_ID)
+      ) {
         user.roles.remove(HELPFUL_ROLE_ID);
       }
     });

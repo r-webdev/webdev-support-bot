@@ -29,6 +29,7 @@ export const API_CACHE_REVALIDATION_WINDOW_IN_SECONDS =
 
 export const MONGO_URI = process.env.MONGO_URI;
 export const HELPFUL_ROLE_ID = process.env.HELPFUL_ROLE_ID;
+export const HELPFUL_ROLE_EXEMPT_ID = process.env.HELPFUL_ROLE_EXEMPT_ID;
 export const HELPFUL_ROLE_POINT_THRESHOLD =
   process.env.HELPFUL_ROLE_POINT_THRESHOLD;
 export const POINT_DECAY_TIMER = process.env.POINT_DECAY_TIMER;
