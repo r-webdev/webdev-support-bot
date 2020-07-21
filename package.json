@@ -39,7 +39,7 @@
     "@types/jest": "^26.0.5",
     "dotenv": "^8.2.0",
     "eslint": "^7.4.0",
-    "eslint-config-galex": "^0.7.15",
+    "eslint-config-galex": "^0.8.0",
     "husky": "^4.2.5",
     "jest": "^26.1.0",
     "lint-staged": "^10.2.11",
