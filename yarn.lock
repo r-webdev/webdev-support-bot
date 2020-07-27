@@ -7000,10 +7000,10 @@ typedarray@^0.0.6:
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
   integrity sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
 
-typescript@^4.0.0-dev.20200724:
-  version "4.0.0-dev.20200724"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.0.0-dev.20200724.tgz#1f07200c5a95e01b10afb3284b2268afafb60a16"
-  integrity sha512-j6Vm8C7fABJfl2SfC6Gipkk6M07hpMq+tnBIQkORBVcyrW4TfnT6gzs/B5P40oKAjd0OBuhm2Tycf2PNxk97/Q==
+typescript@^4.0.0-dev.20200726:
+  version "4.0.0-dev.20200726"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.0.0-dev.20200726.tgz#0aab6a1195ecbc00e8456cbcc3ee645378aa5ff9"
+  integrity sha512-rZOVOtKdmav+uOR1aDUxGD6h0tlxKuTOFrxrkKNG7zp7GcRXTVDO824gQ+lavbKyOnjwnMgas1v4FH8kZiQzyg==
 
 undefsafe@^2.0.2:
   version "2.0.3"
