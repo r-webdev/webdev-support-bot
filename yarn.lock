@@ -1829,10 +1829,25 @@ chokidar@^2.1.8:
   optionalDependencies:
     fsevents "^1.2.7"
 
-chokidar@^3.2.2, chokidar@^3.4.0:
+chokidar@^3.2.2:
   version "3.4.0"
   resolved "https://registry.yarnpkg.com/chokidar/-/chokidar-3.4.0.tgz#b30611423ce376357c765b9b8f904b9fba3c0be8"
   integrity sha512-aXAaho2VJtisB/1fg1+3nlLJqGOuewTzQpd/Tz0yTg2R0e4IGtshYvtjowyEumcBv2z+y4+kc75Mz7j5xJskcQ==
+  dependencies:
+    anymatch "~3.1.1"
+    braces "~3.0.2"
+    glob-parent "~5.1.0"
+    is-binary-path "~2.1.0"
+    is-glob "~4.0.1"
+    normalize-path "~3.0.0"
+    readdirp "~3.4.0"
+  optionalDependencies:
+    fsevents "~2.1.2"
+
+chokidar@^3.4.1:
+  version "3.4.1"
+  resolved "https://registry.yarnpkg.com/chokidar/-/chokidar-3.4.1.tgz#e905bdecf10eaa0a0b1db0c664481cc4cbc22ba1"
+  integrity sha512-TQTJyr2stihpC4Sya9hs2Xh+O2wf+igjL36Y75xx2WdHuiICcn/XJza46Jwt0eT5hVpQOzo3FpY3cj3RVYLX0g==
   dependencies:
     anymatch "~3.1.1"
     braces "~3.0.2"
@@ -2512,10 +2527,10 @@ enhanced-resolve@^0.9.1:
     memory-fs "^0.2.0"
     tapable "^0.1.8"
 
-enhanced-resolve@^4.1.0:
-  version "4.1.1"
-  resolved "https://registry.yarnpkg.com/enhanced-resolve/-/enhanced-resolve-4.1.1.tgz#2937e2b8066cd0fe7ce0990a98f0d71a35189f66"
-  integrity sha512-98p2zE+rL7/g/DzMHMTF4zZlCgeVdJ7yr6xzEpJRYwFYrGi9ANdn5DnJURg6RpBkyk60XYDnWIv51VfIhfNGuA==
+enhanced-resolve@^4.3.0:
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/enhanced-resolve/-/enhanced-resolve-4.3.0.tgz#3b806f3bfafc1ec7de69551ef93cca46c1704126"
+  integrity sha512-3e87LvavsdxyoCfGusJnrZ5G8SLPOFeHSNpZI/ATL9a5leXo2k0w6MKnbqhdBad9qTobSfB20Ld7UmgoNbAZkQ==
   dependencies:
     graceful-fs "^4.1.2"
     memory-fs "^0.5.0"
@@ -2603,15 +2618,15 @@ eslint-ast-utils@^1.1.0:
     lodash.get "^4.4.2"
     lodash.zip "^4.2.0"
 
-eslint-config-galex@^0.8.3:
-  version "0.8.3"
-  resolved "https://registry.yarnpkg.com/eslint-config-galex/-/eslint-config-galex-0.8.3.tgz#880dd325e0c92b1768573c60d117833eff63e284"
-  integrity sha512-/lmHoLhzdYZ6bXvdU3Q8zw7comEE8ggiMhw8gzD0ibUKZnjnvDETtaVKAqG3YhsM4epEopYj6fGPtr3A8wOOdw==
+eslint-config-galex@^0.8.5:
+  version "0.8.5"
+  resolved "https://registry.yarnpkg.com/eslint-config-galex/-/eslint-config-galex-0.8.5.tgz#e36879ffb98e481a2d633bdb9a8eebcf0f3b7ff4"
+  integrity sha512-PZihMpIJZrwDc5KuX5TqQXNJYvlMHMwFGVlJzKLCy0ioUqBc5VgPwCJUtqRQDek5tSUo2nvCHv8YfRe0W24wnA==
   dependencies:
     "@typescript-eslint/eslint-plugin" "3.7.0"
     "@typescript-eslint/parser" "3.7.0"
     babel-eslint "^10.1.0"
-    eslint-config-kentcdodds "^14.14.1"
+    eslint-config-kentcdodds "^14.14.2"
     eslint-config-prettier "^6.11.0"
     eslint-config-react-app "^5.2.1"
     eslint-plugin-flowtype "5.2.0"
@@ -2623,29 +2638,29 @@ eslint-config-galex@^0.8.3:
     eslint-plugin-react "7.20.3"
     eslint-plugin-react-hooks "4.0.8"
     eslint-plugin-sort-keys-fix "^1.1.1"
-    eslint-plugin-testing-library "^3.3.1"
+    eslint-plugin-testing-library "^3.3.2"
     eslint-plugin-unicorn "^21.0.0"
     read-pkg-up "^7.0.1"
 
-eslint-config-kentcdodds@^14.14.1:
-  version "14.14.1"
-  resolved "https://registry.yarnpkg.com/eslint-config-kentcdodds/-/eslint-config-kentcdodds-14.14.1.tgz#4f9d42d9d0a8770f70fd898c14afe5d7ce673637"
-  integrity sha512-2DE3cQvssImMnPFqdQdiQQ9nCAlQqbqWKuWzi5rPhf4YhJqjZWzkgIOr0GmGrGCYhG12n29STnRGf4XaXUOjFg==
+eslint-config-kentcdodds@^14.14.2:
+  version "14.14.2"
+  resolved "https://registry.yarnpkg.com/eslint-config-kentcdodds/-/eslint-config-kentcdodds-14.14.2.tgz#60cf3e4b87f3abf7a6ef16e594b6317ae3c6fd52"
+  integrity sha512-IaXj8o3IblHtzB7pSKNjt+cT9prnHmNv/1mBaAeZLuycn7yN4qkqC0OmPwonoDCeVnHRY45jWE++twWcruqVKA==
   dependencies:
     babel-eslint "^10.1.0"
     eslint-config-prettier "^6.11.0"
     eslint-import-resolver-webpack "^0.12.2"
-    eslint-plugin-babel "^5.3.0"
-    eslint-plugin-import "^2.21.2"
-    eslint-plugin-jest "^23.17.1"
+    eslint-plugin-babel "^5.3.1"
+    eslint-plugin-import "^2.22.0"
+    eslint-plugin-jest "^23.18.2"
     eslint-plugin-jest-dom "^2.1.0"
     eslint-plugin-jsx-a11y "^6.3.1"
-    eslint-plugin-react "^7.20.0"
-    eslint-plugin-react-hooks "^4.0.4"
-    eslint-plugin-testing-library "^3.3.1"
+    eslint-plugin-react "^7.20.3"
+    eslint-plugin-react-hooks "^4.0.8"
+    eslint-plugin-testing-library "^3.3.2"
     read-pkg-up "^7.0.1"
     semver "^7.3.2"
-    webpack "^4.43.0"
+    webpack "^4.44.0"
 
 eslint-config-prettier@^6.11.0:
   version "6.11.0"
@@ -2693,10 +2708,10 @@ eslint-module-utils@^2.6.0:
     debug "^2.6.9"
     pkg-dir "^2.0.0"
 
-eslint-plugin-babel@^5.3.0:
-  version "5.3.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-babel/-/eslint-plugin-babel-5.3.0.tgz#2e7f251ccc249326da760c1a4c948a91c32d0023"
-  integrity sha512-HPuNzSPE75O+SnxHIafbW5QB45r2w78fxqwK3HmjqIUoPfPzVrq6rD+CINU3yzoDSzEhUkX07VUphbF73Lth/w==
+eslint-plugin-babel@^5.3.1:
+  version "5.3.1"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-babel/-/eslint-plugin-babel-5.3.1.tgz#75a2413ffbf17e7be57458301c60291f2cfbf560"
+  integrity sha512-VsQEr6NH3dj664+EyxJwO4FCYm/00JhYb3Sk3ft8o+fpKuIfQ9TaW6uVUfvwMXHcf/lsnRIoyFPsLMyiWCSL/g==
   dependencies:
     eslint-rule-composer "^0.3.0"
 
@@ -2708,7 +2723,7 @@ eslint-plugin-flowtype@5.2.0:
     lodash "^4.17.15"
     string-natural-compare "^3.0.1"
 
-eslint-plugin-import@^2.21.2, eslint-plugin-import@^2.22.0:
+eslint-plugin-import@^2.22.0:
   version "2.22.0"
   resolved "https://registry.yarnpkg.com/eslint-plugin-import/-/eslint-plugin-import-2.22.0.tgz#92f7736fe1fde3e2de77623c838dd992ff5ffb7e"
   integrity sha512-66Fpf1Ln6aIS5Gr/55ts19eUuoDhAbZgnr6UxK5hbDx6l/QgQgx61AePq+BV4PP2uXQFClgMVzep5zZ94qqsxg==
@@ -2739,10 +2754,10 @@ eslint-plugin-jest-formatting@^2.0.0:
   resolved "https://registry.yarnpkg.com/eslint-plugin-jest-formatting/-/eslint-plugin-jest-formatting-2.0.0.tgz#6688feefb9c8c49ff847160e9284bc405d44f360"
   integrity sha512-DLL2vg+cXmtONUBiIVE4nk9YQXnpT2ljHfAvW1vRYOGFA9Jfo5kqG+1lzYxcnphdFyUFN0Tx+rGkmsAZy2paxA==
 
-eslint-plugin-jest@^23.17.1:
-  version "23.17.1"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-jest/-/eslint-plugin-jest-23.17.1.tgz#c0f39ba78e0f33b7ee1ce4ec92b773e39026ea3f"
-  integrity sha512-/o36fw67qNbJGWbSBIBMfseMsNP/d88WUHAGHCi1xFwsNB3XXZGdvxbOw49j3iQz6MCW/yw8OeOsuQhi6mM5ZA==
+eslint-plugin-jest@^23.18.2:
+  version "23.18.2"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-jest/-/eslint-plugin-jest-23.18.2.tgz#9cebb2c93729ccabc1d01cf45c59e9ee6afec80d"
+  integrity sha512-afVOE47F0PENnRlnePUHgrDbv1tsDlTAVrjL051oUETB2ImzBwa5GfmUAUhDjAEuxH+xkE6DsmEpZ8obXzUMqQ==
   dependencies:
     "@typescript-eslint/experimental-utils" "^2.5.0"
 
@@ -2775,15 +2790,32 @@ eslint-plugin-promise@^4.2.1:
   resolved "https://registry.yarnpkg.com/eslint-plugin-promise/-/eslint-plugin-promise-4.2.1.tgz#845fd8b2260ad8f82564c1222fce44ad71d9418a"
   integrity sha512-VoM09vT7bfA7D+upt+FjeBO5eHIJQBUWki1aPvB+vbNiHS3+oGIJGIeyBtKQTME6UPXXy3vV07OL1tHd3ANuDw==
 
-eslint-plugin-react-hooks@4.0.8, eslint-plugin-react-hooks@^4.0.4:
+eslint-plugin-react-hooks@4.0.8, eslint-plugin-react-hooks@^4.0.8:
   version "4.0.8"
   resolved "https://registry.yarnpkg.com/eslint-plugin-react-hooks/-/eslint-plugin-react-hooks-4.0.8.tgz#a9b1e3d57475ccd18276882eff3d6cba00da7a56"
   integrity sha512-6SSb5AiMCPd8FDJrzah+Z4F44P2CdOaK026cXFV+o/xSRzfOiV1FNFeLl2z6xm3yqWOQEZ5OfVgiec90qV2xrQ==
 
-eslint-plugin-react@7.20.3, eslint-plugin-react@^7.20.0:
+eslint-plugin-react@7.20.3:
   version "7.20.3"
   resolved "https://registry.yarnpkg.com/eslint-plugin-react/-/eslint-plugin-react-7.20.3.tgz#0590525e7eb83890ce71f73c2cf836284ad8c2f1"
   integrity sha512-txbo090buDeyV0ugF3YMWrzLIUqpYTsWSDZV9xLSmExE1P/Kmgg9++PD931r+KEWS66O1c9R4srLVVHmeHpoAg==
+  dependencies:
+    array-includes "^3.1.1"
+    array.prototype.flatmap "^1.2.3"
+    doctrine "^2.1.0"
+    has "^1.0.3"
+    jsx-ast-utils "^2.4.1"
+    object.entries "^1.1.2"
+    object.fromentries "^2.0.2"
+    object.values "^1.1.1"
+    prop-types "^15.7.2"
+    resolve "^1.17.0"
+    string.prototype.matchall "^4.0.2"
+
+eslint-plugin-react@^7.20.3:
+  version "7.20.4"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-react/-/eslint-plugin-react-7.20.4.tgz#c14d2631221ec694ddd84557d7152f44b66e4aa0"
+  integrity sha512-y4DOQ0LrzuDQFEAnYFGjJMRHQQqfTco02qiWI00eGQYikHTzC15S5aRHGWSffnThv8sBpsmFBLky3K5keniAJg==
   dependencies:
     array-includes "^3.1.1"
     array.prototype.flatmap "^1.2.3"
@@ -2804,10 +2836,10 @@ eslint-plugin-sort-keys-fix@^1.1.1:
   dependencies:
     requireindex "~1.2.0"
 
-eslint-plugin-testing-library@^3.3.1:
-  version "3.3.1"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-testing-library/-/eslint-plugin-testing-library-3.3.1.tgz#aab204bb19b634ee50a9da550649a51723ebb423"
-  integrity sha512-0Ubug+v9hJDb0OEHc6e2p5/7Q4xhaCZiYLc05hybja8Yd2t+2y1Q+UDwKz+JiDAHoPgE7y2B2G3jn+u9kqJTGw==
+eslint-plugin-testing-library@^3.3.2:
+  version "3.3.2"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-testing-library/-/eslint-plugin-testing-library-3.3.2.tgz#d14d0b73452cd2ba10a963f1f81094957e32b75a"
+  integrity sha512-UUGKQktNbXiTSYADTYGTZiri4HH1oQKjRYOy4bBzd8v/UCR6cAT91U//STioSvofHDpXbhfi9wVjZR2sZzG87w==
   dependencies:
     "@typescript-eslint/experimental-utils" "^2.29.0"
 
@@ -7205,15 +7237,15 @@ watchpack-chokidar2@^2.0.0:
   dependencies:
     chokidar "^2.1.8"
 
-watchpack@^1.6.1:
-  version "1.7.2"
-  resolved "https://registry.yarnpkg.com/watchpack/-/watchpack-1.7.2.tgz#c02e4d4d49913c3e7e122c3325365af9d331e9aa"
-  integrity sha512-ymVbbQP40MFTp+cNMvpyBpBtygHnPzPkHqoIwRRj/0B8KhqQwV8LaKjtbaxF2lK4vl8zN9wCxS46IFCU5K4W0g==
+watchpack@^1.7.4:
+  version "1.7.4"
+  resolved "https://registry.yarnpkg.com/watchpack/-/watchpack-1.7.4.tgz#6e9da53b3c80bb2d6508188f5b200410866cd30b"
+  integrity sha512-aWAgTW4MoSJzZPAicljkO1hsi1oKj/RRq/OJQh2PKI2UKL04c2Bs+MBOB+BBABHTXJpf9mCwHN7ANCvYsvY2sg==
   dependencies:
     graceful-fs "^4.1.2"
     neo-async "^2.5.0"
   optionalDependencies:
-    chokidar "^3.4.0"
+    chokidar "^3.4.1"
     watchpack-chokidar2 "^2.0.0"
 
 webidl-conversions@^5.0.0:
@@ -7234,10 +7266,10 @@ webpack-sources@^1.4.0, webpack-sources@^1.4.1:
     source-list-map "^2.0.0"
     source-map "~0.6.1"
 
-webpack@^4.43.0:
-  version "4.43.0"
-  resolved "https://registry.yarnpkg.com/webpack/-/webpack-4.43.0.tgz#c48547b11d563224c561dad1172c8aa0b8a678e6"
-  integrity sha512-GW1LjnPipFW2Y78OOab8NJlCflB7EFskMih2AHdvjbpKMeDJqEgSx24cXXXiPS65+WSwVyxtDsJH6jGX2czy+g==
+webpack@^4.44.0:
+  version "4.44.0"
+  resolved "https://registry.yarnpkg.com/webpack/-/webpack-4.44.0.tgz#3b08f88a89470175f036f4a9496b8a0428668802"
+  integrity sha512-wAuJxK123sqAw31SpkPiPW3iKHgFUiKvO7E7UZjtdExcsRe3fgav4mvoMM7vvpjLHVoJ6a0Mtp2fzkoA13e0Zw==
   dependencies:
     "@webassemblyjs/ast" "1.9.0"
     "@webassemblyjs/helper-module-context" "1.9.0"
@@ -7247,7 +7279,7 @@ webpack@^4.43.0:
     ajv "^6.10.2"
     ajv-keywords "^3.4.1"
     chrome-trace-event "^1.0.2"
-    enhanced-resolve "^4.1.0"
+    enhanced-resolve "^4.3.0"
     eslint-scope "^4.0.3"
     json-parse-better-errors "^1.0.2"
     loader-runner "^2.4.0"
@@ -7260,7 +7292,7 @@ webpack@^4.43.0:
     schema-utils "^1.0.0"
     tapable "^1.1.3"
     terser-webpack-plugin "^1.4.3"
-    watchpack "^1.6.1"
+    watchpack "^1.7.4"
     webpack-sources "^1.4.1"
 
 whatwg-encoding@^1.0.5:
