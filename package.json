@@ -36,7 +36,7 @@
   },
   "devDependencies": {
     "@sentry/types": "^5.20.1",
-    "@types/jest": "^26.0.7",
+    "@types/jest": "^26.0.8",
     "dotenv": "^8.2.0",
     "eslint": "^7.5.0",
     "eslint-config-galex": "^0.8.8",
