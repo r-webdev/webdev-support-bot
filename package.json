@@ -41,7 +41,7 @@
     "eslint": "^7.5.0",
     "eslint-config-galex": "^0.8.9",
     "husky": "^4.2.5",
-    "jest": "^26.2.1",
+    "jest": "^26.2.2",
     "lint-staged": "^10.2.11",
     "nodemon": "^2.0.4",
     "prettier": "^2.0.5",
