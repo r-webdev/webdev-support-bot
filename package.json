@@ -32,7 +32,7 @@
     "node-cache": "^5.1.2",
     "node-fetch": "^2.6.0",
     "ts-node": "^8.10.2",
-    "typescript": "^4.0.0-dev.20200802"
+    "typescript": "^4.0.0-dev.20200803"
   },
   "devDependencies": {
     "@sentry/types": "^5.20.1",
