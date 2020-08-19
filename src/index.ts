@@ -49,6 +49,10 @@ import {
   LEADERBOARD_KEYWORD,
   DECAY_KEYWORD,
 } from './utils/urlTools';
+import {
+  generateCleanContent,
+  stripMarkdownQuote,
+} from './utils/content_format';
 
 if (IS_PROD) {
   Sentry.init({
@@ -109,8 +113,6 @@ const keywordMap = Object.keys(providers).reduce<{ [key: string]: Provider }>(
 const trimCleanContent = (provider: Provider, cleanContent: string) =>
   cleanContent.slice(keywordMap[provider].length + 2);
 
-const linebreakPattern = /\n/gim;
-
 const help: { [key: string]: string } = Object.entries(providers).reduce(
   (carry, [provider, { help }]) => {
     carry[provider] = help;
@@ -118,9 +120,6 @@ const help: { [key: string]: string } = Object.entries(providers).reduce(
   },
   {}
 );
-
-export const generateCleanContent = (msg: Message) =>
-  msg.cleanContent.replace(linebreakPattern, ' ').toLowerCase();
 
 const isWebdevAndWebDesignServer = (msg: Message) =>
   msg.guild?.id === SERVER_ID || false;
@@ -241,9 +240,9 @@ const handleMessage = async (msg: Message) => {
 };
 
 const handleNonCommandMessages = (msg: Message) => {
-  const cleanContent = generateCleanContent(msg);
+  const quoteLessContent = stripMarkdownQuote(msg.content);
 
-  if (isWebdevAndWebDesignServer(msg) && isThanksMessage(cleanContent)) {
+  if (isWebdevAndWebDesignServer(msg) && isThanksMessage(quoteLessContent)) {
     handleThanks(msg);
   }
 };

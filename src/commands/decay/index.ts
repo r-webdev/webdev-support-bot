@@ -1,9 +1,9 @@
 import { Message } from 'discord.js';
 
-import { generateCleanContent } from '../..';
 import { POINT_DECAY_TIMER, ADMIN_ROLE_ID, MOD_ROLE_ID } from '../../env';
 import { getTimeDiffToDecay, decay } from '../../helpful_role/point_decay';
 import { createEmbed } from '../../utils/discordTools';
+import { generateCleanContent } from '../../utils/content_format';
 
 const getDecayStatus = (msg: Message) => {
   const { diff } = getTimeDiffToDecay();

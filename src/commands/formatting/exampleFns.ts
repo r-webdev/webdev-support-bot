@@ -23,6 +23,9 @@ function getActualName(user: string) {
   return map[user] ?? 'no match found';
 }
 
+/**
+ * @deprecated
+ */
 function typeOfNestor() {
   return 'naab';
 }
