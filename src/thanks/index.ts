@@ -6,6 +6,8 @@ import pointHandler, {
 } from '../helpful_role/point_handler';
 import { cache } from '../spam_filter';
 import { createEmbed } from '../utils/discordTools';
+import { map } from '../utils/map';
+import { stripMarkdownQuote } from '../utils/content_format';
 
 type CooldownUser = {
   id: string;
@@ -29,11 +31,20 @@ const handleThanks = async (msg: Message) => {
    * Filter out all unwanted users.
    * A unwanted user is anyone who's a bot, is the actual message author itself,
    * or if the user's already been given a point by the message author.
+   * also ignoring all names that were only mentioned in a quote.
    */
+
+  const quoteLessContent = stripMarkdownQuote(msg.content);
+
+  const unquotedMentionedUserIds = new Set(
+    map(([, id]) => id, quoteLessContent.matchAll(/<@!(\d+)>/g))
+  );
 
   const usersOnCooldown: CooldownUser[] = [];
 
   const mentionedUsers = msg.mentions.users.filter(u => {
+    if (!unquotedMentionedUserIds.has(u.id)) return false;
+
     const entry: number = cache.get(
       generatePointsCacheEntryKey(u.id, msg.author.id)
     );
