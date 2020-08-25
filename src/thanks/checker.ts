@@ -1,17 +1,12 @@
-const abbreviations = new Set([
-  'ty',
-  'thanks',
-  'thx',
-  'tnx',
-  'tyvm',
-  'thank',
-  'thnaks',
-]);
+const abbreviations = ['ty', 'tyvm', 'thanks', 'thx', 'tnx', 'thank', 'thnaks'];
+
+const regex = new RegExp(
+  abbreviations.map(item => String.raw`\b${item}\b`).join('|'),
+  'i'
+);
 
 const keywordValidator = (msg: string) => {
-  const fragments = msg.toLowerCase().split(' ');
-
-  return fragments.some(fragment => abbreviations.has(fragment));
+  return Boolean(msg.match(regex));
 };
 
 export default keywordValidator;
