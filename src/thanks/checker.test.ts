@@ -19,7 +19,7 @@ describe('thanks checked', () => {
     expect(checker('time for a putty party')).toBe(false);
   });
 
-  test('returns true if ty is followed by punctuation', () => {
-    expect(checker('ty, friend')).toBe(true);
+  test('returns true if ty is followed or preceded by punctuation', () => {
+    expect(checker('"ty, friend"')).toBe(true);
   });
 });
