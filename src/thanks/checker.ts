@@ -1,17 +1,12 @@
-const abbreviations = new Set([
-  'ty',
-  'thanks',
-  'thx',
-  'tnx',
-  'tyvm',
-  'thank',
-  'thnaks',
-]);
+const abbreviations = ['ty', 'tyvm', 'thanks', 'thx', 'tnx', 'thank', 'thnaks'];
 
-const keywordValidator = (msg: string) => {
-  const fragments = msg.toLowerCase().split(' ');
+const thanksRegex = new RegExp(
+  String.raw`\b(?:${abbreviations.join('|')})\b`,
+  'i'
+);
 
-  return fragments.some(fragment => abbreviations.has(fragment));
+const keywordValidator = (str: string) => {
+  return Boolean(str.match(thanksRegex));
 };
 
 export default keywordValidator;
