@@ -1,12 +1,12 @@
 const abbreviations = ['ty', 'tyvm', 'thanks', 'thx', 'tnx', 'thank', 'thnaks'];
 
-const regex = new RegExp(
-  abbreviations.map(item => String.raw`\b${item}\b`).join('|'),
+const thanksRegex = new RegExp(
+  String.raw`\b(?:${abbreviations.join('|')})\b`,
   'i'
 );
 
-const keywordValidator = (msg: string) => {
-  return Boolean(msg.match(regex));
+const keywordValidator = (str: string) => {
+  return Boolean(str.match(thanksRegex));
 };
 
 export default keywordValidator;
