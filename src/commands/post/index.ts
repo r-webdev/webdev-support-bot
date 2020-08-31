@@ -363,6 +363,7 @@ ${createMarkdownCodeBlock(
 `,
   'md'
 )}
+If your compensation is deemed unfair by the moderation team, your job posting will be removed.
 If you agree to these guidelines, type ${'`ok`'}. If not, or you want to exit the form explicitly at any time, type ${'`cancel`'}.`;
 
 const calcNextPostingThreshold = (diff: number) => {
