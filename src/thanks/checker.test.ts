@@ -10,7 +10,14 @@ describe('thanks checked', () => {
     ['tY fRiEnDO', true],
     ['time for a putty party', false],
     ['"ty, friend"', true],
-  ])('acts only on appropriate input', (string, result) => {
+    ['"nty, friend"', false],
+    ['"no ty, friend"', false],
+    ['"no thanks, friend"', false],
+    [
+      'https://github.com/ljosberinn/webdev-support-bot/blob/master/src/thanks/index.ts',
+      false,
+    ],
+  ])('acts only on appropriate input (case %s)', (string, result) => {
     expect(checker(string)).toBe(result);
   });
 });
