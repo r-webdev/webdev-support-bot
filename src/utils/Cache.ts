@@ -317,7 +317,7 @@ export class Cache<Value = any, Key = any> extends EventEmitter {
    */
   flushStats(): void {}
 
-  _check(key: Key, data) {
+  private _check(key: Key, data) {
     let ret = true;
     if (data.t !== 0 && data.t < Date.now()) {
       if (this.options.deleteOnExpire) {
@@ -329,7 +329,7 @@ export class Cache<Value = any, Key = any> extends EventEmitter {
     return ret;
   }
 
-  _killCheckPeriod() {
+  private _killCheckPeriod() {
     if (this.checkTimeout != null) {
       const checkTimeout = this.checkTimeout;
       this.checkTimeout = null;
@@ -337,7 +337,7 @@ export class Cache<Value = any, Key = any> extends EventEmitter {
     }
   }
 
-  _checkData(startPeriod: boolean = false): void {
+  private _checkData(startPeriod: boolean = false): void {
     const ref = this.#data;
 
     for (const [key, value] of ref) {
