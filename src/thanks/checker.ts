@@ -1,7 +1,7 @@
 const abbreviations = ['ty', 'tyvm', 'thanks', 'thx', 'tnx', 'thank', 'thnaks'];
 
 const thanksRegex = new RegExp(
-  String.raw`\b(?:${abbreviations.join('|')})\b`,
+  String.raw`\b(?<!no|n|no |n |/)\b(?:${abbreviations.join('|')})\b`,
   'i'
 );
 
