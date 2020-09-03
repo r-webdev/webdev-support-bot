@@ -1,5 +1,6 @@
 import { EventEmitter } from 'events';
 import { castArray } from './castArray';
+import { addBreadcrumb, Severity } from '@sentry/node';
 
 type WrappedValue<T> = {
   v: T;
@@ -134,6 +135,12 @@ export class Cache<Value = any, Key = any> extends EventEmitter {
    */
   get<T extends Value = Value>(key: Key): T | undefined {
     const data = this.#data.get(key);
+
+    addBreadcrumb({
+      level: Severity.Debug,
+      message: `Cache [Get]: ${String(key)}`,
+    });
+
     if (this.#data.has(key) && this._check(key, data)) {
       return unwrap(data) as T;
     }
@@ -148,6 +155,13 @@ export class Cache<Value = any, Key = any> extends EventEmitter {
    */
   mget<T extends Value = Value>(keys: Key[]): Map<Key, T> {
     const output: Map<Key, T> = new Map();
+
+    addBreadcrumb({
+      level: Severity.Debug,
+      message: `Cache [MGet]: keys: ${keys.slice(0, 10)} (${
+        keys.length
+      } items)`,
+    });
 
     for (const key of keys) {
       const data = this.#data.get(key);
@@ -171,6 +185,13 @@ export class Cache<Value = any, Key = any> extends EventEmitter {
   set<T extends Value = Value>(key: Key, value: T, ttl?: number): boolean {
     const usedTtl = ttl ?? this.options.stdTTL;
 
+    addBreadcrumb({
+      level: Severity.Debug,
+      message: `Cache [Set]: ${String(key)}: ${String(
+        value
+      )} | TTL: ${ttl}/${usedTtl}`,
+    });
+
     this.#data.set(key, wrap(value, usedTtl, this.options));
 
     this.emit('set', key, value);
@@ -183,10 +204,12 @@ export class Cache<Value = any, Key = any> extends EventEmitter {
    *
    * @param keyValueSet an array of object which includes key,value and ttl
    */
-  mset<T extends Value = Value>(
-    keyValueSet: ValueSetItem<Key, Value>[]
-  ): boolean {
+  mset<T extends Value = Value>(keyValueSet: ValueSetItem<Key, T>[]): boolean {
     const len = keyValueSet.length;
+    addBreadcrumb({
+      level: Severity.Debug,
+      message: `Cache [MSet]: ${keyValueSet.length} Items`,
+    });
     for (let i = 0; i < len; i++) {
       const { key, val, ttl } = keyValueSet[i];
       this.set(key, val, ttl);
@@ -204,6 +227,13 @@ export class Cache<Value = any, Key = any> extends EventEmitter {
     let deleted = 0;
     const keyArr = castArray(keys);
     const data = this.#data;
+
+    addBreadcrumb({
+      level: Severity.Debug,
+      message: `Cache [Del]: ${String(keyArr.slice(0, 10))} (${
+        keyArr.length
+      } items)`,
+    });
 
     for (const key of keyArr) {
       if (this.#data.has(key)) {
