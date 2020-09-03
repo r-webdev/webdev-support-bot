@@ -15,7 +15,7 @@ type CooldownUser = {
 };
 
 export const extractUserID = (s: string) =>
-  s.includes('<@!') ? s.split('<@!')[1].split('>')[0] : null;
+  s.match(/<@!?/) ? s.split(/<@!?/)[1].split('>')[0] : null;
 
 const timeUntilCooldownReset = (entry: number) =>
   Math.round(
@@ -37,7 +37,7 @@ const handleThanks = async (msg: Message) => {
   const quoteLessContent = stripMarkdownQuote(msg.content);
 
   const unquotedMentionedUserIds = new Set(
-    map(([, id]) => id, quoteLessContent.matchAll(/<@!(\d+)>/g))
+    map(([, id]) => id, quoteLessContent.matchAll(/<@!?(\d+)>/g))
   );
 
   const usersOnCooldown: CooldownUser[] = [];
@@ -79,7 +79,7 @@ const handleThanks = async (msg: Message) => {
       })
     );
   }
-
+  console.log({ mentionedUsers });
   // Break if no valid users remain
   if (mentionedUsers.size === 0) {
     return;
