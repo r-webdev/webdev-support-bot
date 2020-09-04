@@ -13,7 +13,7 @@ type ValueSetItem<Key, Value> = {
   key: Key;
 };
 
-interface Options {
+interface CacheOptions {
   /**
    * If enabled, all values will be stringified during the set operation
    *
@@ -79,7 +79,7 @@ interface Options {
 const wrap = <T>(
   value: T,
   ttl: number,
-  options: Pick<Options, 'stdTTL'> = {}
+  options: Pick<CacheOptions, 'stdTTL'> = {}
 ): WrappedValue<T> => {
   const now = Date.now();
   const ttlMulti = 1000;
@@ -105,6 +105,27 @@ const wrap = <T>(
 };
 const unwrap = <T>(value: WrappedValue<T>) => value.v;
 
+const DEFAULT_OPTIONS: CacheOptions = {
+  // convert all elements to string
+  forceString: false,
+  // used standard size for calculating value size
+  objectValueSize: 80,
+  promiseValueSize: 80,
+  arrayValueSize: 40,
+  // standard time to live in seconds. 0 = infinity;
+  stdTTL: 0,
+  // time in seconds to check all data and delete expired keys
+  checkperiod: 600,
+  // en/disable cloning of variables. If `true` you'll get a copy of the cached variable. If `false` you'll save and get just the reference
+  useClones: true,
+  // whether values should be deleted automatically at expiration
+  deleteOnExpire: true,
+  // enable legacy callbacks
+  enableLegacyCallbacks: false,
+  // max amount of keys that are being stored
+  maxKeys: -1,
+};
+
 /**
  * A copy of node_cache but without stats and allowing for different keys
  *
@@ -116,12 +137,15 @@ const unwrap = <T>(value: WrappedValue<T>) => value.v;
  */
 export class Cache<Value = any, Key = any> extends EventEmitter {
   #data: Map<Key, WrappedValue<Value>>;
-  options: Options;
+  options: CacheOptions;
   checkTimeout: NodeJS.Timeout;
 
-  constructor(options: Options) {
+  constructor(options: CacheOptions) {
     super();
-    this.options = options;
+    this.options = {
+      ...DEFAULT_OPTIONS,
+      ...options,
+    };
     this.#data = new Map();
 
     this._checkData();
