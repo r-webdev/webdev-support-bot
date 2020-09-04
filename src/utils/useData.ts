@@ -1,5 +1,4 @@
 import * as Sentry from '@sentry/node';
-import * as NodeCache from 'node-cache';
 import fetch, {
   HeaderInit,
   RequestInfo,
@@ -12,8 +11,9 @@ import {
   API_CACHE_EXPIRATION_IN_SECONDS,
   API_CACHE_REVALIDATION_WINDOW_IN_SECONDS,
 } from '../env';
+import { Cache } from './Cache';
 
-const apiCache = new NodeCache({
+const apiCache = new Cache({
   checkperiod: Number.parseInt(API_CACHE_REVALIDATION_WINDOW_IN_SECONDS, 10),
   maxKeys: Number.parseInt(API_CACHE_ENTRIES_LIMIT, 10),
   stdTTL: Number.parseInt(API_CACHE_EXPIRATION_IN_SECONDS, 10),
