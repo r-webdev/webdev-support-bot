@@ -23,8 +23,8 @@ const timeUntilCooldownReset = (entry: number) =>
   );
 
 const handleThanks = async (msg: Message) => {
-  const botId = msg.client.user.id
-  if (msg.author.id === botId || msg.mentions.users.size === 0) {
+  const botId = msg.author.bot
+  if (botId || msg.mentions.users.size === 0) {
     return; // Break if no user has been mentioned
   }
 
