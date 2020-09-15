@@ -23,7 +23,8 @@ const timeUntilCooldownReset = (entry: number) =>
   );
 
 const handleThanks = async (msg: Message) => {
-  if (msg.mentions.users.size === 0) {
+  const botId = msg.client.user.id
+  if (msg.author.id === botId || msg.mentions.users.size === 0) {
     return; // Break if no user has been mentioned
   }
 
@@ -73,7 +74,7 @@ const handleThanks = async (msg: Message) => {
         }),
         footerText: `You can only give a point to a user every ${POINT_LIMITER_IN_MINUTES} minute${
           Number.parseInt(POINT_LIMITER_IN_MINUTES) === 1 ? '' : 's'
-        }.`,
+          }.`,
         provider: 'spam',
         title: 'Cooldown alert!',
       })
@@ -93,15 +94,15 @@ const handleThanks = async (msg: Message) => {
     mentionedUsers.size === 1
       ? `<@!${mentionedUsers.first().id}>`
       : 'the users mentioned below'
-  }!`;
+    }!`;
 
   const fields: EmbedField[] =
     mentionedUsers.size > 1
       ? mentionedUsers.array().map((u, i) => ({
-          inline: false,
-          name: (i + 1).toString() + '.',
-          value: `<@!${u.id}>`,
-        }))
+        inline: false,
+        name: (i + 1).toString() + '.',
+        value: `<@!${u.id}>`,
+      }))
       : [];
 
   const output = createEmbed({
