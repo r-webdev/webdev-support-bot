@@ -38,7 +38,7 @@
     "@sentry/types": "5.24.2",
     "@types/jest": "26.0.14",
     "dotenv": "8.2.0",
-    "eslint": "7.9.0",
+    "eslint": "7.10.0",
     "eslint-config-galex": "0.9.7",
     "husky": "4.3.0",
     "jest": "26.4.2",
