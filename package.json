@@ -45,7 +45,7 @@
     "lint-staged": "10.4.0",
     "nodemon": "2.0.4",
     "prettier": "2.1.2",
-    "ts-jest": "26.4.0"
+    "ts-jest": "26.4.1"
   },
   "husky": {
     "hooks": {
