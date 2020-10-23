@@ -53,6 +53,7 @@ import {
   generateCleanContent,
   stripMarkdownQuote,
 } from './utils/content_format';
+import { handleJs } from './code_parsing';
 
 if (IS_PROD) {
   Sentry.init({
@@ -245,6 +246,7 @@ const handleNonCommandMessages = (msg: Message) => {
   if (isWebdevAndWebDesignServer(msg) && isThanksMessage(quoteLessContent)) {
     handleThanks(msg);
   }
+  handleJs(msg);
 };
 
 const prepReaction = async (reaction: MessageReaction) => {

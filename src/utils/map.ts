@@ -7,7 +7,7 @@
  * @param {(item: T, index: number, iter: Iterable<T>) => U} fn
  * @param {Iterable<T>} iter
  */
-export function* map<T, U>(
+export function* mapʹ<T, U>(
   fn: (item: T, index: number, iter: Iterable<T>) => U,
   iter: Iterable<T>
 ) {
@@ -15,4 +15,15 @@ export function* map<T, U>(
   for (const item of iter) {
     yield fn(item, i++, iter);
   }
+}
+
+export function map<T, U>(
+  fn: (item: T, index: number, iter: Iterable<T>) => U
+) {
+  return function* (iter: Iterable<T>) {
+    let i = 0;
+    for (const item of iter) {
+      yield fn(item, i++, iter);
+    }
+  };
 }
