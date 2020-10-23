@@ -53,7 +53,8 @@ import {
   generateCleanContent,
   stripMarkdownQuote,
 } from './utils/content_format';
-import { handleJs } from './code_parsing';
+import { detectVar as _detectVar } from './code_parsing';
+import { limitFnByUser } from './cache';
 
 if (IS_PROD) {
   Sentry.init({
@@ -240,13 +241,17 @@ const handleMessage = async (msg: Message) => {
   }
 };
 
-const handleNonCommandMessages = (msg: Message) => {
+const detectVar = limitFnByUser(_detectVar, {
+  delay: 30000,
+  type: 'VAR_CHECK',
+});
+const handleNonCommandMessages = async (msg: Message) => {
   const quoteLessContent = stripMarkdownQuote(msg.content);
 
   if (isWebdevAndWebDesignServer(msg) && isThanksMessage(quoteLessContent)) {
     handleThanks(msg);
   }
-  handleJs(msg);
+  await detectVar(msg);
 };
 
 const prepReaction = async (reaction: MessageReaction) => {
