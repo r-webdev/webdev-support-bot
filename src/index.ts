@@ -24,6 +24,7 @@ import {
   MONGO_URI,
   SERVER_ID,
   ENV,
+  VAR_DETECT_LIMIT,
 } from './env';
 import handleHelpfulRole, {
   allowedEmojis as helpfulRoleEmojis,
@@ -242,7 +243,7 @@ const handleMessage = async (msg: Message) => {
 };
 
 const detectVar = limitFnByUser(_detectVar, {
-  delay: 30000,
+  delay: VAR_DETECT_LIMIT,
   type: 'VAR_CHECK',
 });
 const handleNonCommandMessages = async (msg: Message) => {

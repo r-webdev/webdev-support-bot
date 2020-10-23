@@ -37,3 +37,5 @@ export const ADMIN_ROLE_ID = process.env.ADMIN_ROLE_ID;
 export const MOD_ROLE_ID = process.env.MOD_ROLE_ID;
 
 export const POINT_LIMITER_IN_MINUTES = process.env.POINT_LIMITER_IN_MINUTES;
+export const VAR_DETECT_LIMIT =
+  parseInt(process.env.VAR_DETECT_LIMIT) || 1_800_000;
