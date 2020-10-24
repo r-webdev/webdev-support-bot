@@ -25,6 +25,7 @@ import {
   SERVER_ID,
   ENV,
   VAR_DETECT_LIMIT,
+  JUST_ASK_DETECT_LIMIT,
 } from './env';
 import handleHelpfulRole, {
   allowedEmojis as helpfulRoleEmojis,
@@ -54,8 +55,9 @@ import {
   generateCleanContent,
   stripMarkdownQuote,
 } from './utils/content_format';
-import { detectVar as _detectVar } from './code_parsing';
+import { detectVar as _detectVar } from './autorespond/code_parsing';
 import { limitFnByUser } from './cache';
+import { detectVagueQuestion } from './autorespond/justask';
 
 if (IS_PROD) {
   Sentry.init({
@@ -246,12 +248,18 @@ const detectVar = limitFnByUser(_detectVar, {
   delay: VAR_DETECT_LIMIT,
   type: 'VAR_CHECK',
 });
+
+const detectJustAsk = limitFnByUser(detectVagueQuestion, {
+  delay: JUST_ASK_DETECT_LIMIT,
+  type: 'JUST_ASK',
+});
 const handleNonCommandMessages = async (msg: Message) => {
   const quoteLessContent = stripMarkdownQuote(msg.content);
 
   if (isWebdevAndWebDesignServer(msg) && isThanksMessage(quoteLessContent)) {
     handleThanks(msg);
   }
+  await detectJustAsk(msg);
   await detectVar(msg);
 };
 
