@@ -9,6 +9,7 @@ import handleComposerQuery from './commands/composer';
 import handleDecayRequest from './commands/decay';
 import handleFormattingRequest from './commands/formatting';
 import handleGithubQuery from './commands/github';
+import handleModuleRequest from './commands/modules';
 import handleJQueryCommand from './commands/jquery';
 import handleLeaderboardRequest from './commands/leaderboard';
 import handleMDNQuery from './commands/mdn';
@@ -50,6 +51,7 @@ import {
   POINTS_KEYWORD,
   LEADERBOARD_KEYWORD,
   DECAY_KEYWORD,
+  MODULE_KEYWORD,
 } from './utils/urlTools';
 import {
   generateCleanContent,
@@ -162,6 +164,8 @@ const handleMessage = async (msg: Message) => {
   }
 
   switch (cleanContent) {
+    case MODULE_KEYWORD:
+      return await handleModuleRequest(msg);
     case FORMATTING_KEYWORD:
     case FORMATTING_KEYWORD_ALT:
       return await handleFormattingRequest(msg);
