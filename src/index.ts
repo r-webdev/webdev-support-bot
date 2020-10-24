@@ -24,6 +24,7 @@ import {
   MONGO_URI,
   SERVER_ID,
   ENV,
+  VAR_DETECT_LIMIT,
 } from './env';
 import handleHelpfulRole, {
   allowedEmojis as helpfulRoleEmojis,
@@ -53,6 +54,8 @@ import {
   generateCleanContent,
   stripMarkdownQuote,
 } from './utils/content_format';
+import { detectVar as _detectVar } from './code_parsing';
+import { limitFnByUser } from './cache';
 
 if (IS_PROD) {
   Sentry.init({
@@ -239,12 +242,17 @@ const handleMessage = async (msg: Message) => {
   }
 };
 
-const handleNonCommandMessages = (msg: Message) => {
+const detectVar = limitFnByUser(_detectVar, {
+  delay: VAR_DETECT_LIMIT,
+  type: 'VAR_CHECK',
+});
+const handleNonCommandMessages = async (msg: Message) => {
   const quoteLessContent = stripMarkdownQuote(msg.content);
 
   if (isWebdevAndWebDesignServer(msg) && isThanksMessage(quoteLessContent)) {
     handleThanks(msg);
   }
+  await detectVar(msg);
 };
 
 const prepReaction = async (reaction: MessageReaction) => {

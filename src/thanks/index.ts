@@ -6,7 +6,7 @@ import pointHandler, {
 } from '../helpful_role/point_handler';
 import { cache } from '../spam_filter';
 import { createEmbed } from '../utils/discordTools';
-import { map } from '../utils/map';
+import { mapʹ } from '../utils/map';
 import { stripMarkdownQuote } from '../utils/content_format';
 
 type CooldownUser = {
@@ -23,7 +23,7 @@ const timeUntilCooldownReset = (entry: number) =>
   );
 
 const handleThanks = async (msg: Message) => {
-  const botId = msg.author.bot
+  const botId = msg.author.bot;
   if (botId || msg.mentions.users.size === 0) {
     return; // Break if no user has been mentioned
   }
@@ -38,7 +38,7 @@ const handleThanks = async (msg: Message) => {
   const quoteLessContent = stripMarkdownQuote(msg.content);
 
   const unquotedMentionedUserIds = new Set(
-    map(([, id]) => id, quoteLessContent.matchAll(/<@!?(\d+)>/g))
+    mapʹ(([, id]) => id, quoteLessContent.matchAll(/<@!?(\d+)>/g))
   );
 
   const usersOnCooldown: CooldownUser[] = [];
@@ -74,7 +74,7 @@ const handleThanks = async (msg: Message) => {
         }),
         footerText: `You can only give a point to a user every ${POINT_LIMITER_IN_MINUTES} minute${
           Number.parseInt(POINT_LIMITER_IN_MINUTES) === 1 ? '' : 's'
-          }.`,
+        }.`,
         provider: 'spam',
         title: 'Cooldown alert!',
       })
@@ -94,15 +94,15 @@ const handleThanks = async (msg: Message) => {
     mentionedUsers.size === 1
       ? `<@!${mentionedUsers.first().id}>`
       : 'the users mentioned below'
-    }!`;
+  }!`;
 
   const fields: EmbedField[] =
     mentionedUsers.size > 1
       ? mentionedUsers.array().map((u, i) => ({
-        inline: false,
-        name: (i + 1).toString() + '.',
-        value: `<@!${u.id}>`,
-      }))
+          inline: false,
+          name: (i + 1).toString() + '.',
+          value: `<@!${u.id}>`,
+        }))
       : [];
 
   const output = createEmbed({
