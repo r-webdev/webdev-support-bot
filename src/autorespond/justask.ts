@@ -1,6 +1,7 @@
 import { Message } from 'discord.js';
+import { stripMarkdownQuote } from '../utils/content_format';
 
-const rePeople = String.raw`(?:any|some) one`;
+const rePeople = String.raw`(?:any|some) (?:one|1+)`;
 const reHas = String.raw`(?:ha(?:s|ve)|got)`;
 const reQuantifier = String.raw`(?:any?|some|much)`;
 const reHistory = String.raw`(?: prior| past)`;
@@ -14,7 +15,8 @@ const heuristicJustAskRegex = new RegExp(
 );
 
 export function detectVagueQuestion(msg: Message) {
-  if (msg.cleanContent.match(heuristicJustAskRegex)) {
+  const content = stripMarkdownQuote(msg.cleanContent);
+  if (content.split(' ').length < 60 && content.match(heuristicJustAskRegex)) {
     msg.reply(`
 **Don't ask to ask. Just Ask**
 Here's why https://sol.gfxile.net/dontask.html
