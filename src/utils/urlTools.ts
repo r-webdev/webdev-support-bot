@@ -97,6 +97,7 @@ export const JQUERY_KEYWORD = '!jquery';
 export const POINTS_KEYWORD = '!points';
 export const LEADERBOARD_KEYWORD = '!leaderboard';
 export const DECAY_KEYWORD = '!decay';
+export const MODULE_KEYWORD = '!modules';
 
 /**
  * dynamic regExp matching all possible Object.keys(providers) as keyword
