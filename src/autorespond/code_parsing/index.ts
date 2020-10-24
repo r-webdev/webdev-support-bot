@@ -1,8 +1,8 @@
 import { Message } from 'discord.js';
-import { createCodeBlockCapturer } from '../utils/codeBlockCapturer';
-import { pipe } from '../utils/pipe';
-import { some } from '../utils/some';
-import { pluck } from '../utils/pluck';
+import { createCodeBlockCapturer } from '../../utils/codeBlockCapturer';
+import { pipe } from '../../utils/pipe';
+import { some } from '../../utils/some';
+import { pluck } from '../../utils/pluck';
 import { hasVarInSource } from './hasVarInSource';
 
 const jsCodeBlocks = createCodeBlockCapturer([
