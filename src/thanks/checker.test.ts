@@ -17,6 +17,11 @@ describe('thanks checked', () => {
       'https://github.com/ljosberinn/webdev-support-bot/blob/master/src/thanks/index.ts',
       false,
     ],
+    ['merci beaucoup', true],
+    ['non merci', false],
+    ['danke', true],
+    ['谢谢', true],
+    ['nein danke', false],
   ])('acts only on appropriate input (case %s)', (string, result) => {
     expect(checker(string)).toBe(result);
   });
