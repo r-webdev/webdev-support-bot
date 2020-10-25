@@ -5,6 +5,8 @@ import nothankyou from './nothankyou';
 import { map } from '../utils/map';
 
 type ThankDef = typeof thanks[number];
+const wordBoundaryBefore = String.raw`(?<=^|$|\P{L})`;
+const wordBoundaryAfter = String.raw`(?=^|$|\P{L})`;
 
 const wordBoundarableRegex = /\p{Changes_When_Uppercased}|\p{Changes_When_Lowercased}/u;
 const english = ['ty', 'tyvm', 'thanks', 'thx', 'tnx', 'thank', 'thnaks'];
@@ -13,7 +15,9 @@ const negativeEnglish = english
   .concat(['no need to thank', 'thanks,? but no thanks']);
 
 const mapWordBoundary = map((str: string) =>
-  wordBoundarableRegex.test(str) ? String.raw`\b${str}\b` : str
+  wordBoundarableRegex.test(str)
+    ? String.raw`${wordBoundaryBefore}${str}${wordBoundaryAfter}`
+    : str
 );
 
 const mapTextFromDefs = map((def: ThankDef) =>
@@ -42,6 +46,8 @@ const noThanksRegex = new RegExp(
   String.raw`(${[...mapWordBoundary(noThanksSet)].join('|')})`,
   'gui'
 );
+
+console.log(String.raw`(?<!\/)(${[...mapWordBoundary(thanksSet)].join('|')})`);
 const hasThanks = str =>
   removeDiacritics(str)
     .replace(/\s+/, ' ')
