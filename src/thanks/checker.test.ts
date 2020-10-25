@@ -23,6 +23,7 @@ describe('thanks checked', () => {
     ['谢谢', true],
     ['nein danke', false],
     ['Еще раз спасибо за вашу помощь', true],
+    ['cheers love, the cavalries here', true],
   ])('acts only on appropriate input (case %s)', (string, result) => {
     expect(checker(string)).toBe(result);
   });

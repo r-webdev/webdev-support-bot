@@ -12,6 +12,7 @@ const wordBoundaryBefore = String.raw`(?<=^|$|\P{L})`;
 const wordBoundaryAfter = String.raw`(?=^|$|\P{L})`;
 
 const wordBoundarableRegex = /\p{Changes_When_Uppercased}|\p{Changes_When_Lowercased}/u;
+const nonNegativableEnglish = ['cheers'];
 const english = ['ty', 'tyvm', 'thanks', 'thx', 'tnx', 'thank', 'thnaks'];
 const negativeEnglish = english
   .flatMap(word => ['n ' + word, 'n' + word, 'no' + word, 'no ' + word])
@@ -36,7 +37,11 @@ const [noThanksWrappable, noThanksUnwrappable] = partitionWrap(
   new Set(merge(mapTextFromDefs(nothanks), mapTextFromDefs(nothankyou)))
 );
 
-const wrapThanksSet = new Set([...english, ...thanksWrappable]);
+const wrapThanksSet = new Set([
+  ...english,
+  ...nonNegativableEnglish,
+  ...thanksWrappable,
+]);
 const wrapNoThanksSet = new Set([...negativeEnglish, ...noThanksWrappable]);
 
 const or = <T>(iter: Iterable<T>) => `(?:${[...iter].join('|')})`;
