@@ -3,6 +3,8 @@ import thankyou from './thankyou';
 import nothanks from './nothanks';
 import nothankyou from './nothankyou';
 import { map } from '../utils/map';
+import { partition } from '../utils/partition';
+import { merge } from '../utils/merge';
 
 type ThankDef = typeof thanks[number];
 
@@ -15,10 +17,8 @@ const negativeEnglish = english
   .flatMap(word => ['n ' + word, 'n' + word, 'no' + word, 'no ' + word])
   .concat(['no need to thank', 'thanks,? but no thanks']);
 
-const mapWordBoundary = map((str: string) =>
-  wordBoundarableRegex.test(str)
-    ? String.raw`${wordBoundaryBefore}${str}${wordBoundaryAfter}`
-    : str
+const partitionWrap = partition(
+  (str: string) => !!str.match(wordBoundarableRegex)
 );
 
 const mapTextFromDefs = map((def: ThankDef) =>
@@ -28,24 +28,30 @@ const mapTextFromDefs = map((def: ThankDef) =>
 const removeDiacritics = (str: string) =>
   str.normalize('NFD').replace(/\p{Diacritic}/gu, '');
 
-const thanksSet = new Set([
-  ...english,
-  ...mapTextFromDefs(thanks),
-  ...mapTextFromDefs(thankyou),
-]);
-const noThanksSet = new Set([
-  ...negativeEnglish,
-  ...mapTextFromDefs(nothanks),
-  ...mapTextFromDefs(nothankyou),
-]);
+const [thanksWrappable, thanksUnwrappable] = partitionWrap(
+  new Set(merge(mapTextFromDefs(thanks), mapTextFromDefs(thankyou)))
+);
+
+const [noThanksWrappable, noThanksUnwrappable] = partitionWrap(
+  new Set(merge(mapTextFromDefs(nothanks), mapTextFromDefs(nothankyou)))
+);
+
+const wrapThanksSet = new Set([...english, ...thanksWrappable]);
+const wrapNoThanksSet = new Set([...negativeEnglish, ...noThanksWrappable]);
+
+const or = <T>(iter: Iterable<T>) => `(?:${[...iter].join('|')})`;
 
 const thanksRegex = new RegExp(
-  String.raw`(?<!\/)(${[...mapWordBoundary(thanksSet)].join('|')})`,
+  String.raw`(?<!\/)((?:${wordBoundaryBefore}${or(
+    wrapThanksSet
+  )}${wordBoundaryAfter})|${or(thanksUnwrappable)})`,
   'gui'
 );
 
 const noThanksRegex = new RegExp(
-  String.raw`(${[...mapWordBoundary(noThanksSet)].join('|')})`,
+  String.raw`(?<!\/)((?:${wordBoundaryBefore}${or(
+    wrapNoThanksSet
+  )}${wordBoundaryAfter})|${or(noThanksUnwrappable)})`,
   'gui'
 );
 
