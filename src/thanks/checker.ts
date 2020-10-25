@@ -5,6 +5,7 @@ import nothankyou from './nothankyou';
 import { map } from '../utils/map';
 
 type ThankDef = typeof thanks[number];
+
 const wordBoundaryBefore = String.raw`(?<=^|$|\P{L})`;
 const wordBoundaryAfter = String.raw`(?=^|$|\P{L})`;
 
@@ -42,12 +43,12 @@ const thanksRegex = new RegExp(
   String.raw`(?<!\/)(${[...mapWordBoundary(thanksSet)].join('|')})`,
   'gui'
 );
+
 const noThanksRegex = new RegExp(
   String.raw`(${[...mapWordBoundary(noThanksSet)].join('|')})`,
   'gui'
 );
 
-console.log(String.raw`(?<!\/)(${[...mapWordBoundary(thanksSet)].join('|')})`);
 const hasThanks = str =>
   removeDiacritics(str)
     .replace(/\s+/, ' ')
