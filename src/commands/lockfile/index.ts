@@ -1,6 +1,6 @@
 import { Message } from 'discord.js';
 
-const handleCodeRequest = async (msg: Message) => {
+const handleResetLockfileRequest = async (msg: Message) => {
   await msg.channel.send(`**How to reset your lockfile:**
 
 1. Remove your lockfile — it is either \`package-lock.json\` or when using yarn \`yarn.lock\`
@@ -9,4 +9,4 @@ const handleCodeRequest = async (msg: Message) => {
 `);
 };
 
-export default handleCodeRequest;
+export default handleResetLockfileRequest;

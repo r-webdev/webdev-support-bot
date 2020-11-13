@@ -18,6 +18,7 @@ import handlePHPQuery from './commands/php';
 import handlePointsRequest from './commands/points';
 import handleJobPostingRequest from './commands/post';
 import handleVSCodeRequest from './commands/vscode';
+import handleResetLockfileRequest from './commands/lockfile';
 import {
   DISCORD_TOKEN,
   IS_PROD,
@@ -181,7 +182,7 @@ const handleMessage = async (msg: Message) => {
     case LEADERBOARD_KEYWORD:
       return await handleLeaderboardRequest(msg);
     case LOCKFILE_KEYWORD:
-      return
+      return handleResetLockfileRequest(msg);
     // case POINTS_KEYWORD:
     //   return await handlePointsRequest(msg);
     default:
