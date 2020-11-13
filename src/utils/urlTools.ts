@@ -98,6 +98,7 @@ export const POINTS_KEYWORD = '!points';
 export const LEADERBOARD_KEYWORD = '!leaderboard';
 export const DECAY_KEYWORD = '!decay';
 export const MODULE_KEYWORD = '!modules';
+export const LOCKFILE_KEYWORD = '!lockfile';
 
 /**
  * dynamic regExp matching all possible Object.keys(providers) as keyword

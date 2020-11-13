@@ -52,6 +52,7 @@ import {
   LEADERBOARD_KEYWORD,
   DECAY_KEYWORD,
   MODULE_KEYWORD,
+  LOCKFILE_KEYWORD,
 } from './utils/urlTools';
 import {
   generateCleanContent,
@@ -179,6 +180,8 @@ const handleMessage = async (msg: Message) => {
       return await handleJQueryCommand(msg);
     case LEADERBOARD_KEYWORD:
       return await handleLeaderboardRequest(msg);
+    case LOCKFILE_KEYWORD:
+      return
     // case POINTS_KEYWORD:
     //   return await handlePointsRequest(msg);
     default:
