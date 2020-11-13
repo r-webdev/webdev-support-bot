@@ -7,6 +7,6 @@ test('shows how to reset lockfile', async () => {
   };
 
   await handleCodeRequest(msg);
-  const jqueryBad = msg.channel.send.mock.calls[0][0];
-  expect(jqueryBad).toMatchSnapshot();
+  const response = msg.channel.send.mock.calls[0][0];
+  expect(response).toMatchSnapshot();
 });
