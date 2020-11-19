@@ -13,7 +13,18 @@ const wordBoundaryAfter = String.raw`(?=^|$|\P{L})`;
 
 const wordBoundarableRegex = /\p{Changes_When_Uppercased}|\p{Changes_When_Lowercased}/u;
 const nonNegativableEnglish = ['cheers'];
-const english = ['ty', 'tyvm', 'thanks', 'thx', 'tnx', 'thank', 'thnaks', 'tysm'];
+const english = [
+  'ty',
+  'tyvm',
+  'thanks',
+  'thx',
+  'tnx',
+  'thank',
+  'thnaks',
+  'tysm',
+  'thanx',
+  'thnx',
+];
 const negativeEnglish = english
   .flatMap(word => ['n ' + word, 'n' + word, 'no' + word, 'no ' + word])
   .concat(['no need to thank', 'thanks,? but no thanks']);
