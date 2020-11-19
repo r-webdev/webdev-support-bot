@@ -1,4 +1,4 @@
-import { Message, EmbedField } from 'discord.js';
+import { Message, EmbedField, Client } from 'discord.js';
 
 import { POINT_LIMITER_IN_MINUTES } from '../env';
 import pointHandler, {
@@ -22,9 +22,25 @@ const timeUntilCooldownReset = (entry: number) =>
     Number.parseInt(POINT_LIMITER_IN_MINUTES) - (Date.now() - entry) / 60000
   );
 
+const getReply = async (msg): Promise<undefined | Message> => {
+  if (msg.reference) {
+    const { channelID, guildID, messageID } = msg.reference;
+    const guild = await msg.client.guilds.fetch(guildID);
+    if (guild) {
+      const channel = guild.channels.resolve(channelID);
+      if (channel.isText()) {
+        return channel.messages.fetch(messageID);
+      }
+    }
+  }
+};
+
 const handleThanks = async (msg: Message) => {
   const botId = msg.author.bot;
-  if (botId || msg.mentions.users.size === 0) {
+
+  const reply = await getReply(msg);
+
+  if (botId || (msg.mentions.users.size === 0 && !reply)) {
     return; // Break if no user has been mentioned
   }
 
@@ -43,7 +59,13 @@ const handleThanks = async (msg: Message) => {
 
   const usersOnCooldown: CooldownUser[] = [];
 
-  const mentionedUsers = msg.mentions.users.filter(u => {
+  const mentionedUsersWithReply = msg.mentions.users.clone();
+  if (reply) {
+    unquotedMentionedUserIds.add(reply.author.id);
+    mentionedUsersWithReply.set(reply.author.id, reply.author);
+  }
+
+  const thankableUsers = mentionedUsersWithReply.filter(u => {
     if (!unquotedMentionedUserIds.has(u.id)) return false;
 
     const entry: number = cache.get(
@@ -80,25 +102,25 @@ const handleThanks = async (msg: Message) => {
       })
     );
   }
-  console.log({ mentionedUsers });
+
+  console.log({ thankableUsers });
   // Break if no valid users remain
-  if (mentionedUsers.size === 0) {
+  if (thankableUsers.size === 0) {
     return;
   }
 
-  mentionedUsers.forEach(async user => await pointHandler(user.id, msg));
-
-  const title = `Point${mentionedUsers.size === 1 ? '' : 's'} received!`;
+  thankableUsers.forEach(async user => await pointHandler(user.id, msg));
+  const title = `Point${thankableUsers.size === 1 ? '' : 's'} received!`;
 
   const description = `<@!${msg.author.id}> has given a point to ${
-    mentionedUsers.size === 1
-      ? `<@!${mentionedUsers.first().id}>`
+    thankableUsers.size === 1
+      ? `<@!${thankableUsers.first().id}>`
       : 'the users mentioned below'
   }!`;
 
   const fields: EmbedField[] =
-    mentionedUsers.size > 1
-      ? mentionedUsers.array().map((u, i) => ({
+    thankableUsers.size > 1
+      ? thankableUsers.array().map((u, i) => ({
           inline: false,
           name: (i + 1).toString() + '.',
           value: `<@!${u.id}>`,
