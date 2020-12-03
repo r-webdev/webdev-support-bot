@@ -11,17 +11,14 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:ci": "jest --ci",
-    "lint:fix": "eslint --fix src && prettier --write src"
+    "lint:fix": "eslint --fix src && prettier --write src",
+    "lint:types": "tsc --noEmit"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@sentry/node": "5.28.0",
-    "@types/dom-parser": "0.1.1",
-    "@types/mongoose": "5.10.2",
-    "@types/node": "14.14.10",
-    "@types/node-fetch": "2.5.7",
     "compare-versions": "3.6.0",
     "date-fns": "2.16.1",
     "discord.js": "12.5.1",
@@ -32,9 +29,13 @@
     "node-cache": "5.1.2",
     "node-fetch": "2.6.1",
     "ts-node": "9.1.0",
-    "typescript": "^4.0.3"
+    "typescript": "4.1.2"
   },
   "devDependencies": {
+    "@types/dom-parser": "0.1.1",
+    "@types/mongoose": "5.10.2",
+    "@types/node": "14.14.10",
+    "@types/node-fetch": "2.5.7",
     "@sentry/types": "5.28.0",
     "@types/jest": "26.0.16",
     "dotenv": "8.2.0",

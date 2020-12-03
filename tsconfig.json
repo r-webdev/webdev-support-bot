@@ -7,7 +7,8 @@
     "moduleResolution": "node",
     "sourceMap": true,
     "outDir": "./build",
-    "rootDir": "./src"
+    "rootDir": "./src",
+    "skipLibCheck": true
   },
   "include": ["./src/**/*.ts"],
   "exclude": ["node_modules", "./src/**/__fixtures__/*", "./src/**/*.test.ts"]
