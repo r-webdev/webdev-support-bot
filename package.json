@@ -37,7 +37,7 @@
     "@types/node": "14.14.11",
     "@types/node-fetch": "2.5.7",
     "@sentry/types": "5.29.0",
-    "@types/jest": "26.0.17",
+    "@types/jest": "26.0.18",
     "dotenv": "8.2.0",
     "eslint": "7.15.0",
     "eslint-config-galex": "0.9.7",
