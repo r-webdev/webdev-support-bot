@@ -72,7 +72,7 @@ export default [
   { language: 'Kannada', symbol: 'kn', text: 'ಧನ್ಯವಾದಗಳು' },
   { language: 'Kazakh', symbol: 'kk', text: 'рахмет' },
   { language: 'Khmer', symbol: 'km', text: 'សូមអរគុណ' },
-  { language: 'Kurdish', symbol: 'ku', text: 'spas' },
+  // { language: 'Kurdish', symbol: 'ku', text: 'spas' },
   { language: 'Kyrgyz', symbol: 'ky', text: 'рахмат' },
   { language: 'Lao', symbol: 'lo', text: 'ຂອບໃຈ' },
   { language: 'Latin', symbol: 'la', text: 'gratias ago' },
