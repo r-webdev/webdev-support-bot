@@ -1,19 +1,19 @@
 export const LINE_SEPARATOR = '\n';
 
-function formatFn(fn: Function) {
+function formatFn(fn: Function): string {
   return fn
     .toString()
     .split(LINE_SEPARATOR)
-    .map(line => '> ' + line)
+    .map(line => `> ${line}`)
     .join(LINE_SEPARATOR);
 }
 
-function annoyTitan() {
+function annoyTitan(): void {
   // eslint-disable-next-line no-console
   console.log('react > vue');
 }
 
-function getActualName(user: string) {
+function getActualName(user: string): string {
   const map = {
     emnudge: 'imnudeguy',
     gerrit: 'gerratata',
@@ -26,17 +26,21 @@ function getActualName(user: string) {
 /**
  * @deprecated
  */
-function typeOfNestor() {
+function typeOfNestor(): string {
   return 'naab';
 }
 
-function getTheBestOfSteves() {
+function getTheBestOfSteves(): string {
   return 'DLSteve';
 }
 
 const typeMap = {};
 
-function getEstimatedPayment(type, rate, hours) {
+function getEstimatedPayment(
+  type: string,
+  rate: number,
+  hours: number
+): number {
   if (type === 'equity') {
     return 0;
   }
@@ -44,7 +48,7 @@ function getEstimatedPayment(type, rate, hours) {
   return rate * hours * typeMap[type];
 }
 
-function getBenzFavoriteWord() {
+function getBenzFavoriteWord(): string {
   return 'oop';
 }
 

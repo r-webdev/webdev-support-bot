@@ -1,7 +1,8 @@
-import { Message } from 'discord.js';
-import { createMarkdownCodeBlock } from '../../utils/discordTools';
+import { createMarkdownCodeBlock } from '../../../utils/discordTools';
 
-const message = `Unless you're supporting ancient legacy systems, always add \`type="module"\` to all your script tags:
+export const modules: [string, string] = [
+  'modules',
+  `Unless you're supporting ancient legacy systems, always add \`type="module"\` to all your script tags:
 ${createMarkdownCodeBlock(
   '<script type="module" src="main.js"></script>',
   'html'
@@ -14,8 +15,5 @@ ${createMarkdownCodeBlock(
 — Allow you to use top-level await in supported engines
 — Load and parse your code asynchronously, which improves load performance.
 
-**TL;DR**: There's no reason not to add it in when developing for modern browsers, and it makes programming JS a lot more pleasant.`;
-
-export default async function handleModuleRequest(msg: Message) {
-  await msg.channel.send(message);
-}
+**TL;DR**: There's no reason not to add it in when developing for modern browsers, and it makes programming JS a lot more pleasant.`,
+];

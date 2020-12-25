@@ -1,8 +1,9 @@
 {
   "compilerOptions": {
-    "lib": ["es2019", "es2020.string"],
+    "lib": ["es2019", "es2020"],
     "allowJs": true,
     "target": "es2019",
+    "typeRoots": ["types.d.ts","src/types.d.ts"],
     "module": "commonjs",
     "moduleResolution": "node",
     "sourceMap": true,

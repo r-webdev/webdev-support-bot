@@ -1,4 +1,4 @@
-import { Message, GuildMember } from 'discord.js';
+import type { Message, GuildMember } from 'discord.js';
 
 import { startTime } from '..';
 import {
@@ -11,7 +11,7 @@ import { cache } from '../spam_filter';
 import { createEmbed } from '../utils/discordTools';
 import HelpfulRoleMember from './db_model';
 
-import { IUser } from '.';
+import type { IUser } from '.';
 
 const grantHelpfulRole = async (user: GuildMember, msg: Message) => {
   // Check if the user has the role
@@ -81,11 +81,11 @@ const pointHandler = async (
   const details = {
     guild: msg.guild.id,
     user: userID,
-  };
+  } as const;
 
   let user: IUser = await HelpfulRoleMember.findOne(details);
   if (!user) {
-    user = await HelpfulRoleMember.create(details);
+    user = await HelpfulRoleMember.create(details as unknown);
   }
 
   // Add a point to the user

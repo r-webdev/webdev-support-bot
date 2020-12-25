@@ -1,24 +1,33 @@
-import * as Sentry from '@sentry/node';
-import { Client, Message, MessageReaction, User } from 'discord.js';
-import * as mongoose from 'mongoose';
+/* eslint-disable @typescript-eslint/no-misused-promises */
+/* eslint-disable inclusive-language/use-inclusive-words */
+/* eslint-disable @typescript-eslint/no-floating-promises */
+import { init } from '@sentry/node';
+import type { Message, MessageReaction, User } from 'discord.js';
+import { InteractionResponseType } from 'discord.js';
+import { Client } from 'discord.js';
+import { connect } from 'mongoose';
 
-import handleBundlephobiaQuery from './commands/bundlephobia';
-import handleCanIUseQuery from './commands/caniuse';
-import handleCodeRequest from './commands/code';
-import handleComposerQuery from './commands/composer';
-import handleDecayRequest from './commands/decay';
-import handleFormattingRequest from './commands/formatting';
-import handleGithubQuery from './commands/github';
-import handleModuleRequest from './commands/modules';
-import handleJQueryCommand from './commands/jquery';
-import handleLeaderboardRequest from './commands/leaderboard';
-import handleMDNQuery from './commands/mdn';
-import handleNPMQuery from './commands/npm';
-import handlePHPQuery from './commands/php';
-import handlePointsRequest from './commands/points';
-import handleJobPostingRequest from './commands/post';
-import handleVSCodeRequest from './commands/vscode';
-import handleResetLockfileRequest from './commands/lockfile';
+import { detectVar as _detectVar } from './autorespond/code_parsing';
+import { detectVagueQuestion } from './autorespond/justask';
+import { limitFnByUser } from './cache';
+// import handleBundlephobiaQuery from './commands/bundlephobia';
+// import handleCanIUseQuery from './commands/caniuse';
+// import handleCodeRequest from './commands/code';
+// import handleComposerQuery from './commands/composer';
+// import handleDecayRequest from './commands/decay';
+// import handleFormattingRequest from './commands/formatting';
+// import handleGithubQuery from './commands/github';
+import { createHowInteractionHandler } from './commands/how';
+import { createWhyInteractionHandler } from './commands/why';
+// import handleLeaderboardRequest from './commands/leaderboard';
+// import handleResetLockfileRequest from './commands/lockfile';
+// import handleMDNQuery from './commands/mdn';
+// import handleModuleRequest from './commands/modules';
+// import handleNPMQuery from './commands/npm';
+// import handlePHPQuery from './commands/php';
+// import handlePointsRequest from './commands/points';
+// import handleJobPostingRequest from './commands/post';
+// import handleVSCodeRequest from './commands/vscode';
 import {
   DISCORD_TOKEN,
   IS_PROD,
@@ -33,12 +42,17 @@ import handleHelpfulRole, {
   allowedEmojis as helpfulRoleEmojis,
 } from './helpful_role';
 import pointDecaySystem from './helpful_role/point_decay';
+import { handleInteractionWebhook, registerCommand } from './interactions';
 import spamFilter from './spam_filter';
 import handleSpam from './spam_filter/handler';
 import handleThanks from './thanks';
 import isThanksMessage from './thanks/checker';
-import { Provider } from './utils/discordTools';
-import * as errors from './utils/errors';
+import {
+  generateCleanContent,
+  stripMarkdownQuote,
+} from './utils/content_format';
+import type { Provider } from './utils/discordTools';
+import { unknownError } from './utils/errors';
 import {
   providers,
   KEYWORD_REGEXP,
@@ -55,16 +69,9 @@ import {
   MODULE_KEYWORD,
   LOCKFILE_KEYWORD,
 } from './utils/urlTools';
-import {
-  generateCleanContent,
-  stripMarkdownQuote,
-} from './utils/content_format';
-import { detectVar as _detectVar } from './autorespond/code_parsing';
-import { limitFnByUser } from './cache';
-import { detectVagueQuestion } from './autorespond/justask';
 
 if (IS_PROD) {
-  Sentry.init({
+  init({
     dsn:
       'https://9902d087a01f4d8883daad5d59d90736@o163592.ingest.sentry.io/5307626',
   });
@@ -81,9 +88,19 @@ const blacklistedServer = new Set([
   '657145936207806465', // nazi stuff
 ]);
 
-client.on('ready', () => {
+client.on('ready', async () => {
   // eslint-disable-next-line no-console
-  console.log(`Logged in as ${client.user.tag}!\nEnvironment: ${ENV}`);
+  registerCommand(
+    client,
+    '618935554171469834',
+    createWhyInteractionHandler(client, '618935554171469834')
+  );
+  registerCommand(
+    client,
+    '618935554171469834',
+    createHowInteractionHandler(client, '618935554171469834')
+  );
+  client.ws.on('INTERACTION_CREATE', handleInteractionWebhook);
 });
 
 client.once('ready', async () => {
@@ -142,115 +159,141 @@ const handleMessage = async (msg: Message) => {
   }
 
   // Points command override due to passing flags
-  if (
-    isWebdevAndWebDesignServer(msg) &&
-    cleanContent.startsWith(POINTS_KEYWORD)
-  ) {
-    return await handlePointsRequest(msg);
-  }
+  // if (
+  //   isWebdevAndWebDesignServer(msg) &&
+  //   cleanContent.startsWith(POINTS_KEYWORD)
+  // ) {
+  //   return handlePointsRequest(msg);
+  // }
 
   // Decay command override due to passing flags
-  if (
-    isWebdevAndWebDesignServer(msg) &&
-    cleanContent.startsWith(DECAY_KEYWORD)
-  ) {
-    return await handleDecayRequest(msg);
-  }
+  // if (
+  //   isWebdevAndWebDesignServer(msg) &&
+  //   cleanContent.startsWith(DECAY_KEYWORD)
+  // ) {
+  //   await handleDecayRequest(msg);
+  //   return;
+  // }
 
   // Pipe the message into the spam filter
-  const spamMetadata = spamFilter(msg);
+  // const spamMetadata = spamFilter(msg);
 
-  if (spamMetadata) {
-    await handleSpam(spamMetadata);
-    return;
+  // if (spamMetadata) {
+  //   await handleSpam(spamMetadata);
+  //   return;
+  // }
+
+  // switch (cleanContent) {
+  //   case MODULE_KEYWORD: {
+  //     await handleModuleRequest(msg);
+  //     return;
+  //   }
+  //   case FORMATTING_KEYWORD:
+  //   case FORMATTING_KEYWORD_ALT: {
+  //     await handleFormattingRequest(msg);
+  //     return;
+  //   }
+  //   case CODE_KEYWORD: {
+  //     await handleCodeRequest(msg);
+  //     return;
+  //   }
+  //   case VSCODE_KEYWORD: {
+  //     await handleVSCodeRequest(msg);
+  //     return;
+  //   }
+  //   case JOB_POSTING_KEYWORD:
+  //     return handleJobPostingRequest(msg);
+  //   case JQUERY_KEYWORD: {
+  //     await handleJQueryCommand(msg);
+  //     return;
+  //   }
+  //   case LEADERBOARD_KEYWORD: {
+  //     await handleLeaderboardRequest(msg);
+  //     return;
+  //   }
+  //   case LOCKFILE_KEYWORD:
+  //     return handleResetLockfileRequest(msg);
+  //   // case POINTS_KEYWORD:
+  //   //   return await handlePointsRequest(msg);
+  //   default:
+  //     // todo: probably refactor this sooner or later
+  //     const isGeneralHelpRequest =
+  //       cleanContent.includes(HELP_KEYWORD) &&
+  //       !!msg.mentions.users.find(
+  //         ({ username }) => username === client.user.username
+  //       );
+
+  //     if (isGeneralHelpRequest) {
+  //       return await msg.reply(
+  //         [
+  //           '\ntry one of these:',
+  //           ...Object.values(help).map(str => `> ${str}`),
+  //           'or',
+  //           '> !formatting',
+  //           '> !code',
+  //         ].join('\n')
+  //       );
+  //     }
+
+  const isCommandQuery =
+    cleanContent.startsWith('!') && KEYWORD_REGEXP.test(cleanContent);
+
+  // bail if no keyword was found
+  if (!isCommandQuery) {
+    return handleNonCommandMessages(msg);
   }
 
-  switch (cleanContent) {
-    case MODULE_KEYWORD:
-      return await handleModuleRequest(msg);
-    case FORMATTING_KEYWORD:
-    case FORMATTING_KEYWORD_ALT:
-      return await handleFormattingRequest(msg);
-    case CODE_KEYWORD:
-      return await handleCodeRequest(msg);
-    case VSCODE_KEYWORD:
-      return await handleVSCodeRequest(msg);
-    case JOB_POSTING_KEYWORD:
-      return await handleJobPostingRequest(msg);
-    case JQUERY_KEYWORD:
-      return await handleJQueryCommand(msg);
-    case LEADERBOARD_KEYWORD:
-      return await handleLeaderboardRequest(msg);
-    case LOCKFILE_KEYWORD:
-      return handleResetLockfileRequest(msg);
-    // case POINTS_KEYWORD:
-    //   return await handlePointsRequest(msg);
-    default:
-      // todo: probably refactor this sooner or later
-      const isGeneralHelpRequest =
-        cleanContent.includes(HELP_KEYWORD) &&
-        !!msg.mentions.users.find(
-          ({ username }) => username === client.user.username
-        );
+  const keyword = cleanContent.split(' ', 1)[0].slice(1);
+  const searchTerm = trimCleanContent(keywordMap[keyword], cleanContent);
 
-      if (isGeneralHelpRequest) {
-        return await msg.reply(
-          [
-            '\ntry one of these:',
-            ...Object.values(help).map(str => `> ${str}`),
-            'or',
-            '> !formatting',
-            '> !code',
-          ].join('\n')
-        );
-      }
+  const isSpecificHelpRequest =
+    searchTerm.length === 0 || searchTerm === HELP_KEYWORD;
 
-      const isCommandQuery =
-        cleanContent.startsWith('!') && KEYWORD_REGEXP.test(cleanContent);
-
-      // bail if no keyword was found
-      if (!isCommandQuery) {
-        return handleNonCommandMessages(msg);
-      }
-
-      const keyword = cleanContent.split(' ', 1)[0].slice(1);
-      const searchTerm = trimCleanContent(keywordMap[keyword], cleanContent);
-
-      const isSpecificHelpRequest =
-        searchTerm.length === 0 || searchTerm === HELP_KEYWORD;
-
-      // empty query or specific call for help
-      if (isSpecificHelpRequest) {
-        await msg.reply(help[keyword]);
-        return;
-      }
-
-      try {
-        switch (keyword) {
-          case keywordMap.mdn:
-            return await handleMDNQuery(msg, searchTerm);
-          case keywordMap.caniuse:
-            return await handleCanIUseQuery(msg, searchTerm);
-          case keywordMap.npm:
-            return await handleNPMQuery(msg, searchTerm);
-          case keywordMap.composer:
-            return await handleComposerQuery(msg, searchTerm);
-          case keywordMap.github:
-            return await handleGithubQuery(msg, searchTerm);
-          case keywordMap.bundlephobia:
-            return await handleBundlephobiaQuery(msg, searchTerm);
-          case keywordMap.php:
-            return await handlePHPQuery(msg, searchTerm);
-          default:
-            throw new Error('classic "shouldnt be here" scenario');
-        }
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error(`${error.name}: ${error.message}`);
-        await msg.reply(errors.unknownError);
-      }
+  // empty query or specific call for help
+  if (isSpecificHelpRequest) {
+    await msg.reply(help[keyword]);
   }
+
+  // try {
+  //   switch (keyword) {
+  //     case keywordMap.mdn: {
+  //       await handleMDNQuery(msg, searchTerm);
+  //       return;
+  //     }
+  //     case keywordMap.caniuse: {
+  //       await handleCanIUseQuery(msg, searchTerm);
+  //       return;
+  //     }
+  //     case keywordMap.npm: {
+  //       await handleNPMQuery(msg, searchTerm);
+  //       return;
+  //     }
+  //     case keywordMap.composer: {
+  //       await handleComposerQuery(msg, searchTerm);
+  //       return;
+  //     }
+  //     case keywordMap.github: {
+  //       await handleGithubQuery(msg, searchTerm);
+  //       return;
+  //     }
+  //     case keywordMap.bundlephobia: {
+  //       await handleBundlephobiaQuery(msg, searchTerm);
+  //       return;
+  //     }
+  //     case keywordMap.php: {
+  //       await handlePHPQuery(msg, searchTerm);
+  //       return;
+  //     }
+  //     default:
+  //       throw new Error('classic "shouldnt be here" scenario');
+  //   }
+  // } catch (error) {
+  //   // eslint-disable-next-line no-console
+  //   console.error(`${error.name}: ${error.message}`);
+  //   await msg.reply(unknownError);
+  // }
 };
+// };
 
 const detectVar = limitFnByUser(_detectVar, {
   delay: VAR_DETECT_LIMIT,
@@ -284,7 +327,7 @@ const prepReaction = async (reaction: MessageReaction) => {
     return;
   }
 
-  return partial ? await reaction.fetch() : reaction;
+  return partial ? reaction.fetch() : reaction;
 };
 
 const handleReactionAdd = async (reaction: MessageReaction, user: User) => {
@@ -307,7 +350,7 @@ const handleReactionAdd = async (reaction: MessageReaction, user: User) => {
 // Establish a connection with the database
 export const dbConnect = async () => {
   try {
-    await mongoose.connect(MONGO_URI, {
+    await connect(MONGO_URI, {
       useCreateIndex: true,
       useNewUrlParser: true,
       useUnifiedTopology: true,

@@ -1,6 +1,4 @@
-import { Message } from 'discord.js';
-
-import { point_up, paintbrush } from '../../utils/emojis';
+import { point_up, paintbrush } from '../../../../utils/emojis';
 import { LINE_SEPARATOR, exampleFns } from './exampleFns';
 
 const getRandomArbitrary = (min: number, max: number) =>
@@ -22,15 +20,14 @@ const otherLanguageExamples = ['php', 'css', 'html', 'ts', 'sql', 'md']
   .map(str => `\`${str}\``)
   .join(', ');
 
-const handleFormattingRequest = async (msg: Message) => {
-  await msg.channel.send(`
+export const formatting: [string, string] = [
+  'formatting',
+  `
 ${point_up} Did you know you can add ${paintbrush} syntax highlighting to your code in Discord? Try this snippet:
 
 ${getSnippetElements()}
 
 You can replace \`js\` with other languages too, e.g. ${otherLanguageExamples} and so on...
 To properly _format_ your code, try pasting it in here first: https://prettier.io/playground/
-`);
-};
-
-export default handleFormattingRequest;
+`,
+];
