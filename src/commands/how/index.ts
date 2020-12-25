@@ -24,23 +24,25 @@ const mapTransformToChoices = map(
   })
 );
 
-export const createHowInteractionHandler = (
-  client: Client,
-  guild: string
-): CommandData => ({
+export const createHowInteractionHandler = (client: Client): CommandData => ({
   description: 'quick response for common "How" questions',
   handler: async (interaction: Interaction): Promise<void> => {
     const content = howMessages.get(interaction.data.options[0].value);
     if (content) {
       // eslint-disable-next-line no-void
-      void createInteractionResponse(client, guild, interaction, {
-        data: {
+      void createInteractionResponse(
+        client,
+        interaction.guild_id,
+        interaction,
+        {
           data: {
-            content,
+            data: {
+              content,
+            },
+            type: 4,
           },
-          type: 4,
-        },
-      });
+        }
+      );
     }
   },
   name: 'how',

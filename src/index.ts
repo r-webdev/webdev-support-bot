@@ -17,8 +17,9 @@ import { limitFnByUser } from './cache';
 // import handleDecayRequest from './commands/decay';
 // import handleFormattingRequest from './commands/formatting';
 // import handleGithubQuery from './commands/github';
+import { createWhyInteractionHandler } from './commands/about';
 import { createHowInteractionHandler } from './commands/how';
-import { createWhyInteractionHandler } from './commands/why';
+import { mdnCommandBuilder } from './commands/mdn';
 // import handleLeaderboardRequest from './commands/leaderboard';
 // import handleResetLockfileRequest from './commands/lockfile';
 // import handleMDNQuery from './commands/mdn';
@@ -94,13 +95,15 @@ client.on('ready', async () => {
   registerCommand(
     client,
     '618935554171469834',
-    createWhyInteractionHandler(client, '618935554171469834')
+    createWhyInteractionHandler(client)
   );
   registerCommand(
     client,
     '618935554171469834',
-    createHowInteractionHandler(client, '618935554171469834')
+    createHowInteractionHandler(client)
   );
+
+  registerCommand(client, '618935554171469834', mdnCommandBuilder(client));
   client.ws.on('INTERACTION_CREATE', handleInteractionWebhook);
 });
 

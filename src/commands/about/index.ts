@@ -26,26 +26,28 @@ const mapTransformToChoices = map(
   })
 );
 
-export const createWhyInteractionHandler = (
-  client: Client,
-  guild: string
-): CommandData => ({
-  description: 'quick response for common "Why" questions',
+export const createWhyInteractionHandler = (client: Client): CommandData => ({
+  description: 'quick response for common "Why" or "Tell me about" questions',
   handler: async (interaction: Interaction): Promise<void> => {
     const content = whyMessages.get(interaction.data.options[0].value);
     if (content) {
       // eslint-disable-next-line no-void
-      void createInteractionResponse(client, guild, interaction, {
-        data: {
+      void createInteractionResponse(
+        client,
+        interaction.guild_id,
+        interaction,
+        {
           data: {
-            content,
+            data: {
+              content,
+            },
+            type: 4,
           },
-          type: 4,
-        },
-      });
+        }
+      );
     }
   },
-  name: 'why',
+  name: 'about',
   options: [
     {
       choices: [...mapTransformToChoices(whyMessages.keys())],
