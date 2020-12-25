@@ -15,3 +15,4 @@ export const gear = ':gear:';
 export const exclamation = ':exclamation:';
 export const paintbrush = ':paintbrush:';
 export const art = ':art:';
+export const vscode = `<:vscode:538843610209058826>`;

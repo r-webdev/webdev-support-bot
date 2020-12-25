@@ -11,11 +11,13 @@ import { map } from '../../utils/map';
 import { jquery } from './handlers/jquery';
 import { modules } from './handlers/modules';
 import { sass } from './handlers/sass';
+import { vscode } from './handlers/vscode';
 
 export const whyMessages: Map<string, string> = new Map([
   jquery,
   sass,
   modules,
+  vscode,
 ]);
 const mapTransformToChoices = map(
   (item: string): ApplicationCommandOptionChoice => ({

@@ -1,6 +1,6 @@
 /* eslint-disable unicorn/prefer-query-selector */
-import { Message } from 'discord.js';
-import * as DOMParser from 'dom-parser';
+import type { Message } from 'discord.js';
+import DOMParser from 'dom-parser';
 import { Html5Entities as Entities } from 'html-entities';
 
 import { delayedMessageAutoDeletion } from '../../utils/delayedMessageAutoDeletion';
@@ -14,22 +14,22 @@ import {
   adjustTitleLength,
   BASE_DESCRIPTION,
 } from '../../utils/discordTools';
-import * as errors from '../../utils/errors';
+import { invalidResponse, noResults, unknownError } from '../../utils/errors';
 import { getSearchUrl, buildDirectUrl } from '../../utils/urlTools';
 import useData from '../../utils/useData';
 
 const provider = 'mdn';
 const entities = new Entities();
 
-interface ParserResult {
+type ParserResult = {
   results: DOMParser.Node[];
   isEmpty: boolean;
   meta: string;
-}
+};
 
-interface ResultMeta {
+type ResultMeta = {
   getElementsByClassName(cls: string): DOMParser.Node[];
-}
+};
 
 const defaultParser = (text: string): ParserResult => {
   const parser = new DOMParser();
@@ -84,19 +84,19 @@ export const queryBuilder = (
   mdnParser: typeof defaultParser = defaultParser,
   metaDataExtraction: typeof extractMetadataFromResult = extractMetadataFromResult,
   waitForChosenResult: typeof getChosenResult = getChosenResult
-) => async (msg: Message, searchTerm: string) => {
+) => async (msg: Message, searchTerm: string): Promise<string | undefined> => {
   try {
     const searchUrl = getSearchUrl(provider, searchTerm);
     const { error, text } = await useData(searchUrl, 'text');
 
     if (error) {
-      await msg.reply(errors.invalidResponse);
+      await msg.reply(invalidResponse);
       return;
     }
 
     const { results, isEmpty, meta } = mdnParser(text);
     if (isEmpty) {
-      const sentMsg = await msg.reply(errors.noResults(searchTerm));
+      const sentMsg = await msg.reply(noResults(searchTerm));
 
       delayedMessageAutoDeletion(sentMsg);
       return;
@@ -155,7 +155,7 @@ export const queryBuilder = (
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(error);
-    await msg.reply(errors.unknownError);
+    await msg.reply(unknownError);
   }
 };
 
@@ -169,12 +169,12 @@ const sanitizeExcerpt = (excerpt: string) => {
     sanitized = sanitized.replace(')', '');
   }
 
-  return sanitized.replace(/\[]/g, '');
+  return sanitized.replace(/\[]/gu, '');
 };
 
 /**
  * Escapes *, _, `, ~, \
  */
-const escapeMarkdown = (text: string) => text.replace(/([*\\_`~])/g, '\\$1');
+const escapeMarkdown = (text: string) => text.replace(/([*\\_`~])/gu, '\\$1');
 
 export default queryBuilder();

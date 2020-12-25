@@ -89,6 +89,7 @@ const blacklistedServer = new Set([
 ]);
 
 client.on('ready', async () => {
+  // TODO: remove repetition
   // eslint-disable-next-line no-console
   registerCommand(
     client,
@@ -348,7 +349,7 @@ const handleReactionAdd = async (reaction: MessageReaction, user: User) => {
 };
 
 // Establish a connection with the database
-export const dbConnect = async () => {
+export const dbConnect = async (): Promise<void> => {
   try {
     await connect(MONGO_URI, {
       useCreateIndex: true,
