@@ -25,7 +25,7 @@
     "dom-parser": "0.1.6",
     "html-entities": "1.4.0",
     "mdn-browser-compat-data": "1.1.2",
-    "mongoose": "5.11.11",
+    "mongoose": "5.11.12",
     "node-cache": "5.1.2",
     "node-fetch": "2.6.1",
     "ts-node": "9.1.1",
