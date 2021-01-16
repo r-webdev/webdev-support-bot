@@ -27,6 +27,38 @@ interface ParserResult {
   meta: string;
 }
 
+interface SearchResponse {
+  query: string;
+  locale: string;
+  page: number;
+  pages: number;
+  starts: number;
+  end: number;
+  next: string;
+  previous: string | null;
+  count: number;
+  filter: Array<{
+    name: string;
+    slug: string;
+    options: Array<{
+      name: string;
+      slug: string;
+      count: number;
+      active: boolean;
+      urls: {
+        active: string;
+        inactive: string;
+      };
+    }>;
+  }>;
+  documents: Array<{
+    title: string;
+    slug: string;
+    locale: string;
+    excerpt: string;
+  }>;
+}
+
 interface ResultMeta {
   getElementsByClassName(cls: string): DOMParser.Node[];
 }

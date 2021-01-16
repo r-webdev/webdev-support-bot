@@ -65,7 +65,7 @@ export const providers: ProviderMap = {
   mdn: {
     color: 0x83d0f2,
     createTitle: (searchTerm: string) => `MDN results for *${searchTerm}*`,
-    direct: `https://developer.mozilla.org${TERM}`,
+    direct: `https://developer.mozilla.org/${TERM}`,
     help: '!mdn localStorage',
     icon: 'https://avatars0.githubusercontent.com/u/7565578',
     search: `https://developer.mozilla.org/en-US/search?q=${SEARCH_TERM}`,
@@ -75,7 +75,7 @@ export const providers: ProviderMap = {
     createTitle: (searchTerm: string) => `NPM results for *${searchTerm}*`,
     help: '!npm react',
     icon: 'https://avatars0.githubusercontent.com/u/6078720',
-    search: `https://www.npmjs.com/search/suggestions?q=${SEARCH_TERM}`,
+    search: `https://developer.mozilla.org/api/v1/search/en-US?highlight=false&q=${SEARCH_TERM}`,
   },
   php: {
     color: 0x8892bf,
@@ -126,7 +126,7 @@ export const buildDirectUrl = (provider: Provider, href: string) => {
     return providers[provider].direct.replace(TERM, href);
   }
 
-  throw new Error(`provider not implemeted: ${provider}`);
+  throw new Error(`provider not implemented: ${provider}`);
 };
 
 export const getExtendedInfoUrl = (provider: Provider, term: string) => {

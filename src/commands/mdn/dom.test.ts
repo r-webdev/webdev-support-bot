@@ -4,7 +4,8 @@ import * as errors from '../../utils/errors';
 import { getSearchUrl } from '../../utils/urlTools';
 import useData from '../../utils/useData';
 
-import { queryBuilder } from '.';
+import { queryBuilder } from './dom';
+import { getChosenResult } from '../../utils/discordTools';
 
 jest.mock('dom-parser');
 jest.mock('../../utils/urlTools');
@@ -12,6 +13,7 @@ jest.mock('../../utils/useData');
 
 const mockGetSearchUrl: jest.MockedFunction<typeof getSearchUrl> = getSearchUrl as any;
 const mockUseData: jest.MockedFunction<typeof useData> = useData as any;
+const mockChoose: jest.MockedFunction<typeof getChosenResult> = getChosenResult as any;
 
 describe('handleMDNQuery', () => {
   const sendMock = jest.fn();
