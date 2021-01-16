@@ -7,6 +7,7 @@ const sites = [
   'https://codesandbox.io/',
   '<https://repl.it/>',
   '<https://ideone.com/>',
+  '<https://jsfiddle.net/>',
 ].join('\n');
 
 const handleCodeRequest = async (msg: Message) => {
