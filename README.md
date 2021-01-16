@@ -24,7 +24,7 @@ Supports
 
 `!mdn` via parsing [Mozilla Developer Network](http://developer.mozilla.org/),
 
-`!caniuse` via unofficial `caniuse API` and [mdn-browser-combat-data](https://github.com/mdn/browser-compat-data),
+`!caniuse` via unofficial `caniuse API` and [@mdn/browser-combat-data](https://github.com/mdn/browser-compat-data),
 
 `!bundlephobia` via unofficial `bundlephobia API`,
 
