@@ -25,7 +25,7 @@
     "discord.js": "12.5.1",
     "dom-parser": "0.1.6",
     "html-entities": "1.4.0",
-    "mongoose": "5.11.12",
+    "mongoose": "5.11.13",
     "node-cache": "5.1.2",
     "node-fetch": "2.6.1",
     "ts-node": "9.1.1",
