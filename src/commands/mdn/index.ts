@@ -40,7 +40,7 @@ const defaultParser = (text: string): ParserResult => {
   if (!meta || (meta && meta.textContent.startsWith('0 documents found'))) {
     return {
       isEmpty: true,
-      meta,
+      meta: meta.textContent,
       results: [],
     };
   }
