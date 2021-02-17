@@ -5,7 +5,7 @@ import HelpfulRoleMember from '../../helpful_role/db_model';
 import { createEmbed } from '../../utils/discordTools';
 import { OutputField } from '../post';
 
-const handleLeaderboardRequest = async (msg: Message, limit = 10) => {
+const handleLeaderboardRequest = async (msg: Message, limit = 20) => {
   try {
     const topUsers: IUser[] =
       limit > 0
