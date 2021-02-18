@@ -2,6 +2,9 @@ import * as Sentry from '@sentry/node';
 import { Client, Message, MessageReaction, User } from 'discord.js';
 import * as mongoose from 'mongoose';
 
+import { detectVar as _detectVar } from './autorespond/code_parsing';
+import { detectVagueQuestion } from './autorespond/justask';
+import { limitFnByUser } from './cache';
 import handleBundlephobiaQuery from './commands/bundlephobia';
 import handleCanIUseQuery from './commands/caniuse';
 import handleCodeRequest from './commands/code';
@@ -9,16 +12,17 @@ import handleComposerQuery from './commands/composer';
 import handleDecayRequest from './commands/decay';
 import handleFormattingRequest from './commands/formatting';
 import handleGithubQuery from './commands/github';
-import handleModuleRequest from './commands/modules';
 import handleJQueryCommand from './commands/jquery';
 import handleLeaderboardRequest from './commands/leaderboard';
+import handleResetLockfileRequest from './commands/lockfile';
 import handleMDNQuery from './commands/mdn';
+import handleModuleRequest from './commands/modules';
 import handleNPMQuery from './commands/npm';
 import handlePHPQuery from './commands/php';
 import handlePointsRequest from './commands/points';
 import handleJobPostingRequest from './commands/post';
 import handleVSCodeRequest from './commands/vscode';
-import handleResetLockfileRequest from './commands/lockfile';
+import handleFlexboxCommand from './commands/flexbox';
 import {
   DISCORD_TOKEN,
   IS_PROD,
@@ -37,6 +41,10 @@ import spamFilter from './spam_filter';
 import handleSpam from './spam_filter/handler';
 import handleThanks from './thanks';
 import isThanksMessage from './thanks/checker';
+import {
+  generateCleanContent,
+  stripMarkdownQuote,
+} from './utils/content_format';
 import { Provider } from './utils/discordTools';
 import * as errors from './utils/errors';
 import {
@@ -54,14 +62,8 @@ import {
   DECAY_KEYWORD,
   MODULE_KEYWORD,
   LOCKFILE_KEYWORD,
+  FLEXBOX_KEYWORD,
 } from './utils/urlTools';
-import {
-  generateCleanContent,
-  stripMarkdownQuote,
-} from './utils/content_format';
-import { detectVar as _detectVar } from './autorespond/code_parsing';
-import { limitFnByUser } from './cache';
-import { detectVagueQuestion } from './autorespond/justask';
 
 if (IS_PROD) {
   Sentry.init({
@@ -185,6 +187,8 @@ const handleMessage = async (msg: Message) => {
       return handleResetLockfileRequest(msg);
     // case POINTS_KEYWORD:
     //   return await handlePointsRequest(msg);
+    case FLEXBOX_KEYWORD:
+      return await handleFlexboxCommand(msg);
     default:
       // todo: probably refactor this sooner or later
       const isGeneralHelpRequest =
