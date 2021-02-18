@@ -22,6 +22,7 @@ import handlePHPQuery from './commands/php';
 import handlePointsRequest from './commands/points';
 import handleJobPostingRequest from './commands/post';
 import handleVSCodeRequest from './commands/vscode';
+import handleFlexboxCommand from './commands/flexbox';
 import {
   DISCORD_TOKEN,
   IS_PROD,
@@ -61,6 +62,7 @@ import {
   DECAY_KEYWORD,
   MODULE_KEYWORD,
   LOCKFILE_KEYWORD,
+  FLEXBOX_KEYWORD,
 } from './utils/urlTools';
 
 if (IS_PROD) {
@@ -185,6 +187,8 @@ const handleMessage = async (msg: Message) => {
       return handleResetLockfileRequest(msg);
     // case POINTS_KEYWORD:
     //   return await handlePointsRequest(msg);
+    case FLEXBOX_KEYWORD:
+      return await handleFlexboxCommand(msg);
     default:
       // todo: probably refactor this sooner or later
       const isGeneralHelpRequest =
