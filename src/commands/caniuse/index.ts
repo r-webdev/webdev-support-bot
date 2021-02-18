@@ -1,9 +1,9 @@
-import { Message } from 'discord.js';
-import * as bcd from 'mdn-browser-compat-data';
+import * as bcd from '@mdn/browser-compat-data';
 import {
   CompatStatement,
   SupportStatement,
-} from 'mdn-browser-compat-data/types';
+} from '@mdn/browser-compat-data/types';
+import { Message } from 'discord.js';
 
 import { delayedMessageAutoDeletion } from '../../utils/delayedMessageAutoDeletion';
 import {

@@ -34,18 +34,20 @@ interface ResultMeta {
 const defaultParser = (text: string): ParserResult => {
   const parser = new DOMParser();
   const document = parser.parseFromString(text);
-
+  const metaElement = document.getElementsByClassName('result-meta')[0];
+  const meta = metaElement ? metaElement.textContent : '';
+  
   // meta provides information about the amount of results found
-  const meta = document.getElementsByClassName('result-meta')[0].textContent;
-  if (meta.startsWith('0 documents found')) {
+  if(!metaElement || meta.startsWith('0 documents found')) {
     return {
       isEmpty: true,
-      meta,
-      results: [],
+      meta: '',
+      results: []
     };
   }
-
+  
   const results = document.getElementsByClassName('result');
+  
   return {
     isEmpty: false,
     meta,
