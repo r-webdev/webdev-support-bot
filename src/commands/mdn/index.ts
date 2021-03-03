@@ -1,6 +1,4 @@
-/* eslint-disable unicorn/prefer-query-selector */
 import { Message } from 'discord.js';
-import * as DOMParser from 'dom-parser';
 import { Html5Entities as Entities } from 'html-entities';
 
 import { delayedMessageAutoDeletion } from '../../utils/delayedMessageAutoDeletion';
@@ -21,37 +19,54 @@ import useData from '../../utils/useData';
 const provider = 'mdn';
 const entities = new Entities();
 
+type MDNResult = {
+  archived: boolean;
+  locale: 'en-us';
+  mdn_url: string;
+  popularity: number;
+  score: number;
+  slug: string;
+  summary: string;
+  title: string;
+  highlight: {
+    body: string[];
+    title: string[];
+  };
+};
+
 interface ParserResult {
-  results: DOMParser.Node[];
+  results: MDNResult[];
   isEmpty: boolean;
   meta: string;
 }
 
-interface ResultMeta {
-  getElementsByClassName(cls: string): DOMParser.Node[];
-}
+type MDNResponse = {
+  documents: MDNResult[];
+  suggestions: [];
+  metadata: {
+    took_ms: number;
+    total: {
+      value: number;
+      relation: 'eq';
+    };
+    size: number;
+    page: number;
+  };
+};
 
-const defaultParser = (text: string): ParserResult => {
-  const parser = new DOMParser();
-  const document = parser.parseFromString(text);
-  const metaElement = document.getElementsByClassName('result-meta')[0];
-  const meta = metaElement ? metaElement.textContent : '';
-  
-  // meta provides information about the amount of results found
-  if(!metaElement || meta.startsWith('0 documents found')) {
+const defaultParser = (json: MDNResponse): ParserResult => {
+  if (json.documents.length === 0) {
     return {
       isEmpty: true,
       meta: '',
-      results: []
+      results: [],
     };
   }
-  
-  const results = document.getElementsByClassName('result');
-  
+
   return {
     isEmpty: false,
-    meta,
-    results,
+    meta: `Found ${json.metadata.total.value} results.`,
+    results: json.documents,
   };
 };
 
@@ -59,15 +74,11 @@ const defaultParser = (text: string): ParserResult => {
  *
  * @param {any} result [document.parseFromString return type]
  */
-const extractMetadataFromResult = (result: ResultMeta) => {
-  const titleElement = result.getElementsByClassName('result-title')[0];
-  const excerptElement = result.getElementsByClassName('result-excerpt')[0];
-
-  const title = escapeMarkdown(entities.decode(titleElement.textContent));
-  const url = buildDirectUrl(provider, titleElement.getAttribute('href'));
-
+const extractMetadataFromResult = (result: MDNResult) => {
+  const title = result.title;
+  const url = buildDirectUrl(provider, result.mdn_url);
   const excerpt = sanitizeExcerpt(
-    escapeMarkdown(entities.decode(excerptElement.textContent))
+    escapeMarkdown(entities.decode(result.summary))
   );
 
   return {
@@ -89,14 +100,15 @@ export const queryBuilder = (
 ) => async (msg: Message, searchTerm: string) => {
   try {
     const searchUrl = getSearchUrl(provider, searchTerm);
-    const { error, text } = await useData(searchUrl, 'text');
+    const { error, json } = await useData<MDNResponse>(searchUrl);
 
     if (error) {
       await msg.reply(errors.invalidResponse);
       return;
     }
 
-    const { results, isEmpty, meta } = mdnParser(text);
+    const { results, isEmpty, meta } = mdnParser(json);
+
     if (isEmpty) {
       const sentMsg = await msg.reply(errors.noResults(searchTerm));
 

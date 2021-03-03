@@ -68,7 +68,7 @@ export const providers: ProviderMap = {
     direct: `https://developer.mozilla.org${TERM}`,
     help: '!mdn localStorage',
     icon: 'https://avatars0.githubusercontent.com/u/7565578',
-    search: `https://developer.mozilla.org/en-US/search?q=${SEARCH_TERM}`,
+    search: `https://developer.mozilla.org/api/v1/search?q=${SEARCH_TERM}&locale=en-US`,
   },
   npm: {
     color: 0xfb3e44,
