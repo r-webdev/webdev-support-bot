@@ -8,7 +8,7 @@ import pointHandler from './point_handler';
  * If you are not sure what the unicode for a certain emoji is,
  * consult the emojipedia. https://emojipedia.org/
  */
-export const allowedEmojis = ['✅', '✔️', '☑️', '🆙', '⬆️', '⏫', '🔼'];
+export const allowedEmojis = ['🆙', '⬆️', '⏫', '🔼'];
 
 export interface IUser extends Document {
   user?: string;
