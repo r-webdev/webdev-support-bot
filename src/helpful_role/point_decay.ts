@@ -28,19 +28,24 @@ export const decay = async (
       },
     });
 
-    users.forEach(async u => {
-      u.points--;
-      await u.save();
+    for (const user of users) {
+      const currentPoints = user.points ?? 0;
+      const decay = Math.ceil(currentPoints / 100);
+      const nextPoints = currentPoints - decay;
 
-      const user = guild.members.cache.get(u.user);
+      user.points = nextPoints > 0 ? nextPoints : 0;
+
+      await user.save();
+
+      const member = guild.members.cache.get(user.user);
 
       if (
-        u.points < Number.parseInt(HELPFUL_ROLE_POINT_THRESHOLD) &&
-        !user.roles.cache.has(HELPFUL_ROLE_EXEMPT_ID)
+        user.points < Number.parseInt(HELPFUL_ROLE_POINT_THRESHOLD) &&
+        !member.roles.cache.has(HELPFUL_ROLE_EXEMPT_ID)
       ) {
-        user.roles.remove(HELPFUL_ROLE_ID);
+        member.roles.remove(HELPFUL_ROLE_ID);
       }
-    });
+    }
 
     const modChannel: TargetChannel = guild.channels.cache.find(
       c => c.name === MOD_CHANNEL
@@ -52,15 +57,12 @@ export const decay = async (
         name: 'Forced?',
         value: capitalize(`${force}`),
       },
-    ];
-
-    if (force) {
-      fields.push({
+      force && {
         inline: false,
         name: 'Admin/Moderator',
         value: `<@!${id}>`,
-      });
-    }
+      },
+    ].filter(Boolean);
 
     await modChannel.send(
       createEmbed({
