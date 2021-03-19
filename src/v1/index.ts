@@ -2,6 +2,17 @@ import * as Sentry from '@sentry/node';
 import { Client, Message, MessageReaction, User } from 'discord.js';
 import * as mongoose from 'mongoose';
 
+import {
+  DISCORD_TOKEN,
+  IS_PROD,
+  DUMMY_TOKEN,
+  MONGO_URI,
+  SERVER_ID,
+  ENV,
+  VAR_DETECT_LIMIT,
+  JUST_ASK_DETECT_LIMIT,
+} from '../env';
+import { handleInteractionWebhook } from '../v2/interactions';
 import { detectVar as _detectVar } from './autorespond/code_parsing';
 import { detectVagueQuestion } from './autorespond/justask';
 import { limitFnByUser } from './cache';
@@ -10,6 +21,7 @@ import handleCanIUseQuery from './commands/caniuse';
 import handleCodeRequest from './commands/code';
 import handleComposerQuery from './commands/composer';
 import handleDecayRequest from './commands/decay';
+import handleFlexboxCommand from './commands/flexbox';
 import handleFormattingRequest from './commands/formatting';
 import handleGithubQuery from './commands/github';
 import handleJQueryCommand from './commands/jquery';
@@ -22,17 +34,6 @@ import handlePHPQuery from './commands/php';
 import handlePointsRequest from './commands/points';
 import handleJobPostingRequest from './commands/post';
 import handleVSCodeRequest from './commands/vscode';
-import handleFlexboxCommand from './commands/flexbox';
-import {
-  DISCORD_TOKEN,
-  IS_PROD,
-  DUMMY_TOKEN,
-  MONGO_URI,
-  SERVER_ID,
-  ENV,
-  VAR_DETECT_LIMIT,
-  JUST_ASK_DETECT_LIMIT,
-} from '../env';
 import handleHelpfulRole, {
   allowedEmojis as helpfulRoleEmojis,
 } from './helpful_role';
@@ -84,6 +85,7 @@ const blacklistedServer = new Set([
 ]);
 
 client.on('ready', () => {
+  client.ws.on('INTERACTION_CREATE', handleInteractionWebhook);
   // eslint-disable-next-line no-console
   console.log(`Logged in as ${client.user.tag}!\nEnvironment: ${ENV}`);
 });

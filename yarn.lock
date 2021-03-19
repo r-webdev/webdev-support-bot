@@ -2502,6 +2502,11 @@
   dependencies:
     "webidl-conversions" "^5.0.0"
 
+"domyno@^1.0.1":
+  "integrity" "sha512-g9hJBa2qAMN9mzjnUDSCW3qhnHNJZeQR27EyVb5139deGhrz0t1KdgZmH/VPtYbKdIUWFAniFfE10n7s8iO+1Q=="
+  "resolved" "https://registry.npmjs.org/domyno/-/domyno-1.0.1.tgz"
+  "version" "1.0.1"
+
 "dot-prop@^5.2.0":
   "integrity" "sha512-QM8q3zDe58hqUqjraQOmzZ1LIH9SWQJTlEKCH4kJ2oQvLZk7RbQXvtDM2XEq3fwkV9CCvvH4LA0AV+ogFsBM2Q=="
   "resolved" "https://registry.npmjs.org/dot-prop/-/dot-prop-5.3.0.tgz"
