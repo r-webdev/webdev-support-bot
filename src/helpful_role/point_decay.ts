@@ -41,9 +41,9 @@ export const decay = async (
 
       if (
         user.points < Number.parseInt(HELPFUL_ROLE_POINT_THRESHOLD) &&
-        !member.roles.cache.has(HELPFUL_ROLE_EXEMPT_ID)
+        !member?.roles.cache.has(HELPFUL_ROLE_EXEMPT_ID)
       ) {
-        member.roles.remove(HELPFUL_ROLE_ID);
+        member?.roles.remove(HELPFUL_ROLE_ID);
       }
     }
 
