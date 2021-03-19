@@ -101,9 +101,12 @@ export const buildComposerQueryHandler = (
 
     const { name: resultName } = result;
 
-    const { error, json: extendedJson } = await fetchUse<
-      ExtendedPackagistResponse
-    >(getExtendedInfoUrl(provider, resultName));
+    const {
+      error,
+      json: extendedJson,
+    } = await fetchUse<ExtendedPackagistResponse>(
+      getExtendedInfoUrl(provider, resultName)
+    );
 
     if (error) {
       await msg.reply(errors.invalidResponse);

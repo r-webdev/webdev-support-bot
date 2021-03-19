@@ -107,9 +107,12 @@ const handleResult = async (
   sentMsg: Message,
   fetch: typeof useData
 ) => {
-  const { error, json: extendedJson } = await fetch<
-    ExtendedBundlephobiaResponse
-  >(getExtendedInfoUrl(provider, name));
+  const {
+    error,
+    json: extendedJson,
+  } = await fetch<ExtendedBundlephobiaResponse>(
+    getExtendedInfoUrl(provider, name)
+  );
 
   if (error) {
     await msg.reply(errors.invalidResponse);
