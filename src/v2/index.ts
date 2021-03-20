@@ -14,10 +14,13 @@ import {
   VAR_DETECT_LIMIT,
   JUST_ASK_DETECT_LIMIT,
 } from '../env';
+import { detectVar } from './autorespond/code_parsing';
+import { detectVagueQuestion } from './autorespond/justask';
 import { limitFnByUser } from './cache';
 import { initCommands } from './commands';
 import { createHandleInteractionWebhook } from './interactions';
 import handleThanks from './thanks';
+import isThanksMessage from './thanks/checker';
 import {
   generateCleanContent,
   stripMarkdownQuote,
@@ -77,7 +80,7 @@ client.once(
   }
 );
 
-const detectVar = limitFnByUser(_detectVar, {
+const detectVarLimited = limitFnByUser(detectVar, {
   delay: VAR_DETECT_LIMIT,
   type: 'VAR_CHECK',
 });
@@ -91,18 +94,18 @@ const isWebdevAndWebDesignServer = (msg: Message) =>
   msg.guild?.id === SERVER_ID || false;
 
 client.on('message', msg => {
-  const cleanContent = generateCleanContent(msg);
-
-  const handleNonCommandMessages = async (msg: Message) => {
-    const quoteLessContent = stripMarkdownQuote(msg.content);
-
-    if (isWebdevAndWebDesignServer(msg) && isThanksMessage(quoteLessContent)) {
-      handleThanks(msg);
-    }
-    await detectJustAsk(msg);
-    await detectVar(msg);
-  };
+  handleNonCommandMessages(msg);
 });
+
+const handleNonCommandMessages = async (msg: Message) => {
+  const quoteLessContent = stripMarkdownQuote(msg.content);
+
+  if (isWebdevAndWebDesignServer(msg) && isThanksMessage(quoteLessContent)) {
+    handleThanks(msg);
+  }
+  await detectJustAsk(msg);
+  await detectVarLimited(msg);
+};
 
 // Establish a connection with the database
 export const dbConnect = async (): Promise<void> => {
