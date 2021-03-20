@@ -1,22 +1,18 @@
-import {
-  ApplicationCommand,
-  Client,
-  Collection,
-  Guild,
-  Interaction,
-} from 'discord.js';
-import { pipe, filter, map } from 'domyno';
+import type { ApplicationCommand, Client, Collection, Guild } from 'discord.js';
+import { pipe, filter, map, zip } from 'domyno';
 import { debounce } from 'lodash';
-import { pluckʹ } from '../../v1/utils/pluck';
 
+import { pluckʹ } from '../../v1/utils/pluck';
+import type { CommandData } from '../interactions';
+import { getRegisteredCommands } from '../interactions';
 import {
-  CommandData,
   deleteCommand,
   getCommands,
   registerGuildCommand,
   registerCommand,
 } from '../interactions';
-import { difference } from '../utils/sets';
+import { mapʹ } from '../utils/map';
+import { difference, intersection } from '../utils/sets';
 
 type InternalCommand = Omit<ApplicationCommand, 'application_id' | 'guild_id'>;
 
@@ -24,15 +20,21 @@ const guildCommandMap: Map<
   Guild['id'],
   Collection<string, InternalCommand>
 > = new Map();
-const registeredCommands: Map<string, CommandData> = new Map();
 
 let _client!: Client;
 
-const getResolvedValues = pipe(
-  filter(item => (item.status === 'fulfilled' ? true : console.log(item))),
-  map(item => item.value)
-);
-
+const getResolvedValues = (
+  client: Client,
+  guildCommands: PromiseSettledResult<ApplicationCommand[]>[]
+) =>
+  zip(
+    client.guilds.cache.keys(),
+    mapʹ(
+      promiseResult =>
+        promiseResult.status === 'fulfilled' ? promiseResult.value : [],
+      guildCommands
+    )
+  );
 const transformExternalCommands = pipe(
   map<ApplicationCommand, InternalCommand>(item => {
     const { application_id, guild_id, ...rest } = item;
@@ -54,24 +56,28 @@ export function registerCommands(...commandData: CommandData[]) {
 }
 
 async function syncCommands() {
-  console.log('sync commands');
   const results = await Promise.all(
     map(async ([guild, commandData]) => {
+      const registeredCommands = getRegisteredCommands();
       const commands = [...pluckʹ(commandData.values(), 'name')];
       const missingCommands = difference(registeredCommands.keys(), commands);
       const extraCommands = difference(commands, registeredCommands.keys());
+      const existingCommands = intersection(
+        commands,
+        registeredCommands.keys()
+      );
 
       return [
         ...(await Promise.allSettled(
-          map(name => {
-            deleteCommand(_client, guild, commandData.get(name).id);
-          })(extraCommands)
+          map(name => deleteCommand(_client, guild, commandData.get(name).id))(
+            extraCommands
+          )
         )),
 
         ...(await Promise.allSettled(
-          map(name => {
-            registerGuildCommand(_client, guild, registeredCommands.get(name));
-          })(missingCommands)
+          map((name: string) =>
+            registerGuildCommand(_client, guild, registeredCommands.get(name))
+          )(missingCommands)
         )),
       ];
     })(guildCommandMap)
@@ -83,7 +89,7 @@ async function syncCommands() {
       (item: PromiseSettledResult<unknown>) => item.status === 'rejected'
     );
 
-  if (failedResults.length) {
+  if (failedResults.length > 0) {
     console.error(failedResults);
   } else {
     console.log('no errors');
@@ -91,15 +97,12 @@ async function syncCommands() {
 }
 
 // load the commands from each
-export async function initCommands(client: Client) {
+export async function initCommands(client: Client): Promise<void> {
   const guildCommands = await Promise.allSettled(
-    client.guilds.cache.map(async ({ id }) => [
-      id,
-      await getCommands(client, id),
-    ])
+    client.guilds.cache.map(async ({ id }) => getCommands(client, id))
   );
 
-  for (const [id, commands] of getResolvedValues(guildCommands)) {
+  for (const [id, commands] of getResolvedValues(client, guildCommands)) {
     guildCommandMap.set(id, transformExternalCommands(commands));
   }
 

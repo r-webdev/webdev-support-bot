@@ -5,34 +5,37 @@ import type {
   Interaction,
   InteractionResponse,
 } from 'discord.js';
-import { InteractionType } from 'discord.js';
+
+import { InteractionType } from '../../enums';
 
 export type CommandData = {
   name: string;
   description: string;
   options?: ApplicationCommand['options'];
-  handler: (interaction: Interaction) => Promise<void> | void;
+  handler: (client: Client, interaction: Interaction) => Promise<void> | void;
 };
 
 const commands = new Map<string, CommandData>();
 
-export function handleInteractionWebhook(interaction: Interaction): void {
-  if (
-    interaction.type === InteractionType.APPLICATION_COMMAND &&
-    interaction.data
-  ) {
-    const command = commands.get(interaction.data.name.toLowerCase());
-    if (command) {
-      return void command.handler(interaction);
+export function createHandleInteractionWebhook(client: Client) {
+  return function handleInteractionWebhook(interaction: Interaction): void {
+    if (
+      interaction.type === InteractionType.APPLICATION_COMMAND &&
+      interaction.data
+    ) {
+      const command = commands.get(interaction.data.name.toLowerCase());
+      if (command) {
+        return void command.handler(client, interaction);
+      }
     }
-  }
+  };
 }
 
-export function registerCommand(commandData: CommandData) {
+export function registerCommand(commandData: CommandData): void {
   commands.set(commandData.name.toLowerCase(), commandData);
 }
 
-export function getRegisteredCommands() {
+export function getRegisteredCommands(): Map<string, CommandData> {
   return new Map(commands);
 }
 
@@ -40,8 +43,8 @@ export function registerGuildCommand(
   client: Client,
   guild: string,
   commandData: CommandData
-): void {
-  void createCommand(client, guild, {
+): Promise<ApplicationCommand> {
+  return createCommand(client, guild, {
     data: {
       description: commandData.description,
       name: commandData.name,
