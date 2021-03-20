@@ -1,4 +1,4 @@
-import { Message, Guild, GuildChannel } from 'discord.js';
+import type { Message, Guild, GuildChannel } from 'discord.js';
 
 import {
   NUMBER_OF_ALLOWED_MESSAGES,
@@ -44,10 +44,10 @@ export type SpammerMetadata = null | {
   guild: Guild;
 };
 
-interface CacheEntry {
+type CacheEntry = {
   wasRecentlyWarned: boolean;
   timestamps: number[];
-}
+};
 
 /**
  * - Implement a simple cache, in which each message lives in for 10 seconds
@@ -81,7 +81,7 @@ const spamFilter = ({
 
   // prevent spam by the bot itself
   if (wasRecentlyWarned) {
-    // keep this cache set active so we dont warn about the same user until its
+    // keep this cache set active so we don't warn about the same user until its
     // been resolved
     cache.set(userID, {
       ...previousEntry,

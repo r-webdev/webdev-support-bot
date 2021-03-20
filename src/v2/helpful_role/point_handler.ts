@@ -1,4 +1,4 @@
-import { Message, GuildMember } from 'discord.js';
+import type { Message, GuildMember } from 'discord.js';
 
 import { startTime } from '..';
 import {
@@ -11,7 +11,7 @@ import { cache } from '../spam_filter';
 import { createEmbed } from '../utils/discordTools';
 import HelpfulRoleMember from './db_model';
 
-import { IUser } from '.';
+import type { IUser } from '.';
 
 const grantHelpfulRole = async (user: GuildMember, msg: Message) => {
   // Check if the user has the role
@@ -36,13 +36,13 @@ const grantHelpfulRole = async (user: GuildMember, msg: Message) => {
 export const generatePointsCacheEntryKey = (
   receivingUserID: string,
   pointGiverUserID: string
-) => `point-${receivingUserID}-${pointGiverUserID}`;
+): string => `point-${receivingUserID}-${pointGiverUserID}`;
 
 const pointHandler = async (
   userID: string,
   msg: Message,
   reactionHandlerUserID: string = null
-) => {
+): Promise<void> => {
   const pointGiverUserID = reactionHandlerUserID || msg.author.id;
 
   const cacheKey = generatePointsCacheEntryKey(userID, pointGiverUserID);
@@ -64,7 +64,7 @@ const pointHandler = async (
   // Check if the user's on cooldown to give a point to the message author/mentioned user
   if (entry) {
     const diff = Math.round(
-      Number.parseInt(POINT_LIMITER_IN_MINUTES) - (Date.now() - entry) / 60000
+      Number.parseInt(POINT_LIMITER_IN_MINUTES) - (Date.now() - entry) / 60_000
     );
 
     const dm = await msg.guild.members.cache.get(pointGiverUserID).createDM();

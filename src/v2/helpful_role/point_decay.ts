@@ -1,6 +1,7 @@
-import { Message, EmbedField } from 'discord.js';
+import type { Message, EmbedField } from 'discord.js';
 
-import { TargetChannel, capitalize } from '../commands/post';
+import type { TargetChannel } from '../commands/post';
+import { capitalize } from '../commands/post';
 import {
   POINT_DECAY_TIMER,
   MOD_CHANNEL,
@@ -12,14 +13,14 @@ import {
 import { createEmbed } from '../utils/discordTools';
 import HelpfulRoleMember from './db_model';
 
-import { IUser } from '.';
+import type { IUser } from '.';
 
 let lastDecay = Date.now();
 
 export const decay = async (
   { guild, author: { id } }: Message,
   force = false
-) => {
+): Promise<void> => {
   try {
     const users: IUser[] = await HelpfulRoleMember.find({
       guild: guild.id,
@@ -81,7 +82,7 @@ export const decay = async (
   }
 };
 
-export const getTimeDiffToDecay = () => {
+export const getTimeDiffToDecay = (): { diff: number; timestamp: number } => {
   const timestamp = Date.now();
 
   return {
@@ -90,7 +91,7 @@ export const getTimeDiffToDecay = () => {
   };
 };
 
-const pointDecaySystem = async (msg: Message) => {
+const pointDecaySystem = async (msg: Message): Promise<void> => {
   const { diff, timestamp } = getTimeDiffToDecay();
   const timer = IS_PROD ? Number.parseInt(POINT_DECAY_TIMER) : 0.005;
 

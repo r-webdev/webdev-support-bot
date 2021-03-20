@@ -9,6 +9,12 @@ const {
 const tsOverride = createTSOverride({
   ...getDependencies(),
   rules: {
+    '@typescript-eslint/no-floating-promises': 0,
+    'inclusive-language/use-inclusive-words': 0,
+    '@typescript-eslint/no-floating-promises': 0,
+    'no-empty': 0,
+    'no-void': 0,
+    '@typescript-eslint/no-misused-promises': 0,
     // stuff
   },
 });

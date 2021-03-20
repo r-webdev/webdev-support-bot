@@ -1,4 +1,4 @@
-import {
+import type {
   Message,
   CollectorFilter,
   TextChannel,
@@ -44,35 +44,35 @@ type CacheEntry = {
   value: Date;
 };
 
-export interface TargetChannel extends GuildChannel {
+export type TargetChannel = {
   send?: (
     message: string | { embed: Partial<MessageEmbed> }
   ) => Promise<Message>;
-}
+} & GuildChannel;
 
 enum Days {
   Sunday = 0,
-  Monday,
-  Tuesday,
-  Wednesday,
-  Thursday,
-  Friday,
-  Saturday,
+  Monday = 1,
+  Tuesday = 2,
+  Wednesday = 3,
+  Thursday = 4,
+  Friday = 5,
+  Saturday = 6,
 }
 
 enum Months {
   January = 0,
-  February,
-  March,
-  April,
-  May,
-  June,
-  July,
-  August,
-  September,
-  October,
-  November,
-  December,
+  February = 1,
+  March = 2,
+  April = 3,
+  May = 4,
+  June = 5,
+  July = 6,
+  August = 7,
+  September = 8,
+  October = 9,
+  November = 10,
+  December = 11,
 }
 
 const getCurrentDate = () => {
@@ -103,7 +103,7 @@ const generateURL = (guildID: string, channelID: string, msgID: string) =>
 const getReply = async (
   channel: Channel,
   filter: CollectorFilter,
-  timeMultiplier: number = 1
+  timeMultiplier = 1
 ) => {
   try {
     const res = await channel.awaitMessages(filter, {
@@ -181,14 +181,17 @@ const generateFields = (answers: Answers): OutputField[] => {
   const response = [];
 
   for (let [key, value] of answers) {
-    if (key === 'compensation')
+    if (key === 'compensation') {
       value = value.includes('$') ? value : `${value}$`;
+    }
 
-    /* 
+    /*
       If the value is "no", don't print the location field.
       The location field is optional.
     */
-    if (key === 'location' && value.toLowerCase() === 'no') continue;
+    if (key === 'location' && value.toLowerCase() === 'no') {
+      continue;
+    }
 
     response.push({
       inline: false,
@@ -384,7 +387,9 @@ const handleJobPostingRequest = async (msg: Message) => {
 
   try {
     // Bail if the user is pinging the bot directly
-    if (msgChannelType === 'dm') return;
+    if (msgChannelType === 'dm') {
+      return;
+    }
 
     // Generate cache entry
     const entry = generateCacheEntry(id);
@@ -394,7 +399,7 @@ const handleJobPostingRequest = async (msg: Message) => {
     if (isCached) {
       const diff =
         Number.parseInt(POST_LIMITER_IN_HOURS) -
-        Math.abs(new Date().getTime() - entry.value.getTime()) / 3600000;
+        Math.abs(Date.now() - entry.value.getTime()) / 3_600_000;
       send(
         `You cannot create a job posting right now.\nPlease try again ${calcNextPostingThreshold(
           diff
@@ -431,7 +436,7 @@ const handleJobPostingRequest = async (msg: Message) => {
     });
 
     // Notify the user that the form is now complete
-    await send('Your job posting has been created!\n' + url);
+    await send(`Your job posting has been created!\n${url}`);
 
     // Store the job post in the cache
     cache.set(entry.key, entry.value, POST_LIMITER);

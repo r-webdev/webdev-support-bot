@@ -1,4 +1,3 @@
-/* eslint-disable inclusive-language/use-inclusive-words, @typescript-eslint/no-floating-promises, no-empty, no-void, @typescript-eslint/no-misused-promises */
 import { init } from '@sentry/node';
 import type { Message } from 'discord.js';
 import { Client, MessageReaction, User } from 'discord.js';
