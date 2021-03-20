@@ -45,7 +45,7 @@ const transformExternalCommands = pipe(
 
 const queueSyncCommands = debounce(syncCommands);
 
-export function registerCommands(...commandData: CommandData[]) {
+export function registerCommands(...commandData: CommandData[]): void {
   for (const commandDatum of commandData) {
     registerCommand(commandDatum);
   }
@@ -90,7 +90,7 @@ async function syncCommands() {
     );
 
   if (failedResults.length > 0) {
-    console.error(failedResults);
+    // console.error(failedResults);
   } else {
     console.log('no errors');
   }

@@ -1,6 +1,8 @@
-import * as Sentry from '@sentry/node';
-import { Client, Message, MessageReaction, User } from 'discord.js';
-import * as mongoose from 'mongoose';
+/* eslint-disable inclusive-language/use-inclusive-words, @typescript-eslint/no-floating-promises, no-empty, no-void, @typescript-eslint/no-misused-promises */
+import { init } from '@sentry/node';
+import type { Message } from 'discord.js';
+import { Client, MessageReaction, User } from 'discord.js';
+import { connect } from 'mongoose';
 
 import {
   DISCORD_TOKEN,
@@ -12,10 +14,17 @@ import {
   VAR_DETECT_LIMIT,
   JUST_ASK_DETECT_LIMIT,
 } from '../env';
+import { limitFnByUser } from './cache';
 import { initCommands } from './commands';
+import { createHandleInteractionWebhook } from './interactions';
+import handleThanks from './thanks';
+import {
+  generateCleanContent,
+  stripMarkdownQuote,
+} from './utils/content_format';
 
 if (IS_PROD) {
-  Sentry.init({
+  init({
     dsn:
       'https://9902d087a01f4d8883daad5d59d90736@o163592.ingest.sentry.io/5307626',
   });
@@ -33,39 +42,72 @@ const blacklistedServer = new Set([
 ]);
 
 client.on('ready', () => {
-  initCommands(client);
   // eslint-disable-next-line no-console
   console.log(`Logged in as ${client.user.tag}!\nEnvironment: ${ENV}`);
 });
 
-client.once('ready', async () => {
-  client.user.setActivity(`@${client.user.username} --help`);
+client.once(
+  'ready',
+  async (): Promise<void> => {
+    void initCommands(client);
 
-  await Promise.all(
-    client.guilds.cache
-      .filter(guild => blacklistedServer.has(guild.id))
-      .map(guild => guild.leave())
-  );
+    client.ws.on('INTERACTION_CREATE', createHandleInteractionWebhook(client));
 
-  // eslint-disable-next-line no-console
-  console.table(
-    client.guilds.cache.map(({ name, id, joinedAt, memberCount }) => ({
-      id,
-      joinedAt: joinedAt.toLocaleDateString(),
-      memberCount,
-      name,
-    }))
-  );
+    void client.user.setActivity(`@${client.user.username} --help`);
 
-  try {
-    await client.user.setAvatar('./logo.png');
-  } catch {}
+    await Promise.all(
+      client.guilds.cache
+        .filter(guild => blacklistedServer.has(guild.id))
+        .map(guild => guild.leave())
+    );
+
+    // eslint-disable-next-line no-console
+    console.table(
+      client.guilds.cache.map(({ name, id, joinedAt, memberCount }) => ({
+        id,
+        joinedAt: joinedAt.toLocaleDateString(),
+        memberCount,
+        name,
+      }))
+    );
+
+    try {
+      await client.user.setAvatar('./logo.png');
+    } catch {}
+  }
+);
+
+const detectVar = limitFnByUser(_detectVar, {
+  delay: VAR_DETECT_LIMIT,
+  type: 'VAR_CHECK',
+});
+
+const detectJustAsk = limitFnByUser(detectVagueQuestion, {
+  delay: JUST_ASK_DETECT_LIMIT,
+  type: 'JUST_ASK',
+});
+
+const isWebdevAndWebDesignServer = (msg: Message) =>
+  msg.guild?.id === SERVER_ID || false;
+
+client.on('message', msg => {
+  const cleanContent = generateCleanContent(msg);
+
+  const handleNonCommandMessages = async (msg: Message) => {
+    const quoteLessContent = stripMarkdownQuote(msg.content);
+
+    if (isWebdevAndWebDesignServer(msg) && isThanksMessage(quoteLessContent)) {
+      handleThanks(msg);
+    }
+    await detectJustAsk(msg);
+    await detectVar(msg);
+  };
 });
 
 // Establish a connection with the database
-export const dbConnect = async () => {
+export const dbConnect = async (): Promise<void> => {
   try {
-    await mongoose.connect(MONGO_URI, {
+    await connect(MONGO_URI, {
       useCreateIndex: true,
       useNewUrlParser: true,
       useUnifiedTopology: true,
