@@ -1,12 +1,15 @@
+/* eslint-disable no-await-in-loop */
 /* eslint-disable no-void */
 import type {
   ApplicationCommand,
   Client,
   Interaction,
   InteractionResponse,
+  TextChannel,
 } from 'discord.js';
 
 import { InteractionType } from '../../enums';
+import { chunkUntil } from '../utils/chunkUntil';
 
 export type CommandData = {
   name: string;
@@ -98,7 +101,7 @@ export async function deleteCommand(
     .delete();
 }
 
-export async function createInteractionResponse(
+async function _createInteractionResponse(
   client: Client,
   guild: string,
   interaction: Interaction,
@@ -107,4 +110,48 @@ export async function createInteractionResponse(
   return client.api
     .interactions(interaction.id, interaction.token)
     .callback.post(response);
+}
+
+const chunkUntilOver2k = chunkUntil<string>(
+  (current, next) => [...current, next].join('\n').length > 2000
+);
+
+export async function createInteractionResponse(
+  client: Client,
+  guildId: string,
+  interaction: Interaction,
+  response: PostData<InteractionResponse>
+): Promise<unknown> {
+  const { content } = response.data.data;
+  if (content.length <= 2000) {
+    return _createInteractionResponse(client, guildId, interaction, response);
+  }
+  let first = true;
+  const guild = await client.guilds.fetch(guildId);
+  const channel = guild.channels.resolve(interaction.channel_id) as TextChannel;
+
+  try {
+    channel.startTyping();
+    for (const chunk of chunkUntilOver2k(content.split('\n'))) {
+      const data = {
+        ...response.data.data,
+        content: chunk.join('\n'),
+      };
+
+      if (first) {
+        await _createInteractionResponse(client, guildId, interaction, {
+          ...response,
+          data: {
+            ...response.data,
+            data,
+          },
+        });
+
+        first = false;
+      } else {
+        await channel.send(chunk.join('\n'));
+      }
+    }
+  } catch {}
+  channel.stopTyping();
 }

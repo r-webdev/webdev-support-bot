@@ -67,6 +67,8 @@ async function syncCommands() {
         registeredCommands.keys()
       );
 
+      console.log({ missingCommands, existingCommands, extraCommands });
+
       return [
         ...(await Promise.allSettled(
           map(name => deleteCommand(_client, guild, commandData.get(name).id))(
