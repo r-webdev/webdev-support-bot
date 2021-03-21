@@ -8,9 +8,13 @@ import type {
   GuildChannel,
   MessageEmbed,
 } from 'discord.js';
+import { collect, filter } from 'domyno';
 
 import { cache } from '../../spam_filter';
 import { createEmbed, createMarkdownCodeBlock } from '../../utils/discordTools';
+import { map } from '../../utils/map';
+import { pipe } from '../../utils/pipe';
+import { capitalize } from '../../utils/string';
 import {
   AWAIT_MESSAGE_TIMEOUT,
   MOD_CHANNEL,
@@ -21,6 +25,13 @@ import {
   MINIMAL_AMOUNT_OF_WORDS,
 } from './env';
 import questions from './questions';
+
+const dateFormatter = new Intl.DateTimeFormat('en-US', {
+  month: 'long',
+  weekday: 'long',
+  day: '2-digit',
+  year: 'numeric',
+});
 
 export type OutputField = {
   name: string;
@@ -50,49 +61,14 @@ export type TargetChannel = {
   ) => Promise<Message>;
 } & GuildChannel;
 
-export enum Days {
-  Sunday = 0,
-  Monday = 1,
-  Tuesday = 2,
-  Wednesday = 3,
-  Thursday = 4,
-  Friday = 5,
-  Saturday = 6,
-}
-
-export enum Months {
-  January = 0,
-  February = 1,
-  March = 2,
-  April = 3,
-  May = 4,
-  June = 5,
-  July = 6,
-  August = 7,
-  September = 8,
-  October = 9,
-  November = 10,
-  December = 11,
-}
-
 const getCurrentDate = () => {
-  const date = new Date();
-
-  return `${Days[date.getDay()]}, ${
-    Months[date.getMonth()]
-  } ${date.getDate()}, ${date.getFullYear()}`;
+  return dateFormatter.format(Date.now());
 };
 
 /*
   The `capitalize` function does **not** capitalize only one word in a string.
   It capitalizes all words present in the string itself, separated with a space.
 */
-
-export const capitalize = (str: string) =>
-  str
-    .split(' ')
-    .map(s => `${s[0].toUpperCase()}${s.slice(1).toLowerCase()}`)
-    .join(' ');
 
 const getTargetChannel = (guild: Guild, name: string): TargetChannel =>
   guild.channels.cache.find(({ name: n }) => n === name);
@@ -134,7 +110,7 @@ const sendAlert = (
     return;
   }
 
-  const user = createUserTag(username, discriminator);
+  const userTag = createUserTag(username, discriminator);
 
   try {
     targetChannel.send(
@@ -145,7 +121,7 @@ const sendAlert = (
           {
             inline: true,
             name: 'User',
-            value: user,
+            value: userTag,
           },
           {
             inline: false,
@@ -156,7 +132,7 @@ const sendAlert = (
             inline: false,
             name: 'Command',
             value: createMarkdownCodeBlock(
-              `?ban ${user} Invalid compensation.`
+              `?ban ${userTag} Invalid compensation.`
             ),
           },
           {
@@ -177,35 +153,32 @@ const sendAlert = (
   }
 };
 
-const generateFields = (answers: Answers): OutputField[] => {
-  const response = [];
+const generateFields = pipe<Answers, Iterable<OutputField>>([
+  filter(
+    ([key, val]: [string, string]) =>
+      key !== 'location' || val.toLowerCase() !== 'no'
+  ),
+  map(
+    ([key, val]: [string, string]): OutputField => {
+      let value = val;
+      switch (key) {
+        case 'compensation':
+          value = val.includes('$') ? val : `${val}$`;
+          break;
+        case 'compensation_type':
+        case 'remote':
+          value = capitalize(val);
+          break;
+      }
 
-  for (let [key, value] of answers) {
-    if (key === 'compensation') {
-      value = value.includes('$') ? value : `${value}$`;
+      return {
+        inline: false,
+        name: capitalize(key.replace('_', ' ')),
+        value,
+      };
     }
-
-    /*
-      If the value is "no", don't print the location field.
-      The location field is optional.
-    */
-    if (key === 'location' && value.toLowerCase() === 'no') {
-      continue;
-    }
-
-    response.push({
-      inline: false,
-      name: capitalize(key.replace('_', ' ')),
-      value: createMarkdownCodeBlock(
-        key === 'compensation_type' || key === 'remote'
-          ? capitalize(value)
-          : value
-      ),
-    });
-  }
-
-  return response;
-};
+  ),
+]);
 
 const createUserTag = (username: string, discriminator: string) =>
   `${username}#${discriminator}`;
@@ -277,7 +250,7 @@ const formAndValidateAnswers = async (
   const answers = new Map();
 
   // Iterate over questions
-  for (const key in questions) {
+  for (const [key, val] of questions) {
     // Check if the current question is the location question
     if (key === 'location') {
       // Check if the `isRemote` value has been set to "yes"

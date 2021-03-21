@@ -1,7 +1,6 @@
 import type { Message, EmbedField } from 'discord.js';
 
-import type { TargetChannel } from '../commands/post';
-import { capitalize } from '../commands/post';
+import type { TargetChannel } from '../commands/post/questions';
 import {
   POINT_DECAY_TIMER,
   MOD_CHANNEL,
@@ -11,6 +10,7 @@ import {
   HELPFUL_ROLE_ID,
 } from '../env';
 import { createEmbed } from '../utils/discordTools';
+import { capitalize } from '../utils/string';
 import HelpfulRoleMember from './db_model';
 
 import type { IUser } from '.';

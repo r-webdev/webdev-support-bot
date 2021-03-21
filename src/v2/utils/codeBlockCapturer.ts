@@ -5,20 +5,22 @@ export type CodeBlockData = {
   language: string;
 };
 
-export function createCodeBlockCapturer(langs: string[] = []) {
+export function createCodeBlockCapturer(
+  langs: string[] = []
+): (str: string) => Iterable<CodeBlockData> {
   const langAlts = langs.join('|');
-  return function* (str: string): Generator<CodeBlockData> {
+  return function* (str: string): Iterable<CodeBlockData> {
     const langRegex = new RegExp(
       String.raw`${BACKTICKS}(?<language>${langAlts})\n(?<code>[\s\S]+?)\n${BACKTICKS}`,
-      'gi'
+      'gui'
     );
     const matches = str.matchAll(langRegex);
     for (const {
       groups: { language, code },
     } of matches) {
       yield {
-        language: language || '',
-        code: code || '',
+        language: language ?? '',
+        code: code ?? '',
       };
     }
   };
