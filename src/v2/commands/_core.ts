@@ -16,6 +16,29 @@ import { difference, intersection } from '../utils/sets';
 
 type InternalCommand = Omit<ApplicationCommand, 'application_id' | 'guild_id'>;
 
+const collator = new Intl.Collator('en-US');
+
+const sortKeys = obj => {
+  if (typeof obj !== 'object' || obj == null) {
+    return obj;
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(sortKeys);
+  }
+  return Object.fromEntries(
+    Object.entries(obj)
+      .sort(([a], [b]) => collator.compare(a, b))
+      .map(([key, val]) => [key, sortKeys(val)])
+  );
+};
+
+const transformToBaseCommandData = obj =>
+  sortKeys({
+    name: obj.name,
+    description: obj.description,
+    ...(obj.options && { options: obj.options }),
+  });
+
 const guildCommandMap: Map<
   Guild['id'],
   Collection<string, InternalCommand>
@@ -57,32 +80,68 @@ export function registerCommands(...commandData: CommandData[]): void {
 
 async function syncCommands() {
   const results = await Promise.all(
-    map(async ([guild, commandData]) => {
-      const registeredCommands = getRegisteredCommands();
-      const commands = [...pluckʹ(commandData.values(), 'name')];
-      const missingCommands = difference(registeredCommands.keys(), commands);
-      const extraCommands = difference(commands, registeredCommands.keys());
-      const existingCommands = intersection(
-        commands,
-        registeredCommands.keys()
-      );
+    map(
+      async ([guild, commandData]: [
+        string,
+        Collection<string, InternalCommand>
+      ]) => {
+        const registeredCommands = getRegisteredCommands();
+        const commandNames = [...pluckʹ(commandData.values(), 'name')];
 
-      console.log({ missingCommands, existingCommands, extraCommands });
+        const getChangedCommands = pipe(
+          map(name => [
+            transformToBaseCommandData(registeredCommands.get(name)),
+            transformToBaseCommandData(commandData.get(name)),
+          ]),
+          filter(([registeredCommand, guildCommand]) => {
+            const registeredJson = JSON.stringify(registeredCommand);
+            const guildJson = JSON.stringify(guildCommand);
+            return registeredJson !== guildJson;
+          }),
+          map(([{ name }]) => name)
+        );
 
-      return [
-        ...(await Promise.allSettled(
-          map(name => deleteCommand(_client, guild, commandData.get(name).id))(
-            extraCommands
-          )
-        )),
+        // to be added
+        const missingCommands = difference(
+          registeredCommands.keys(),
+          commandNames
+        );
+        // / To be deleted
+        const extraCommands = difference(
+          commandNames,
+          registeredCommands.keys()
+        );
 
-        ...(await Promise.allSettled(
-          map((name: string) =>
-            registerGuildCommand(_client, guild, registeredCommands.get(name))
-          )(missingCommands)
-        )),
-      ];
-    })(guildCommandMap)
+        const updateCommands = getChangedCommands(
+          difference(commandNames, missingCommands)
+        );
+        const existingCommands = intersection(
+          commandNames,
+          registeredCommands.keys()
+        );
+
+        console.log({
+          missingCommands,
+          existingCommands,
+          extraCommands,
+          commandData,
+        });
+
+        return [
+          ...(await Promise.allSettled(
+            map(name =>
+              deleteCommand(_client, guild, commandData.get(name).id)
+            )(extraCommands)
+          )),
+
+          ...(await Promise.allSettled(
+            map((name: string) =>
+              registerGuildCommand(_client, guild, registeredCommands.get(name))
+            )(new Set([...missingCommands, ...updateCommands]))
+          )),
+        ];
+      }
+    )(guildCommandMap)
   );
 
   const failedResults = results
