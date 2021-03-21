@@ -63,19 +63,14 @@ const shitpostInteraction: CommandData = {
         shitpostReplacements[interaction.data.options[0].value],
         interaction.data.options[1].value
       );
-      await createInteractionResponse(
-        client,
-        interaction.guild_id,
-        interaction,
-        {
+      await createInteractionResponse(client, interaction, {
+        data: {
           data: {
-            data: {
-              content: shitpostContent,
-            },
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+            content: shitpostContent,
           },
-        }
-      );
+          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        },
+      });
     }
   },
   name: 'shitpost',

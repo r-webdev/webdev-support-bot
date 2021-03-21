@@ -48,19 +48,14 @@ const aboutInteraction: CommandData = {
     const content = aboutMessages.get(interaction.data.options[0].value);
 
     if (content) {
-      await createInteractionResponse(
-        client,
-        interaction.guild_id,
-        interaction,
-        {
+      await createInteractionResponse(client, interaction, {
+        data: {
           data: {
-            data: {
-              content: valueOrCall(content),
-            },
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+            content: valueOrCall(content),
           },
-        }
-      );
+          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        },
+      });
     }
   },
   name: 'about',

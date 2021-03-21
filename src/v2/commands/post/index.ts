@@ -380,7 +380,7 @@ const handleJobPostingRequest = async (
       const diff =
         Number.parseInt(POST_LIMITER_IN_HOURS) -
         Math.abs(Date.now() - entry.value.getTime()) / 3_600_000;
-      createInteractionResponse(client, interaction.guild_id, interaction, {
+      createInteractionResponse(client, interaction, {
         data: {
           type: InteractionResponseType.ACKNOWLEDGE_WITH_SOURCE,
         },
@@ -393,7 +393,7 @@ const handleJobPostingRequest = async (
       return;
     }
 
-    createInteractionResponse(client, interaction.guild_id, interaction, {
+    createInteractionResponse(client, interaction, {
       data: {
         type: InteractionResponseType.ACKNOWLEDGE_WITH_SOURCE,
       },
@@ -432,7 +432,7 @@ const handleJobPostingRequest = async (
     // Store the job post in the cache
     cache.set(entry.key, entry.value, POST_LIMITER);
   } catch (error) {
-    createInteractionResponse(client, interaction.guild_id, interaction, {
+    createInteractionResponse(client, interaction, {
       data: {
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         data: {

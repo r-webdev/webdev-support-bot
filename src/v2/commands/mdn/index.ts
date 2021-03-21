@@ -93,37 +93,27 @@ const mdnHandler = async (
     const url = getSearchUrl(provider, searchTerm);
     const { error, json } = await fetch<SearchResponse>(url, 'json');
     if (error) {
-      return await createInteractionResponse(
-        client,
-        interaction.guild_id,
-        interaction,
-        {
+      return await createInteractionResponse(client, interaction, {
+        data: {
+          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
           data: {
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: invalidResponse,
-              flags: 64,
-            },
+            content: invalidResponse,
+            flags: 64,
           },
-        }
-      );
+        },
+      });
     }
 
     if (json.documents.length === 0) {
-      return await createInteractionResponse(
-        client,
-        interaction.guild_id,
-        interaction,
-        {
+      return await createInteractionResponse(client, interaction, {
+        data: {
+          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
           data: {
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: noResults(searchTerm),
-              flags: 64,
-            },
+            content: noResults(searchTerm),
+            flags: 64,
           },
-        }
-      );
+        },
+      });
     }
 
     let preparedDescription = json.documents.map(
@@ -154,7 +144,7 @@ const mdnHandler = async (
       });
     }
 
-    await createInteractionResponse(client, interaction.guild_id, interaction, {
+    await createInteractionResponse(client, interaction, {
       data: {
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         data: {
@@ -199,19 +189,14 @@ const mdnHandler = async (
     await attemptEdit(sentMsg, editableUrl, { embed: null });
   } catch {
     try {
-      await createInteractionResponse(
-        client,
-        interaction.guild_id,
-        interaction,
-        {
+      await createInteractionResponse(client, interaction, {
+        data: {
+          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
           data: {
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: {
-              content: unknownError,
-            },
+            content: unknownError,
           },
-        }
-      );
+        },
+      });
     } catch {
       editOriginalInteractionResponse(client, interaction, {
         data: {

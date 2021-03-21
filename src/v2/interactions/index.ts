@@ -172,11 +172,11 @@ const chunkUntilOver2k = chunkUntil<string>(
 
 export async function createInteractionResponse(
   client: Client,
-  guildId: string,
   interaction: Interaction,
   response: PostData<InteractionResponse>
 ): Promise<unknown> {
   const { content } = response?.data?.data ?? {};
+  const guildId = interaction.guild_id;
   if (content?.length <= 2000 || !content?.length) {
     return _createInteractionResponse(client, guildId, interaction, response);
   }
