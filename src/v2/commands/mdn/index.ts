@@ -160,13 +160,13 @@ const mdnHandler = async (
         data: {
           content: '',
           embeds: [
-            (createListEmbed({
+            createListEmbed({
               description: createDescription(preparedDescription),
               footerText: `${json.documents.length} results found`,
               provider,
               searchTerm,
               url,
-            }).embed as unknown) as MessageEmbed,
+            }).embed as MessageEmbed,
           ],
         },
       },
