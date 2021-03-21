@@ -1,5 +1,5 @@
 import { init } from '@sentry/node';
-import type { Message } from 'discord.js';
+import type { Message, TextChannel } from 'discord.js';
 import { Client, MessageReaction, User } from 'discord.js';
 import { connect } from 'mongoose';
 

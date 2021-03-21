@@ -120,13 +120,6 @@ async function syncCommands() {
           registeredCommands.keys()
         );
 
-        console.log({
-          missingCommands,
-          existingCommands,
-          extraCommands,
-          commandData,
-        });
-
         return [
           ...(await Promise.allSettled(
             map(name =>

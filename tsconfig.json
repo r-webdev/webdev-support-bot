@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "lib": ["es2019", "es2020"],
+    "lib": ["es2019", "es2020", "es2020.string", "ESNext"],
     "allowJs": true,
     "target": "es2019",
     "module": "commonjs",

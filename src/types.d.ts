@@ -3,13 +3,16 @@
 declare module 'discord.js' {
   import type {
     ApplicationCommand,
+    InteractionApplicationCommandCallbackData,
     InteractionResponse,
     MessageEmbed,
+    MessageMentionOptions,
     MessageMentionOptions,
     MessageMentionOptions,
   } from 'discord.js';
   import { EventEmitter } from 'events';
 
+  import type { ApplicationCommandOptionType } from './enums';
   import type { InteractionResponseType } from './enums';
 
   export interface Client {
@@ -19,6 +22,7 @@ declare module 'discord.js' {
   export interface BaseClient {
     applications: ApplicationRoutes;
     interactions: InteractionRoutes;
+    webhooks: WebhookRoutes;
   }
 
   export interface WebSocketManager {
@@ -78,6 +82,10 @@ declare module 'discord.js' {
     content: string;
     embeds?: MessageEmbed[];
     allowedMentions?: MessageMentionOptions;
+    /**
+     * set to 64 to make message ephemeral
+     */
+    flags?: 64;
   };
 
   export type ApplicationCommand = {
@@ -92,7 +100,7 @@ declare module 'discord.js' {
     type: ApplicationCommandOptionType;
     name: string;
     description: string;
-    default?: boolean;
+    // default?: boolean;
     required?: boolean;
     choices?: ApplicationCommandOptionChoice[];
     options?: ApplicationCommandOption[];
@@ -125,6 +133,44 @@ type ApplicationRoutes = (
       ) => Promise<ApplicationCommand>;
       delete: () => Promise<ApplicationCommand>;
     });
+  };
+};
+
+type CreateInteractionData = {
+  content: string;
+  username?: string;
+  avatar_url?: string;
+  tts?: boolean;
+  file?: unknown;
+  embeds?: DiscordEmbed[];
+  payload_json?: string;
+  allowed_mentions?: MessageMentionOptions;
+};
+
+type WebhookRoutes = (
+  applicationId: string,
+  interactionToken: string
+) => {
+  // TODO: Swap anys out
+  post(data: PostData<CreateInteractionData>): Promise<any>;
+
+  messages(
+    id: '@original'
+  ): {
+    patch(
+      data: Omit<InteractionApplicationCommandCallbackData, 'tts' | 'flags'>
+    ): Promise<Buffer>;
+    delete(): Promise<Buffer>;
+  };
+  messages(
+    id: string
+  ): {
+    patch(
+      data: PostData<
+        Omit<InteractionApplicationCommandCallbackData, 'tts' | 'flags'>
+      >
+    ): Promise<Buffer>;
+    delete(): Promise<Buffer>;
   };
 };
 

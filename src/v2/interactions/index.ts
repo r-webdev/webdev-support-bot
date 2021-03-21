@@ -10,6 +10,7 @@ import type {
 
 import { InteractionType } from '../../enums';
 import { chunkUntil } from '../utils/chunkUntil';
+import { intersection } from '../utils/sets';
 
 export type CommandData = {
   name: string;
@@ -98,6 +99,59 @@ export async function deleteCommand(
     .applications(client.user.id)
     .guilds(guild)
     .commands(commandId)
+    .delete();
+}
+
+export async function editOriginalInteractionResponse(
+  client: Client,
+  interaction: Interaction,
+  response: PostData<any>
+): Promise<unknown> {
+  return client.api
+    .webhooks(client.user.id, interaction.token)
+    .messages('@original')
+    .patch(response);
+}
+
+export async function deleteOriginalInteractionResponse(
+  client: Client,
+  interaction: Interaction
+): Promise<unknown> {
+  return client.api
+    .webhooks(client.user.id, interaction.token)
+    .messages('@original')
+    .delete();
+}
+
+export async function createFollowupMessage(
+  client: Client,
+  interaction: Interaction,
+  response: PostData<any>
+): Promise<unknown> {
+  return client.api.webhooks(client.user.id, interaction.token).post(response);
+}
+
+export async function editFollwupMessage(
+  client: Client,
+  interaction: Interaction,
+  messageId: string,
+  response: PostData<any>
+): Promise<unknown> {
+  return client.api
+    .webhooks(client.user.id, interaction.token)
+    .messages(messageId)
+    .patch(response);
+}
+
+export async function deleteFollwupMessage(
+  client: Client,
+  interaction: Interaction,
+  messageId: string,
+  response: PostData<any>
+): Promise<unknown> {
+  return client.api
+    .webhooks(client.user.id, interaction.token)
+    .messages(messageId)
     .delete();
 }
 

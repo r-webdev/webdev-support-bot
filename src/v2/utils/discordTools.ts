@@ -1,13 +1,13 @@
-import {
+import type {
   Message,
   MessageEditOptions,
   EmbedField,
   MessageEmbed,
 } from 'discord.js';
 
-import { REPO_LINK } from './../env';
+import { REPO_LINK } from '../env';
 import { delayedMessageAutoDeletion } from './delayedMessageAutoDeletion';
-import * as emojis from './emojis';
+import { light, neutral_face, point_up, gear } from './emojis';
 import { unknownError } from './errors';
 import {
   reactionFilterBuilder,
@@ -16,17 +16,15 @@ import {
 } from './reactions';
 import { providers } from './urlTools';
 
-export const createMarkdownLink = (title: string, url: string) =>
+export const createMarkdownLink = (title: string, url: string): string =>
   // eslint-disable-next-line unicorn/prefer-replace-all
-  `[${title}](${url.replace(/\)/g, '\\)')})`;
+  `[${title}](${url.replace(/\)/gu, '\\)')})`;
 
 export const BASE_DESCRIPTION = `
-${emojis.light} *react with a number (:one:, :two:, ...) to filter your result*
-${emojis.neutral_face} *react with \`❌\` to delete*
-${
-  emojis.point_up
-} *supports \`!mdn\`, \`!github\`, \`!caniuse\`, \`!npm\`, \`!composer\`, \`!bundlephobia\`, and \`!php\`*
-${emojis.gear} *issues? feature requests? head over to ${createMarkdownLink(
+${light} *react with a number (:one:, :two:, ...) to filter your result*
+${neutral_face} *react with \`❌\` to delete*
+${point_up} *supports \`!mdn\`, \`!github\`, \`!caniuse\`, \`!npm\`, \`!composer\`, \`!bundlephobia\`, and \`!php\`*
+${gear} *issues? feature requests? head over to ${createMarkdownLink(
   'github',
   REPO_LINK
 )}*`;
@@ -40,13 +38,13 @@ export type Provider =
   | 'bundlephobia'
   | 'php';
 
-interface ListEmbed {
+type ListEmbed = {
   provider: Provider;
   searchTerm: string;
   url: string;
   footerText: string;
   description: string;
-}
+};
 
 export const createListEmbed = ({
   provider,
@@ -70,7 +68,7 @@ export const createListEmbed = ({
   throw new Error('provider not implemented');
 };
 
-export interface Embed {
+export type Embed = {
   provider: Provider | 'spam';
   title: string;
   url?: string;
@@ -78,10 +76,10 @@ export interface Embed {
   description: string;
   fields?: EmbedField[];
   author?: { name: string; icon_url?: string; url?: string };
-}
+};
 
 const spamMeta = {
-  color: 0xfe5f55,
+  color: 0xfe_5f_55,
   icon:
     'https://github.com/ljosberinn/webdev-support-bot/blob/master/logo.png?raw=true',
 };
@@ -161,7 +159,7 @@ export const adjustDescriptionLength = (
         return [carry, part].join(' ');
       }, '');
 
-    return shortenedDescription + '...';
+    return `${shortenedDescription}...`;
   }
 
   return description;
@@ -172,10 +170,10 @@ export const adjustTitleLength = (title: string) => {
 
   const cleansedTitle =
     titleLength > DESCRIPTION_LENGTH_LIMIT
-      ? title.slice(
+      ? `${title.slice(
           0,
           Math.max(0, DESCRIPTION_LENGTH_LIMIT - SEPARATOR_LENGTH)
-        ) + '...'
+        )}...`
       : title;
 
   return cleansedTitle.replace(/\n/gm, ' ');
@@ -187,10 +185,8 @@ export const createMarkdownListItem = (index: number, content: string) =>
 export const createMarkdownBash = (string: string) =>
   ['```bash', string, '```'].join('\n');
 
-export const createMarkdownCodeBlock = (
-  string: string,
-  language: string = ''
-) => ['```' + language, string, '```'].join('\n');
+export const createMarkdownCodeBlock = (string: string, language = '') =>
+  [`\`\`\`${language}`, string, '```'].join('\n');
 
 export const createDescription = (items: any[]) =>
   items.concat(BASE_DESCRIPTION).join('\n');
@@ -218,7 +214,7 @@ export const clearReactions = ({ reactions }: Message) =>
 
 export const getChosenResult = async <T>(
   sentMsg: Message,
-  { author: { id } }: Message,
+  { author: { id } }: { author: { id: string } },
   results: T[]
 ): Promise<T> => {
   let earlyReaction = null;
@@ -256,9 +252,7 @@ export const getChosenResult = async <T>(
       return;
     }
 
-    const index = validReactions.indices.findIndex(
-      emoji => emoji === emojiName
-    );
+    const index = validReactions.indices.indexOf(emojiName);
 
     clearReactions(sentMsg);
 
@@ -278,9 +272,7 @@ export const getChosenResult = async <T>(
       return;
     }
 
-    const index = validReactions.indices.findIndex(
-      emoji => emoji === emojiName
-    );
+    const index = validReactions.indices.indexOf(emojiName);
 
     clearReactions(sentMsg);
 
@@ -290,7 +282,6 @@ export const getChosenResult = async <T>(
       // eslint-disable-next-line no-console
       console.error(`${error.name}: ${error.message}`);
       await attemptEdit(sentMsg, unknownError);
-      return;
     }
 
     // nobody reacted, doesn't matter
