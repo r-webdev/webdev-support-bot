@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import type {
   Message,
   CollectorFilter,
@@ -7,9 +8,15 @@ import type {
   Guild,
   GuildChannel,
   MessageEmbed,
+  Client,
+  Interaction,
 } from 'discord.js';
-import { collect, filter } from 'domyno';
+import { filter } from 'domyno';
 
+import { InteractionResponseType } from '../../../enums';
+import type { CommandData } from '../../interactions';
+import { registerCommand } from '../../interactions';
+import { createInteractionResponse } from '../../interactions';
 import { cache } from '../../spam_filter';
 import { createEmbed, createMarkdownCodeBlock } from '../../utils/discordTools';
 import { map } from '../../utils/map';
@@ -187,7 +194,7 @@ const createJobPost = async (
   answers: Answers,
   guild: Guild,
   channelID: string,
-  { username, discriminator, msgID, userID }: Metadata
+  { username, discriminator, userID }: Metadata
 ) => {
   const targetChannel = getTargetChannel(guild, JOB_POSTINGS_CHANNEL);
 
@@ -200,7 +207,7 @@ const createJobPost = async (
   }
 
   const user = createUserTag(username, discriminator);
-  const url = generateURL(guild.id, channelID, msgID);
+  // const url = generateURL(guild.id, channelID, msgID);
 
   try {
     const msg = await targetChannel.send(
@@ -229,7 +236,7 @@ const createJobPost = async (
         provider: 'spam',
 
         title: 'New Job Post',
-        url,
+        // url, doesn't seem to serve a purpose due to !post messages no longer existing and also never really used anyway
       })
     );
 
@@ -261,7 +268,7 @@ const formAndValidateAnswers = async (
       }
     }
 
-    const q = questions[key];
+    const q = val;
     // Send out the question
     await send(q.body);
     // Await the input
@@ -291,7 +298,7 @@ const formAndValidateAnswers = async (
       switch (key) {
         case 'compensation':
           // Alert the moderators if the compensation is invalid.
-          await sendAlert(guild, reply, { discriminator, username });
+          sendAlert(guild, reply, { discriminator, username });
           break;
         case 'description':
           await send(
@@ -350,20 +357,20 @@ const calcNextPostingThreshold = (diff: number) => {
   return diff === 1 ? 'in an hour' : `in ${diff} hours`;
 };
 
-const handleJobPostingRequest = async (msg: Message) => {
-  const { guild, id: msgID } = msg;
-  const { username, discriminator, id } = msg.author;
-  const { type: msgChannelType } = msg.channel;
+const handleJobPostingRequest = async (
+  client: Client,
+  interaction: Interaction
+): Promise<void> => {
+  const guild = await client.guilds.fetch(interaction.guild_id);
+  const channel = guild.channels.resolve(interaction.channel_id);
+  const member = await guild.members.fetch(interaction.member.user.id);
+  const author = member.user;
+  const { username, discriminator, id } = author;
 
-  const filter: CollectorFilter = m => m.author.id === msg.author.id;
-  const send = (str: string) => msg.author.send(str);
+  const filter: CollectorFilter = m => m.author.id === id;
+  const send = (str: string) => author.send(str);
 
   try {
-    // Bail if the user is pinging the bot directly
-    if (msgChannelType === 'dm') {
-      return;
-    }
-
     // Generate cache entry
     const entry = generateCacheEntry(id);
     // Check if the user has been cached
@@ -373,6 +380,11 @@ const handleJobPostingRequest = async (msg: Message) => {
       const diff =
         Number.parseInt(POST_LIMITER_IN_HOURS) -
         Math.abs(Date.now() - entry.value.getTime()) / 3_600_000;
+      createInteractionResponse(client, interaction.guild_id, interaction, {
+        data: {
+          type: InteractionResponseType.ACKNOWLEDGE_WITH_SOURCE,
+        },
+      });
       send(
         `You cannot create a job posting right now.\nPlease try again ${calcNextPostingThreshold(
           diff
@@ -381,14 +393,21 @@ const handleJobPostingRequest = async (msg: Message) => {
       return;
     }
 
+    createInteractionResponse(client, interaction.guild_id, interaction, {
+      data: {
+        type: InteractionResponseType.ACKNOWLEDGE_WITH_SOURCE,
+      },
+    });
+
     // Notify the user regarding the rules, and get the channel
     const { channel } = await send(greeterMessage);
 
-    const { id: channelID } = msg.channel;
+    const { id: channelID } = channel;
     const proceed = await getReply(channel, filter);
 
     if (!proceed) {
-      return send('Canceled.');
+      send('Canceled.');
+      return;
     }
 
     const answers = await formAndValidateAnswers(channel, filter, guild, send, {
@@ -403,7 +422,6 @@ const handleJobPostingRequest = async (msg: Message) => {
 
     const url = await createJobPost(answers, guild, channelID, {
       discriminator,
-      msgID,
       userID: id,
       username,
     });
@@ -414,15 +432,26 @@ const handleJobPostingRequest = async (msg: Message) => {
     // Store the job post in the cache
     cache.set(entry.key, entry.value, POST_LIMITER);
   } catch (error) {
-    await msg.reply(
-      'Please temporarily enable direct messages as the bot cares about your privacy.'
-    );
+    createInteractionResponse(client, interaction.guild_id, interaction, {
+      data: {
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+          content:
+            'Please temporarily enable direct messages as the bot cares about your privacy.',
+        },
+      },
+    });
     // eslint-disable-next-line no-console
     console.error('post.handleJobPostingRequest', error);
-  } finally {
-    // Remove the message
-    await msg.delete();
   }
 };
 
 export default handleJobPostingRequest;
+
+const jobPostCommand: CommandData = {
+  name: 'post',
+  description: 'Start the process of creating a new job post',
+  handler: handleJobPostingRequest,
+};
+
+registerCommand(jobPostCommand);

@@ -93,10 +93,16 @@ const isWebdevAndWebDesignServer = (msg: Message) =>
   msg.guild?.id === SERVER_ID || false;
 
 client.on('message', msg => {
-  handleNonCommandMessages(msg);
+  if (msg.author.bot) {
+    return;
+  }
+
+  if (msg.channel.type === 'text' && msg.guild) {
+    handleNonCommandGuildMessages(msg);
+  }
 });
 
-const handleNonCommandMessages = async (msg: Message) => {
+const handleNonCommandGuildMessages = async (msg: Message) => {
   const quoteLessContent = stripMarkdownQuote(msg.content);
 
   if (isWebdevAndWebDesignServer(msg) && isThanksMessage(quoteLessContent)) {

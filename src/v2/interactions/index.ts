@@ -122,8 +122,8 @@ export async function createInteractionResponse(
   interaction: Interaction,
   response: PostData<InteractionResponse>
 ): Promise<unknown> {
-  const { content } = response.data.data;
-  if (content.length <= 2000) {
+  const { content } = response?.data?.data ?? {};
+  if (content?.length <= 2000 || !content?.length) {
     return _createInteractionResponse(client, guildId, interaction, response);
   }
   let first = true;

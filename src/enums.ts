@@ -5,7 +5,13 @@ export enum InteractionType {
 
 export enum InteractionResponseType {
   PONG = 1,
+  /**
+   * @deprecated
+   */
   ACKNOWLEDGE = 2,
+  /**
+   * @deprecated
+   */
   CHANNEL_MESSAGE = 3,
   CHANNEL_MESSAGE_WITH_SOURCE = 4,
   ACKNOWLEDGE_WITH_SOURCE = 5,

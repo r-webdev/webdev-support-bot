@@ -10,6 +10,8 @@ declare module 'discord.js' {
   } from 'discord.js';
   import { EventEmitter } from 'events';
 
+  import type { InteractionResponseType } from './enums';
+
   export interface Client {
     public api: BaseClient;
   }
