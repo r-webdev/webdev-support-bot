@@ -12,16 +12,26 @@ import type { CommandData } from '../../interactions';
 import { registerCommand } from '../../interactions';
 import { createInteractionResponse } from '../../interactions';
 import { map } from '../../utils/map';
+import type { ValueOrNullary } from '../../utils/valueOrCall';
+import { valueOrCall } from '../../utils/valueOrCall';
+import { code } from '../about/handlers/code';
+import { flexbox } from '../about/handlers/flexbox';
+import { formatting } from '../about/handlers/formatting';
 import { jquery } from '../about/handlers/jquery';
+import { lockfile } from '../about/handlers/lockfile';
 import { modules } from '../about/handlers/modules';
 import { sass } from '../about/handlers/sass';
 import { vscode } from '../about/handlers/vscode';
 
-const aboutMessages: Map<string, string> = new Map([
+const aboutMessages = new Map<string, ValueOrNullary<string>>([
   jquery,
   vscode,
   modules,
   sass,
+  formatting,
+  code,
+  flexbox,
+  lockfile,
 ]);
 
 const shitpostReplacements = {
@@ -29,6 +39,10 @@ const shitpostReplacements = {
   vscode: /visual studio code|vscode/giu,
   modules: /module/giu,
   sass: /sass|scss/giu,
+  formatting: /code|sql/giu,
+  code: /code/giu,
+  flexbox: /flexbox/giu,
+  lockfile: /lockfile/giu,
 };
 
 const mapTransformToChoices = map(
@@ -45,7 +59,7 @@ const shitpostInteraction: CommandData = {
     const content = aboutMessages.get(interaction.data.options[0].value);
 
     if (content) {
-      const shitpostContent = content.replace(
+      const shitpostContent = valueOrCall(content).replace(
         shitpostReplacements[interaction.data.options[0].value],
         interaction.data.options[1].value
       );

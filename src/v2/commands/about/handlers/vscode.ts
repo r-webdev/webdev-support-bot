@@ -1,9 +1,9 @@
-import { light, vscode as vscode_emoji } from '../../../utils/emojis';
+import { vscode as vscode_emoji } from '../../../utils/emojis';
 
 export const vscode: [string, string] = [
   'vscode',
   [
-    `> ${light} consider using a lightweight, customizeable and monthly updated editor such as`,
+    `> 💡 consider using a lightweight, customizeable and monthly updated editor such as`,
     '> ',
     vscode_emoji
       ? `> ${vscode_emoji} Visual Studio Code - <https://code.visualstudio.com/>`

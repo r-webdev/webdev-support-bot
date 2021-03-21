@@ -12,16 +12,26 @@ import type { CommandData } from '../../interactions';
 import { registerCommand } from '../../interactions';
 import { createInteractionResponse } from '../../interactions';
 import { map } from '../../utils/map';
+import type { ValueOrNullary } from '../../utils/valueOrCall';
+import { valueOrCall } from '../../utils/valueOrCall';
+import { code } from './handlers/code';
+import { flexbox } from './handlers/flexbox';
+import { formatting } from './handlers/formatting';
 import { jquery } from './handlers/jquery';
+import { lockfile } from './handlers/lockfile';
 import { modules } from './handlers/modules';
 import { sass } from './handlers/sass';
 import { vscode } from './handlers/vscode';
 
-const aboutMessages: Map<string, string> = new Map([
+const aboutMessages = new Map<string, ValueOrNullary<string>>([
   jquery,
   vscode,
   modules,
   sass,
+  formatting,
+  code,
+  flexbox,
+  lockfile,
 ]);
 
 const mapTransformToChoices = map(
@@ -45,7 +55,7 @@ const aboutInteraction: CommandData = {
         {
           data: {
             data: {
-              content,
+              content: valueOrCall(content),
             },
             type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
           },
