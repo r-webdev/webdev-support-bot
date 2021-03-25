@@ -1,5 +1,5 @@
 const sites = [
-  `<https://codepen.io/> - ⚠ requires account`,
+  `<https://codepen.io/> - requires account`,
   'https://codesandbox.io/',
   '<https://repl.it/>',
   '<https://ideone.com/>',

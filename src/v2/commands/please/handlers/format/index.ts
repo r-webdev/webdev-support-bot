@@ -19,8 +19,8 @@ const otherLanguageExamples = ['php', 'css', 'html', 'ts', 'sql', 'md']
   .map(str => `\`${str}\``)
   .join(', ');
 
-export const formatting: [string, () => string] = [
-  'formatting',
+export const format: [string, () => string] = [
+  'format',
   (): string => `
 ☝ Did you know you can add 🖌 syntax highlighting to your code in Discord? Try this snippet:
 

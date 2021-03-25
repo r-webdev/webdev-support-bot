@@ -2,6 +2,7 @@ import type {
   ApplicationCommandOptionChoice,
   Client,
   Interaction,
+  MessageEmbed,
 } from 'discord.js';
 
 import {
@@ -11,23 +12,14 @@ import {
 import type { CommandData } from '../../interactions';
 import { registerCommand } from '../../interactions';
 import { createInteractionResponse } from '../../interactions';
+import { Embed } from '../../utils/discordTools';
 import { map } from '../../utils/map';
 import type { ValueOrNullary } from '../../utils/valueOrCall';
 import { valueOrCall } from '../../utils/valueOrCall';
-import { flexbox } from './handlers/flexbox';
-import { jquery } from './handlers/jquery';
-import { lockfile } from './handlers/lockfile';
-import { modules } from './handlers/modules';
-import { sass } from './handlers/sass';
-import { vscode } from './handlers/vscode';
+import { javascript } from './handlers/javascript';
 
-const aboutMessages = new Map<string, ValueOrNullary<string>>([
-  jquery,
-  vscode,
-  modules,
-  sass,
-  flexbox,
-  lockfile,
+const resourceMessages = new Map<string, ValueOrNullary<{ content: string }>>([
+  javascript,
 ]);
 
 const mapTransformToChoices = map(
@@ -37,33 +29,30 @@ const mapTransformToChoices = map(
   })
 );
 
-const aboutInteraction: CommandData = {
-  description:
-    'Quick response for common "why" or "Tell me about..." questions',
+const pleaseInteraction: CommandData = {
+  description: 'Quick response for asking someone to please use something',
   handler: async (client: Client, interaction: Interaction) => {
-    const content = aboutMessages.get(interaction.data.options[0].value);
+    const content = resourceMessages.get(interaction.data.options[0].value);
 
     if (content) {
       await createInteractionResponse(client, interaction, {
         data: {
-          data: {
-            content: valueOrCall(content),
-          },
+          data: valueOrCall(content) as { content: string },
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         },
       });
     }
   },
-  name: 'about',
+  name: 'resource',
   options: [
     {
-      choices: [...mapTransformToChoices(aboutMessages.keys())],
-      description: 'The topic to ask about',
-      name: 'topic',
+      choices: [...mapTransformToChoices(resourceMessages.keys())],
+      description: 'what are you looking to find resources for',
+      name: 'for',
       required: true,
       type: ApplicationCommandOptionType.STRING,
     },
   ],
 };
 
-registerCommand(aboutInteraction);
+registerCommand(pleaseInteraction);

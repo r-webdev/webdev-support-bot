@@ -14,21 +14,21 @@ import { createInteractionResponse } from '../../interactions';
 import { map } from '../../utils/map';
 import type { ValueOrNullary } from '../../utils/valueOrCall';
 import { valueOrCall } from '../../utils/valueOrCall';
-import { code } from '../about/handlers/code';
 import { flexbox } from '../about/handlers/flexbox';
-import { formatting } from '../about/handlers/formatting';
 import { jquery } from '../about/handlers/jquery';
 import { lockfile } from '../about/handlers/lockfile';
 import { modules } from '../about/handlers/modules';
 import { sass } from '../about/handlers/sass';
 import { vscode } from '../about/handlers/vscode';
+import { code } from '../please/handlers/code';
+import { format } from '../please/handlers/format';
 
 const aboutMessages = new Map<string, ValueOrNullary<string>>([
   jquery,
   vscode,
   modules,
   sass,
-  formatting,
+  format,
   code,
   flexbox,
   lockfile,
@@ -39,7 +39,7 @@ const shitpostReplacements = {
   vscode: /visual studio code|vscode/giu,
   modules: /module/giu,
   sass: /sass|scss/giu,
-  formatting: /code|sql/giu,
+  format: /code|sql/giu,
   code: /code/giu,
   flexbox: /flexbox/giu,
   lockfile: /lockfile/giu,
