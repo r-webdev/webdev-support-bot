@@ -28,11 +28,11 @@ declare module 'discord.js' {
   export interface WebSocketManager {
     public on(
       event: 'INTERACTION_CREATE',
-      listener: (interaction: Interaction) => void
+      listener: (interaction: InteractionObject) => void
     ): this;
   }
 
-  export type Interaction = {
+  export type InteractionObject = {
     id: string;
     type: InteractionType;
     token: string;

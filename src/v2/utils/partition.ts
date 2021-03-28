@@ -1,7 +1,7 @@
 export function partitionʹ<T, U>(
   predicate: (item: T, index: number, iter: Iterable<T>) => U,
   iter: Iterable<T>
-) {
+): [T[], T[]] {
   const success = [];
   const failed = [];
   let i = 0;
@@ -15,7 +15,7 @@ export function partitionʹ<T, U>(
 export function partition<T, U>(
   predicate: (item: T, index: number, iter: Iterable<T>) => U
 ) {
-  return function (iter: Iterable<T>) {
+  return function (iter: Iterable<T>): [T[], T[]] {
     return partitionʹ(predicate, iter);
   };
 }

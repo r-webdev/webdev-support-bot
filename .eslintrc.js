@@ -9,7 +9,6 @@ const {
 const tsOverride = createTSOverride({
   ...getDependencies(),
   rules: {
-    '@typescript-eslint/no-floating-promises': 0,
     'inclusive-language/use-inclusive-words': 0,
     '@typescript-eslint/no-floating-promises': 0,
     'no-empty': 0,
@@ -19,6 +18,7 @@ const tsOverride = createTSOverride({
     'unicorn/prefer-string-replace-all': 0,
     'no-eq-null': 0,
     eqeqeq: ['error', 'always', { null: 'ignore' }],
+    'no-bitwise': 0,
     // stuff
   },
 });

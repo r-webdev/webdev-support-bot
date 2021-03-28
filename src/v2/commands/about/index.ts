@@ -1,14 +1,14 @@
 import type {
   ApplicationCommandOptionChoice,
   Client,
-  Interaction,
+  InteractionObject,
 } from 'discord.js';
 
 import {
   InteractionResponseType,
   ApplicationCommandOptionType,
 } from '../../../enums';
-import type { CommandData } from '../../interactions';
+import type { CommandData, Interaction } from '../../interactions';
 import { registerCommand } from '../../interactions';
 import { createInteractionResponse } from '../../interactions';
 import { map } from '../../utils/map';
@@ -40,19 +40,20 @@ const mapTransformToChoices = map(
 const aboutInteraction: CommandData = {
   description:
     'Quick response for common "why" or "Tell me about..." questions',
-  handler: async (client: Client, interaction: Interaction) => {
-    const content = aboutMessages.get(interaction.data.options[0].value);
+  handler: async (client: Client, interaction: Interaction): Promise<void> => {
+    const topic = interaction.data.options[0].value;
+    const content = aboutMessages.get(topic);
 
     if (content) {
-      await createInteractionResponse(client, interaction, {
-        data: {
-          data: {
-            content: valueOrCall(content),
-          },
-          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        },
+      interaction.reply({
+        content: valueOrCall(content),
       });
+      return;
     }
+
+    interaction.reply({
+      content: `An error occured when trying to call \`/about ${topic}`,
+    });
   },
   name: 'about',
   options: [

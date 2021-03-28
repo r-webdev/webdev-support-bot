@@ -1,7 +1,7 @@
 import type {
   ApplicationCommandOptionChoice,
   Client,
-  Interaction,
+  InteractionObject,
   MessageEmbed,
 } from 'discord.js';
 
@@ -9,7 +9,7 @@ import {
   InteractionResponseType,
   ApplicationCommandOptionType,
 } from '../../../enums';
-import type { CommandData } from '../../interactions';
+import type { CommandData, Interaction } from '../../interactions';
 import { registerCommand } from '../../interactions';
 import { createInteractionResponse } from '../../interactions';
 import { Embed } from '../../utils/discordTools';
@@ -35,12 +35,7 @@ const pleaseInteraction: CommandData = {
     const content = resourceMessages.get(interaction.data.options[0].value);
 
     if (content) {
-      await createInteractionResponse(client, interaction, {
-        data: {
-          data: valueOrCall(content) as { content: string },
-          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        },
-      });
+      interaction.reply(valueOrCall(content));
     }
   },
   name: 'resource',

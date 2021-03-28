@@ -9,12 +9,12 @@ import type {
   GuildChannel,
   MessageEmbed,
   Client,
-  Interaction,
+  InteractionObject,
 } from 'discord.js';
 import { filter } from 'domyno';
 
 import { InteractionResponseType } from '../../../enums';
-import type { CommandData } from '../../interactions';
+import type { CommandData, Interaction } from '../../interactions';
 import { registerCommand } from '../../interactions';
 import { createInteractionResponse } from '../../interactions';
 import { cache } from '../../spam_filter';
@@ -380,11 +380,8 @@ const handleJobPostingRequest = async (
       const diff =
         Number.parseInt(POST_LIMITER_IN_HOURS) -
         Math.abs(Date.now() - entry.value.getTime()) / 3_600_000;
-      createInteractionResponse(client, interaction, {
-        data: {
-          type: InteractionResponseType.ACKNOWLEDGE_WITH_SOURCE,
-        },
-      });
+      interaction.acknowledge();
+
       send(
         `You cannot create a job posting right now.\nPlease try again ${calcNextPostingThreshold(
           diff
@@ -393,11 +390,7 @@ const handleJobPostingRequest = async (
       return;
     }
 
-    createInteractionResponse(client, interaction, {
-      data: {
-        type: InteractionResponseType.ACKNOWLEDGE_WITH_SOURCE,
-      },
-    });
+    interaction.acknowledge();
 
     // Notify the user regarding the rules, and get the channel
     const { channel } = await send(greeterMessage);
@@ -432,15 +425,9 @@ const handleJobPostingRequest = async (
     // Store the job post in the cache
     cache.set(entry.key, entry.value, POST_LIMITER);
   } catch (error) {
-    createInteractionResponse(client, interaction, {
-      data: {
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: {
-          content:
-            'Please temporarily enable direct messages as the bot cares about your privacy.',
-        },
-      },
-    });
+    interaction.reply(
+      'Please temporarily enable direct messages as the bot cares about your privacy.'
+    );
     // eslint-disable-next-line no-console
     console.error('post.handleJobPostingRequest', error);
   }

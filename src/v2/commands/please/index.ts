@@ -1,14 +1,14 @@
 import type {
   ApplicationCommandOptionChoice,
   Client,
-  Interaction,
+  InteractionObject,
 } from 'discord.js';
 
 import {
   InteractionResponseType,
   ApplicationCommandOptionType,
 } from '../../../enums';
-import type { CommandData } from '../../interactions';
+import type { CommandData, Interaction } from '../../interactions';
 import { registerCommand } from '../../interactions';
 import { createInteractionResponse } from '../../interactions';
 import { map } from '../../utils/map';
@@ -32,14 +32,8 @@ const pleaseInteraction: CommandData = {
     const content = pleaseMessages.get(interaction.data.options[0].value);
 
     if (content) {
-      await createInteractionResponse(client, interaction, {
-        data: {
-          data: {
-            content: valueOrCall(content),
-          },
-          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        },
-      });
+      await interaction.reply(valueOrCall(content));
+      await interaction.reply(valueOrCall(content));
     }
   },
   name: 'please',

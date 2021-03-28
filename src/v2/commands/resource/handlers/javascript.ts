@@ -1,7 +1,5 @@
-import type { Message, MessageEmbed } from 'discord.js';
 import { collect } from 'domyno';
 
-import type { Embed } from '../../../utils/discordTools';
 import { map } from '../../../utils/map';
 import { pipe } from '../../../utils/pipe';
 
@@ -26,7 +24,7 @@ ${BACKTICKS}
 const transform = pipe<Iterable<ResourceDescription>, string>([
   mapTransform,
   collect,
-  arr => arr.join('\n'),
+  (arr: string[]) => arr.join('\n'),
 ]);
 
 const resources = [

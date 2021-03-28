@@ -188,8 +188,8 @@ export const createMarkdownBash = (string: string) =>
 export const createMarkdownCodeBlock = (string: string, language = '') =>
   [`\`\`\`${language}`, string, '```'].join('\n');
 
-export const createDescription = (items: any[]) =>
-  items.concat(BASE_DESCRIPTION).join('\n');
+export const createDescription = (items: unknown[]): string =>
+  [...items, BASE_DESCRIPTION].join('\n');
 
 export const findEarlyReaction = (
   { reactions }: Message,

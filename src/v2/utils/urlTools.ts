@@ -1,8 +1,11 @@
+import type { InteractionObject } from 'discord.js';
 import { Message } from 'discord.js';
-import { HeadersInit } from 'node-fetch';
+import type { HeadersInit } from 'node-fetch';
 
+import type { Interaction } from '../interactions';
+import { createInteractionResponse } from '../interactions';
 import { delayedMessageAutoDeletion } from './delayedMessageAutoDeletion';
-import { Provider } from './discordTools';
+import type { Provider } from './discordTools';
 import { noResults, invalidResponse } from './errors';
 import useData from './useData';
 
@@ -23,7 +26,7 @@ type ProviderMap = {
 
 export const providers: ProviderMap = {
   bundlephobia: {
-    color: 0xffffff,
+    color: 0xff_ff_ff,
     createTitle: (searchTerm: string) =>
       `Bundlephobia results for *${searchTerm}*`,
     direct: `https://bundlephobia.com/result?p=${TERM}`,
@@ -34,7 +37,7 @@ export const providers: ProviderMap = {
     search: `https://api.npms.io/v2/search/suggestions?q=${SEARCH_TERM}`,
   },
   caniuse: {
-    color: 0xdb5600,
+    color: 0xdb_56_00,
     createTitle: (searchTerm: string) => `CanIUse results for *${searchTerm}*`,
     direct: `https://caniuse.com/#feat=${TERM}`,
     getExtendedInfoUrl: (text: string) =>
@@ -44,7 +47,7 @@ export const providers: ProviderMap = {
     search: `https://caniuse.com/process/query.php?search=${SEARCH_TERM}`,
   },
   composer: {
-    color: 0xf28d1a,
+    color: 0xf2_8d_1a,
     createTitle: (searchTerm: string) => `Packagist results for ${searchTerm}`,
     direct: `https://packagist.org/packages/${TERM}`,
     getExtendedInfoUrl: (pkg: string) =>
@@ -54,7 +57,7 @@ export const providers: ProviderMap = {
     search: `https://packagist.org/search.json?q=${SEARCH_TERM}`,
   },
   github: {
-    color: 0x24292e,
+    color: 0x24_29_2e,
     createTitle: (searchTerm: string) => `GitHub results for *${searchTerm}*`,
     direct: `https://github.com/${TERM}`,
     help: '!github react',
@@ -63,7 +66,7 @@ export const providers: ProviderMap = {
     search: `https://api.github.com/search/repositories?q=${SEARCH_TERM}`,
   },
   mdn: {
-    color: 0x83d0f2,
+    color: 0x83_d0_f2,
     createTitle: (searchTerm: string) => `MDN results for *${searchTerm}*`,
     direct: `https://developer.mozilla.org${TERM}`,
     help: '!mdn localStorage',
@@ -71,14 +74,14 @@ export const providers: ProviderMap = {
     search: `https://developer.mozilla.org/api/v1/search?q=${SEARCH_TERM}&locale=en-US`,
   },
   npm: {
-    color: 0xfb3e44,
+    color: 0xfb_3e_44,
     createTitle: (searchTerm: string) => `NPM results for *${searchTerm}*`,
     help: '!npm react',
     icon: 'https://avatars0.githubusercontent.com/u/6078720',
     search: `https://www.npmjs.com/search/suggestions?q=${SEARCH_TERM}`,
   },
   php: {
-    color: 0x8892bf,
+    color: 0x88_92_bf,
     createTitle: (searchTerm: string) => `PHP.net results for *${searchTerm}*`,
     direct: `https://www.php.net/${TERM}`,
     help: '!php echo',
@@ -111,7 +114,7 @@ export const KEYWORD_REGEXP = new RegExp(
       .reduce((carry, keyword) => [...carry, keyword], [])
       .join('|')
   ),
-  'i'
+  'iu'
 );
 
 export const getSearchUrl = (provider: Provider, search: string) => {
@@ -140,17 +143,17 @@ export const getExtendedInfoUrl = (provider: Provider, term: string) => {
   );
 };
 
-interface GetDataParams {
-  msg: Message;
+type GetDataParams = {
+  msg: Interaction;
   provider: Provider;
   searchTerm: string;
   sanitizeData?: (data: any) => Partial<any>;
   isInvalidData: (data: any) => boolean;
   headers?: HeadersInit;
-}
+};
 
 export const getData = async <T>({
-  msg,
+  msg: interaction,
   provider,
   searchTerm,
   sanitizeData,
@@ -161,16 +164,16 @@ export const getData = async <T>({
   const { error, json: data } = await useData<T>(searchUrl, 'json', headers);
 
   if (error) {
-    await msg.reply(invalidResponse);
+    interaction.reply(invalidResponse);
     return;
   }
 
   const sanitizedData = sanitizeData ? sanitizeData(data) : data;
 
   if (isInvalidData(sanitizedData)) {
-    const sentMessage = await msg.reply(noResults(searchTerm));
+    const sentMessage = await interaction.reply(noResults(searchTerm));
 
-    delayedMessageAutoDeletion(sentMessage);
+    // delayedMessageAutoDeletion(sentMessage);
     return;
   }
 

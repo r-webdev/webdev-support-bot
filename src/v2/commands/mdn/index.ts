@@ -1,18 +1,12 @@
 /* eslint-disable unicorn/prefer-query-selector */
-import type {
-  Client,
-  Interaction,
-  Message,
-  MessageEmbed,
-  TextChannel,
-} from 'discord.js';
-import { create } from 'ts-node';
+import type { Client, Message, MessageEmbed, TextChannel } from 'discord.js';
 import { URL } from 'url';
 
 import {
   ApplicationCommandOptionType,
   InteractionResponseType,
 } from '../../../enums';
+import type { Interaction } from '../../interactions';
 import {
   createInteractionResponse,
   editOriginalInteractionResponse,
@@ -93,26 +87,16 @@ const mdnHandler = async (
     const url = getSearchUrl(provider, searchTerm);
     const { error, json } = await fetch<SearchResponse>(url, 'json');
     if (error) {
-      return await createInteractionResponse(client, interaction, {
-        data: {
-          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: {
-            content: invalidResponse,
-            flags: 64,
-          },
-        },
+      return await interaction.reply({
+        content: invalidResponse,
+        flags: 64,
       });
     }
 
     if (json.documents.length === 0) {
-      return await createInteractionResponse(client, interaction, {
-        data: {
-          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: {
-            content: noResults(searchTerm),
-            flags: 64,
-          },
-        },
+      return await interaction.reply({
+        content: noResults(searchTerm),
+        flags: 64,
       });
     }
 
@@ -144,37 +128,18 @@ const mdnHandler = async (
       });
     }
 
-    await createInteractionResponse(client, interaction, {
-      data: {
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: {
-          content: '',
-          embeds: [
-            createListEmbed({
-              description: createDescription(preparedDescription),
-              footerText: `${json.documents.length} results found`,
-              provider,
-              searchTerm,
-              url,
-            }).embed as MessageEmbed,
-          ],
-        },
-      },
+    const sentMsg = await interaction.reply({
+      content: '',
+      embeds: [
+        createListEmbed({
+          description: createDescription(preparedDescription),
+          footerText: `${json.documents.length} results found`,
+          provider,
+          searchTerm,
+          url,
+        }).embed as MessageEmbed,
+      ],
     });
-
-    const interactionMessageObj = await editOriginalInteractionResponse(
-      client,
-      interaction,
-      {
-        data: {},
-      }
-    );
-
-    const sentMsg = await getTextMessageFromMessageObj(
-      client,
-      interaction.guild_id,
-      interactionMessageObj as Record<string, string>
-    );
 
     const result = await waitForChosenResult(
       sentMsg,
@@ -188,25 +153,7 @@ const mdnHandler = async (
     const editableUrl = buildDirectUrl(result.slug);
     await attemptEdit(sentMsg, editableUrl, { embed: null });
   } catch {
-    try {
-      await createInteractionResponse(client, interaction, {
-        data: {
-          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: {
-            content: unknownError,
-          },
-        },
-      });
-    } catch {
-      editOriginalInteractionResponse(client, interaction, {
-        data: {
-          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: {
-            content: unknownError,
-          },
-        },
-      });
-    }
+    interaction.reply(unknownError);
   }
 };
 
