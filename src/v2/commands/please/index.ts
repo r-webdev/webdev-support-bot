@@ -33,7 +33,6 @@ const pleaseInteraction: CommandData = {
 
     if (content) {
       await interaction.reply(valueOrCall(content));
-      await interaction.reply(valueOrCall(content));
     }
   },
   name: 'please',

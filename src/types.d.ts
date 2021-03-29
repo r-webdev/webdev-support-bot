@@ -64,6 +64,7 @@ declare module 'discord.js' {
     id: string;
     name: string;
     options: ApplicationCommandInteractionDataOption[];
+    resolved: unknown;
   };
 
   export type ApplicationCommandInteractionDataOption = {

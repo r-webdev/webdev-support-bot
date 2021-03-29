@@ -73,24 +73,9 @@ export class Interaction extends Base implements InteractionObject {
       | APIMessageContentResolvable
       | InteractionApplicationCommandCallbackData
   ): typeof data extends { flag: 64 } ? Promise<void> : Promise<Message> {
-    let content: InteractionApplicationCommandCallbackData;
-
-    if (Object.prototype.toString.call(data) === '[object Object]') {
-      content = {
-        content: '',
-        ...(data as InteractionApplicationCommandCallbackData),
-      };
-    } else if (
-      data instanceof MessageEmbed ||
-      (Array.isArray(data) && data.every(item => item instanceof MessageEmbed))
-    ) {
-      content = {
-        content: '',
-        embeds: castArray(data),
-      };
-    } else {
-      content = { content: String(data) };
-    }
+    const content: InteractionApplicationCommandCallbackData = normalizeContent(
+      data
+    );
 
     const isEphemeral = Boolean(content.flags & 64);
 
@@ -134,17 +119,37 @@ export class Interaction extends Base implements InteractionObject {
     );
   }
 
-  public async acknowledge(): Promise<void> {
+  public async acknowledge(): Promise<Message | null> {
     if (this._replied) {
-      return Promise.resolve();
+      return Promise.resolve(null);
     }
 
     this._replied = true;
-    createInteractionResponse(this.client, this, {
+    await createInteractionResponse(this.client, this, {
       data: {
         type: InteractionResponseType.ACKNOWLEDGE_WITH_SOURCE,
       },
     });
+  }
+
+  public async update(
+    data:
+      | APIMessageContentResolvable
+      | InteractionApplicationCommandCallbackData
+  ): Promise<Message> {
+    const content = normalizeContent(data);
+    const msgData = await editOriginalInteractionResponse(this.client, this, {
+      data: {
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        ...content,
+      },
+    });
+
+    return getTextMessageFromMessageObj(
+      this.client,
+      this.guild_id,
+      msgData as Record<string, string>
+    );
   }
 }
 
@@ -158,4 +163,34 @@ function getTextMessageFromMessageObj(
     messageObject.channel_id
   ) as TextChannel;
   return channel.messages.fetch(messageObject.id);
+}
+function normalizeContent(
+  data:
+    | string
+    | number
+    | bigint
+    | boolean
+    | symbol
+    | InteractionApplicationCommandCallbackData
+    | readonly unknown[]
+) {
+  let content: InteractionApplicationCommandCallbackData;
+
+  if (Object.prototype.toString.call(data) === '[object Object]') {
+    content = {
+      content: '',
+      ...(data as InteractionApplicationCommandCallbackData),
+    };
+  } else if (
+    data instanceof MessageEmbed ||
+    (Array.isArray(data) && data.every(item => item instanceof MessageEmbed))
+  ) {
+    content = {
+      content: '',
+      embeds: castArray(data),
+    };
+  } else {
+    content = { content: String(data) };
+  }
+  return content;
 }
