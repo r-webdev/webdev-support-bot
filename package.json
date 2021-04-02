@@ -22,7 +22,7 @@
     "@sentry/node": "6.2.5",
     "compare-versions": "3.6.0",
     "date-fns": "2.19.0",
-    "discord.js": "12.5.2",
+    "discord.js": "12.5.3",
     "dom-parser": "0.1.6",
     "html-entities": "1.4.0",
     "mongoose": "5.12.3",
