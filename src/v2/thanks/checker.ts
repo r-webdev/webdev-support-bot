@@ -27,7 +27,7 @@ const english = [
 ];
 const negativeEnglish = english
   .flatMap(word => ['n ' + word, 'n' + word, 'no' + word, 'no ' + word])
-  .concat(['no need to thank', 'thanks,? but no thanks']);
+  .concat(['no need to thank', 'thanks,? but no thanks', 'thanks for nothing']);
 
 const partitionWrap = partition(
   (str: string) => !!str.match(wordBoundarableRegex)

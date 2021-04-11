@@ -1,16 +1,8 @@
-import type {
-  ApplicationCommandOptionChoice,
-  Client,
-  InteractionObject,
-} from 'discord.js';
+import type { ApplicationCommandOptionChoice, Client } from 'discord.js';
 
-import {
-  InteractionResponseType,
-  ApplicationCommandOptionType,
-} from '../../../enums';
+import { ApplicationCommandOptionType } from '../../../enums';
 import type { CommandData, Interaction } from '../../interactions';
 import { registerCommand } from '../../interactions';
-import { createInteractionResponse } from '../../interactions';
 import { map } from '../../utils/map';
 import type { ValueOrNullary } from '../../utils/valueOrCall';
 import { valueOrCall } from '../../utils/valueOrCall';
@@ -42,12 +34,13 @@ const aboutInteraction: CommandData = {
     'Quick response for common "why" or "Tell me about..." questions',
   handler: async (client: Client, interaction: Interaction): Promise<void> => {
     const topic = interaction.data.options[0].value;
+    const user = interaction.data.options[1]?.value;
     const content = aboutMessages.get(topic);
 
     if (content) {
-      interaction.reply({
-        content: valueOrCall(content),
-      });
+      interaction.reply(
+        `${user ? `<@${user}>\n` : ''} ${valueOrCall(content).trim()}`
+      );
       return;
     }
 
@@ -63,6 +56,11 @@ const aboutInteraction: CommandData = {
       name: 'topic',
       required: true,
       type: ApplicationCommandOptionType.STRING,
+    },
+    {
+      name: 'user',
+      description: 'Optional Person to Tag',
+      type: ApplicationCommandOptionType.USER,
     },
   ],
 };

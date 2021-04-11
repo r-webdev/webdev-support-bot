@@ -1,16 +1,8 @@
-import type {
-  ApplicationCommandOptionChoice,
-  Client,
-  InteractionObject,
-} from 'discord.js';
+import type { ApplicationCommandOptionChoice, Client } from 'discord.js';
 
-import {
-  InteractionResponseType,
-  ApplicationCommandOptionType,
-} from '../../../enums';
+import { ApplicationCommandOptionType } from '../../../enums';
 import type { CommandData, Interaction } from '../../interactions';
 import { registerCommand } from '../../interactions';
-import { createInteractionResponse } from '../../interactions';
 import { map } from '../../utils/map';
 import type { ValueOrNullary } from '../../utils/valueOrCall';
 import { valueOrCall } from '../../utils/valueOrCall';
@@ -27,22 +19,30 @@ const mapTransformToChoices = map(
 );
 
 const pleaseInteraction: CommandData = {
+  name: 'please',
   description: 'Quick response for asking someone to please use something',
   handler: async (client: Client, interaction: Interaction) => {
     const content = pleaseMessages.get(interaction.data.options[0].value);
+    const user = interaction.data.options[1]?.value;
 
     if (content) {
-      await interaction.reply(valueOrCall(content));
+      await interaction.reply(
+        `${user ? `<@${user}>\n` : ''}${valueOrCall(content).trim()}`
+      );
     }
   },
-  name: 'please',
   options: [
     {
-      choices: [...mapTransformToChoices(pleaseMessages.keys())],
-      description: 'The topic to ask about',
       name: 'topic',
+      description: 'The topic to ask about',
+      choices: [...mapTransformToChoices(pleaseMessages.keys())],
       required: true,
       type: ApplicationCommandOptionType.STRING,
+    },
+    {
+      name: 'user',
+      description: 'Optional Person to Tag',
+      type: ApplicationCommandOptionType.USER,
     },
   ],
 };
