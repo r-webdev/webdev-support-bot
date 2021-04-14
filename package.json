@@ -21,7 +21,7 @@
     "@mdn/browser-compat-data": "^3.0.3",
     "@sentry/node": "6.2.5",
     "compare-versions": "3.6.0",
-    "date-fns": "2.20.3",
+    "date-fns": "2.21.0",
     "discord.js": "12.5.3",
     "dom-parser": "0.1.6",
     "html-entities": "1.4.0",
