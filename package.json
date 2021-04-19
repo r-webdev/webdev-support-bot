@@ -18,7 +18,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@mdn/browser-compat-data": "^3.0.3",
+    "@mdn/browser-compat-data": "^3.3.0",
     "@sentry/node": "6.2.5",
     "compare-versions": "3.6.0",
     "date-fns": "2.21.1",
