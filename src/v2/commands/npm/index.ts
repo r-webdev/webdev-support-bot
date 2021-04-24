@@ -75,6 +75,7 @@ const npmEmbedToString = ({ name, description, url }: NPMEmbed, index) => {
 
   return createMarkdownListItem(index, createMarkdownLink(linkTitle, url));
 };
+
 // msg: Message, searchTerm: string
 const handleNpmCommand = async (client: Client, interaction: Interaction) => {
   const searchTerm = interaction.data.options[0].value;
@@ -231,6 +232,7 @@ registerCommand({
       name: 'name',
       description: 'The name of the package',
       type: ApplicationCommandOptionType.STRING,
+      required: true,
     },
   ],
   handler: handleNpmCommand,

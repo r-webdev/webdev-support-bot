@@ -10,7 +10,7 @@
 export function* mapʹ<T, U>(
   fn: (item: T, index: number, iter: Iterable<T>) => U,
   iter: Iterable<T>
-) {
+): IterableIterator<U> {
   let i = 0;
   for (const item of iter) {
     yield fn(item, i++, iter);
@@ -20,5 +20,5 @@ export function* mapʹ<T, U>(
 export function map<T, U>(
   fn: (item: T, index: number, iter: Iterable<T>) => U
 ) {
-  return (iter: Iterable<T>) => mapʹ(fn, iter);
+  return (iter: Iterable<T>): IterableIterator<U> => mapʹ(fn, iter);
 }

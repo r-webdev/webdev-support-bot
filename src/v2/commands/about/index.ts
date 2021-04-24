@@ -58,7 +58,7 @@ const aboutInteraction: CommandData = {
       type: ApplicationCommandOptionType.STRING,
     },
     {
-      name: 'user',
+      name: 'tag',
       description: 'Optional Person to Tag',
       type: ApplicationCommandOptionType.USER,
     },

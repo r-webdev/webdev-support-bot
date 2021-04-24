@@ -1,4 +1,4 @@
-import { Message } from 'discord.js';
+import type { Message } from 'discord.js';
 import { Html5Entities as Entities } from 'html-entities';
 
 import { delayedMessageAutoDeletion } from '../../utils/delayedMessageAutoDeletion';
@@ -12,7 +12,7 @@ import {
   adjustTitleLength,
   BASE_DESCRIPTION,
 } from '../../utils/discordTools';
-import * as errors from '../../utils/errors';
+import { invalidResponse, noResults, unknownError } from '../../utils/errors';
 import { getSearchUrl, buildDirectUrl } from '../../utils/urlTools';
 import useData from '../../utils/useData';
 
@@ -34,11 +34,11 @@ type MDNResult = {
   };
 };
 
-interface ParserResult {
+type ParserResult = {
   results: MDNResult[];
   isEmpty: boolean;
   meta: string;
-}
+};
 
 type MDNResponse = {
   documents: MDNResult[];
@@ -75,7 +75,7 @@ const defaultParser = (json: MDNResponse): ParserResult => {
  * @param {any} result [document.parseFromString return type]
  */
 const extractMetadataFromResult = (result: MDNResult) => {
-  const title = result.title;
+  const { title } = result;
   const url = buildDirectUrl(provider, result.mdn_url);
   const excerpt = sanitizeExcerpt(
     escapeMarkdown(entities.decode(result.summary))
@@ -103,14 +103,14 @@ export const queryBuilder = (
     const { error, json } = await useData<MDNResponse>(searchUrl);
 
     if (error) {
-      await msg.reply(errors.invalidResponse);
+      await msg.reply(invalidResponse);
       return;
     }
 
     const { results, isEmpty, meta } = mdnParser(json);
 
     if (isEmpty) {
-      const sentMsg = await msg.reply(errors.noResults(searchTerm));
+      const sentMsg = await msg.reply(noResults(searchTerm));
 
       delayedMessageAutoDeletion(sentMsg);
       return;
@@ -169,7 +169,7 @@ export const queryBuilder = (
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(error);
-    await msg.reply(errors.unknownError);
+    await msg.reply(unknownError);
   }
 };
 

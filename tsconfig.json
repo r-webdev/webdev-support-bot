@@ -1,14 +1,15 @@
 {
   "compilerOptions": {
-    "lib": ["es2019", "es2020", "es2020.string", "ESNext"],
+    "lib": ["ESNext"],
     "allowJs": true,
-    "target": "es2019",
+    "target": "esnext",
     "module": "commonjs",
     "moduleResolution": "node",
     "sourceMap": true,
     "outDir": "./build",
     "rootDir": "./src",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "esModuleInterop": true
   },
   "include": ["./src/**/*.ts"],
   "exclude": ["node_modules", "./src/**/__fixtures__/*", "./src/**/*.test.ts"]

@@ -1,8 +1,13 @@
 /* eslint-disable unicorn/prefer-query-selector */
-import type { Message } from 'discord.js';
-import * as DOMParser from 'dom-parser';
+import type { Client, Message, MessageEmbed } from 'discord.js';
+import type { Node } from 'dom-parser';
+import DOMParser from 'dom-parser';
 import { Html5Entities as Entities } from 'html-entities';
 
+import { ApplicationCommandOptionType } from '../../../enums';
+import { invalidResponse, unknownError } from '../../../v2/utils/errors';
+import type { Interaction } from '../../interactions';
+import { registerCommand } from '../../interactions';
 import {
   adjustTitleLength,
   attemptEdit,
@@ -12,7 +17,7 @@ import {
   createMarkdownListItem,
   getChosenResult,
 } from '../../utils/discordTools';
-import { invalidResponse, unknownError } from '../../utils/errors';
+import {} from '../../utils/errors';
 import { buildDirectUrl, getSearchUrl } from '../../utils/urlTools';
 import useData from '../../utils/useData';
 
@@ -23,6 +28,28 @@ type ParseResult = {
   isDirect: boolean;
   results: DOMParser.Node[];
 };
+
+/**
+ *
+ * @param {any} result [document.parseFromString return type]
+ */
+const extractMetadataFromResult = (result: Node) => {
+  const titleElement = result.textContent;
+
+  const title = escapeMarkdown(entities.decode(titleElement));
+
+  const url = buildDirectUrl(provider, result.getAttribute('href'));
+
+  return {
+    title,
+    url,
+  };
+};
+
+/**
+ * Escapes *, _, `, ~, \
+ */
+const escapeMarkdown = (text: string) => text.replace(/([*\\_`~])/gu, '\\$1');
 
 const textParser = (text: string): ParseResult => {
   const parser = new DOMParser();
@@ -59,22 +86,24 @@ const requester = async (
   };
 };
 
-export const buildPHPQueryHandler = (
-  makeRequest: typeof requester = requester,
-  parseText: typeof textParser = textParser,
-  metadataExtractor: typeof extractMetadataFromResult = extractMetadataFromResult,
-  waitForResult: typeof getChosenResult = getChosenResult
-) => async (msg: Message, searchTerm: string) => {
+const makeRequest = requester;
+const parseText = textParser;
+const metadataExtractor = extractMetadataFromResult;
+const waitForResult = getChosenResult;
+
+const handler = async (client: Client, interaction: Interaction) => {
+  const searchTerm = interaction.data.options[0].value;
+
   try {
     const { error, text, searchUrl } = await makeRequest(searchTerm);
     if (error) {
-      await msg.reply(invalidResponse);
+      await interaction.reply(invalidResponse);
       return;
     }
 
     const { isDirect, results } = parseText(text);
     if (isDirect) {
-      await msg.channel.send(buildDirectUrl(provider, searchTerm));
+      await interaction.reply(buildDirectUrl(provider, searchTerm));
       return;
     }
 
@@ -88,17 +117,24 @@ export const buildPHPQueryHandler = (
       );
     });
 
-    const sentMsg = await msg.channel.send(
-      createListEmbed({
-        description: createDescription(preparedDescription),
-        footerText: '',
-        provider,
-        searchTerm,
-        url: searchUrl,
-      })
-    );
+    const sentMsg = await interaction.reply({
+      content: '',
+      embeds: [
+        createListEmbed({
+          description: createDescription(preparedDescription),
+          footerText: '',
+          provider,
+          searchTerm,
+          url: searchUrl,
+        }).embed as MessageEmbed,
+      ],
+    });
 
-    const result = await waitForResult(sentMsg, msg, results);
+    const result = await waitForResult(
+      sentMsg,
+      { author: { id: interaction.member.user.id } },
+      results
+    );
 
     if (!result) {
       return;
@@ -110,30 +146,20 @@ export const buildPHPQueryHandler = (
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(error);
-    await msg.reply(unknownError);
+    await interaction.reply(unknownError);
   }
 };
 
-/**
- *
- * @param {any} result [document.parseFromString return type]
- */
-const extractMetadataFromResult = (result: any) => {
-  const titleElement = result.textContent;
-
-  const title = escapeMarkdown(entities.decode(titleElement));
-
-  const url = buildDirectUrl(provider, result.getAttribute('href'));
-
-  return {
-    title,
-    url,
-  };
-};
-
-/**
- * Escapes *, _, `, ~, \
- */
-const escapeMarkdown = (text: string) => text.replace(/([*\\_`~])/g, '\\$1');
-
-export default buildPHPQueryHandler();
+registerCommand({
+  name: 'php',
+  description: 'search and link something from php.net',
+  handler,
+  options: [
+    {
+      name: 'query',
+      description: 'The search query for php',
+      type: ApplicationCommandOptionType.STRING,
+      required: true,
+    },
+  ],
+});

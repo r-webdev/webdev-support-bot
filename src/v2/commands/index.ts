@@ -6,6 +6,7 @@ import './resource';
 // base commands
 import './post';
 import './mdn';
+import './php';
 import './points';
 
 // meme commands
