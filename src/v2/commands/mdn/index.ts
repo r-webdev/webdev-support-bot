@@ -64,9 +64,11 @@ const mdnHandler = async (
   interaction: Interaction
 ): Promise<unknown> => {
   const searchTerm: string = interaction.data.options[0].value;
+  interaction.acknowledge();
   try {
     const url = getSearchUrl(provider, searchTerm);
     const { error, json } = await fetch<SearchResponse>(url, 'json');
+
     if (error) {
       return await interaction.reply({
         content: invalidResponse,
@@ -116,7 +118,7 @@ const mdnHandler = async (
         provider,
         searchTerm,
         url,
-      }).embed as MessageEmbed
+      }).embed
     );
 
     const result = await waitForChosenResult(
@@ -130,7 +132,8 @@ const mdnHandler = async (
 
     const editableUrl = buildDirectUrl(result.slug);
     await attemptEdit(sentMsg, editableUrl, { embed: null });
-  } catch {
+  } catch (error) {
+    console.error(error);
     interaction.reply(unknownError);
   }
 };

@@ -1,9 +1,5 @@
-import type {
-  Message,
-  MessageEditOptions,
-  EmbedField,
-  MessageEmbed,
-} from 'discord.js';
+import { MessageEmbed } from 'discord.js';
+import type { Message, MessageEditOptions, EmbedField } from 'discord.js';
 
 import { REPO_LINK } from '../env';
 import { delayedMessageAutoDeletion } from './delayedMessageAutoDeletion';
@@ -92,14 +88,14 @@ export const createEmbed = ({
   description,
   fields = [],
   author = null,
-}: Embed): { embed: Partial<MessageEmbed> } => {
+}: Embed): { embed: MessageEmbed } => {
   const isSpam = provider === 'spam';
 
   if (isSpam || providers[provider]) {
     const { color, icon } = isSpam ? spamMeta : providers[provider];
 
     return {
-      embed: {
+      embed: new MessageEmbed({
         author,
         color,
         description,
@@ -110,7 +106,7 @@ export const createEmbed = ({
         },
         title,
         url,
-      },
+      }),
     };
   }
 
