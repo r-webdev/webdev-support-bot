@@ -1,4 +1,5 @@
-import type { Message, GuildMemberRoleManager } from 'discord.js';
+import type { MessageEmbed, Client, EmbedField } from 'discord.js';
+import type { GuildMember } from 'discord.js';
 
 import { ApplicationCommandOptionType } from '../../../enums';
 import {
@@ -9,258 +10,282 @@ import {
 } from '../../env';
 import type { IUser } from '../../helpful_role';
 import HelpfulRoleMember from '../../helpful_role/db_model';
+import type { Interaction } from '../../interactions';
 import { registerCommand } from '../../interactions';
-import { extractUserID } from '../../thanks';
 import { createEmbed } from '../../utils/discordTools';
+import { some } from '../../utils/some';
 
-const resetPoints = async (userID: string, msg: Message) => {
-  const adminID = msg.author.id;
+const HELPFUL_ROLE_POINT_THRESHOLD_NUM = Number.parseInt(
+  HELPFUL_ROLE_POINT_THRESHOLD
+);
 
-  const guildMember = msg.guild.members.cache.find(u => u.id === userID);
-
-  // Break if there's no user or the user is a bot
-  if (!guildMember || guildMember.user.bot) {
-    return;
-  }
-
-  if (!userID) {
-    return createEmbed({
-      description: 'An invalid user ID has been provided.',
-      fields: [
-        { inline: true, name: 'Admin/Moderator', value: `<@!${adminID}>` },
-      ],
-      footerText: 'Admin: Points Handler',
-      provider: 'spam',
-      title: 'Points Handler',
-    });
-  }
-
+const getPoints = async (userID: string, guild: string) => {
   const user: IUser = await HelpfulRoleMember.findOne({
-    guild: msg.guild.id,
+    guild,
     user: userID,
   });
 
-  if (!user) {
-    return createEmbed({
-      description: `The provided ID: "${userID}" is not bound to any user.`,
-      fields: [
-        { inline: true, name: 'Admin/Moderator', value: `<@!${adminID}>` },
-      ],
-      footerText: 'Admin: Points Handler',
-      provider: 'spam',
-      title: 'Points Handler',
-    });
-  }
-
-  user.points = 0;
-  await user.save();
-
-  // Remove the role from the user
-  await guildMember.roles.remove(HELPFUL_ROLE_ID);
-
-  return createEmbed({
-    description: `<@!${user.user}>'s points have been reset.`,
-    fields: [
-      { inline: true, name: 'Admin/Moderator', value: `<@!${adminID}>` },
-    ],
-    footerText: 'Admin: Points Handler',
-    provider: 'spam',
-    title: 'Points Handler',
-  });
+  return user?.points ?? 0;
 };
 
-const getPoints = async (
-  userID: string,
-  title: string,
-  msg: Message,
-  admin = false
-) => {
-  if (!userID && admin) {
-    return createEmbed({
-      description: `The provided user ID is invalid.`,
-      footerText: 'Admin: Points Handler',
-      provider: 'spam',
-      title,
-    });
-  }
+const setPoints = async (
+  guild: string,
+  userId: string,
+  amount: string | number
+): Promise<[] | [number, number]> => {
+  const points =
+    typeof amount === 'number' ? amount : Number.parseInt(amount) ?? 0;
 
-  const user: IUser = await HelpfulRoleMember.findOne({
-    guild: msg.guild.id,
-    user: userID,
-  });
-
-  const points = user ? user.points : 0;
-
-  return createEmbed({
-    description: `${
-      !admin ? 'You have' : 'The user has'
-    } accumulated ${points} point${points !== 1 ? 's' : ''}.`,
-    footerText: !admin ? 'Helpful User Points' : 'Admin: Points Handler',
-    provider: 'spam',
-    title,
-  });
-};
-
-const setPoints = async (userID: string, amount: string, msg: Message) => {
-  const points = Number.parseInt(amount);
   if (Number.isNaN(points)) {
-    return (
-      'Invalid argument provided for the points parameter.\nUsage example: ```' +
-      '!points set @user 10' +
-      '```'
-    );
-  }
-
-  const guildMember = msg.guild.members.cache.find(u => u.id === userID);
-  if (!guildMember) {
-    return (
-      'Invalid user mention provided.\nUsage example: ```' +
-      '!points set @user 10' +
-      '```'
-    );
+    return [];
   }
 
   const user: IUser = await HelpfulRoleMember.findOne({
-    guild: msg.guild.id,
-    user: userID,
+    guild,
+    user: userId,
   });
-
   if (user) {
+    const oldPoints = user.points;
+    const currPoints = points;
     user.points = points;
     await user.save();
+    return [oldPoints, currPoints];
   }
-
-  const output = createEmbed({
-    description:
-      '```' + `!points set @${guildMember.user.username} ${points}` + '```',
-    fields: [
-      {
-        inline: false,
-        name: 'User',
-        value: `<@!${userID}>`,
-      },
-      {
-        inline: false,
-        name: 'Admin/Moderator',
-        value: `<@!${msg.author.id}>`,
-      },
-    ],
-    footerText: 'Admin: Points Handler',
-    provider: 'spam',
-    title: 'Points have been set manually for a user',
-  });
-
-  // Set or remove the role if necessary
-  if (user.points >= Number.parseInt(HELPFUL_ROLE_POINT_THRESHOLD)) {
-    await guildMember.roles.add(HELPFUL_ROLE_ID);
-    output.embed.fields.push({
-      inline: false,
-      name: 'Role access',
-      value: 'Granted',
-    });
-  } else {
-    await guildMember.roles.remove(HELPFUL_ROLE_ID);
-    output.embed.fields.push({
-      inline: false,
-      name: 'Role access',
-      value: 'Revoked',
-    });
-  }
-
-  return output;
+  return [];
 };
 
-export const isModOrAdmin = ({ cache }: GuildMemberRoleManager) =>
-  cache.find(({ id }) => id === ADMIN_ROLE_ID || id === MOD_ROLE_ID);
+const isModOrAdmin = some(id => id === ADMIN_ROLE_ID || id === MOD_ROLE_ID);
 
-const handlePointsRequest = async (msg: Message) => {
-  try {
-    // Check for any flags
-    const cleanContent = msg.content.trim().toLowerCase().split(' ');
+async function getMemberFromInteraction(
+  client: Client,
+  interaction: Interaction,
+  userId?: string
+): Promise<GuildMember | null> {
+  const guild = client.guilds.cache.get(interaction.guild_id);
+  if (!guild) {
+    return null;
+  }
 
-    // Flags and ID checking users for points are admin/mod-only commands
-    if (cleanContent.length > 1 && isModOrAdmin(msg.member.roles)) {
-      const [, flag, mention, points] = cleanContent;
+  return guild.members.fetch(userId ?? interaction.member.user.id);
+}
 
-      const userID = mention ? extractUserID(mention) : '';
+async function handlePoints(
+  client: Client,
+  interaction: Interaction
+): Promise<void> {
+  const [interactionOption] = interaction.data.options;
+  const isAdmin = isModOrAdmin(interaction.member.roles);
+  switch (interactionOption.name) {
+    case 'get': {
+      const userId: string =
+        (isAdmin && interactionOption?.options[0].options[0].value) ||
+        interaction.member.user.id;
 
-      switch (flag) {
-        case 'reset':
-          const resetEmbed = await resetPoints(userID, msg);
+      const userName: string =
+        getNameFromInteraction(
+          interaction,
+          interactionOption?.options?.[0].value
+        ) ?? (await getMemberFromInteraction(client, interaction)).displayName;
 
-          return await msg.channel.send(resetEmbed);
-        case 'check':
-          const pointsEmbed = await getPoints(
-            userID,
-            'Points check for mentioned user',
-            msg,
-            true
-          );
-
-          return await msg.channel.send(pointsEmbed);
-        case 'set':
-          const setEmbed = await setPoints(userID, points, msg);
-
-          return await msg.channel.send(setEmbed);
-        default:
-          break;
+      await handlePointsGet(userId, interaction, userName, isAdmin);
+      return;
+    }
+    case 'set': {
+      if (!isAdmin) {
+        interaction.reply({
+          content: 'You do not have permission to use this command',
+          flags: 64,
+        });
+        return;
       }
+      const user: string = interactionOption.options[0].value;
+      const points: number = interactionOption.options[1].value;
+
+      await handlePointsSet(client, interaction, user, points);
+      return;
+    }
+    case 'reset': {
+      if (!isAdmin) {
+        interaction.reply({
+          content: 'You do not have permission to use this command',
+          flags: 64,
+        });
+        return;
+      }
+      const user = interactionOption.options[0].value;
+
+      await handlePointsReset(interaction, user, client);
 
       return;
     }
-
-    const getPointsEmbed = await getPoints(msg.author.id, msg.author.tag, msg);
-
-    await msg.channel.send(getPointsEmbed);
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('catch -> points/index.ts:', error);
+    default:
+      console.log(interaction.data.options);
+      break;
   }
-};
+  interaction.acknowledge();
+}
+
+async function handlePointsGet(
+  userId: string,
+  interaction: Interaction,
+  userName: string,
+  isAdmin: boolean
+) {
+  const points = await getPoints(userId, interaction.guild_id);
+
+  if (!userId && isAdmin) {
+    interaction.reply(
+      createPointCheckEmbed(userName, `The provided user ID is invalid.`)
+    );
+  }
+
+  interaction.reply(
+    createPointCheckEmbed(
+      userName,
+      `${isAdmin ? 'The user has' : 'You have'} accumulated ${points} point${
+        points === 1 ? '' : 's'
+      }.`,
+      isAdmin ? undefined : 'Helpful User Points'
+    )
+  );
+}
+
+async function handlePointsReset(
+  interaction: Interaction,
+  user: string,
+  client: Client
+) {
+  const result = await setPoints(interaction.guild_id, user, 0);
+  const member = await getMemberFromInteraction(client, interaction, user);
+
+  if (result.length === 0) {
+    interaction.reply(
+      createPointsEmbed(
+        `The provided ID: "${user}" is not bound to any user.`,
+        [adminEmbedField(interaction, true)]
+      )
+    );
+    return;
+  }
+
+  await member.roles.remove(HELPFUL_ROLE_ID);
+
+  const embed = createPointsEmbed(`<@!${user}>'s points have been reset.`, [
+    adminEmbedField(interaction, true),
+  ]);
+
+  interaction.reply(embed);
+}
+
+function adminEmbedField(interaction: Interaction, inline = false): EmbedField {
+  return {
+    inline,
+    name: 'Admin/Moderator',
+    value: `<@!${interaction.member.user.id}>`,
+  };
+}
+
+async function handlePointsSet(
+  client: Client,
+  interaction: Interaction,
+  user: string,
+  points: number
+) {
+  const member = await getMemberFromInteraction(client, interaction, user);
+
+  if (!member) {
+    interaction.reply({
+      content: `User was invalid. (Not sure how that happened)`,
+      flags: 64,
+    });
+    return;
+  }
+
+  const result = await setPoints(interaction.guild_id, user, points);
+
+  if (result.length === 0) {
+    interaction.reply({
+      content:
+        'Invalid argument provided for the points parameter.\nUsage example: ```' +
+        '!points set @user 10' +
+        '```',
+      flags: 64,
+    });
+    return;
+  }
+
+  const [prev, curr] = result;
+  const output = createPointsEmbed(`Points have been set manually for a user`, [
+    {
+      inline: false,
+      name: 'User',
+      value: `<@!${user}>`,
+    },
+    adminEmbedField(interaction),
+  ]);
+
+  if (
+    prev >= HELPFUL_ROLE_POINT_THRESHOLD_NUM &&
+    curr < HELPFUL_ROLE_POINT_THRESHOLD_NUM
+  ) {
+    output.fields.push({
+      inline: false,
+      name: '⚠ Role Change',
+      value: '❌ Helpful Revoked',
+    });
+  } else if (
+    prev < HELPFUL_ROLE_POINT_THRESHOLD_NUM &&
+    curr > HELPFUL_ROLE_POINT_THRESHOLD_NUM
+  ) {
+    output.fields.push({
+      inline: false,
+      name: '⚠ Role Change',
+      value: '✅ Helpful Granted',
+    });
+  }
+
+  interaction.reply(output);
+}
+
+function createPointCheckEmbed(
+  userName: string,
+  description: string,
+  footerText = 'Admin: Points Handler'
+): MessageEmbed {
+  return createEmbed({
+    description,
+    footerText,
+    provider: 'spam',
+    title: `Points check for ${userName}`,
+  }).embed as MessageEmbed;
+}
+
+function createPointsEmbed(
+  description: string,
+  fields: EmbedField[] = []
+): MessageEmbed {
+  return createEmbed({
+    description,
+    fields,
+    footerText: 'Admin: Points Handler',
+    provider: 'spam',
+    title: 'Points Handler',
+  }).embed as MessageEmbed;
+}
+
+function getNameFromInteraction(
+  interaction: Interaction,
+  userId: string
+): string {
+  return (
+    interaction.data.resolved?.members?.[userId]?.nick ??
+    interaction.data.resolved?.users?.[userId]?.username
+  );
+}
 
 registerCommand({
   description: 'point commands',
-  handler(client, interaction) {
-    const interactionOption = interaction.data.options[0];
-    interaction.acknowledge();
-    console.log(interactionOption.name);
-    switch (interactionOption.name) {
-      case 'get': {
-        const user = interactionOption?.options[0].value;
-        console.log({
-          user,
-          r: JSON.stringify(interaction.data.resolved),
-          i: interaction.data,
-        });
-        break;
-      }
-      case 'set': {
-        const user = interactionOption.options[0].value;
-        const points = interactionOption.options[1].value;
-        console.log({
-          user,
-          points,
-          r: interaction.data.resolved,
-          i: interaction.data,
-        });
-
-        break;
-      }
-      case 'reset': {
-        const user = interactionOption.options[0].value;
-        console.log({
-          user,
-          r: interaction.data.resolved,
-          x: interaction.data,
-        });
-
-        break;
-      }
-      default:
-        console.log(interaction.data.options);
-        break;
-    }
-  },
+  handler: handlePoints,
   name: 'points',
   options: [
     {

@@ -71,7 +71,8 @@ export class Interaction extends Base implements InteractionObject {
   public async reply(
     data:
       | APIMessageContentResolvable
-      | InteractionApplicationCommandCallbackData
+      | Partial<InteractionApplicationCommandCallbackData>
+      | MessageEmbed
   ): typeof data extends { flag: 64 } ? Promise<void> : Promise<Message> {
     const content: InteractionApplicationCommandCallbackData = normalizeContent(
       data
@@ -171,23 +172,24 @@ function normalizeContent(
     | bigint
     | boolean
     | symbol
-    | InteractionApplicationCommandCallbackData
+    | Partial<InteractionApplicationCommandCallbackData>
     | readonly unknown[]
+    | MessageEmbed
 ) {
   let content: InteractionApplicationCommandCallbackData;
 
-  if (Object.prototype.toString.call(data) === '[object Object]') {
-    content = {
-      content: '',
-      ...(data as InteractionApplicationCommandCallbackData),
-    };
-  } else if (
+  if (
     data instanceof MessageEmbed ||
     (Array.isArray(data) && data.every(item => item instanceof MessageEmbed))
   ) {
     content = {
       content: '',
       embeds: castArray(data),
+    };
+  } else if (Object.prototype.toString.call(data) === '[object Object]') {
+    content = {
+      content: '',
+      ...(data as InteractionApplicationCommandCallbackData),
     };
   } else {
     content = { content: String(data) };

@@ -64,7 +64,8 @@ declare module 'discord.js' {
     id: string;
     name: string;
     options: ApplicationCommandInteractionDataOption[];
-    resolved: unknown;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolved: any;
   };
 
   export type ApplicationCommandInteractionDataOption = {
