@@ -1,11 +1,5 @@
 import { formatDistanceToNow } from 'date-fns';
-import type {
-  Message,
-  EmbedField,
-  InteractionObject,
-  Client,
-  MessageEmbed,
-} from 'discord.js';
+import type { EmbedField, Client, MessageEmbed } from 'discord.js';
 import { collect, take } from 'domyno';
 import { URL } from 'url';
 
@@ -107,21 +101,18 @@ const handleNpmCommand = async (client: Client, interaction: Interaction) => {
       firstTenResults.map(npmEmbedToString)
     );
 
-    const sentMsg = await interaction.reply({
-      content: '',
-      embeds: ([
-        createListEmbed({
-          description,
-          footerText:
-            firstTenResults.length < 10
-              ? `${firstTenResults.length} packages found`
-              : `at least ${firstTenResults.length.toLocaleString()} packages found`,
-          provider,
-          searchTerm,
-          url: `https://npmjs.com/search?q=${encodeURI(searchTerm)}`,
-        }),
-      ] as unknown) as MessageEmbed[],
-    });
+    const sentMsg = await interaction.reply(
+      createListEmbed({
+        description,
+        footerText:
+          firstTenResults.length < 10
+            ? `${firstTenResults.length} packages found`
+            : `at least ${firstTenResults.length.toLocaleString()} packages found`,
+        provider,
+        searchTerm,
+        url: `https://npmjs.com/search?q=${encodeURI(searchTerm)}`,
+      }).embed as MessageEmbed
+    );
 
     const result = await waitForResponse(
       sentMsg,

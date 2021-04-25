@@ -1,17 +1,10 @@
 /* eslint-disable unicorn/prefer-query-selector */
-import type { Client, Message, MessageEmbed, TextChannel } from 'discord.js';
+import type { Client, MessageEmbed } from 'discord.js';
 import { URL } from 'url';
 
-import {
-  ApplicationCommandOptionType,
-  InteractionResponseType,
-} from '../../../enums';
+import { ApplicationCommandOptionType } from '../../../enums';
 import type { Interaction } from '../../interactions';
-import {
-  createInteractionResponse,
-  editOriginalInteractionResponse,
-  registerCommand,
-} from '../../interactions';
+import { registerCommand } from '../../interactions';
 import {
   adjustTitleLength,
   attemptEdit,
@@ -66,18 +59,6 @@ const waitForChosenResult: typeof getChosenResult = getChosenResult;
 const buildDirectUrl = (path: string) =>
   new URL(path, 'https://developer.mozilla.org/en-US/docs/').toString();
 
-const getTextMessageFromMessageObj = async (
-  client: Client,
-  guildId: string,
-  messageObject: Record<string, string>
-): Promise<Message> => {
-  const guild = client.guilds.cache.get(guildId);
-  const channel = guild.channels.cache.get(
-    messageObject.channel_id
-  ) as TextChannel;
-  return channel.messages.fetch(messageObject.id);
-};
-
 const mdnHandler = async (
   client: Client,
   interaction: Interaction
@@ -128,18 +109,15 @@ const mdnHandler = async (
       });
     }
 
-    const sentMsg = await interaction.reply({
-      content: '',
-      embeds: [
-        createListEmbed({
-          description: createDescription(preparedDescription),
-          footerText: `${json.documents.length} results found`,
-          provider,
-          searchTerm,
-          url,
-        }).embed as MessageEmbed,
-      ],
-    });
+    const sentMsg = await interaction.reply(
+      createListEmbed({
+        description: createDescription(preparedDescription),
+        footerText: `${json.documents.length} results found`,
+        provider,
+        searchTerm,
+        url,
+      }).embed as MessageEmbed
+    );
 
     const result = await waitForChosenResult(
       sentMsg,

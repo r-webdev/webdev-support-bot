@@ -9,14 +9,11 @@ import type {
   GuildChannel,
   MessageEmbed,
   Client,
-  InteractionObject,
 } from 'discord.js';
 import { filter } from 'domyno';
 
-import { InteractionResponseType } from '../../../enums';
 import type { CommandData, Interaction } from '../../interactions';
 import { registerCommand } from '../../interactions';
-import { createInteractionResponse } from '../../interactions';
 import { cache } from '../../spam_filter';
 import { createEmbed, createMarkdownCodeBlock } from '../../utils/discordTools';
 import { map } from '../../utils/map';

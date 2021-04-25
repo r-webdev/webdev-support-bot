@@ -44,9 +44,7 @@ const aboutInteraction: CommandData = {
       return;
     }
 
-    interaction.reply({
-      content: `An error occured when trying to call \`/about ${topic}`,
-    });
+    interaction.reply(`An error occured when trying to call \`/about ${topic}`);
   },
   name: 'about',
   options: [

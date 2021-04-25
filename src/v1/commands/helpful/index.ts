@@ -4,7 +4,10 @@ import { ApplicationCommandOptionType } from '../../../enums';
 import type { Interaction } from '../../../v2/interactions';
 import { registerCommand } from '../../../v2/interactions';
 
-function handleHelpful(client: Client, interaction: Interaction) {}
+async function handleHelpful(
+  client: Client,
+  interaction: Interaction
+): Promise<void> {}
 
 registerCommand({
   description: 'Command for Helpful users',

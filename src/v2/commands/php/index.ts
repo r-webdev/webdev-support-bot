@@ -117,18 +117,15 @@ const handler = async (client: Client, interaction: Interaction) => {
       );
     });
 
-    const sentMsg = await interaction.reply({
-      content: '',
-      embeds: [
-        createListEmbed({
-          description: createDescription(preparedDescription),
-          footerText: '',
-          provider,
-          searchTerm,
-          url: searchUrl,
-        }).embed as MessageEmbed,
-      ],
-    });
+    const sentMsg = await interaction.reply(
+      createListEmbed({
+        description: createDescription(preparedDescription),
+        footerText: '',
+        provider,
+        searchTerm,
+        url: searchUrl,
+      }).embed as MessageEmbed
+    );
 
     const result = await waitForResult(
       sentMsg,
