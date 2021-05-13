@@ -343,13 +343,14 @@ const greeterMessage = `Please adhere to the following guidelines when creating 
 ${createMarkdownCodeBlock(
   `
 1. Your job must provide monetary compensation.\n
-2. Your job must provide at least $${MINIMAL_COMPENSATION} in compensation.\n
-3. You can only post a job once every ${
+2. Your job must not be related to cryptocurrency in any way.\n
+3. Your job must provide at least $${MINIMAL_COMPENSATION} in compensation.\n
+4. You can only post a job once every ${
     Number.parseInt(POST_LIMITER_IN_HOURS, 10) === 1
       ? 'hour'
       : `${POST_LIMITER_IN_HOURS} hours`
   }.\n
-4. You agree not to abuse our job posting service or circumvent any server rules, and you understand that doing so will result in a ban.\n
+5. You agree not to abuse our job posting service or circumvent any server rules, and you understand that doing so will result in a ban.\n
 `,
   'md'
 )}
