@@ -35,7 +35,7 @@
     "@sentry/types": "6.5.0",
     "@types/dom-parser": "0.1.1",
     "@types/jest": "26.0.23",
-    "@types/mongoose": "5.11.32",
+    "@types/mongoose": "5.11.33",
     "@types/node": "14.17.2",
     "@types/node-fetch": "2.5.10",
     "dotenv": "8.6.0",
