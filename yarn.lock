@@ -768,10 +768,10 @@
     "@types/bson" "*"
     "@types/node" "*"
 
-"@types/mongoose@5.11.94":
-  version "5.11.94"
-  resolved "https://registry.yarnpkg.com/@types/mongoose/-/mongoose-5.11.94.tgz#3ffc3d448f8d0b22bc76a8767c93b9e7e990bac9"
-  integrity sha512-b/1yqjF3x+LfxU6gEwaKb4ZG1YmMZODaHg2QFlXqsZ80cAgfGPqAmTZXYimdQC/whTHMTpsvzyALcM8QC6Bh5A==
+"@types/mongoose@5.11.96":
+  version "5.11.96"
+  resolved "https://registry.yarnpkg.com/@types/mongoose/-/mongoose-5.11.96.tgz#870fa0f3565bf2e8e0d4aa571ec6d342b196eeb8"
+  integrity sha512-keiY22ljJtXyM7osgScmZOHV6eL5VFUD5tQumlu+hjS++HND5nM8jNEdj5CSWfKIJpVwQfPuwQ2SfBqUnCAVRw==
   dependencies:
     mongoose "*"
 
