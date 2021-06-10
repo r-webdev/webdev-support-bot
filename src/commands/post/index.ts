@@ -443,8 +443,9 @@ const handleJobPostingRequest = async (msg: Message) => {
     // eslint-disable-next-line no-console
     console.error('post.handleJobPostingRequest', error);
   } finally {
-    // Remove the message
-    await msg.delete();
+    try {
+      await msg.delete();
+    } catch {}
   }
 };
 
