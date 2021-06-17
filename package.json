@@ -29,7 +29,7 @@
     "node-cache": "5.1.2",
     "node-fetch": "2.6.1",
     "ts-node": "9.1.1",
-    "typescript": "4.3.2"
+    "typescript": "4.3.3"
   },
   "devDependencies": {
     "@sentry/types": "6.7.1",
