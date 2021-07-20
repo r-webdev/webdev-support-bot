@@ -8,6 +8,7 @@ const sites = [
   '<https://repl.it/>',
   '<https://ideone.com/>',
   '<https://jsfiddle.net/>',
+  '<https://stackblitz.com/>',
 ].join('\n');
 
 const handleCodeRequest = async (msg: Message) => {
