@@ -1,7 +1,8 @@
-import type { MessageEmbed, Client, EmbedField } from 'discord.js';
+import type { MessageEmbed, Client, EmbedField, CommandInteraction } from 'discord.js';
 import type { GuildMember } from 'discord.js';
 
 import { ApplicationCommandOptionType } from '../../../enums';
+import type { CommandDataWithHandler } from '../../../types';
 import {
   ADMIN_ROLE_ID,
   MOD_ROLE_ID,
@@ -10,8 +11,6 @@ import {
 } from '../../env';
 import type { IUser } from '../../helpful_role';
 import HelpfulRoleMember from '../../helpful_role/db_model';
-import type { Interaction } from '../../interactions';
-import { registerCommand } from '../../interactions';
 import { createEmbed } from '../../utils/discordTools';
 import { some } from '../../utils/some';
 
@@ -56,128 +55,121 @@ const setPoints = async (
 
 const isModOrAdmin = some(id => id === ADMIN_ROLE_ID || id === MOD_ROLE_ID);
 
-async function getMemberFromInteraction(
-  client: Client,
-  interaction: Interaction,
-  userId?: string
-): Promise<GuildMember | null> {
-  const guild = client.guilds.cache.get(interaction.guild_id);
-  if (!guild) {
-    return null;
-  }
-
-  return guild.members.fetch(userId ?? interaction.member.user.id);
-}
 
 async function handlePoints(
   client: Client,
-  interaction: Interaction
+  interaction: CommandInteraction
 ): Promise<void> {
-  const [interactionOption] = interaction.data.options;
-  const isAdmin = isModOrAdmin(interaction.member.roles);
-  switch (interactionOption.name) {
-    case 'get': {
-      const userId: string =
-        (isAdmin && interactionOption?.options[0].options[0].value) ||
-        interaction.member.user.id;
+  // const [interactionOption] = interaction.data.options;
+  console.log(interaction.member.roles)
 
-      const userName: string =
-        getNameFromInteraction(
-          interaction,
-          interactionOption?.options?.[0].value
-        ) ?? (await getMemberFromInteraction(client, interaction)).displayName;
+  // const isAdmin = isModOrAdmin(interaction.member.roles);
+  // switch (interactionOption.name) {
+  //   case 'get': {
+  //     const userId: string =
+  //       (isAdmin && interactionOption?.options[0].options[0].value) ||
+  //       interaction.member.user.id;
 
-      await handlePointsGet(userId, interaction, userName, isAdmin);
-      return;
-    }
-    case 'set': {
-      if (!isAdmin) {
-        interaction.reply({
-          content: 'You do not have permission to use this command',
-          flags: 64,
-        });
-        return;
-      }
-      const user: string = interactionOption.options[0].value;
-      const points: number = interactionOption.options[1].value;
+  //     const userName: string =
+  //       getNameFromInteraction(
+  //         interaction,
+  //         interactionOption?.options?.[0].value
+  //       ) ?? (await getMemberFromInteraction(client, interaction)).displayName;
 
-      await handlePointsSet(client, interaction, user, points);
-      return;
-    }
-    case 'reset': {
-      if (!isAdmin) {
-        interaction.reply({
-          content: 'You do not have permission to use this command',
-          flags: 64,
-        });
-        return;
-      }
-      const user = interactionOption.options[0].value;
+  //     await handlePointsGet(userId, interaction, userName, isAdmin);
+  //     return;
+  //   }
+  //   case 'set': {
+  //     if (!isAdmin) {
+  //       interaction.reply({
+  //         content: 'You do not have permission to use this command',
+  //         flags: 64,
+  //       });
+  //       return;
+  //     }
+  //     const user: string = interactionOption.options[0].value;
+  //     const points: number = interactionOption.options[1].value;
 
-      await handlePointsReset(interaction, user, client);
+  //     await handlePointsSet(client, interaction, user, points);
+  //     return;
+  //   }
+  //   case 'reset': {
+  //     if (!isAdmin) {
+  //       interaction.reply({
+  //         content: 'You do not have permission to use this command',
+  //         flags: 64,
+  //       });
+  //       return;
+  //     }
+  //     const user = interactionOption.options[0].value;
 
-      return;
-    }
-    default:
-      console.log(interaction.data.options);
-      break;
-  }
-  interaction.acknowledge();
+  //     await handlePointsReset(interaction, user, client);
+
+  //     return;
+  //   }
+  //   default:
+  //     console.log(interaction.data.options);
+  //     break;
+  // }
+  // interaction.acknowledge();
 }
 
 async function handlePointsGet(
   userId: string,
-  interaction: Interaction,
+  interaction: CommandInteraction,
   userName: string,
   isAdmin: boolean
 ) {
-  const points = await getPoints(userId, interaction.guild_id);
+  const points = await getPoints(userId, interaction.guildId);
 
   if (!userId && isAdmin) {
-    interaction.reply(
-      createPointCheckEmbed(userName, `The provided user ID is invalid.`)
-    );
+    interaction.reply({
+      embeds: [createPointCheckEmbed(userName, `The provided user ID is invalid.`)]
+    });
   }
 
-  interaction.reply(
+  interaction.reply({
+    embeds: [
     createPointCheckEmbed(
       userName,
       `${isAdmin ? 'The user has' : 'You have'} accumulated ${points} point${
         points === 1 ? '' : 's'
       }.`,
       isAdmin ? undefined : 'Helpful User Points'
-    )
-  );
+    )]
+  });
 }
 
 async function handlePointsReset(
-  interaction: Interaction,
+  interaction: CommandInteraction,
   user: string,
   client: Client
 ) {
-  const result = await setPoints(interaction.guild_id, user, 0);
-  const member = await getMemberFromInteraction(client, interaction, user);
+  const result = await setPoints(interaction.guildId, user, 0);
+  const {member} = interaction
 
   if (result.length === 0) {
-    interaction.reply(
-      createPointsEmbed(
-        `The provided ID: "${user}" is not bound to any user.`,
-        [adminEmbedField(interaction, true)]
-      )
-    );
+    interaction.reply({
+      embeds: [
+        createPointsEmbed(
+          `The provided ID: "${user}" is not bound to any user.`,
+          [adminEmbedField(interaction, true)]
+        )
+      ]
+    });
     return;
   }
 
-  await member.roles.remove(HELPFUL_ROLE_ID);
+  // await member.roles.remove(HELPFUL_ROLE_ID);
 
   const embed = createPointsEmbed(`<@!${user}>'s points have been reset.`, [
     adminEmbedField(interaction, true),
   ]);
 
-  interaction.reply(embed);
+  interaction.reply({embeds:[embed]});
 }
 
-function adminEmbedField(interaction: Interaction, inline = false): EmbedField {
+function adminEmbedField(interaction: CommandInteraction, inline = false): EmbedField {
   return {
     inline,
     name: 'Admin/Moderator',
@@ -187,21 +179,21 @@ function adminEmbedField(interaction: Interaction, inline = false): EmbedField {
 
 async function handlePointsSet(
   client: Client,
-  interaction: Interaction,
+  interaction: CommandInteraction,
   user: string,
   points: number
 ) {
-  const member = await getMemberFromInteraction(client, interaction, user);
+  const {member} = interaction
 
   if (!member) {
     interaction.reply({
       content: `User was invalid. (Not sure how that happened)`,
-      flags: 64,
+      ephemeral: true
     });
     return;
   }
 
-  const result = await setPoints(interaction.guild_id, user, points);
+  const result = await setPoints(interaction.guildId, user, points);
 
   if (result.length === 0) {
     interaction.reply({
@@ -209,7 +201,7 @@ async function handlePointsSet(
         'Invalid argument provided for the points parameter.\nUsage example: ```' +
         '!points set @user 10' +
         '```',
-      flags: 64,
+      ephemeral: true
     });
     return;
   }
@@ -244,7 +236,7 @@ async function handlePointsSet(
     });
   }
 
-  interaction.reply(output);
+  interaction.reply({embeds:[output]});
 }
 
 function createPointCheckEmbed(
@@ -257,7 +249,7 @@ function createPointCheckEmbed(
     footerText,
     provider: 'spam',
     title: `Points check for ${userName}`,
-  }).embed as MessageEmbed;
+  }).embed ;
 }
 
 function createPointsEmbed(
@@ -270,20 +262,11 @@ function createPointsEmbed(
     footerText: 'Admin: Points Handler',
     provider: 'spam',
     title: 'Points Handler',
-  }).embed as MessageEmbed;
+  }).embed ;
 }
 
-function getNameFromInteraction(
-  interaction: Interaction,
-  userId: string
-): string {
-  return (
-    interaction.data.resolved?.members?.[userId]?.nick ??
-    interaction.data.resolved?.users?.[userId]?.username
-  );
-}
 
-registerCommand({
+export const pointsHandlers: CommandDataWithHandler ={
   description: 'point commands',
   handler: handlePoints,
   name: 'points',
@@ -291,11 +274,11 @@ registerCommand({
     {
       name: 'get',
       description: 'Get points of a user',
-      type: ApplicationCommandOptionType.SUB_COMMAND,
+      type: 'SUB_COMMAND',
       options: [
         {
           name: 'user',
-          type: ApplicationCommandOptionType.USER,
+          type: 'USER',
           description: 'The user to get points for (Mod/Admins only)',
         },
       ],
@@ -303,17 +286,17 @@ registerCommand({
     {
       name: 'set',
       description: 'Set points of user (Mod/Admin only)',
-      type: ApplicationCommandOptionType.SUB_COMMAND,
+      type: 'SUB_COMMAND',
       options: [
         {
           name: 'user',
-          type: ApplicationCommandOptionType.USER,
+          type: 'USER',
           description: 'The user to set points for (Mod/Admins only)',
           required: true,
         },
         {
           name: 'value',
-          type: ApplicationCommandOptionType.INTEGER,
+          type: 'INTEGER',
           description: 'Number of points to set the user to have',
           required: true,
         },
@@ -322,15 +305,15 @@ registerCommand({
     {
       name: 'reset',
       description: 'Set points of user (Mod/Admin only)',
-      type: ApplicationCommandOptionType.SUB_COMMAND,
+      type: 'SUB_COMMAND',
       options: [
         {
           name: 'user',
-          type: ApplicationCommandOptionType.USER,
+          type: 'USER',
           description: 'The user to reset points for (Mod/Admins only)',
           required: true,
         },
       ],
     },
   ],
-});
+};

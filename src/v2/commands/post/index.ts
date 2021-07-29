@@ -6,15 +6,21 @@ import type {
   DMChannel,
   NewsChannel,
   Guild,
+  Client,
+  ThreadChannel,
+  CommandInteraction,
+  User} from 'discord.js';
+import {
   GuildChannel,
   MessageEmbed,
-  Client,
+  MessageActionRow,
+  MessageSelectMenu,
 } from 'discord.js';
 import { filter } from 'domyno';
 
-import type { CommandData, Interaction } from '../../interactions';
-import { registerCommand } from '../../interactions';
+import type { CommandDataWithHandler } from '../../../types';
 import { cache } from '../../spam_filter';
+import { MultistepForm } from '../../utils/MultistepForm';
 import { createEmbed, createMarkdownCodeBlock } from '../../utils/discordTools';
 import { map } from '../../utils/map';
 import { pipe } from '../../utils/pipe';
@@ -28,7 +34,7 @@ import {
   MINIMAL_COMPENSATION,
   MINIMAL_AMOUNT_OF_WORDS,
 } from './env';
-import questions from './questions';
+import {questions} from './questions.v2';
 
 const dateFormatter = new Intl.DateTimeFormat('en-US', {
   month: 'long',
@@ -59,12 +65,6 @@ type CacheEntry = {
   value: Date;
 };
 
-export type TargetChannel = {
-  send?: (
-    message: string | { embed: Partial<MessageEmbed> }
-  ) => Promise<Message>;
-} & GuildChannel;
-
 const getCurrentDate = () => {
   return dateFormatter.format(Date.now());
 };
@@ -74,19 +74,23 @@ const getCurrentDate = () => {
   It capitalizes all words present in the string itself, separated with a space.
 */
 
-const getTargetChannel = (guild: Guild, name: string): TargetChannel =>
-  guild.channels.cache.find(({ name: n }) => n === name);
+const getTargetChannel = (
+  guild: Guild,
+  name: string
+): TextChannel | ThreadChannel =>
+  guild.channels.cache.find(({ name: n }) => n === name) as TextChannel | ThreadChannel;
 
 const generateURL = (guildID: string, channelID: string, msgID: string) =>
   `https://discordapp.com/channels/${guildID}/${channelID}/${msgID}`;
 
 const getReply = async (
-  channel: Channel,
-  filter: CollectorFilter,
+  channel: DMChannel,
+  filter: CollectorFilter<[Message]>,
   timeMultiplier = 1
 ) => {
   try {
-    const res = await channel.awaitMessages(filter, {
+    const res = await channel.awaitMessages({
+      filter,
       max: 1,
       time: AWAIT_MESSAGE_TIMEOUT * timeMultiplier,
     });
@@ -117,40 +121,42 @@ const sendAlert = (
   const userTag = createUserTag(username, discriminator);
 
   try {
-    targetChannel.send(
-      createEmbed({
-        description:
-          'A user attempted creating a job post whilst providing invalid compensation.',
-        fields: [
-          {
-            inline: true,
-            name: 'User',
-            value: userTag,
-          },
-          {
-            inline: false,
-            name: 'Input',
-            value: createMarkdownCodeBlock(userInput),
-          },
-          {
-            inline: false,
-            name: 'Command',
-            value: createMarkdownCodeBlock(
-              `?ban ${userTag} Invalid compensation.`
-            ),
-          },
-          {
-            inline: false,
-            name: 'Message Link',
-            value: 'DM Channel - Not Applicable.',
-          },
-        ],
-        footerText: 'Job Posting Module',
-        provider: 'spam',
-        title: 'Alert!',
-        url: 'https://discord.gg/',
-      })
-    );
+    targetChannel.send({
+      embeds: [
+        createEmbed({
+          description:
+            'A user attempted creating a job post whilst providing invalid compensation.',
+          fields: [
+            {
+              inline: true,
+              name: 'User',
+              value: userTag,
+            },
+            {
+              inline: false,
+              name: 'Input',
+              value: createMarkdownCodeBlock(userInput),
+            },
+            {
+              inline: false,
+              name: 'Command',
+              value: createMarkdownCodeBlock(
+                `?ban ${userTag} Invalid compensation.`
+              ),
+            },
+            {
+              inline: false,
+              name: 'Message Link',
+              value: 'DM Channel - Not Applicable.',
+            },
+          ],
+          footerText: 'Job Posting Module',
+          provider: 'spam',
+          title: 'Alert!',
+          url: 'https://discord.gg/',
+        }).embed,
+      ],
+    });
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('post.sendAlert', error);
@@ -193,7 +199,7 @@ const createJobPost = async (
   channelID: string,
   { username, discriminator, userID }: Metadata
 ) => {
-  const targetChannel = getTargetChannel(guild, JOB_POSTINGS_CHANNEL);
+  const targetChannel = getTargetChannel(guild, 'job-postt');
 
   if (!targetChannel) {
     // eslint-disable-next-line no-console
@@ -207,34 +213,36 @@ const createJobPost = async (
   // const url = generateURL(guild.id, channelID, msgID);
 
   try {
-    const msg = await targetChannel.send(
-      createEmbed({
-        author: {
-          name: user,
-        },
-        description: `A user has created a new job post!`,
-        // Using the spam provider because we only need the color/icon, which it provides anyway
-        fields: [
-          {
-            inline: true,
-            name: 'User',
-            value: `<@!${userID}>`,
+    const msg = await targetChannel.send({
+      embeds: [
+        createEmbed({
+          author: {
+            name: user,
           },
-          {
-            inline: true,
-            name: 'Created At',
-            value: getCurrentDate(),
-          },
-          ...generateFields(answers),
-        ],
+          description: `A user has created a new job post!`,
+          // Using the spam provider because we only need the color/icon, which it provides anyway
+          fields: [
+            {
+              inline: true,
+              name: 'User',
+              value: `<@!${userID}>`,
+            },
+            {
+              inline: true,
+              name: 'Created At',
+              value: getCurrentDate(),
+            },
+            ...generateFields(answers),
+          ],
 
-        footerText: 'Job Posting Module',
+          footerText: 'Job Posting Module',
 
-        provider: 'spam',
+          provider: 'spam',
 
-        title: 'New Job Post',
-        // url, doesn't seem to serve a purpose due to !post messages no longer existing and also never really used anyway
-      })
+          title: 'New Job Post',
+          // url, doesn't seem to serve a purpose due to !post messages no longer existing and also never really used anyway
+        }).embed
+      ]}
     );
 
     return generateURL(guild.id, msg.channel.id, msg.id);
@@ -244,107 +252,82 @@ const createJobPost = async (
   }
 };
 
-const formAndValidateAnswers = async (
-  channel: Channel,
-  filter: CollectorFilter,
-  guild: Guild,
-  send: Function,
-  { username, discriminator }: Metadata
-): Promise<Answers> => {
-  const answers = new Map();
+// const formAndValidateAnswers = async (
+//   channel: Channel,
+//   filter: CollectorFilter<[Message]>,
+//   guild: Guild,
+//   send: Function,
+//   { username, discriminator }: Metadata
+// ): Promise<Answers> => {
+//   const answers = new Map();
 
-  // Iterate over questions
-  for (const [key, val] of questions) {
-    // Check if the current question is the location question
-    if (key === 'location') {
-      // Check if the `isRemote` value has been set to "yes"
-      const isRemote = answers.get('remote').toLowerCase();
-      // If the value is set to "yes", skip this iteration
-      if (isRemote === 'yes') {
-        continue;
-      }
-    }
+//   // Iterate over questions
+//   for (const [key, val] of questions) {
+//     // Check if the current question is the location question
+//     if (key === 'location') {
+//       // Check if the `isRemote` value has been set to "yes"
+//       const isRemote = answers.get('remote').toLowerCase();
+//       // If the value is set to "yes", skip this iteration
+//       if (isRemote === 'yes') {
+//         continue;
+//       }
+//     }
 
-    const q = val;
-    // Send out the question
-    await send(q.body);
-    // Await the input
-    const reply = await getReply(
-      channel,
-      filter,
-      // Increase the timeout up to 5x of `AWAIT_TIMEOUT` when waiting for the job description
-      key === 'description' ? 5 : 1
-    );
+//     const q = val;
+//     // Send out the question
+//     await send(q.body);
+//     // Await the input
+//     const reply = await getReply(
+//       channel as DMChannel,
+//       filter,
+//       // Increase the timeout up to 5x of `AWAIT_TIMEOUT` when waiting for the job description
+//       key === 'description' ? 5 : 1
+//     );
 
-    // If the reply is equal to "cancel" (aka, returns false), cancel the form
-    if (!reply) {
-      await send('Explicitly cancelled job post form. Exiting.');
-      return;
-    }
+//     // If the reply is equal to "cancel" (aka, returns false), cancel the form
+//     if (!reply) {
+//       await send('Explicitly cancelled job post form. Exiting.');
+//       return;
+//     }
 
-    // If there is a validation method appended to the question, use it
-    if (!q.validate) {
-      answers.set(key, reply);
-      continue;
-    }
+//     // If there is a validation method appended to the question, use it
+//     if (!q.validate) {
+//       answers.set(key, reply);
+//       continue;
+//     }
 
-    // If the input is not valid, cancel the form and notify the user.
-    const isValid = q.validate(reply.toLowerCase());
+//     // If the input is not valid, cancel the form and notify the user.
+//     const isValid = q.validate(reply.toLowerCase());
 
-    if (!isValid) {
-      switch (key) {
-        case 'compensation':
-          // Alert the moderators if the compensation is invalid.
-          sendAlert(guild, reply, { discriminator, username });
-          break;
-        case 'description':
-          await send(
-            `The job description should contain more than ${MINIMAL_AMOUNT_OF_WORDS} words.`
-          );
-          break;
-      }
-      await send('Invalid input. Cancelling form.');
-      return;
-    }
+//     if (!isValid) {
+//       switch (key) {
+//         case 'compensation':
+//           // Alert the moderators if the compensation is invalid.
+//           sendAlert(guild, reply, { discriminator, username });
+//           break;
+//         case 'description':
+//           await send(
+//             `The job description should contain more than ${MINIMAL_AMOUNT_OF_WORDS} words.`
+//           );
+//           break;
+//       }
+//       await send('Invalid input. Cancelling form.');
+//       return;
+//     }
 
-    // Otherwise, store the answer in the output map
-    answers.set(key, reply);
-  }
+//     // Otherwise, store the answer in the output map
+//     answers.set(key, reply);
+//   }
 
-  return answers;
-};
+//   return answers;
+// };
 
 const generateCacheEntry = (key: string): CacheEntry => ({
   key: `jp-${key}`, // JP stands for Job Posting, for the sake of key differentiation
   value: new Date(),
 });
 
-const greeterMessage = `Please adhere to the following guidelines when creating a job posting:
-${createMarkdownCodeBlock(
-  `
-1. Your job must provide monetary compensation.\n
-2. Your job must provide at least $${MINIMAL_COMPENSATION} in compensation.\n
-3. You can only post a job once every ${
-    Number.parseInt(POST_LIMITER_IN_HOURS, 10) === 1
-      ? 'hour'
-      : `${POST_LIMITER_IN_HOURS} hours`
-  }.\n
-4. You agree not to abuse our job posting service or circumvent any server rules, and you understand that doing so will result in a ban.\n
-`,
-  'md'
-)}
-To continue, have the following information available:
-${createMarkdownCodeBlock(
-  `
-1. Job location information (optional).\n
-2. A short description of the job posting with no special formatting (at least ${MINIMAL_AMOUNT_OF_WORDS} words long).\n
-3. The amount of compensation in USD for the job.\n
-4. Contact information for potential job seekers to apply for your job.\n
-`,
-  'md'
-)}
-If your compensation is deemed unfair by the moderation team, your job posting will be removed.
-If you agree to these guidelines, type ${'`ok`'}. If not, or you want to exit the form explicitly at any time, type ${'`cancel`'}.`;
+
 
 const calcNextPostingThreshold = (diff: number) => {
   if (diff === 0) {
@@ -356,15 +339,13 @@ const calcNextPostingThreshold = (diff: number) => {
 
 const handleJobPostingRequest = async (
   client: Client,
-  interaction: Interaction
+  interaction: CommandInteraction
 ): Promise<void> => {
-  const guild = await client.guilds.fetch(interaction.guild_id);
-  const channel = guild.channels.resolve(interaction.channel_id);
-  const member = await guild.members.fetch(interaction.member.user.id);
-  const author = member.user;
+  const { guild } = interaction;
+  const author = interaction.member.user as User;
   const { username, discriminator, id } = author;
 
-  const filter: CollectorFilter = m => m.author.id === id;
+  const filter: CollectorFilter<[Message]> = m => m.author.id === id;
   const send = (str: string) => author.send(str);
 
   try {
@@ -377,7 +358,7 @@ const handleJobPostingRequest = async (
       const diff =
         Number.parseInt(POST_LIMITER_IN_HOURS) -
         Math.abs(Date.now() - entry.value.getTime()) / 3_600_000;
-      interaction.acknowledge();
+      interaction.defer();
 
       send(
         `You cannot create a job posting right now.\nPlease try again ${calcNextPostingThreshold(
@@ -387,23 +368,30 @@ const handleJobPostingRequest = async (
       return;
     }
 
-    interaction.acknowledge();
+
+
+    await interaction.reply({ content: `I've DMed you to start the process.`, ephemeral: true});
 
     // Notify the user regarding the rules, and get the channel
-    const { channel } = await send(greeterMessage);
+    const channel = await author.createDM();
+    console.log(channel)
 
     const { id: channelID } = channel;
-    const proceed = await getReply(channel, filter);
+    // const proceed = await getReply(channel, filter);
 
-    if (!proceed) {
-      send('Canceled.');
-      return;
-    }
+    // if (!proceed) {
+    //   send('Canceled.');
+    //   return;
+    // }
 
-    const answers = await formAndValidateAnswers(channel, filter, guild, send, {
-      discriminator,
-      username,
-    });
+    const form = new MultistepForm(questions, channel, author)
+
+    const answers = await form.getResult('guidelines') as unknown as Answers
+    console.log({answers})
+    // const answers = await formAndValidateAnswers(channel, filter, guild, send, {
+    //   discriminator,
+    //   username,
+    // });
 
     // Just return if the iteration breaks due to invalid input
     if (!answers) {
@@ -430,12 +418,8 @@ const handleJobPostingRequest = async (
   }
 };
 
-export default handleJobPostingRequest;
-
-const jobPostCommand: CommandData = {
+export const jobPostCommand: CommandDataWithHandler = {
   name: 'post',
   description: 'Start the process of creating a new job post',
   handler: handleJobPostingRequest,
 };
-
-registerCommand(jobPostCommand);

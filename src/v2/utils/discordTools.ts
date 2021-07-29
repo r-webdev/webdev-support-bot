@@ -1,5 +1,5 @@
 import { MessageEmbed } from 'discord.js';
-import type { Message, MessageEditOptions, EmbedField } from 'discord.js';
+import type { Message, MessageEditOptions, EmbedField , MessagePayload } from 'discord.js';
 
 import { REPO_LINK } from '../env';
 import { delayedMessageAutoDeletion } from './delayedMessageAutoDeletion';
@@ -256,10 +256,10 @@ export const getChosenResult = async <T>(
   }
 
   try {
-    const collectedReactions = await sentMsg.awaitReactions(
-      reactionFilterBuilder(id, emojis),
-      awaitReactionConfig
-    );
+    const collectedReactions = await sentMsg.awaitReactions({
+     filter: reactionFilterBuilder(id, emojis),
+     ...awaitReactionConfig
+    });
 
     const emojiName = collectedReactions.first().emoji.name;
 
@@ -292,11 +292,10 @@ export const EMPTY_FIELD: EmbedField = {
 
 export const attemptEdit = async (
   sentMsg: Message,
-  content: string | any[] | number | { embed: Partial<MessageEmbed> },
-  options?: MessageEmbed | MessageEditOptions
-) => {
+  content: string | MessageEditOptions | MessagePayload
+): Promise<void> => {
   try {
-    await sentMsg.edit(content, options);
+    await sentMsg.edit(content);
   } catch {
     // eslint-disable-next-line no-console
     console.info('Attempting to edit message: message probably deleted.');

@@ -1,8 +1,6 @@
 import type { ApplicationCommandOptionChoice, Client } from 'discord.js';
 
-import { ApplicationCommandOptionType } from '../../../enums';
-import type { CommandData, Interaction } from '../../interactions';
-import { registerCommand } from '../../interactions';
+import type { CommandDataWithHandler } from '../../../types';
 import { map } from '../../utils/map';
 import type { ValueOrNullary } from '../../utils/valueOrCall';
 import { valueOrCall } from '../../utils/valueOrCall';
@@ -34,7 +32,7 @@ const shitpostReplacements = {
   format: /code|sql/giu,
   code: /code/giu,
   flexbox: /flexbox/giu,
-  lockfile: /lockfile/giu,
+  lockfile: /lockfile|package|node/giu,
 };
 
 const mapTransformToChoices = map(
@@ -44,16 +42,18 @@ const mapTransformToChoices = map(
   })
 );
 
-const shitpostInteraction: CommandData = {
+export const shitpostInteraction: CommandDataWithHandler = {
   description:
     'Quick response for common "why" or "Tell me about..." questions',
-  handler: async (client: Client, interaction: Interaction) => {
-    const content = aboutMessages.get(interaction.data.options[0].value);
+  handler: async (client, interaction) => {
+    const topic = interaction.options.getString('topic')
+    const replacement = interaction.options.getString('replacement')
+    const content = aboutMessages.get(topic);
 
     if (content) {
       const shitpostContent = valueOrCall(content).replace(
-        shitpostReplacements[interaction.data.options[0].value],
-        interaction.data.options[1].value
+        shitpostReplacements[topic],
+        replacement
       );
       interaction.reply(shitpostContent);
     }
@@ -65,15 +65,13 @@ const shitpostInteraction: CommandData = {
       description: 'The topic to ask about',
       name: 'topic',
       required: true,
-      type: ApplicationCommandOptionType.STRING,
+      type: 'STRING',
     },
     {
       name: 'replacement',
       description: 'Replacement word to use',
       required: true,
-      type: ApplicationCommandOptionType.STRING,
+      type: 'STRING',
     },
   ],
 };
-
-registerCommand(shitpostInteraction);

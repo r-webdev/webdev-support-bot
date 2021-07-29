@@ -1,9 +1,7 @@
-import type { InteractionObject } from 'discord.js';
+import type { CommandInteraction, Interaction} from 'discord.js';
 import { Message } from 'discord.js';
 import type { HeadersInit } from 'node-fetch';
 
-import type { Interaction } from '../interactions';
-import { createInteractionResponse } from '../interactions';
 import { delayedMessageAutoDeletion } from './delayedMessageAutoDeletion';
 import type { Provider } from './discordTools';
 import { noResults, invalidResponse } from './errors';
@@ -144,7 +142,7 @@ export const getExtendedInfoUrl = (provider: Provider, term: string) => {
 };
 
 type GetDataParams = {
-  msg: Interaction;
+  msg: CommandInteraction;
   provider: Provider;
   searchTerm: string;
   sanitizeData?: (data: any) => Partial<any>;

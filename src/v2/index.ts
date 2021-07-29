@@ -1,6 +1,6 @@
 import { init } from '@sentry/node';
-import type { Message, TextChannel } from 'discord.js';
-import { Client, MessageReaction, User } from 'discord.js';
+import type { Message } from 'discord.js';
+import { Client, Intents } from 'discord.js';
 import { connect } from 'mongoose';
 
 import {
@@ -16,8 +16,7 @@ import {
 import { detectVar } from './autorespond/code_parsing';
 import { detectVagueQuestion } from './autorespond/justask';
 import { limitFnByUser } from './cache';
-import { initCommands } from './commands';
-import { createHandleInteractionWebhook } from './interactions';
+import { registerCommands } from './commands';
 import handleThanks from './thanks';
 import isThanksMessage from './thanks/checker';
 import {
@@ -32,10 +31,30 @@ if (IS_PROD) {
   });
 }
 
+const alreadyVoted = new Set()
+
 // This date is used to check if the message's been created before the bot's started
 export const startTime = new Date();
 
-const client = new Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] });
+const client = new Client({
+  intents: [
+    Intents.FLAGS.GUILDS,
+    // Intents.FLAGS.GUILD_MEMBERS, // Privileged Intent
+    Intents.FLAGS.GUILD_BANS,
+    Intents.FLAGS.GUILD_EMOJIS_AND_STICKERS,
+    Intents.FLAGS.GUILD_INTEGRATIONS,
+    Intents.FLAGS.GUILD_WEBHOOKS,
+    Intents.FLAGS.GUILD_INVITES,
+    Intents.FLAGS.GUILD_VOICE_STATES,
+    // Intents.FLAGS.GUILD_PRESENCES, // Privileged Intent
+    Intents.FLAGS.GUILD_MESSAGES,
+    Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+    Intents.FLAGS.GUILD_MESSAGE_TYPING,
+    Intents.FLAGS.DIRECT_MESSAGES,
+    Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
+    Intents.FLAGS.DIRECT_MESSAGE_TYPING,
+  ]
+});
 
 const blacklistedServer = new Set([
   '264445053596991498', // Discord Bot List
@@ -51,10 +70,7 @@ client.on('ready', () => {
 client.once(
   'ready',
   async (): Promise<void> => {
-    void initCommands(client);
-
-    client.ws.on('INTERACTION_CREATE', createHandleInteractionWebhook(client));
-
+    registerCommands(client)
     void client.user.setActivity(`@${client.user.username} --help`);
 
     await Promise.all(
@@ -76,6 +92,7 @@ client.once(
     try {
       await client.user.setAvatar('./logo.png');
     } catch {}
+
   }
 );
 
@@ -92,12 +109,12 @@ const detectJustAsk = limitFnByUser(detectVagueQuestion, {
 const isWebdevAndWebDesignServer = (msg: Message) =>
   msg.guild?.id === SERVER_ID || false;
 
-client.on('message', msg => {
+client.on('messageCreate', msg => {
   if (msg.author.bot) {
     return;
   }
 
-  if (msg.channel.type === 'text' && msg.guild) {
+  if (['GUILD_TEXT', 'GUILD_PRIVATE_THREAD','GUILD_PUBLIC_THREAD'].includes(msg.channel.type) && msg.guild) {
     handleNonCommandGuildMessages(msg);
   }
 });

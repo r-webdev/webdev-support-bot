@@ -1,8 +1,6 @@
-import type { ApplicationCommandOptionChoice, Client } from 'discord.js';
+import type { ApplicationCommandOptionChoice, Client, CommandInteraction, Interaction } from 'discord.js';
 
-import { ApplicationCommandOptionType } from '../../../enums';
-import type { CommandData, Interaction } from '../../interactions';
-import { registerCommand } from '../../interactions';
+import type { CommandDataWithHandler } from '../../../types';
 import { map } from '../../utils/map';
 import type { ValueOrNullary } from '../../utils/valueOrCall';
 import { valueOrCall } from '../../utils/valueOrCall';
@@ -29,12 +27,12 @@ const mapTransformToChoices = map(
   })
 );
 
-const aboutInteraction: CommandData = {
+export const aboutInteraction: CommandDataWithHandler = {
   description:
     'Quick response for common "why" or "Tell me about..." questions',
-  handler: async (client: Client, interaction: Interaction): Promise<void> => {
-    const topic = interaction.data.options[0].value;
-    const user = interaction.data.options[1]?.value;
+  handler: async (client: Client, interaction: CommandInteraction): Promise<void> => {
+    const topic = interaction.options.get('topic').value as string;
+    const user = interaction.options.getUser('tag');
     const content = aboutMessages.get(topic);
 
     if (content) {
@@ -53,14 +51,12 @@ const aboutInteraction: CommandData = {
       description: 'The topic to ask about',
       name: 'topic',
       required: true,
-      type: ApplicationCommandOptionType.STRING,
+      type: 'STRING',
     },
     {
       name: 'tag',
       description: 'Optional Person to Tag',
-      type: ApplicationCommandOptionType.USER,
+      type: 'USER',
     },
   ],
 };
-
-registerCommand(aboutInteraction);

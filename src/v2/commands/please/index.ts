@@ -1,8 +1,6 @@
-import type { ApplicationCommandOptionChoice, Client } from 'discord.js';
+import type { ApplicationCommandOptionChoice, Client, CommandInteraction } from 'discord.js';
 
-import { ApplicationCommandOptionType } from '../../../enums';
-import type { CommandData, Interaction } from '../../interactions';
-import { registerCommand } from '../../interactions';
+import type { CommandDataWithHandler } from '../../../types';
 import { map } from '../../utils/map';
 import type { ValueOrNullary } from '../../utils/valueOrCall';
 import { valueOrCall } from '../../utils/valueOrCall';
@@ -18,12 +16,12 @@ const mapTransformToChoices = map(
   })
 );
 
-const pleaseInteraction: CommandData = {
+export const pleaseInteraction: CommandDataWithHandler = {
   name: 'please',
   description: 'Quick response for asking someone to please use something',
-  handler: async (client: Client, interaction: Interaction) => {
-    const content = pleaseMessages.get(interaction.data.options[0].value);
-    const user = interaction.data.options[1]?.value;
+  handler: async (client: Client, interaction: CommandInteraction) => {
+    const content = pleaseMessages.get(interaction.options.getString('topic'));
+    const user = interaction.options.getUser('user');
 
     if (content) {
       await interaction.reply(
@@ -37,14 +35,12 @@ const pleaseInteraction: CommandData = {
       description: 'The topic to ask about',
       choices: [...mapTransformToChoices(pleaseMessages.keys())],
       required: true,
-      type: ApplicationCommandOptionType.STRING,
+      type: 'STRING',
     },
     {
       name: 'user',
       description: 'Optional Person to Tag',
-      type: ApplicationCommandOptionType.USER,
+      type: 'USER',
     },
   ],
 };
-
-registerCommand(pleaseInteraction);

@@ -1,25 +1,26 @@
-import { Message, EmbedField, Client } from 'discord.js';
+import type { Message, EmbedField} from 'discord.js';
+import { Client } from 'discord.js';
 
 import { POINT_LIMITER_IN_MINUTES } from '../env';
 import pointHandler, {
   generatePointsCacheEntryKey,
 } from '../helpful_role/point_handler';
 import { cache } from '../spam_filter';
+import { stripMarkdownQuote } from '../utils/content_format';
 import { createEmbed } from '../utils/discordTools';
 import { mapʹ } from '../utils/map';
-import { stripMarkdownQuote } from '../utils/content_format';
 
 type CooldownUser = {
   id: string;
   timestamp: number;
 };
 
-export const extractUserID = (s: string) =>
-  s.match(/<@!?/) ? s.split(/<@!?/)[1].split('>')[0] : null;
+export const extractUserID = (s: string): string | null =>
+  /<@!?/u.test(s) ? s.split(/<@!?/u)[1].split('>')[0] : null;
 
 const timeUntilCooldownReset = (entry: number) =>
   Math.round(
-    Number.parseInt(POINT_LIMITER_IN_MINUTES) - (Date.now() - entry) / 60000
+    Number.parseInt(POINT_LIMITER_IN_MINUTES) - (Date.now() - entry) / 60_000
   );
 
 const getReply = async (msg): Promise<undefined | Message> => {
@@ -35,7 +36,7 @@ const getReply = async (msg): Promise<undefined | Message> => {
   }
 };
 
-const handleThanks = async (msg: Message) => {
+const handleThanks = async (msg: Message): Promise<void> => {
   const botId = msg.author.bot;
 
   const reply = await getReply(msg);
@@ -54,7 +55,7 @@ const handleThanks = async (msg: Message) => {
   const quoteLessContent = stripMarkdownQuote(msg.content);
 
   const unquotedMentionedUserIds = new Set(
-    mapʹ(([, id]) => id, quoteLessContent.matchAll(/<@!?(\d+)>/g))
+    mapʹ(([, id]) => id, quoteLessContent.matchAll(/<@!?(\d+)>/gu))
   );
 
   const usersOnCooldown: CooldownUser[] = [];
@@ -66,7 +67,7 @@ const handleThanks = async (msg: Message) => {
   }
 
   const thankableUsers = mentionedUsersWithReply.filter(u => {
-    if (!unquotedMentionedUserIds.has(u.id)) return false;
+    if (!unquotedMentionedUserIds.has(u.id)) {return false;}
 
     const entry: number = cache.get(
       generatePointsCacheEntryKey(u.id, msg.author.id)
@@ -82,7 +83,8 @@ const handleThanks = async (msg: Message) => {
   if (usersOnCooldown.length > 0) {
     const dm = await msg.author.createDM();
 
-    dm.send(
+    dm.send({
+     embeds: [
       createEmbed({
         description:
           'You cannot thank the following users for the period of time shown below their names:',
@@ -99,8 +101,9 @@ const handleThanks = async (msg: Message) => {
         }.`,
         provider: 'spam',
         title: 'Cooldown alert!',
-      })
-    );
+      }).embed
+     ]
+    });
   }
 
   console.log({ thankableUsers });
@@ -109,7 +112,7 @@ const handleThanks = async (msg: Message) => {
     return;
   }
 
-  thankableUsers.forEach(async user => await pointHandler(user.id, msg));
+  thankableUsers.forEach(async user => pointHandler(user.id, msg));
   const title = `Point${thankableUsers.size === 1 ? '' : 's'} received!`;
 
   const description = `<@!${msg.author.id}> has given a point to ${
@@ -122,7 +125,7 @@ const handleThanks = async (msg: Message) => {
     thankableUsers.size > 1
       ? thankableUsers.array().map((u, i) => ({
           inline: false,
-          name: (i + 1).toString() + '.',
+          name: `${(i + 1).toString()  }.`,
           value: `<@!${u.id}>`,
         }))
       : [];
@@ -133,9 +136,11 @@ const handleThanks = async (msg: Message) => {
     footerText: 'Point Handler',
     provider: 'spam',
     title,
-  });
+  }).embed;
 
-  await msg.channel.send(output);
+  await msg.channel.send({
+    embeds:[output]
+  });
 };
 
 export default handleThanks;

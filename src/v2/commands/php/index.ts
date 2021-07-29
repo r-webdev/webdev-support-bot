@@ -1,13 +1,17 @@
 /* eslint-disable unicorn/prefer-query-selector */
-import type { Client, Message, MessageEmbed } from 'discord.js';
+import type {
+  Client,
+  CommandInteraction,
+  Message,
+  MessageEmbed,
+} from 'discord.js';
 import type { Node } from 'dom-parser';
 import DOMParser from 'dom-parser';
-import { Html5Entities as Entities } from 'html-entities';
+import { decode } from 'html-entities';
 
 import { ApplicationCommandOptionType } from '../../../enums';
+import type { CommandDataWithHandler } from '../../../types';
 import { invalidResponse, unknownError } from '../../../v2/utils/errors';
-import type { Interaction } from '../../interactions';
-import { registerCommand } from '../../interactions';
 import {
   adjustTitleLength,
   attemptEdit,
@@ -22,7 +26,6 @@ import { buildDirectUrl, getSearchUrl } from '../../utils/urlTools';
 import useData from '../../utils/useData';
 
 const provider = 'php';
-const entities = new Entities();
 
 type ParseResult = {
   isDirect: boolean;
@@ -36,7 +39,7 @@ type ParseResult = {
 const extractMetadataFromResult = (result: Node) => {
   const titleElement = result.textContent;
 
-  const title = escapeMarkdown(entities.decode(titleElement));
+  const title = escapeMarkdown(decode(titleElement));
 
   const url = buildDirectUrl(provider, result.getAttribute('href'));
 
@@ -91,8 +94,8 @@ const parseText = textParser;
 const metadataExtractor = extractMetadataFromResult;
 const waitForResult = getChosenResult;
 
-const handler = async (client: Client, interaction: Interaction) => {
-  const searchTerm = interaction.data.options[0].value;
+const handler = async (client: Client, interaction: CommandInteraction): Promise<void> => {
+  const searchTerm = interaction.options.getString('query');
 
   try {
     const { error, text, searchUrl } = await makeRequest(searchTerm);
@@ -117,15 +120,19 @@ const handler = async (client: Client, interaction: Interaction) => {
       );
     });
 
-    const sentMsg = await interaction.reply(
-      createListEmbed({
-        description: createDescription(preparedDescription),
-        footerText: '',
-        provider,
-        searchTerm,
-        url: searchUrl,
-      }).embed as MessageEmbed
-    );
+    await interaction.reply({
+      embeds: [
+        createListEmbed({
+          description: createDescription(preparedDescription),
+          footerText: '',
+          provider,
+          searchTerm,
+          url: searchUrl,
+        }).embed ,
+      ],
+    });
+
+    const sentMsg = await interaction.fetchReply() as Message
 
     const result = await waitForResult(
       sentMsg,
@@ -139,7 +146,7 @@ const handler = async (client: Client, interaction: Interaction) => {
 
     const { url } = metadataExtractor(result.firstChild);
 
-    await attemptEdit(sentMsg, url, { embed: null });
+    interaction.editReply({ content: url })
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(error);
@@ -147,7 +154,7 @@ const handler = async (client: Client, interaction: Interaction) => {
   }
 };
 
-registerCommand({
+export const phpCommand : CommandDataWithHandler = {
   name: 'php',
   description: 'search and link something from php.net',
   handler,
@@ -155,8 +162,8 @@ registerCommand({
     {
       name: 'query',
       description: 'The search query for php',
-      type: ApplicationCommandOptionType.STRING,
+      type: 'STRING',
       required: true,
     },
   ],
-});
+};

@@ -1,10 +1,9 @@
 /* eslint-disable unicorn/prefer-query-selector */
-import type { Client, MessageEmbed } from 'discord.js';
+import type { Client, CommandInteraction, Message, MessageEmbed } from 'discord.js';
 import { URL } from 'url';
 
 import { ApplicationCommandOptionType } from '../../../enums';
-import type { Interaction } from '../../interactions';
-import { registerCommand } from '../../interactions';
+import type { CommandDataWithHandler } from '../../../types';
 import {
   adjustTitleLength,
   attemptEdit,
@@ -61,26 +60,28 @@ const buildDirectUrl = (path: string) =>
 
 const mdnHandler = async (
   client: Client,
-  interaction: Interaction
+  interaction: CommandInteraction
 ): Promise<unknown> => {
-  const searchTerm: string = interaction.data.options[0].value;
-  interaction.acknowledge();
+  const searchTerm: string = interaction.options.getString('query');
+  interaction.defer();
   try {
     const url = getSearchUrl(provider, searchTerm);
     const { error, json } = await fetch<SearchResponse>(url, 'json');
 
     if (error) {
-      return await interaction.reply({
+      await interaction.reply({
         content: invalidResponse,
-        flags: 64,
+        ephemeral: true,
       });
+      return;
     }
 
     if (json.documents.length === 0) {
-      return await interaction.reply({
+      await interaction.reply({
         content: noResults(searchTerm),
-        flags: 64,
+        ephemeral: true,
       });
+      return;
     }
 
     let preparedDescription = json.documents.map(
@@ -111,15 +112,19 @@ const mdnHandler = async (
       });
     }
 
-    const sentMsg = await interaction.reply(
-      createListEmbed({
-        description: createDescription(preparedDescription),
-        footerText: `${json.documents.length} results found`,
-        provider,
-        searchTerm,
-        url,
-      }).embed
-    );
+    await interaction.reply({
+      embeds: [
+        createListEmbed({
+          description: createDescription(preparedDescription),
+          footerText: `${json.documents.length} results found`,
+          provider,
+          searchTerm,
+          url,
+        }).embed,
+      ],
+    });
+
+    const sentMsg = await interaction.fetchReply() as Message
 
     const result = await waitForChosenResult(
       sentMsg,
@@ -131,14 +136,16 @@ const mdnHandler = async (
     }
 
     const editableUrl = buildDirectUrl(result.slug);
-    await attemptEdit(sentMsg, editableUrl, { embed: null });
+    interaction.editReply({
+      content: editableUrl
+    })
   } catch (error) {
     console.error(error);
     interaction.reply(unknownError);
   }
 };
 
-registerCommand({
+export const mdnCommand: CommandDataWithHandler ={
   name: 'mdn',
   description: 'search mdn',
   handler: async (client, interaction): Promise<void> => {
@@ -148,8 +155,8 @@ registerCommand({
     {
       name: 'query',
       description: 'query',
-      type: ApplicationCommandOptionType.STRING,
+      type: 'STRING',
       required: true,
     },
   ],
-});
+};

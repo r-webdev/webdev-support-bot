@@ -28,7 +28,7 @@ export function detectVar(msg: Message): boolean {
   const { content, channel, author } = msg;
 
   if (getFirstVar(content)) {
-    channel.send(messageFor(author.id), {});
+    channel.send(messageFor(author.id));
     return true;
   }
 }

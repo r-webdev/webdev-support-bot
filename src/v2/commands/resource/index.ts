@@ -1,8 +1,7 @@
-import type { ApplicationCommandOptionChoice, Client } from 'discord.js';
+import type { ApplicationCommandOptionChoice, Client, CommandInteraction } from 'discord.js';
 
 import { ApplicationCommandOptionType } from '../../../enums';
-import type { CommandData, Interaction } from '../../interactions';
-import { registerCommand } from '../../interactions';
+import type { CommandDataWithHandler } from '../../../types';
 import { map } from '../../utils/map';
 import type { ValueOrNullary } from '../../utils/valueOrCall';
 import { valueOrCall } from '../../utils/valueOrCall';
@@ -19,10 +18,10 @@ const mapTransformToChoices = map(
   })
 );
 
-const pleaseInteraction: CommandData = {
+export const resourceInteraction: CommandDataWithHandler = {
   description: 'Quick response for asking someone to please use something',
-  handler: async (client: Client, interaction: Interaction) => {
-    const content = resourceMessages.get(interaction.data.options[0].value);
+  handler: async (client: Client, interaction: CommandInteraction) => {
+    const content = resourceMessages.get(interaction.options.getString('for'));
 
     if (content) {
       interaction.reply(valueOrCall(content));
@@ -35,9 +34,7 @@ const pleaseInteraction: CommandData = {
       description: 'what are you looking to find resources for',
       name: 'for',
       required: true,
-      type: ApplicationCommandOptionType.STRING,
+      type: 'STRING',
     },
   ],
 };
-
-registerCommand(pleaseInteraction);

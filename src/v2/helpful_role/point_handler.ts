@@ -24,13 +24,13 @@ const grantHelpfulRole = async (user: GuildMember, msg: Message) => {
 
   // Send notification message
   await msg.channel.send(
-    createEmbed({
+    {embeds:[createEmbed({
       description: `<@!${user.id}> has been granted the <@&${HELPFUL_ROLE_ID}> role!`,
       footerText: 'Helpful Role Handler',
       provider: 'spam',
       title: 'A user has received the Helpful role!',
-    })
-  );
+    }).embed]
+  });
 };
 
 export const generatePointsCacheEntryKey = (
@@ -41,7 +41,7 @@ export const generatePointsCacheEntryKey = (
 const pointHandler = async (
   userID: string,
   msg: Message,
-  reactionHandlerUserID: string = null
+  reactionHandlerUserID: `${bigint}` = null
 ): Promise<void> => {
   const pointGiverUserID = reactionHandlerUserID || msg.author.id;
 
