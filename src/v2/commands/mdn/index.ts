@@ -210,5 +210,5 @@ export const mdnCommand: CommandDataWithHandler = {
 };
 
 function maybeClippy() {
-  return Math.random() <= 1.01 ? '<:clippy:865257202915082254>' : '🔗';
+  return Math.random() <= 0.01 ? '<:clippy:865257202915082254>' : '🔗';
 }
