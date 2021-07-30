@@ -1,7 +1,6 @@
-import type { MessageEmbed, Client, EmbedField, CommandInteraction } from 'discord.js';
+import type { MessageEmbed, Client, EmbedField, CommandInteraction, RoleManager, GuildMemberRoleManager, User } from 'discord.js';
 import type { GuildMember } from 'discord.js';
 
-import { ApplicationCommandOptionType } from '../../../enums';
 import type { CommandDataWithHandler } from '../../../types';
 import {
   ADMIN_ROLE_ID,
@@ -28,7 +27,7 @@ const getPoints = async (userID: string, guild: string) => {
 };
 
 const setPoints = async (
-  guild: string,
+  guild: `${bigint}`,
   userId: string,
   amount: string | number
 ): Promise<[] | [number, number]> => {
@@ -55,63 +54,56 @@ const setPoints = async (
 
 const isModOrAdmin = some(id => id === ADMIN_ROLE_ID || id === MOD_ROLE_ID);
 
+const rolesArray = (roles: `${bigint}`[] | GuildMemberRoleManager) => Array.isArray(roles) ? roles : roles.cache.map(role => role.id)
 
 async function handlePoints(
   client: Client,
-  interaction: CommandInteraction
+  interaction: CommandInteraction,
 ): Promise<void> {
-  // const [interactionOption] = interaction.data.options;
-  console.log(interaction.member.roles)
 
-  // const isAdmin = isModOrAdmin(interaction.member.roles);
-  // switch (interactionOption.name) {
-  //   case 'get': {
-  //     const userId: string =
-  //       (isAdmin && interactionOption?.options[0].options[0].value) ||
-  //       interaction.member.user.id;
+  const isAdmin = isModOrAdmin(rolesArray(interaction.member.roles));
 
-  //     const userName: string =
-  //       getNameFromInteraction(
-  //         interaction,
-  //         interactionOption?.options?.[0].value
-  //       ) ?? (await getMemberFromInteraction(client, interaction)).displayName;
+  await interaction.defer()
 
-  //     await handlePointsGet(userId, interaction, userName, isAdmin);
-  //     return;
-  //   }
-  //   case 'set': {
-  //     if (!isAdmin) {
-  //       interaction.reply({
-  //         content: 'You do not have permission to use this command',
-  //         flags: 64,
-  //       });
-  //       return;
-  //     }
-  //     const user: string = interactionOption.options[0].value;
-  //     const points: number = interactionOption.options[1].value;
+  switch (interaction.options.getSubCommand()) {
+    case 'get': {
+      const user: User = (isAdmin && interaction.options.getUser('user')) || interaction.user
 
-  //     await handlePointsSet(client, interaction, user, points);
-  //     return;
-  //   }
-  //   case 'reset': {
-  //     if (!isAdmin) {
-  //       interaction.reply({
-  //         content: 'You do not have permission to use this command',
-  //         flags: 64,
-  //       });
-  //       return;
-  //     }
-  //     const user = interactionOption.options[0].value;
+      const {username, id} = user
+      await handlePointsGet(id, interaction, username, isAdmin);
+      return;
+    }
+    case 'set': {
+      if (!isAdmin) {
+        interaction.editReply({
+          content: 'You do not have permission to use this command',
+        });
+        return;
+      }
+      const user: `${bigint}` = interaction.options.getUser("user").id;
+      const points: number = interaction.options.getInteger('points');
 
-  //     await handlePointsReset(interaction, user, client);
+      await handlePointsSet(client, interaction, user, points);
+      return;
+    }
+    case 'reset': {
+      if (!isAdmin) {
+        interaction.editReply({
+          content: 'You do not have permission to use this command',
+        });
+        return;
+      }
+      const user = interaction.options.getUser('user').id
 
-  //     return;
-  //   }
-  //   default:
-  //     console.log(interaction.data.options);
-  //     break;
-  // }
-  // interaction.acknowledge();
+      await handlePointsReset(interaction, user, client);
+
+      return;
+    }
+    default:
+      console.error("Something went wrong")
+      break;
+  }
+  interaction.defer();
 }
 
 async function handlePointsGet(
@@ -128,7 +120,7 @@ async function handlePointsGet(
     });
   }
 
-  interaction.reply({
+  interaction.editReply({
     embeds: [
     createPointCheckEmbed(
       userName,
@@ -149,7 +141,7 @@ async function handlePointsReset(
   const {member} = interaction
 
   if (result.length === 0) {
-    interaction.reply({
+    interaction.editReply({
       embeds: [
         createPointsEmbed(
           `The provided ID: "${user}" is not bound to any user.`,
@@ -186,9 +178,8 @@ async function handlePointsSet(
   const {member} = interaction
 
   if (!member) {
-    interaction.reply({
+    interaction.editReply({
       content: `User was invalid. (Not sure how that happened)`,
-      ephemeral: true
     });
     return;
   }
@@ -196,12 +187,11 @@ async function handlePointsSet(
   const result = await setPoints(interaction.guildId, user, points);
 
   if (result.length === 0) {
-    interaction.reply({
+    interaction.editReply({
       content:
         'Invalid argument provided for the points parameter.\nUsage example: ```' +
         '!points set @user 10' +
         '```',
-      ephemeral: true
     });
     return;
   }

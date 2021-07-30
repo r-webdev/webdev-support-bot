@@ -106,7 +106,6 @@ const handleThanks = async (msg: Message): Promise<void> => {
     });
   }
 
-  console.log({ thankableUsers });
   // Break if no valid users remain
   if (thankableUsers.size === 0) {
     return;

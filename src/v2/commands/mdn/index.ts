@@ -21,6 +21,8 @@ import { invalidResponse, noResults, unknownError } from '../../utils/errors';
 import { getSearchUrl } from '../../utils/urlTools';
 import useData from '../../utils/useData';
 
+
+const list = new (Intl as any).ListFormat()
 const provider = 'mdn';
 
 type SearchResponse = {
@@ -67,7 +69,7 @@ const mdnHandler = async (
   interaction: CommandInteraction
 ): Promise<unknown> => {
   const searchTerm: string = interaction.options.getString('query');
-  const deferral = interaction.defer();
+  const deferral = interaction.defer({ ephemeral: true });
   try {
     const url = getSearchUrl(provider, searchTerm);
     const { error, json } = await fetch<SearchResponse>(url, 'json');
@@ -133,8 +135,12 @@ const mdnHandler = async (
       const values = collection.filter((_, key) => valueSet.has(key));
 
       await interaction.editReply({
+        content: `Displaying Results for ${list.format(values.map(({title}) => title))}`,
+        components: []
+      })
+
+      interaction.channel.send({
         content: `Results for "${searchTerm}"`,
-        components: [],
         embeds: values.map(({ title, summary, slug }) =>
           new MessageEmbed()
             .setTitle(`${maybeClippy()} ${title}`)
