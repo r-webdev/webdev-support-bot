@@ -15,18 +15,8 @@ import {
 } from 'discord.js';
 import { URL } from 'url';
 
-import { ApplicationCommandOptionType } from '../../../enums';
 import type { CommandDataWithHandler } from '../../../types';
-import {
-  adjustTitleLength,
-  attemptEdit,
-  BASE_DESCRIPTION,
-  createDescription,
-  createListEmbed,
-  createMarkdownLink,
-  createMarkdownListItem,
-  getChosenResult,
-} from '../../utils/discordTools';
+import { clampLength, clampLengthMiddle } from '../../utils/clampStr';
 import { invalidResponse, noResults, unknownError } from '../../utils/errors';
 import { getSearchUrl } from '../../utils/urlTools';
 import useData from '../../utils/useData';
@@ -66,26 +56,11 @@ type SearchResponse = {
 };
 
 const fetch: typeof useData = useData;
-const waitForChosenResult: typeof getChosenResult = getChosenResult;
 
 const buildDirectUrl = (path: string) =>
   new URL(path, 'https://developer.mozilla.org/en-US/docs/').toString();
 
-const clampLength = (str: string, maxLength: number): string => {
-  if (str.length > maxLength) {
-    return `${str.slice(0, maxLength - 3)}...`;
-  }
-  return str;
-};
 
-const clampLengthMiddle = (str: string, maxLength: number): string => {
-  if (str.length > maxLength) {
-    const firstHalf = str.slice(0, maxLength / 2 -3);
-    const secondHalf = str.slice(str.length - maxLength / 2);
-    return `${firstHalf}...${secondHalf}`;
-  }
-  return str;
-};
 
 const mdnHandler = async (
   client: Client,
@@ -170,23 +145,6 @@ const mdnHandler = async (
       });
     });
 
-    return;
-
-    // const sentMsg = (await interaction.fetchReply()) as Message;
-
-    // const result = await waitForChosenResult(
-    //   sentMsg,
-    //   { author: { id: interaction.member.user.id } },
-    //   json.documents
-    // );
-    // if (!result) {
-    //   return;
-    // }
-
-    // const editableUrl = buildDirectUrl(result.slug);
-    // interaction.editReply({
-    //   content: editableUrl,
-    // });
   } catch (error) {
     console.error(error);
     interaction.reply(unknownError);

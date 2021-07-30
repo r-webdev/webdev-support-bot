@@ -1,27 +1,23 @@
 /* eslint-disable unicorn/prefer-query-selector */
 import type {
+  ButtonInteraction,
   Client,
   CommandInteraction,
   Message,
-  MessageEmbed,
+  SelectMenuInteraction
+} from 'discord.js';
+import  {
+  MessageButton,
+  MessageActionRow,
+  MessageSelectMenu,
 } from 'discord.js';
 import type { Node } from 'dom-parser';
 import DOMParser from 'dom-parser';
 import { decode } from 'html-entities';
 
-import { ApplicationCommandOptionType } from '../../../enums';
 import type { CommandDataWithHandler } from '../../../types';
 import { invalidResponse, unknownError } from '../../../v2/utils/errors';
-import {
-  adjustTitleLength,
-  attemptEdit,
-  createDescription,
-  createListEmbed,
-  createMarkdownLink,
-  createMarkdownListItem,
-  getChosenResult,
-} from '../../utils/discordTools';
-import {} from '../../utils/errors';
+import { clampLength, clampLengthMiddle } from '../../utils/clampStr';
 import { buildDirectUrl, getSearchUrl } from '../../utils/urlTools';
 import useData from '../../utils/useData';
 
@@ -39,7 +35,7 @@ type ParseResult = {
 const extractMetadataFromResult = (result: Node) => {
   const titleElement = result.textContent;
 
-  const title = escapeMarkdown(decode(titleElement));
+  const title = decode(titleElement);
 
   const url = buildDirectUrl(provider, result.getAttribute('href'));
 
@@ -48,11 +44,6 @@ const extractMetadataFromResult = (result: Node) => {
     url,
   };
 };
-
-/**
- * Escapes *, _, `, ~, \
- */
-const escapeMarkdown = (text: string) => text.replace(/([*\\_`~])/gu, '\\$1');
 
 const textParser = (text: string): ParseResult => {
   const parser = new DOMParser();
@@ -92,61 +83,77 @@ const requester = async (
 const makeRequest = requester;
 const parseText = textParser;
 const metadataExtractor = extractMetadataFromResult;
-const waitForResult = getChosenResult;
 
 const handler = async (client: Client, interaction: CommandInteraction): Promise<void> => {
   const searchTerm = interaction.options.getString('query');
-
+  const defer = interaction.defer()
   try {
     const { error, text, searchUrl } = await makeRequest(searchTerm);
     if (error) {
-      await interaction.reply(invalidResponse);
+      await defer
+      await interaction.editReply(invalidResponse);
       return;
     }
 
     const { isDirect, results } = parseText(text);
     if (isDirect) {
-      await interaction.reply(buildDirectUrl(provider, searchTerm));
+      await defer
+      await interaction.editReply(buildDirectUrl(provider, searchTerm));
       return;
     }
 
-    const preparedDescription = results.map((result, index) => {
-      const link = result.firstChild;
-      const { title, url } = metadataExtractor(link);
 
-      return createMarkdownListItem(
-        index,
-        createMarkdownLink(adjustTitleLength([`**${title}**`].join(' - ')), url)
+    const msgId = Math.random().toString(16)
+
+    const selectRow = new MessageActionRow()
+      .addComponents(
+        new MessageSelectMenu()
+        .setCustomId(`php🤔${msgId}🤔select`)
+        .addOptions(
+          results.map(({ firstChild: link }, index) => {
+            const { title, url } = metadataExtractor(link);
+
+            return {
+              label: clampLengthMiddle(title, 25),
+              description: clampLength(url, 50),
+              value: String(index),
+            }
+          })
+        )
+      )
+
+
+      const buttonRow = new MessageActionRow().addComponents(
+        new MessageButton()
+          .setLabel('Cancel')
+          .setStyle('DANGER')
+          .setCustomId(`mdn🤔${msgId}🤔cancel`)
       );
+
+      await defer
+      const int = (await interaction.editReply({
+        content: 'Please pick 1 - 5 options below to display',
+        components: [selectRow, buttonRow],
+      })) as Message;
+
+      const interactionCollector = int.createMessageComponentCollector<SelectMenuInteraction | ButtonInteraction>({
+      filter: item => item.user.id === interaction.user.id && item.customId.startsWith(`php🤔${msgId}`),
     });
 
-    await interaction.reply({
-      embeds: [
-        createListEmbed({
-          description: createDescription(preparedDescription),
-          footerText: '',
-          provider,
-          searchTerm,
-          url: searchUrl,
-        }).embed ,
-      ],
+    interactionCollector.once('collect', async interaction => {
+      await interaction.deferUpdate();
+      if (interaction.isButton()) {
+        await int.delete();
+        return;
+      }
+      const [result] = interaction.values
+
+
+      await interaction.editReply({
+        components: [],
+        content: buildDirectUrl(provider, result)
+      });
     });
-
-    const sentMsg = await interaction.fetchReply() as Message
-
-    const result = await waitForResult(
-      sentMsg,
-      { author: { id: interaction.member.user.id } },
-      results
-    );
-
-    if (!result) {
-      return;
-    }
-
-    const { url } = metadataExtractor(result.firstChild);
-
-    interaction.editReply({ content: url })
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(error);
