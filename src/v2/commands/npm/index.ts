@@ -1,22 +1,19 @@
 import { formatDistanceToNow } from 'date-fns';
-import type { EmbedField, Client, MessageEmbed } from 'discord.js';
+import type { EmbedField, Client, CommandInteraction, Message, ButtonInteraction, SelectMenuInteraction} from 'discord.js';
+import { MessageEmbed, Collection, MessageActionRow, MessageButton, MessageSelectMenu } from 'discord.js';
 import { collect, take } from 'domyno';
 import { URL } from 'url';
 
-import { ApplicationCommandOptionType } from '../../../enums';
-import type { Interaction } from '../../interactions';
-import { registerCommand } from '../../interactions';
+import type { CommandDataWithHandler } from '../../../types';
+import { clampLengthMiddle, clampLength } from '../../utils/clampStr';
 import type { Embed } from '../../utils/discordTools';
 import {
   createMarkdownLink,
-  createListEmbed,
   createEmbed,
   adjustDescriptionLength,
-  createDescription,
   createMarkdownListItem,
   getChosenResult,
   createMarkdownBash,
-  attemptEdit,
 } from '../../utils/discordTools';
 import { website, language } from '../../utils/emojis';
 import { unknownError } from '../../utils/errors';
@@ -26,6 +23,9 @@ import { getData } from '../../utils/urlTools';
 import type { NPMResponse } from './types';
 
 const provider = 'npm';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const list = new (Intl as any).ListFormat
 
 const fetch: typeof getData = getData;
 const waitForResponse: typeof getChosenResult = getChosenResult;
@@ -71,8 +71,9 @@ const npmEmbedToString = ({ name, description, url }: NPMEmbed, index) => {
 };
 
 // msg: Message, searchTerm: string
-const handleNpmCommand = async (client: Client, interaction: Interaction) => {
-  const searchTerm = interaction.data.options[0].value;
+const handleNpmCommand = async (client: Client, interaction: CommandInteraction): Promise<void> => {
+  const searchTerm = interaction.options.getString('name')
+  const defer = interaction.defer()
   try {
     const json = await fetch<NPMResponse[]>({
       isInvalidData: json => json.length === 0,
@@ -80,6 +81,8 @@ const handleNpmCommand = async (client: Client, interaction: Interaction) => {
       provider,
       searchTerm,
     });
+
+    await defer
 
     if (!json) {
       return;
@@ -97,34 +100,69 @@ const handleNpmCommand = async (client: Client, interaction: Interaction) => {
       return;
     }
 
-    const description = createDescription(
-      firstTenResults.map(npmEmbedToString)
+    const msgId = Math.random().toString(16);
+    const collection = new Collection(
+      firstTenResults.map(item => [item.url, item])
+    );
+    const selectRow = new MessageActionRow().addComponents(
+      new MessageSelectMenu()
+        .setCustomId(`mdn🤔${msgId}🤔select`)
+        .setPlaceholder('Pick one to 5 options to display')
+        .setMinValues(1)
+        .setMaxValues(5)
+        .addOptions(
+          firstTenResults.map(({ name, description, url }) => ({
+            label: clampLengthMiddle(name, 25),
+            description: clampLength(description, 50),
+            value: url,
+          }))
+        )
+    );
+    const buttonRow = new MessageActionRow().addComponents(
+      new MessageButton()
+        .setLabel('Cancel')
+        .setStyle('DANGER')
+        .setCustomId(`mdn🤔${msgId}🤔cancel`)
     );
 
-    const sentMsg = await interaction.reply(
-      createListEmbed({
-        description,
-        footerText:
-          firstTenResults.length < 10
-            ? `${firstTenResults.length} packages found`
-            : `at least ${firstTenResults.length.toLocaleString()} packages found`,
-        provider,
-        searchTerm,
-        url: `https://npmjs.com/search?q=${encodeURI(searchTerm)}`,
-      }).embed as MessageEmbed
-    );
+    const int = (await interaction.editReply({
+      content: 'Please pick 1 - 5 options below to display',
+      components: [selectRow, buttonRow],
+    })) as Message;
 
-    const result = await waitForResponse(
-      sentMsg,
-      { author: { id: interaction.member.user.id } },
-      firstTenResults
-    );
+    const interactionCollector = int.createMessageComponentCollector<SelectMenuInteraction | ButtonInteraction>({
+      filter: item => item.user.id === interaction.user.id && item.customId.startsWith(`mdn🤔${msgId}`),
+    });
 
-    if (!result) {
-      return;
-    }
+    interactionCollector.once('collect', async interaction => {
+      await interaction.deferUpdate();
+      if (interaction.isButton()) {
+        await int.delete();
+        return;
+      }
+      const valueSet = new Set(interaction.values);
+      const values = collection.filter((_, key) => valueSet.has(key));
 
-    await attemptEdit(sentMsg, createEmbed(createNPMEmbed(result)));
+      await interaction.editReply({
+        content: `Displaying Results for ${list.format(values.map(({name}) => name))}`,
+        components: []
+      })
+
+      interaction.channel.send({
+        content: `Results for "${searchTerm}"`,
+        embeds: values.map(({ name, description, url,author,lastUpdate,maintainers,externalUrls }) =>
+          new MessageEmbed()
+            .setAuthor(`📦 Last updated ${lastUpdate}`)
+            .setTitle(`${name}`)
+            .setThumbnail('https://static.npmjs.com/338e4905a2684ca96e08c7780fc68412.png')
+            .setDescription(description.split('\n').map(item => item.trim()).join(' '))
+            .addFields(...createFields(name, externalUrls, maintainers), { name: 'Author', value: author.name, inline: true })
+            .setURL(url)
+            .setFooter(`requested by ${interaction.user.username}#${interaction.user.discriminator}`, interaction.user.avatarURL({size:64,format:'webp'}))
+            .setColor(0xCB_37_37)
+        ),
+      });
+    });
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(error);
@@ -171,9 +209,9 @@ const createFields = (
 ): EmbedField[] => [
   {
     inline: false,
-    name: 'add to your project',
+    name: 'How to install',
     value: createMarkdownBash(
-      ['npm install', 'yarn add'].map(cmd => [cmd, name].join(' ')).join('\n')
+      [`npm install ${name}`,'# Or', `yarn add ${name}`].join('\n')
     ),
   },
   ...Object.entries(externalUrls)
@@ -215,16 +253,16 @@ const sanitizePackageLink = (host: string, link: string) => {
   return link;
 };
 
-registerCommand({
+export const npmInteraction: CommandDataWithHandler = {
   description: 'Search npm for a given package',
   name: 'npm',
   options: [
     {
       name: 'name',
       description: 'The name of the package',
-      type: ApplicationCommandOptionType.STRING,
+      type: "STRING",
       required: true,
     },
   ],
   handler: handleNpmCommand,
-});
+}

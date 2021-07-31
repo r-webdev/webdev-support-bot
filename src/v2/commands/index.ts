@@ -9,6 +9,7 @@ import { aboutInteraction} from './about';
 
 // base commands
 import { mdnCommand} from './mdn';
+import { npmInteraction } from './npm'
 import {phpCommand } from './php';
 import { pleaseInteraction} from './please';
 import {pointsHandlers } from './points';
@@ -26,7 +27,8 @@ const applicationCommands = new Collection([
   pointsHandlers,
   jobPostCommand,
   resourceInteraction,
-  shitpostInteraction
+  shitpostInteraction,
+  npmInteraction
 ].map(command => [command.name, command]))
 
 const mapCommandData = pipe<Iterable<CommandDataWithHandler>, ApplicationCommandData[]>([
@@ -36,9 +38,13 @@ const mapCommandData = pipe<Iterable<CommandDataWithHandler>, ApplicationCommand
 
 const guildCommands = new Collection([]) // placeholder for now
 
-export const registerCommands = (client:Client): void => {
+export const registerCommands = async (client:Client): Promise<void> => {
 
-  client.application?.commands.set(mapCommandData(applicationCommands.values()))
+  await client.application?.commands.set(mapCommandData(applicationCommands.values()))
+
+  // client.guilds.cache.forEach(guild => {
+  //   guild.commands.set([])
+  // })
 
   client.on('interactionCreate', interaction => {
     if(!interaction.isCommand()) {return}
