@@ -28,7 +28,7 @@
     "mongoose": "5.13.5",
     "node-cache": "5.1.2",
     "node-fetch": "2.6.1",
-    "ts-node": "10.1.0",
+    "ts-node": "10.2.0",
     "typescript": "4.3.5"
   },
   "devDependencies": {
