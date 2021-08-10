@@ -16,7 +16,7 @@ const getFirstVar = pipe([jsCodeBlocks, pluck('code'), some(hasVarInSource)]);
 
 const messageFor = (userId: string) => `
 Hey <@${userId}>, I've noticed you're using \`var\` in a code snippet.
-Unless you've got a very good reason to, it's highly recommend you use \`let\` or \`const\`, preferring \`const\` if it won't be reassigned.
+Unless you've got a very good reason to, it's highly recommended that you use \`let\` or \`const\`. Preferably \`const\` if it won't be reassigned.
 `;
 
 export function detectVar(msg: Message) {
