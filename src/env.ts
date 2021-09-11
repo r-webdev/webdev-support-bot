@@ -23,12 +23,12 @@ export const {API_CACHE_EXPIRATION_IN_SECONDS} = process.env;
 export const {API_CACHE_REVALIDATION_WINDOW_IN_SECONDS} = process.env;
 
 export const {MONGO_URI} = process.env;
-export const HELPFUL_ROLE_ID = process.env.HELPFUL_ROLE_ID as `${bigint}`;
-export const HELPFUL_ROLE_EXEMPT_ID = process.env.HELPFUL_ROLE_EXEMPT_ID as `${bigint}`;
+export const {HELPFUL_ROLE_ID} = process.env;
+export const {HELPFUL_ROLE_EXEMPT_ID} = process.env;
 export const {HELPFUL_ROLE_POINT_THRESHOLD} = process.env;
 export const {POINT_DECAY_TIMER} = process.env;
-export const ADMIN_ROLE_ID = process.env.ADMIN_ROLE_ID as `${bigint}`;
-export const MOD_ROLE_ID = process.env.MOD_ROLE_ID as `${bigint}`;
+export const {ADMIN_ROLE_ID} = process.env;
+export const {MOD_ROLE_ID} = process.env;
 
 export const {POINT_LIMITER_IN_MINUTES} = process.env;
 export const VAR_DETECT_LIMIT =

@@ -358,7 +358,7 @@ const handleJobPostingRequest = async (
       const diff =
         Number.parseInt(POST_LIMITER_IN_HOURS) -
         Math.abs(Date.now() - entry.value.getTime()) / 3_600_000;
-      interaction.defer();
+      interaction.deferReply();
 
       send(
         `You cannot create a job posting right now.\nPlease try again ${calcNextPostingThreshold(

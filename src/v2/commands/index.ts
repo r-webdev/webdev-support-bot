@@ -41,6 +41,10 @@ const guildCommands = new Collection([]) // placeholder for now
 export const registerCommands = async (client:Client): Promise<void> => {
 
   await client.application?.commands.set(mapCommandData(applicationCommands.values()))
+  // await client.application?.commands.set([{type:''}])
+  await client.guilds.cache.get('618935554171469834').commands.set([
+
+  ])
 
   // client.guilds.cache.forEach(guild => {
   //   guild.commands.set([])

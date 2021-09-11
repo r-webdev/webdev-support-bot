@@ -30,7 +30,7 @@ if (IS_PROD) {
       'https://9902d087a01f4d8883daad5d59d90736@o163592.ingest.sentry.io/5307626',
   });
 }
-
+console.log(process.version)
 const alreadyVoted = new Set()
 
 // This date is used to check if the message's been created before the bot's started

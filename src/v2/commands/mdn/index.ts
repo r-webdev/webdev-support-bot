@@ -69,7 +69,7 @@ const mdnHandler = async (
   interaction: CommandInteraction
 ): Promise<unknown> => {
   const searchTerm: string = interaction.options.getString('query');
-  const deferral = interaction.defer({ ephemeral: true });
+  const deferral = interaction.deferReply({ ephemeral: true });
   try {
     const url = getSearchUrl(provider, searchTerm);
     const { error, json } = await fetch<SearchResponse>(url, 'json');

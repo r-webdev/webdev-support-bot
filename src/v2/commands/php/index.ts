@@ -86,7 +86,7 @@ const metadataExtractor = extractMetadataFromResult;
 
 const handler = async (client: Client, interaction: CommandInteraction): Promise<void> => {
   const searchTerm = interaction.options.getString('query');
-  const defer = interaction.defer()
+  const defer = interaction.deferReply()
   try {
     const { error, text, searchUrl } = await makeRequest(searchTerm);
     if (error) {

@@ -122,7 +122,7 @@ const handleThanks = async (msg: Message): Promise<void> => {
 
   const fields: EmbedField[] =
     thankableUsers.size > 1
-      ? thankableUsers.array().map((u, i) => ({
+      ? thankableUsers.map((u, i) => ({
           inline: false,
           name: `${(i + 1).toString()  }.`,
           value: `<@!${u.id}>`,

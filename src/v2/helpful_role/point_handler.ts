@@ -41,7 +41,7 @@ export const generatePointsCacheEntryKey = (
 const pointHandler = async (
   userID: string,
   msg: Message,
-  reactionHandlerUserID: `${bigint}` = null
+  reactionHandlerUserID: string = null
 ): Promise<void> => {
   const pointGiverUserID = reactionHandlerUserID || msg.author.id;
 

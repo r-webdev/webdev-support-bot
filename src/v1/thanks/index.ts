@@ -37,7 +37,7 @@ const getReply = async (msg): Promise<undefined | Message> => {
   }
 };
 
-const handleThanks = async (msg: Message) => {
+const handleThanks = async (msg: Message): Promise<void> => {
   const botId = msg.author.bot;
 
   const reply = await getReply(msg);
@@ -86,28 +86,29 @@ const handleThanks = async (msg: Message) => {
   if (usersOnCooldown.length > 0) {
     const dm = await msg.author.createDM();
 
-    dm.send(
-      createEmbed({
-        description:
-          'You cannot thank the following users for the period of time shown below their names:',
-        fields: usersOnCooldown.map((u, i) => {
-          const diff = timeUntilCooldownReset(u.timestamp);
-          return {
-            inline: false,
-            name: `${i + 1}`,
-            value: `<@!${u.id}>\n${diff} minute${diff === 1 ? '' : 's'}.`,
-          };
-        }),
-        footerText: `You can only give a point to a user every ${POINT_LIMITER_IN_MINUTES} minute${
-          Number.parseInt(POINT_LIMITER_IN_MINUTES) === 1 ? '' : 's'
-        }.`,
-        provider: 'spam',
-        title: 'Cooldown alert!',
-      })
-    );
+    dm.send({
+      embeds: [
+        createEmbed({
+          description:
+            'You cannot thank the following users for the period of time shown below their names:',
+          fields: usersOnCooldown.map((u, i) => {
+            const diff = timeUntilCooldownReset(u.timestamp);
+            return {
+              inline: false,
+              name: `${i + 1}`,
+              value: `<@!${u.id}>\n${diff} minute${diff === 1 ? '' : 's'}.`,
+            };
+          }),
+          footerText: `You can only give a point to a user every ${POINT_LIMITER_IN_MINUTES} minute${
+            Number.parseInt(POINT_LIMITER_IN_MINUTES) === 1 ? '' : 's'
+          }.`,
+          provider: 'spam',
+          title: 'Cooldown alert!',
+        }).embed,
+      ],
+    });
   }
 
-  console.log({ thankableUsers });
   // Break if no valid users remain
   if (thankableUsers.size === 0) {
     return;

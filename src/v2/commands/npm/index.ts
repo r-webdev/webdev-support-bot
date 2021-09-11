@@ -73,7 +73,7 @@ const npmEmbedToString = ({ name, description, url }: NPMEmbed, index) => {
 // msg: Message, searchTerm: string
 const handleNpmCommand = async (client: Client, interaction: CommandInteraction): Promise<void> => {
   const searchTerm = interaction.options.getString('name')
-  const defer = interaction.defer()
+  const defer = interaction.deferReply()
   try {
     const json = await fetch<NPMResponse[]>({
       isInvalidData: json => json.length === 0,

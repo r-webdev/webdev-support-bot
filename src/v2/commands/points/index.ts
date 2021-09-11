@@ -27,7 +27,7 @@ const getPoints = async (userID: string, guild: string) => {
 };
 
 const setPoints = async (
-  guild: `${bigint}`,
+  guild: string,
   userId: string,
   amount: string | number
 ): Promise<[] | [number, number]> => {
@@ -54,7 +54,7 @@ const setPoints = async (
 
 const isModOrAdmin = some(id => id === ADMIN_ROLE_ID || id === MOD_ROLE_ID);
 
-const rolesArray = (roles: `${bigint}`[] | GuildMemberRoleManager) => Array.isArray(roles) ? roles : roles.cache.map(role => role.id)
+const rolesArray = (roles: string[] | GuildMemberRoleManager) => Array.isArray(roles) ? roles : roles.cache.map(role => role.id)
 
 async function handlePoints(
   client: Client,
@@ -63,9 +63,9 @@ async function handlePoints(
 
   const isAdmin = isModOrAdmin(rolesArray(interaction.member.roles));
 
-  await interaction.defer()
+  await interaction.deferReply()
 
-  switch (interaction.options.getSubCommand()) {
+  switch (interaction.options.getSubcommand()) {
     case 'get': {
       const user: User = (isAdmin && interaction.options.getUser('user')) || interaction.user
 
@@ -80,7 +80,7 @@ async function handlePoints(
         });
         return;
       }
-      const user: `${bigint}` = interaction.options.getUser("user").id;
+      const user: string = interaction.options.getUser("user").id;
       const points: number = interaction.options.getInteger('points');
 
       await handlePointsSet(client, interaction, user, points);
@@ -103,7 +103,7 @@ async function handlePoints(
       console.error("Something went wrong")
       break;
   }
-  interaction.defer();
+  interaction.deferReply();
 }
 
 async function handlePointsGet(

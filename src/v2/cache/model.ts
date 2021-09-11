@@ -1,4 +1,5 @@
-import { Document, Model, model, Schema } from 'mongoose';
+import type { Document, Model} from 'mongoose';
+import { model, Schema } from 'mongoose';
 
 const schema = new Schema({
   guild: {
@@ -23,7 +24,7 @@ const schema = new Schema({
   },
 });
 
-export const GenericCache = model('GenericCache', schema) as Model<
+export const GenericCache = model('GenericCache', schema) as unknown as Model<
   Document & {
     guild: string;
     type: string;
