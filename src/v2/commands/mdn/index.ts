@@ -13,6 +13,7 @@ import {
   MessageEmbed,
   MessageSelectMenu,
 } from 'discord.js';
+import type { MessageComponentTypes } from 'discord.js/typings/enums';
 import { URL } from 'url';
 
 import type { CommandDataWithHandler } from '../../../types';
@@ -120,12 +121,12 @@ const mdnHandler = async (
     })) as Message;
 
     const interactionCollector = int.createMessageComponentCollector<
-      SelectMenuInteraction | ButtonInteraction
+      MessageComponentTypes.SELECT_MENU | MessageComponentTypes.BUTTON
     >({
       filter: item => item.user.id === interaction.user.id && item.customId.startsWith(`mdn🤔${msgId}`),
     });
 
-    interactionCollector.once('collect', async interaction => {
+    interactionCollector.once('collect', async (interaction:ButtonInteraction|SelectMenuInteraction) => {
       await interaction.deferUpdate();
       if (interaction.isButton()) {
         await int.delete();

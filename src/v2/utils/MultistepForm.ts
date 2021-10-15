@@ -14,6 +14,7 @@ import type {
   ThreadChannel,
   User,
 } from 'discord.js';
+import { MessageComponentTypes } from 'discord.js/typings/enums';
 
 import { AWAIT_MESSAGE_TIMEOUT } from '../../env';
 import { ExternalResolver } from './ExternalResolver';
@@ -91,7 +92,7 @@ export class MultistepForm<T extends Record<string, MultiStepFormStep>> {
     }
 
     const collector =
-      message.createMessageComponentCollector<ButtonInteraction>({
+      message.createMessageComponentCollector({
         componentType: 'BUTTON',
         filter: interaction => interaction.user.id === this.#user.id,
       });
@@ -236,7 +237,7 @@ export class MultistepForm<T extends Record<string, MultiStepFormStep>> {
     });
 
     const collector =
-      message.createMessageComponentCollector<ButtonInteraction>({
+      message.createMessageComponentCollector({
         componentType: 'BUTTON',
         filter: interaction => interaction.user.id === this.#user.id,
       });

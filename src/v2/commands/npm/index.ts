@@ -1,6 +1,7 @@
 import { formatDistanceToNow } from 'date-fns';
 import type { EmbedField, Client, CommandInteraction, Message, ButtonInteraction, SelectMenuInteraction} from 'discord.js';
 import { MessageEmbed, Collection, MessageActionRow, MessageButton, MessageSelectMenu } from 'discord.js';
+import type { MessageComponentTypes } from 'discord.js/typings/enums';
 import { collect, take } from 'domyno';
 import { URL } from 'url';
 
@@ -130,11 +131,11 @@ const handleNpmCommand = async (client: Client, interaction: CommandInteraction)
       components: [selectRow, buttonRow],
     })) as Message;
 
-    const interactionCollector = int.createMessageComponentCollector<SelectMenuInteraction | ButtonInteraction>({
+    const interactionCollector = int.createMessageComponentCollector<MessageComponentTypes.BUTTON | MessageComponentTypes.SELECT_MENU>({
       filter: item => item.user.id === interaction.user.id && item.customId.startsWith(`mdn🤔${msgId}`),
     });
 
-    interactionCollector.once('collect', async interaction => {
+    interactionCollector.once('collect', async (interaction: ButtonInteraction | SelectMenuInteraction) => {
       await interaction.deferUpdate();
       if (interaction.isButton()) {
         await int.delete();

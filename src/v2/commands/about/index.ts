@@ -8,14 +8,14 @@ import { flexbox } from './handlers/flexbox';
 import { jquery } from './handlers/jquery';
 import { lockfile } from './handlers/lockfile';
 import { modules } from './handlers/modules';
-import { sass } from './handlers/sass';
+// import { sass } from './handlers/sass';
 import { vscode } from './handlers/vscode';
 
 const aboutMessages = new Map<string, ValueOrNullary<string>>([
   jquery,
   vscode,
   modules,
-  sass,
+  // sass,
   flexbox,
   lockfile,
 ]);

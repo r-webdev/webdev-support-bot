@@ -1,1 +1,1 @@
-import './v2';
+import './v2/index.ts';

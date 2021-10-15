@@ -11,6 +11,7 @@ import  {
   MessageActionRow,
   MessageSelectMenu,
 } from 'discord.js';
+import type { MessageComponentTypes } from 'discord.js/typings/enums';
 import type { Node } from 'dom-parser';
 import DOMParser from 'dom-parser';
 import { decode } from 'html-entities';
@@ -136,11 +137,11 @@ const handler = async (client: Client, interaction: CommandInteraction): Promise
         components: [selectRow, buttonRow],
       })) as Message;
 
-      const interactionCollector = int.createMessageComponentCollector<SelectMenuInteraction | ButtonInteraction>({
+      const interactionCollector = int.createMessageComponentCollector<MessageComponentTypes.BUTTON | MessageComponentTypes.SELECT_MENU>({
       filter: item => item.user.id === interaction.user.id && item.customId.startsWith(`php🤔${msgId}`),
     });
 
-    interactionCollector.once('collect', async interaction => {
+    interactionCollector.once('collect', async (interaction:ButtonInteraction | SelectMenuInteraction) => {
       await interaction.deferUpdate();
       if (interaction.isButton()) {
         await int.delete();

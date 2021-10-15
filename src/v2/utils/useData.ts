@@ -1,10 +1,11 @@
-import * as Sentry from '@sentry/node';
-import fetch, {
-  HeaderInit,
+import { addBreadcrumb, Severity } from '@sentry/node';
+import type {
+  HeadersInit,
   RequestInfo,
   RequestInit,
   Response,
 } from 'node-fetch';
+import fetch from 'node-fetch';
 
 import {
   API_CACHE_ENTRIES_LIMIT,
@@ -65,10 +66,10 @@ const doFetch: <TParsedResponse>(
   }
 
   return async (url, fetchOptions) => {
-    Sentry.addBreadcrumb({
+    addBreadcrumb({
       category: 'query',
       data: typeof url === 'string' ? { url } : undefined,
-      level: Sentry.Severity.Info,
+      level: Severity.Info,
       timestamp: Date.now(),
     });
 
@@ -86,7 +87,7 @@ const doFetch: <TParsedResponse>(
 
 const responseMapper: <T>(
   type: ResponseTypes
-) => (response: Response) => Promise<UnknownData<T>> = (
+) => (response: Response) => Promise<UnknownData<T>> = <T>(
   type: string
 ) => async response => {
   if (!response.ok) {
@@ -94,7 +95,7 @@ const responseMapper: <T>(
       error: true,
       json: null,
       text: null,
-    };
+    } as unknown as Promise<UnknownData<T>>;
   }
 
   if (type === 'json') {
@@ -103,7 +104,7 @@ const responseMapper: <T>(
       error: false,
       json,
       text: null,
-    };
+    }as unknown as Promise<UnknownData<T>>;
   }
 
   if (type === 'text') {
@@ -113,14 +114,14 @@ const responseMapper: <T>(
       error: false,
       json: null,
       text,
-    };
+    }as unknown as Promise<UnknownData<T>>;
   }
 };
 
 const useData = <T>(
   url: string,
   type: ResponseTypes = 'json',
-  headers: HeaderInit = {}
+  headers: HeadersInit = {}
 ): Promise<UnknownData<T>> => {
   return doFetch(url, responseMapper<T>(type))(url, { headers });
 };

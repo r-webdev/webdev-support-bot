@@ -1,7 +1,7 @@
 import { init } from '@sentry/node';
 import type { Message } from 'discord.js';
 import { Client, Intents } from 'discord.js';
-import { connect } from 'mongoose';
+import mongoose from 'mongoose';
 
 import {
   DISCORD_TOKEN,
@@ -23,6 +23,10 @@ import {
   generateCleanContent,
   stripMarkdownQuote,
 } from './utils/content_format';
+
+const { connect } = mongoose
+
+const NON_COMMAND_MSG_TYPES = new Set(['GUILD_TEXT', 'GUILD_PRIVATE_THREAD','GUILD_PUBLIC_THREAD'])
 
 if (IS_PROD) {
   init({
@@ -114,7 +118,7 @@ client.on('messageCreate', msg => {
     return;
   }
 
-  if (['GUILD_TEXT', 'GUILD_PRIVATE_THREAD','GUILD_PUBLIC_THREAD'].includes(msg.channel.type) && msg.guild) {
+  if (NON_COMMAND_MSG_TYPES.has(msg.channel.type) && msg.guild) {
     handleNonCommandGuildMessages(msg);
   }
 });
@@ -133,9 +137,6 @@ const handleNonCommandGuildMessages = async (msg: Message) => {
 export const dbConnect = async (): Promise<void> => {
   try {
     await connect(MONGO_URI, {
-      useCreateIndex: true,
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
     });
     // eslint-disable-next-line no-console
     console.log('MongoDB connection established.');
