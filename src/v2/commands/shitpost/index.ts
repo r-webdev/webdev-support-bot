@@ -44,7 +44,7 @@ const mapTransformToChoices = map(
 
 export const shitpostInteraction: CommandDataWithHandler = {
   description:
-    'Quick response for common "why" or "Tell me about..." questions',
+    'A fun little shitpost command using some of the about/please commands',
   handler: async (client, interaction) => {
     const topic = interaction.options.getString('topic')
     const replacement = interaction.options.getString('replacement')

@@ -1,10 +1,10 @@
-import thanks from './thanks';
-import thankyou from './thankyou';
+import { map } from '../../utils/map';
+import { merge } from '../../utils/merge';
+import { partition } from '../../utils/partition';
 import nothanks from './nothanks';
 import nothankyou from './nothankyou';
-import { map } from '../utils/map';
-import { partition } from '../utils/partition';
-import { merge } from '../utils/merge';
+import thanks from './thanks';
+import thankyou from './thankyou';
 
 type ThankDef = typeof thanks[number];
 
@@ -25,12 +25,11 @@ const english = [
   'thanx',
   'thnx',
 ];
-const negativeEnglish = english
-  .flatMap(word => ['n ' + word, 'n' + word, 'no' + word, 'no ' + word])
-  .concat(['no need to thank', 'thanks,? but no thanks', 'thanks for nothing']);
+const negativeEnglish = [...english
+  .flatMap(word => [`n ${  word}`, `n${  word}`, `no${  word}`, `no ${  word}`]), 'no need to thank', 'thanks,? but no thanks', 'thanks for nothing'];
 
 const partitionWrap = partition(
-  (str: string) => !!str.match(wordBoundarableRegex)
+  (str: string) => !!wordBoundarableRegex.test(str)
 );
 
 const mapTextFromDefs = map((def: ThankDef) =>
@@ -72,10 +71,9 @@ const noThanksRegex = new RegExp(
 );
 
 const hasThanks = str =>
-  removeDiacritics(str)
+  thanksRegex.exec(removeDiacritics(str)
     .replace(/\s+/, ' ')
-    .replace(noThanksRegex, '')
-    .match(thanksRegex);
+    .replace(noThanksRegex, ''));
 
 const keywordValidator = (str: string) => {
   return Boolean(hasThanks(str));

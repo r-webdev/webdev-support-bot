@@ -3,18 +3,18 @@ import { MessageActionRow, MessageSelectMenu } from 'discord.js';
 import type { Message, EmbedField, TextChannel } from 'discord.js';
 import type { Client } from 'discord.js';
 
-import { POINT_LIMITER_IN_MINUTES } from '../env';
-import HelpfulRoleMember from '../helpful_role/db_model';
+import { POINT_LIMITER_IN_MINUTES } from '../../env';
+import HelpfulRoleMember from '../../helpful_role/db_model';
 import pointHandler, {
   generatePointsCacheEntryKey,
-} from '../helpful_role/point_handler';
-import { cache } from '../spam_filter';
-import type { ThanksInteractionType } from '../thanks/db_model';
-import { clampLength } from '../utils/clampStr';
-import { stripMarkdownQuote } from '../utils/content_format';
-import { createEmbed } from '../utils/discordTools';
-import { mapʹ } from '../utils/map';
-import { difference } from '../utils/sets';
+} from '../../helpful_role/point_handler';
+import { cache } from '../../spam_filter';
+import { clampLength } from '../../utils/clampStr';
+import { stripMarkdownQuote } from '../../utils/content_format';
+import { createEmbed } from '../../utils/discordTools';
+import { mapʹ } from '../../utils/map';
+import { difference } from '../../utils/sets';
+import type { ThanksInteractionType } from './db_model';
 import { ThanksInteraction } from './db_model';
 
 type CooldownUser = {

@@ -16,10 +16,10 @@ import {
 import { detectVar } from './autorespond/code_parsing';
 import { handleDeprecatedCommands } from './autorespond/deprecatedCommands';
 import { detectVagueQuestion } from './autorespond/justask';
+import {handleThanks, attachUndoThanksListener} from './autorespond/thanks';
+import isThanksMessage from './autorespond/thanks/checker';
 import { limitFnByUser } from './cache';
 import { registerCommands } from './commands';
-import {handleThanks, attachUndoThanksListener} from './thanks';
-import isThanksMessage from './thanks/checker';
 import {
   generateCleanContent,
   stripMarkdownQuote,
