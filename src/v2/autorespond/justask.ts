@@ -1,4 +1,5 @@
-import { Message } from 'discord.js';
+import type { Message } from 'discord.js';
+
 import { stripMarkdownQuote } from '../utils/content_format';
 
 const rePeople = String.raw`(?:any|some) (?:one|1+)`;
@@ -14,9 +15,9 @@ const heuristicJustAskRegex = new RegExp(
   'ui'
 );
 
-export function detectVagueQuestion(msg: Message) {
+export function detectVagueQuestion(msg: Message):boolean {
   const content = stripMarkdownQuote(msg.cleanContent);
-  if (content.split(' ').length < 60 && content.match(heuristicJustAskRegex)) {
+  if (content.split(' ').length < 50 && heuristicJustAskRegex.test(content)) {
     msg.reply(`
 **Don't ask to ask. Just Ask**
 Here's why https://sol.gfxile.net/dontask.html
@@ -25,4 +26,5 @@ Here's why https://sol.gfxile.net/dontask.html
 `);
     return true;
   }
+  return false
 }

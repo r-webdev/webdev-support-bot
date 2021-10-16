@@ -13,7 +13,11 @@ const jsCodeBlocks = createCodeBlockCapturer([
   'typescript',
 ]);
 
-const getFirstVar = pipe([jsCodeBlocks, pluck('code'), some(hasVarInSource)]);
+const getFirstVar = pipe([
+  jsCodeBlocks,
+  pluck('code'),
+  some(hasVarInSource)
+]);
 
 const messageFor = (userId: string) => `
 Hey <@${userId}>, I've noticed you're using \`var\` in a code snippet.

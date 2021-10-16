@@ -14,6 +14,7 @@ import {
   JUST_ASK_DETECT_LIMIT,
 } from '../env';
 import { detectVar } from './autorespond/code_parsing';
+import { handleDeprecatedCommands } from './autorespond/deprecatedCommands';
 import { detectVagueQuestion } from './autorespond/justask';
 import { limitFnByUser } from './cache';
 import { registerCommands } from './commands';
@@ -132,6 +133,7 @@ const handleNonCommandGuildMessages = async (msg: Message) => {
   if (isWebdevAndWebDesignServer(msg) && isThanksMessage(quoteLessContent)) {
     handleThanks(msg);
   }
+  handleDeprecatedCommands(msg)
   await detectJustAsk(msg);
   await detectVarLimited(msg);
 };
