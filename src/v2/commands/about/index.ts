@@ -37,7 +37,7 @@ export const aboutInteraction: CommandDataWithHandler = {
 
     if (content) {
       interaction.reply(
-        `${user ? `<@${user}>\n` : ''} ${valueOrCall(content).trim()}`
+        `${user ? `${user}\n` : ''} ${valueOrCall(content).trim()}`
       );
       return;
     }

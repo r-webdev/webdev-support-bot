@@ -25,7 +25,7 @@ export const pleaseInteraction: CommandDataWithHandler = {
 
     if (content) {
       await interaction.reply(
-        `${user ? `<@${user}>\n` : ''}${valueOrCall(content).trim()}`
+        `${user ? `${user}\n` : ''}${valueOrCall(content).trim()}`
       );
     }
   },

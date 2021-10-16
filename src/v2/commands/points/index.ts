@@ -67,7 +67,7 @@ async function handlePoints(
 
   switch (interaction.options.getSubcommand()) {
     case 'get': {
-      const user: User = (isAdmin && interaction.options.getUser('user')) || interaction.user
+      const user = interaction.options.getUser('user') ?? interaction.user
 
       const {username, id} = user
       await handlePointsGet(id, interaction, username, isAdmin);

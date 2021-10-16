@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "TS_NODE_PROJECT=\"./tsconfig.json\" nodemon -r dotenv/config -x  node --experimental-specifier-resolution=node --loader ts-node/esm ./src/index.ts",
+    "dev": "TS_NODE_FILES=true TS_NODE_PROJECT=\"./tsconfig.json\" nodemon -r dotenv/config -x  node --experimental-specifier-resolution=node --loader ts-node/esm ./src/index.ts",
     "start": "node build/index.js",
     "build": "yarn test:ci && tsc",
     "lint": "eslint src && tsc --noEmit",

@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "lib": ["ESNext"],
+    "lib": ["ESNext", "ESNext.Intl"],
     "allowJs": true,
     "target": "esnext",
     "module": "esnext",
@@ -8,9 +8,10 @@
     "sourceMap": true,
     "outDir": "./build",
     "rootDir": "./src",
+    "typeRoots": ["./node_modules/@types", "./src/*.d.ts"],
     "skipLibCheck": true,
     "esModuleInterop": true
   },
-  "include": ["./src/**/*.ts"],
+  "include": ["./src/**/*.ts", "./src/*.d.ts"],
   "exclude": ["node_modules", "./src/**/__fixtures__/*", "./src/**/*.test.ts"]
 }

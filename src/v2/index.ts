@@ -17,7 +17,7 @@ import { detectVar } from './autorespond/code_parsing';
 import { detectVagueQuestion } from './autorespond/justask';
 import { limitFnByUser } from './cache';
 import { registerCommands } from './commands';
-import handleThanks from './thanks';
+import {handleThanks, attachUndoThanksListener} from './thanks';
 import isThanksMessage from './thanks/checker';
 import {
   generateCleanContent,
@@ -75,6 +75,9 @@ client.once(
   'ready',
   async (): Promise<void> => {
     registerCommands(client)
+
+    attachUndoThanksListener(client)
+
     void client.user.setActivity(`@${client.user.username} --help`);
 
     await Promise.all(

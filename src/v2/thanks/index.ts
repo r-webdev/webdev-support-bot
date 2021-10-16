@@ -1,14 +1,21 @@
-import type { Message, EmbedField} from 'discord.js';
-import { Client } from 'discord.js';
+import { MessageButton } from 'discord.js';
+import { MessageActionRow, MessageSelectMenu } from 'discord.js';
+import type { Message, EmbedField, TextChannel } from 'discord.js';
+import type { Client } from 'discord.js';
 
 import { POINT_LIMITER_IN_MINUTES } from '../env';
+import HelpfulRoleMember from '../helpful_role/db_model';
 import pointHandler, {
   generatePointsCacheEntryKey,
 } from '../helpful_role/point_handler';
 import { cache } from '../spam_filter';
+import type { ThanksInteractionType } from '../thanks/db_model';
+import { clampLength } from '../utils/clampStr';
 import { stripMarkdownQuote } from '../utils/content_format';
 import { createEmbed } from '../utils/discordTools';
 import { mapʹ } from '../utils/map';
+import { difference } from '../utils/sets';
+import { ThanksInteraction } from './db_model';
 
 type CooldownUser = {
   id: string;
@@ -17,6 +24,8 @@ type CooldownUser = {
 
 export const extractUserID = (s: string): string | null =>
   /<@!?/u.test(s) ? s.split(/<@!?/u)[1].split('>')[0] : null;
+
+const listFormatter = new Intl.ListFormat();
 
 const timeUntilCooldownReset = (entry: number) =>
   Math.round(
@@ -67,7 +76,9 @@ const handleThanks = async (msg: Message): Promise<void> => {
   }
 
   const thankableUsers = mentionedUsersWithReply.filter(u => {
-    if (!unquotedMentionedUserIds.has(u.id)) {return false;}
+    if (!unquotedMentionedUserIds.has(u.id)) {
+      return false;
+    }
 
     const entry: number = cache.get(
       generatePointsCacheEntryKey(u.id, msg.author.id)
@@ -84,25 +95,25 @@ const handleThanks = async (msg: Message): Promise<void> => {
     const dm = await msg.author.createDM();
 
     dm.send({
-     embeds: [
-      createEmbed({
-        description:
-          'You cannot thank the following users for the period of time shown below their names:',
-        fields: usersOnCooldown.map((u, i) => {
-          const diff = timeUntilCooldownReset(u.timestamp);
-          return {
-            inline: false,
-            name: `${i + 1}`,
-            value: `<@!${u.id}>\n${diff} minute${diff === 1 ? '' : 's'}.`,
-          };
-        }),
-        footerText: `You can only give a point to a user every ${POINT_LIMITER_IN_MINUTES} minute${
-          Number.parseInt(POINT_LIMITER_IN_MINUTES) === 1 ? '' : 's'
-        }.`,
-        provider: 'spam',
-        title: 'Cooldown alert!',
-      }).embed
-     ]
+      embeds: [
+        createEmbed({
+          description:
+            'You cannot thank the following users for the period of time shown below their names:',
+          fields: usersOnCooldown.map((u, i) => {
+            const diff = timeUntilCooldownReset(u.timestamp);
+            return {
+              inline: false,
+              name: `${i + 1}`,
+              value: `<@!${u.id}>\n${diff} minute${diff === 1 ? '' : 's'}.`,
+            };
+          }),
+          footerText: `You can only give a point to a user every ${POINT_LIMITER_IN_MINUTES} minute${
+            Number.parseInt(POINT_LIMITER_IN_MINUTES) === 1 ? '' : 's'
+          }.`,
+          provider: 'spam',
+          title: 'Cooldown alert!',
+        }).embed,
+      ],
     });
   }
 
@@ -112,9 +123,23 @@ const handleThanks = async (msg: Message): Promise<void> => {
   }
 
   thankableUsers.forEach(async user => pointHandler(user.id, msg));
+  const msgData = createResponse(thankableUsers, msg.author.id);
+
+  const response = await msg.channel.send(msgData);
+
+  const thxInter = await ThanksInteraction.create({
+    thanker: msg.author.id,
+    guild: msg.guildId,
+    channel: msg.channelId,
+    thankees: thankableUsers.map(u => u.id),
+    responseMsgId: response.id,
+  });
+};
+
+function createResponse(thankableUsers, authorId) {
   const title = `Point${thankableUsers.size === 1 ? '' : 's'} received!`;
 
-  const description = `<@!${msg.author.id}> has given a point to ${
+  const description = `<@!${authorId}> has given a point to ${
     thankableUsers.size === 1
       ? `<@!${thankableUsers.first().id}>`
       : 'the users mentioned below'
@@ -122,9 +147,9 @@ const handleThanks = async (msg: Message): Promise<void> => {
 
   const fields: EmbedField[] =
     thankableUsers.size > 1
-      ? thankableUsers.map((u, i) => ({
+      ? thankableUsers.map((u, _, i) => ({
           inline: false,
-          name: `${(i + 1).toString()  }.`,
+          name: `${(i + 1).toString()}.`,
           value: `<@!${u.id}>`,
         }))
       : [];
@@ -137,9 +162,116 @@ const handleThanks = async (msg: Message): Promise<void> => {
     title,
   }).embed;
 
-  await msg.channel.send({
-    embeds:[output]
-  });
-};
+  return {
+    embeds: [output],
+    components: [
+      new MessageActionRow().addComponents(
+        thankableUsers.size > 1
+          ? new MessageSelectMenu()
+              .setCustomId(`thanks🤔${authorId}🤔select`)
+              .setPlaceholder('Accidentally Thank someone? Un-thank them here!')
+              .setMinValues(1)
+              .setOptions(
+                thankableUsers.map(user => ({
+                  label: clampLength(user.username, 25),
+                  value: user.id,
+                }))
+              )
+          : new MessageButton()
+              .setCustomId(`thanks🤔${authorId}🤔${thankableUsers.first().id}`)
+              .setStyle('DANGER')
+              .setLabel('This was an accident, UNDO!')
+      ),
+    ],
+  };
+}
 
-export default handleThanks;
+function attachUndoThanksListener(client: Client): void {
+  client.on('interactionCreate', async interaction => {
+    if (!(interaction.isButton() || interaction.isSelectMenu())) {
+      return;
+    }
+    const id = interaction.customId;
+    const msgId = interaction.message.id;
+    const [type, authorId, thankeeId] = id.split('🤔');
+
+    if (type !== 'thanks') {
+      return;
+    }
+
+    if (interaction.user.id !== authorId) {
+      interaction.reply({
+        content: "This isn't your thanks to undo!",
+        ephemeral: true,
+      });
+      return;
+    }
+
+    await interaction.deferReply({ ephemeral: true });
+
+    const thanksInteraction: ThanksInteractionType =
+      await ThanksInteraction.findOne({
+        responseMsgId: msgId,
+      });
+
+    const removeThankees: string[] = interaction.isButton()
+      ? [thankeeId]
+      : interaction.values;
+
+    const thankees = await HelpfulRoleMember.find({
+      user: {
+        $in: removeThankees,
+      },
+      guild: thanksInteraction.guild,
+    });
+
+    await Promise.all(
+      thankees.map(user => {
+        user.points--;
+        return user.save();
+      })
+    );
+
+    thanksInteraction.thankees = [
+      ...difference(thanksInteraction.thankees, removeThankees),
+    ];
+    const guild = client.guilds.resolve(thanksInteraction.guild);
+
+    const textChannel = (await guild.channels.fetch(
+      thanksInteraction.channel
+    )) as TextChannel;
+    if (thanksInteraction.thankees.length === 0) {
+      textChannel.messages.delete(thanksInteraction.responseMsgId);
+      thanksInteraction.delete();
+    } else {
+      const oldMsg = await textChannel.messages.fetch(msgId);
+      oldMsg.embeds[0].fields = oldMsg.embeds[0].fields
+        .filter(item => !removeThankees.includes(item.value.slice(3, -1)))
+        .map((item, x) => ({ ...item, name: `${x + 1}` }));
+
+      const oldSelect = oldMsg.components[0].components[0] as MessageSelectMenu;
+      const newOptions = oldSelect.options
+      .filter(item => !removeThankees.includes(item.value))
+      .map(({ label, value }) => ({ label, value }))
+
+      oldMsg.edit({
+        embeds: oldMsg.embeds,
+        components: [
+          new MessageActionRow().addComponents(
+            new MessageSelectMenu(oldSelect).setOptions(
+              newOptions
+            ).setMaxValues(newOptions.length)
+          ),
+        ],
+      });
+      thanksInteraction.save();
+    }
+    interaction.editReply({
+      content: `Your thanks was revoked from ${listFormatter.format(
+        removeThankees.map(x => `<@${x}>`)
+      )}`,
+    });
+  });
+}
+
+export { handleThanks, attachUndoThanksListener };
