@@ -8,8 +8,10 @@ import type {
   Guild,
   Client,
   ThreadChannel,
-  CommandInteraction,
-  User} from 'discord.js';
+  CommandInteraction} from 'discord.js';
+import {
+  User,
+  MessageButton} from 'discord.js';
 import {
   GuildChannel,
   MessageEmbed,
@@ -242,7 +244,23 @@ const createJobPost = async (
           title: 'New Job Post',
           // url, doesn't seem to serve a purpose due to !post messages no longer existing and also never really used anyway
         }).embed
-      ]}
+      ],
+      components: [
+        new MessageActionRow()
+          .addComponents(
+            new MessageButton()
+              .setCustomId(`job🤔${userID}🤔response`)
+              .setStyle("PRIMARY")
+              .setLabel('DM me the username')
+              .setEmoji("✉️"),
+            new MessageButton()
+              .setCustomId(`job🤔${userID}🤔delete`)
+              .setStyle("DANGER")
+              .setLabel("Delete my post (poster only)")
+              .setEmoji("🗑")
+          ),
+      ]
+    }
     );
 
     return generateURL(guild.id, msg.channel.id, msg.id);
@@ -252,82 +270,10 @@ const createJobPost = async (
   }
 };
 
-// const formAndValidateAnswers = async (
-//   channel: Channel,
-//   filter: CollectorFilter<[Message]>,
-//   guild: Guild,
-//   send: Function,
-//   { username, discriminator }: Metadata
-// ): Promise<Answers> => {
-//   const answers = new Map();
-
-//   // Iterate over questions
-//   for (const [key, val] of questions) {
-//     // Check if the current question is the location question
-//     if (key === 'location') {
-//       // Check if the `isRemote` value has been set to "yes"
-//       const isRemote = answers.get('remote').toLowerCase();
-//       // If the value is set to "yes", skip this iteration
-//       if (isRemote === 'yes') {
-//         continue;
-//       }
-//     }
-
-//     const q = val;
-//     // Send out the question
-//     await send(q.body);
-//     // Await the input
-//     const reply = await getReply(
-//       channel as DMChannel,
-//       filter,
-//       // Increase the timeout up to 5x of `AWAIT_TIMEOUT` when waiting for the job description
-//       key === 'description' ? 5 : 1
-//     );
-
-//     // If the reply is equal to "cancel" (aka, returns false), cancel the form
-//     if (!reply) {
-//       await send('Explicitly cancelled job post form. Exiting.');
-//       return;
-//     }
-
-//     // If there is a validation method appended to the question, use it
-//     if (!q.validate) {
-//       answers.set(key, reply);
-//       continue;
-//     }
-
-//     // If the input is not valid, cancel the form and notify the user.
-//     const isValid = q.validate(reply.toLowerCase());
-
-//     if (!isValid) {
-//       switch (key) {
-//         case 'compensation':
-//           // Alert the moderators if the compensation is invalid.
-//           sendAlert(guild, reply, { discriminator, username });
-//           break;
-//         case 'description':
-//           await send(
-//             `The job description should contain more than ${MINIMAL_AMOUNT_OF_WORDS} words.`
-//           );
-//           break;
-//       }
-//       await send('Invalid input. Cancelling form.');
-//       return;
-//     }
-
-//     // Otherwise, store the answer in the output map
-//     answers.set(key, reply);
-//   }
-
-//   return answers;
-// };
-
 const generateCacheEntry = (key: string): CacheEntry => ({
   key: `jp-${key}`, // JP stands for Job Posting, for the sake of key differentiation
   value: new Date(),
 });
-
-
 
 const calcNextPostingThreshold = (diff: number) => {
   if (diff === 0) {
@@ -341,8 +287,8 @@ const handleJobPostingRequest = async (
   client: Client,
   interaction: CommandInteraction
 ): Promise<void> => {
-  const { guild } = interaction;
-  const author = interaction.member.user as User;
+  const { guild, member } = interaction;
+  const {user:author} = interaction
   const { username, discriminator, id } = author;
 
   const filter: CollectorFilter<[Message]> = m => m.author.id === id;
@@ -387,11 +333,6 @@ const handleJobPostingRequest = async (
     const form = new MultistepForm(questions, channel, author)
 
     const answers = await form.getResult('guidelines') as unknown as Answers
-    console.log({answers})
-    // const answers = await formAndValidateAnswers(channel, filter, guild, send, {
-    //   discriminator,
-    //   username,
-    // });
 
     // Just return if the iteration breaks due to invalid input
     if (!answers) {
@@ -418,8 +359,57 @@ const handleJobPostingRequest = async (
   }
 };
 
+
 export const jobPostCommand: CommandDataWithHandler = {
   name: 'post',
   description: 'Start the process of creating a new job post',
   handler: handleJobPostingRequest,
+  onAttach:  (client) => {
+    client.on('interactionCreate', async interaction => {
+      if(!interaction.isButton()) { return }
+
+      const [category, userId, type]  =interaction.customId.split('🤔')
+
+      if(category !== 'job') { return }
+
+      if(type === "delete" ) {
+        if(interaction.user.id !== userId) {
+          interaction.reply({
+            content: "You don't have permission to delete this post",
+            ephemeral: true
+          })
+          return
+        }
+
+        const guild = await client.guilds.fetch(interaction.guildId)
+        const channel = await guild.channels.fetch(interaction.channelId) as TextChannel
+        const message = await channel.messages.fetch(interaction.message.id)
+
+        await message.delete()
+
+        interaction.reply({
+          content: "Your job post was deleted",
+          ephemeral: true
+        })
+      }
+
+      if(type === 'response') {
+        await interaction.deferReply({ ephemeral: true })
+        const dmChannel = await interaction.user.createDM()
+        try {
+          dmChannel.send({
+            content: `The user you want to DM is <@!${userId}>`
+          })
+          interaction.editReply({
+            content: "Please check your dms",
+            components: [
+              new MessageActionRow().addComponents(new MessageButton().setStyle("LINK").setURL(`https://discord.com/channels/@me/${dmChannel.id}`).setLabel("Go to DMs"))
+            ]
+          })
+        } catch {
+          interaction.editReply(`I tried to send you a DM but your DMs appear to be off. Heres the user you wish to DM <@${userId}>. If that doesn't work, please enable your DMs and try again.`)
+        }
+      }
+    })
+  }
 };
