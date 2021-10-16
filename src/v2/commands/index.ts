@@ -1,15 +1,19 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import type { ApplicationCommand, Client } from 'discord.js';
+import type {
+  ApplicationCommand,
+  ApplicationCommandData,
+  Client,
+} from 'discord.js';
 import { Collection } from 'discord.js';
 import _ from 'lodash';
 
 import { map } from '../utils/map';
 import { merge } from '../utils/merge';
+import { normalizeApplicationCommandData } from '../utils/normalizeCommand';
 import { difference, intersection } from '../utils/sets';
 // quick responses
 // base commands
 import { aboutInteraction } from './about';
-import { leaderboardCommand } from './leaderboard';
 import { mdnCommand } from './mdn';
 import { npmInteraction } from './npm';
 import { phpCommand } from './php';
@@ -20,24 +24,6 @@ import { resourceInteraction } from './resource';
 // meme commands
 import { shitpostInteraction } from './shitpost';
 
-const getRelevantCmdProperties = ({
-  description,
-  name,
-  options,
-}: {
-  description: string;
-  name: string;
-  options?: unknown[];
-}) =>
-  stripEmpty({
-    description,
-    name,
-    options,
-  });
-
-const stripEmpty = (obj: Record<string, unknown>): Record<string, unknown> => {
-  return Object.fromEntries(Object.entries(obj).filter(([, b]) => b != null));
-};
 
 export const applicationCommands = new Collection(
   [
@@ -47,27 +33,43 @@ export const applicationCommands = new Collection(
     pleaseInteraction,
     pointsHandlers,
     jobPostCommand,
-    leaderboardCommand,
     resourceInteraction,
     shitpostInteraction,
     npmInteraction,
   ].map(command => [command.name, command])
 );
 
-const createNewCommands = (
-  client: Client,
-  commandMap: Map<string, ApplicationCommand>
-) =>
-  map(async (name: string) => {
-    const command = applicationCommands.get(name);
-    // this is always true
-    if (command) {
-      const { onAttach, handler, ...rest } = command;
-      console.info(`Creating ${name}`);
+const getRelevantCmdProperties = ({
+  description,
+  name,
+  options,
+}: {
+  description: string;
+  name: string;
+  options?: unknown[];
+}): ApplicationCommandData => {
+  const relevantData = {
+    description,
+    name,
+    options,
+  } as unknown as ApplicationCommandData
+  return stripNullish(normalizeApplicationCommandData(relevantData))
+}
 
-      return client.application.commands.create(rest);
-    }
-  });
+const stripNullish = <T>(obj: T): T => {
+  if(typeof obj !== "object" && obj !== null) {return obj}
+
+  if (Array.isArray(obj)) {
+    return obj.map(stripNullish) as typeof obj
+  }
+
+  return Object.fromEntries(
+    Object.entries(obj)
+    .map(([a,b]) => [a, stripNullish(b)])
+    .filter(([, b]) => b != null)
+  ) as T;
+};
+
 
 const guildCommands = new Collection([]); // placeholder for now
 
@@ -139,6 +141,23 @@ export const registerCommands = async (client: Client): Promise<void> => {
   //   guild.commands.set([])
   // })
 };
+
+function createNewCommands(
+  client: Client,
+  commandMap: Map<string, ApplicationCommand>
+) {
+  return map(async (name: string) => {
+    const command = applicationCommands.get(name);
+    // this is always true
+    if (command) {
+      const { onAttach, handler, ...rest } = command;
+      console.info(`Creating ${name}`);
+
+      return client.application.commands.create(rest);
+    }
+  });
+}
+
 function editExistingCommands(
   client: Client,
   existingCommands: Map<string, ApplicationCommand>
@@ -149,6 +168,8 @@ function editExistingCommands(
 
     const { onAttach, handler, ...command } = cmd;
 
+
+
     if (
       !_.isEqual(
         getRelevantCmdProperties(cmd),
@@ -156,6 +177,11 @@ function editExistingCommands(
       )
     ) {
       console.info(`Updating ${name}`);
+
+      console.log(
+        (getRelevantCmdProperties(cmd)),
+        (getRelevantCmdProperties(existing))
+        )
       return client.application.commands.edit(existing.id, command);
     }
   });

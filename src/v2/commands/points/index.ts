@@ -1,4 +1,12 @@
-import type { MessageEmbed, Client, EmbedField, CommandInteraction, RoleManager, GuildMemberRoleManager, User } from 'discord.js';
+import type {
+  MessageEmbed,
+  Client,
+  EmbedField,
+  CommandInteraction,
+  RoleManager,
+  GuildMemberRoleManager,
+  User,
+} from 'discord.js';
 import type { GuildMember } from 'discord.js';
 
 import type { CommandDataWithHandler } from '../../../types';
@@ -12,6 +20,9 @@ import type { IUser } from '../../helpful_role';
 import HelpfulRoleMember from '../../helpful_role/db_model';
 import { createEmbed } from '../../utils/discordTools';
 import { some } from '../../utils/some';
+import type { OutputField } from '../post';
+
+const LEADERBOARD_LIMIT = 20;
 
 const HELPFUL_ROLE_POINT_THRESHOLD_NUM = Number.parseInt(
   HELPFUL_ROLE_POINT_THRESHOLD
@@ -54,22 +65,22 @@ const setPoints = async (
 
 const isModOrAdmin = some(id => id === ADMIN_ROLE_ID || id === MOD_ROLE_ID);
 
-const rolesArray = (roles: string[] | GuildMemberRoleManager) => Array.isArray(roles) ? roles : roles.cache.map(role => role.id)
+const rolesArray = (roles: string[] | GuildMemberRoleManager) =>
+  Array.isArray(roles) ? roles : roles.cache.map(role => role.id);
 
 async function handlePoints(
   client: Client,
-  interaction: CommandInteraction,
+  interaction: CommandInteraction
 ): Promise<void> {
-
   const isAdmin = isModOrAdmin(rolesArray(interaction.member.roles));
 
-  await interaction.deferReply()
+  await interaction.deferReply();
 
   switch (interaction.options.getSubcommand()) {
     case 'get': {
-      const user = interaction.options.getUser('user') ?? interaction.user
+      const user = interaction.options.getUser('user') ?? interaction.user;
 
-      const {username, id} = user
+      const { username, id } = user;
       await handlePointsGet(id, interaction, username, isAdmin);
       return;
     }
@@ -80,7 +91,7 @@ async function handlePoints(
         });
         return;
       }
-      const user: string = interaction.options.getUser("user").id;
+      const user: string = interaction.options.getUser('user').id;
       const points: number = interaction.options.getInteger('points');
 
       await handlePointsSet(client, interaction, user, points);
@@ -93,14 +104,18 @@ async function handlePoints(
         });
         return;
       }
-      const user = interaction.options.getUser('user').id
+      const user = interaction.options.getUser('user').id;
 
       await handlePointsReset(interaction, user, client);
 
       return;
     }
+    case 'leaderboard': {
+      await handleLeaderboards(interaction)
+      return;
+    }
     default:
-      console.error("Something went wrong")
+      console.error('Something went wrong');
       break;
   }
   interaction.deferReply();
@@ -116,19 +131,22 @@ async function handlePointsGet(
 
   if (!userId && isAdmin) {
     interaction.reply({
-      embeds: [createPointCheckEmbed(userName, `The provided user ID is invalid.`)]
+      embeds: [
+        createPointCheckEmbed(userName, `The provided user ID is invalid.`),
+      ],
     });
   }
 
   interaction.editReply({
     embeds: [
-    createPointCheckEmbed(
-      userName,
-      `${isAdmin ? 'The user has' : 'You have'} accumulated ${points} point${
-        points === 1 ? '' : 's'
-      }.`,
-      isAdmin ? undefined : 'Helpful User Points'
-    )]
+      createPointCheckEmbed(
+        userName,
+        `${isAdmin ? 'The user has' : 'You have'} accumulated ${points} point${
+          points === 1 ? '' : 's'
+        }.`,
+        isAdmin ? undefined : 'Helpful User Points'
+      ),
+    ],
   });
 }
 
@@ -138,7 +156,7 @@ async function handlePointsReset(
   client: Client
 ) {
   const result = await setPoints(interaction.guildId, user, 0);
-  const {member} = interaction
+  const { member } = interaction;
 
   if (result.length === 0) {
     interaction.editReply({
@@ -146,8 +164,8 @@ async function handlePointsReset(
         createPointsEmbed(
           `The provided ID: "${user}" is not bound to any user.`,
           [adminEmbedField(interaction, true)]
-        )
-      ]
+        ),
+      ],
     });
     return;
   }
@@ -158,10 +176,13 @@ async function handlePointsReset(
     adminEmbedField(interaction, true),
   ]);
 
-  interaction.reply({embeds:[embed]});
+  interaction.reply({ embeds: [embed] });
 }
 
-function adminEmbedField(interaction: CommandInteraction, inline = false): EmbedField {
+function adminEmbedField(
+  interaction: CommandInteraction,
+  inline = false
+): EmbedField {
   return {
     inline,
     name: 'Admin/Moderator',
@@ -175,7 +196,7 @@ async function handlePointsSet(
   user: string,
   points: number
 ) {
-  const {member} = interaction
+  const { member, guildId } = interaction;
 
   if (!member) {
     interaction.editReply({
@@ -184,7 +205,7 @@ async function handlePointsSet(
     return;
   }
 
-  const result = await setPoints(interaction.guildId, user, points);
+  const result = await setPoints(guildId, user, points);
 
   if (result.length === 0) {
     interaction.editReply({
@@ -226,7 +247,7 @@ async function handlePointsSet(
     });
   }
 
-  interaction.reply({embeds:[output]});
+  interaction.reply({ embeds: [output] });
 }
 
 function createPointCheckEmbed(
@@ -239,7 +260,7 @@ function createPointCheckEmbed(
     footerText,
     provider: 'spam',
     title: `Points check for ${userName}`,
-  }).embed ;
+  }).embed;
 }
 
 function createPointsEmbed(
@@ -252,15 +273,59 @@ function createPointsEmbed(
     footerText: 'Admin: Points Handler',
     provider: 'spam',
     title: 'Points Handler',
-  }).embed ;
+  }).embed;
 }
 
+async function handleLeaderboards(interaction: CommandInteraction): Promise<void> {
+  try {
+    const topUsers: IUser[] =
+      LEADERBOARD_LIMIT > 0
+        ? [
+            ...(await HelpfulRoleMember.find({ guild: interaction.guild.id })
+              .sort({ points: -1 })
+              .limit(LEADERBOARD_LIMIT)),
+          ]
+        : [];
 
-export const pointsHandlers: CommandDataWithHandler ={
+    const fields: OutputField[] = topUsers.map(
+      ({ user, points }, i): OutputField => {
+        return {
+          inline: false,
+          name: `${i + 1}.`,
+          value: `<@!${user}>: ${points} point${points === 1 ? '' : 's'}.`,
+        };
+      }
+    );
+
+    const output = createEmbed({
+      description: `${
+        fields.length > 0 ? 'Top helpful users:' : 'No users found.'
+      }`,
+      fields,
+      footerText: 'Leaderboard: Helpful Users',
+      provider: 'spam',
+      title: 'Leaderboard: Helpful Users',
+    });
+
+    interaction.editReply({
+      embeds: [output.embed],
+    });
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('catch -> leaderboard/index.ts', error);
+  }
+}
+
+export const pointsHandlers: CommandDataWithHandler = {
   description: 'point commands',
   handler: handlePoints,
   name: 'points',
   options: [
+    {
+      name: 'leaderboard',
+      description: `Display the points leaderboard, showing the top ${LEADERBOARD_LIMIT} users`,
+      type: 'SUB_COMMAND',
+    },
     {
       name: 'get',
       description: 'Get points of a user',
