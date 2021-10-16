@@ -21,7 +21,6 @@ import isThanksMessage from './autorespond/thanks/checker';
 import { limitFnByUser } from './cache';
 import { registerCommands } from './commands';
 import {
-  generateCleanContent,
   stripMarkdownQuote,
 } from './utils/content_format';
 
@@ -114,6 +113,11 @@ const detectJustAsk = limitFnByUser(detectVagueQuestion, {
   type: 'JUST_ASK',
 });
 
+const detectDeprecatedCommands = limitFnByUser(handleDeprecatedCommands, {
+  type: "DEPRECATED_COMMANDS",
+  delay: VAR_DETECT_LIMIT// gonna reuse this as its just a temp measure
+})
+
 const isWebdevAndWebDesignServer = (msg: Message) =>
   msg.guild?.id === SERVER_ID || false;
 
@@ -133,7 +137,7 @@ const handleNonCommandGuildMessages = async (msg: Message) => {
   if (isWebdevAndWebDesignServer(msg) && isThanksMessage(quoteLessContent)) {
     handleThanks(msg);
   }
-  handleDeprecatedCommands(msg)
+  await detectDeprecatedCommands(msg)
   await detectJustAsk(msg);
   await detectVarLimited(msg);
 };

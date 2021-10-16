@@ -1,14 +1,16 @@
-import { Message } from 'discord.js';
+import type { Message } from 'discord.js';
+
 import { upsert, get } from './cacheFns';
+
 export * from './cacheFns';
 
 type ConditionLimit = { delay: number; type: string; meta?: unknown };
 
-export function limitFnByUser<T extends (...args: any[]) => any>(
+export function limitFnByUser<T extends (...args: unknown[]) => boolean | Promise<boolean>>(
   fn: T,
   { delay, type = `${fn.name}|${delay}` }: ConditionLimit
 ) {
-  return async function (msg: Message) {
+  return async (msg: Message): Promise<boolean> => {
     const user = msg.author.id;
     const guild = msg.guild.id;
 
@@ -29,5 +31,7 @@ export function limitFnByUser<T extends (...args: any[]) => any>(
         meta: typeof result === 'object' ? result : undefined,
       });
     }
+
+    return result;
   };
 }
