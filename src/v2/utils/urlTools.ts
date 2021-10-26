@@ -1,4 +1,4 @@
-import type { CommandInteraction, Interaction} from 'discord.js';
+import type { CommandInteraction, Interaction } from 'discord.js';
 import { Message } from 'discord.js';
 import type { HeadersInit } from 'node-fetch';
 
@@ -59,8 +59,7 @@ export const providers: ProviderMap = {
     createTitle: (searchTerm: string) => `GitHub results for *${searchTerm}*`,
     direct: `https://github.com/${TERM}`,
     help: '!github react',
-    icon:
-      'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png',
+    icon: 'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png',
     search: `https://api.github.com/search/repositories?q=${SEARCH_TERM}`,
   },
   mdn: {
@@ -169,7 +168,11 @@ export const getData = async <T>({
   const sanitizedData = sanitizeData ? sanitizeData(data) : data;
 
   if (isInvalidData(sanitizedData)) {
-    const sentMessage = await interaction.reply(noResults(searchTerm));
+    try {
+      await interaction.reply(noResults(searchTerm));
+    } catch {
+      interaction.editReply(noResults(searchTerm));
+    }
 
     // delayedMessageAutoDeletion(sentMessage);
     return;

@@ -8,10 +8,9 @@ import type {
   Guild,
   Client,
   ThreadChannel,
-  CommandInteraction} from 'discord.js';
-import {
-  User,
-  MessageButton} from 'discord.js';
+  CommandInteraction,
+} from 'discord.js';
+import { User, MessageButton } from 'discord.js';
 import {
   GuildChannel,
   MessageEmbed,
@@ -36,7 +35,8 @@ import {
   MINIMAL_COMPENSATION,
   MINIMAL_AMOUNT_OF_WORDS,
 } from './env';
-import {questions} from './questions.v2';
+import { questions } from './questions.v2';
+import { asyncCatch } from '../../utils/asyncCatch';
 
 const dateFormatter = new Intl.DateTimeFormat('en-US', {
   month: 'long',
@@ -80,7 +80,9 @@ const getTargetChannel = (
   guild: Guild,
   name: string
 ): TextChannel | ThreadChannel =>
-  guild.channels.cache.find(({ name: n }) => n === name) as TextChannel | ThreadChannel;
+  guild.channels.cache.find(({ name: n }) => n === name) as
+    | TextChannel
+    | ThreadChannel;
 
 const generateURL = (guildID: string, channelID: string, msgID: string) =>
   `https://discordapp.com/channels/${guildID}/${channelID}/${msgID}`;
@@ -168,28 +170,28 @@ const sendAlert = (
 const generateFields = pipe<Answers, Iterable<OutputField>>([
   filter(
     ([key, val]: [string, string]) =>
-      key !== 'location' || val.toLowerCase() !== 'no'
+      !['location','guidelines'].includes(key) && val.toLowerCase() !== 'no'
   ),
-  map(
-    ([key, val]: [string, string]): OutputField => {
-      let value = val;
-      switch (key) {
-        case 'compensation':
-          value = val.includes('$') ? val : `${val}$`;
-          break;
-        case 'compensation_type':
-        case 'remote':
-          value = capitalize(val);
-          break;
-      }
-
-      return {
-        inline: false,
-        name: capitalize(key.replace('_', ' ')),
-        value,
-      };
+  map(([key, val]: [string, string]): OutputField => {
+    let value = val;
+    switch (key) {
+      case 'compensation':
+        value = val
+        break;
+      case 'compensation_type':
+        value = capitalize(val)
+        break;
+      case 'remote':
+        value = val === 'remote' ? "Yes" : "No";
+        break;
     }
-  ),
+
+    return {
+      inline: false,
+      name: capitalize(key.replace('_', ' ')),
+      value: createMarkdownCodeBlock(value.replace(/```/g,'')),
+    };
+  }),
 ]);
 
 const createUserTag = (username: string, discriminator: string) =>
@@ -213,7 +215,7 @@ const createJobPost = async (
 
   const user = createUserTag(username, discriminator);
   // const url = generateURL(guild.id, channelID, msgID);
-
+console.log(answers)
   try {
     const msg = await targetChannel.send({
       embeds: [
@@ -243,25 +245,23 @@ const createJobPost = async (
 
           title: 'New Job Post',
           // url, doesn't seem to serve a purpose due to !post messages no longer existing and also never really used anyway
-        }).embed
+        }).embed,
       ],
       components: [
-        new MessageActionRow()
-          .addComponents(
-            new MessageButton()
-              .setCustomId(`job🤔${userID}🤔response`)
-              .setStyle("PRIMARY")
-              .setLabel('DM me the username')
-              .setEmoji("✉️"),
-            new MessageButton()
-              .setCustomId(`job🤔${userID}🤔delete`)
-              .setStyle("DANGER")
-              .setLabel("Delete my post (poster only)")
-              .setEmoji("🗑")
-          ),
-      ]
-    }
-    );
+        new MessageActionRow().addComponents(
+          new MessageButton()
+            .setCustomId(`job🤔${userID}🤔response`)
+            .setStyle('PRIMARY')
+            .setLabel('DM me the username')
+            .setEmoji('✉️'),
+          new MessageButton()
+            .setCustomId(`job🤔${userID}🤔delete`)
+            .setStyle('DANGER')
+            .setLabel('Delete my post (poster only)')
+            .setEmoji('🗑')
+        ),
+      ],
+    });
 
     return generateURL(guild.id, msg.channel.id, msg.id);
   } catch (error) {
@@ -288,7 +288,7 @@ const handleJobPostingRequest = async (
   interaction: CommandInteraction
 ): Promise<void> => {
   const { guild, member } = interaction;
-  const {user:author} = interaction
+  const { user: author } = interaction;
   const { username, discriminator, id } = author;
 
   const filter: CollectorFilter<[Message]> = m => m.author.id === id;
@@ -304,38 +304,37 @@ const handleJobPostingRequest = async (
       const diff =
         Number.parseInt(POST_LIMITER_IN_HOURS) -
         Math.abs(Date.now() - entry.value.getTime()) / 3_600_000;
-      interaction.deferReply();
 
-      send(
-        `You cannot create a job posting right now.\nPlease try again ${calcNextPostingThreshold(
+      interaction.reply({
+        content: `You cannot create a job posting right now.\nPlease try again ${calcNextPostingThreshold(
           diff
-        )}.`
-      );
+        )}.`,
+        ephemeral: true,
+      });
       return;
     }
+    cache.set(entry.key, entry.value, POST_LIMITER);
 
 
-
-    await interaction.reply({ content: `I've DMed you to start the process.`, ephemeral: true});
+    await interaction.reply({
+      content: `I've DMed you to start the process.`,
+      ephemeral: true,
+    });
 
     // Notify the user regarding the rules, and get the channel
     const channel = await author.createDM();
-    console.log(channel)
+    console.log(channel);
 
     const { id: channelID } = channel;
-    // const proceed = await getReply(channel, filter);
 
-    // if (!proceed) {
-    //   send('Canceled.');
-    //   return;
-    // }
+    const form = new MultistepForm(questions, channel, author);
 
-    const form = new MultistepForm(questions, channel, author)
+    const answers = (await form.getResult('guidelines')) as unknown as Answers;
 
-    const answers = await form.getResult('guidelines') as unknown as Answers
-
+    console.log(answers)
     // Just return if the iteration breaks due to invalid input
     if (!answers) {
+      cache.del(entry.key)
       return;
     }
 
@@ -359,57 +358,66 @@ const handleJobPostingRequest = async (
   }
 };
 
-
 export const jobPostCommand: CommandDataWithHandler = {
   name: 'post',
   description: 'Start the process of creating a new job post',
   handler: handleJobPostingRequest,
-  onAttach:  (client) => {
-    client.on('interactionCreate', async interaction => {
-      if(!interaction.isButton()) { return }
+  onAttach: client => {
+    client.on('interactionCreate', asyncCatch(async interaction => {
+      if (!interaction.isButton()) {
+        return;
+      }
 
-      const [category, userId, type]  =interaction.customId.split('🤔')
+      const [category, userId, type] = interaction.customId.split('🤔');
 
-      if(category !== 'job') { return }
+      if (category !== 'job') {
+        return;
+      }
 
-      if(type === "delete" ) {
-        if(interaction.user.id !== userId) {
+      const message = await interaction.channel.messages.fetch(interaction.message.id)
+
+      if (type === 'delete') {
+        if (interaction.user.id !== userId) {
           interaction.reply({
             content: "You don't have permission to delete this post",
-            ephemeral: true
-          })
-          return
+            ephemeral: true,
+          });
+          return;
         }
 
-        const guild = await client.guilds.fetch(interaction.guildId)
-        const channel = await guild.channels.fetch(interaction.channelId) as TextChannel
-        const message = await channel.messages.fetch(interaction.message.id)
 
-        await message.delete()
+        await message.delete();
 
         interaction.reply({
-          content: "Your job post was deleted",
-          ephemeral: true
-        })
+          content: 'Your job post was deleted',
+          ephemeral: true,
+        });
       }
 
-      if(type === 'response') {
-        await interaction.deferReply({ ephemeral: true })
-        const dmChannel = await interaction.user.createDM()
+      if (type === 'response') {
+        await interaction.deferReply({ ephemeral: true });
+        const dmChannel = await interaction.user.createDM();
         try {
           dmChannel.send({
-            content: `The user you want to DM is <@!${userId}>`
-          })
+            content: `The user you want to DM is <@!${userId}>. The job posting can be found here: ${message.url}`,
+          });
           interaction.editReply({
-            content: "Please check your dms",
+            content: 'Please check your dms',
             components: [
-              new MessageActionRow().addComponents(new MessageButton().setStyle("LINK").setURL(`https://discord.com/channels/@me/${dmChannel.id}`).setLabel("Go to DMs"))
-            ]
-          })
+              new MessageActionRow().addComponents(
+                new MessageButton()
+                  .setStyle('LINK')
+                  .setURL(`https://discord.com/channels/@me/${dmChannel.id}`)
+                  .setLabel('Go to DMs')
+              ),
+            ],
+          });
         } catch {
-          interaction.editReply(`I tried to send you a DM but your DMs appear to be off. Heres the user you wish to DM <@${userId}>. If that doesn't work, please enable your DMs and try again.`)
+          interaction.editReply(
+            `I tried to send you a DM but your DMs appear to be off. Heres the user you wish to DM <@${userId}>. If that doesn't work, please enable your DMs and try again.`
+          );
         }
       }
-    })
-  }
+    }));
+  },
 };

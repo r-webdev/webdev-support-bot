@@ -21,7 +21,7 @@ import { ExternalResolver } from './ExternalResolver';
 
 export type QuestionBase = {
   body: string;
-  next?: (value: unknown, state: unknown) => string;
+  next?: (value: unknown, state: unknown) => string | undefined | symbol;
 };
 
 export type ButtonQuestion = {
@@ -36,7 +36,8 @@ export type ButtonQuestion = {
 
 export type TextQuestion = {
   type: 'text';
-  validate: (input: string) => boolean;
+  validate?: (input: string) => boolean | string;
+  format?: (input:string) => string
 } & QuestionBase;
 
 export type MultiStepFormStep = ButtonQuestion | TextQuestion;
@@ -148,10 +149,17 @@ export class MultistepForm<T extends Record<string, MultiStepFormStep>> {
       const res = await Promise.race([
         this.#channel.awaitMessages({
           time: Number.parseInt(AWAIT_MESSAGE_TIMEOUT) * 1000,
-          filter(message) {
+          filter: (message) => {
+            const value = step.validate(message.cleanContent)
+            const fromUser = message.author.id === userId
+
+            if(typeof value === 'string' && fromUser) {
+              this.#channel.send(value)
+            }
+
             return (
-              message.author.id === userId &&
-              step.validate(message.cleanContent)
+              fromUser &&
+              typeof value === 'boolean' && value
             );
           },
           max: 1,
@@ -166,7 +174,8 @@ export class MultistepForm<T extends Record<string, MultiStepFormStep>> {
         return __cancelled__;
       }
 
-      return res.first().content.trim();
+      const value = res.first().content.trim()
+      return step.format?.(value) ?? value;
     } catch {
       this.#channel.send(`You have timed out. Please try again`);
     }
@@ -175,11 +184,11 @@ export class MultistepForm<T extends Record<string, MultiStepFormStep>> {
   }
 
   public async getResult(startStep: keyof T): Promise<Map<keyof T, unknown>> {
-    let currentStep: keyof T = startStep;
+    let currentStep: keyof T | typeof __cancelled__ = startStep;
 
     const state: Map<keyof T, unknown> = new Map();
 
-    while (currentStep !== undefined && currentStep in this.#steps) {
+    while (currentStep !== undefined && currentStep !==__cancelled__&& currentStep in this.#steps) {
       const step = this.#steps[currentStep];
       let value;
       if (step.type === 'button') {
@@ -198,7 +207,7 @@ export class MultistepForm<T extends Record<string, MultiStepFormStep>> {
 
       currentStep = step?.next?.(value, state);
     }
-    return state;
+    return currentStep !== __cancelled__ ? state : null;
   }
 
   private genButtons<P extends ButtonQuestion>(

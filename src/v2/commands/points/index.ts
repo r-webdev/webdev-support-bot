@@ -6,6 +6,7 @@ import type {
   RoleManager,
   GuildMemberRoleManager,
   User,
+  UserFlagsString,
 } from 'discord.js';
 import type { GuildMember } from 'discord.js';
 
@@ -39,7 +40,7 @@ const getPoints = async (userID: string, guild: string) => {
 
 const setPoints = async (
   guild: string,
-  userId: string,
+  member: GuildMember,
   amount: string | number
 ): Promise<[] | [number, number]> => {
   const points =
@@ -49,15 +50,15 @@ const setPoints = async (
     return [];
   }
 
-  const user: IUser = await HelpfulRoleMember.findOne({
+  const helpfulUser: IUser = await HelpfulRoleMember.findOne({
     guild,
-    user: userId,
+    user: member.user.id,
   });
-  if (user) {
-    const oldPoints = user.points;
+  if (helpfulUser) {
+    const oldPoints = helpfulUser.points;
     const currPoints = points;
-    user.points = points;
-    await user.save();
+    helpfulUser.points = points;
+    await helpfulUser.save();
     return [oldPoints, currPoints];
   }
   return [];
@@ -91,10 +92,10 @@ async function handlePoints(
         });
         return;
       }
-      const user: string = interaction.options.getUser('user').id;
-      const points: number = interaction.options.getInteger('points');
+      const member: GuildMember = interaction.options.getMember('user') as GuildMember
+      const points: number = interaction.options.getInteger('value');
 
-      await handlePointsSet(client, interaction, user, points);
+      await handlePointsSet(client, interaction, member, points);
       return;
     }
     case 'reset': {
@@ -104,9 +105,9 @@ async function handlePoints(
         });
         return;
       }
-      const user = interaction.options.getUser('user').id;
+      const member = interaction.options.getMember('user') as GuildMember
 
-      await handlePointsReset(interaction, user, client);
+      await handlePointsReset(interaction, member, client);
 
       return;
     }
@@ -152,17 +153,16 @@ async function handlePointsGet(
 
 async function handlePointsReset(
   interaction: CommandInteraction,
-  user: string,
+  member: GuildMember,
   client: Client
 ) {
-  const result = await setPoints(interaction.guildId, user, 0);
-  const { member } = interaction;
+  const result = await setPoints(interaction.guildId, member, 0);
 
   if (result.length === 0) {
     interaction.editReply({
       embeds: [
         createPointsEmbed(
-          `The provided ID: "${user}" is not bound to any user.`,
+          `The provided ID: "${member.user.id}" is not bound to any user.`,
           [adminEmbedField(interaction, true)]
         ),
       ],
@@ -170,13 +170,13 @@ async function handlePointsReset(
     return;
   }
 
-  // await member.roles.remove(HELPFUL_ROLE_ID);
+  await member.roles.remove(HELPFUL_ROLE_ID);
 
-  const embed = createPointsEmbed(`<@!${user}>'s points have been reset.`, [
+  const embed = createPointsEmbed(`${member.user}'s points have been reset.`, [
     adminEmbedField(interaction, true),
   ]);
 
-  interaction.reply({ embeds: [embed] });
+  interaction.editReply({ embeds: [embed] });
 }
 
 function adminEmbedField(
@@ -193,7 +193,7 @@ function adminEmbedField(
 async function handlePointsSet(
   client: Client,
   interaction: CommandInteraction,
-  user: string,
+  guildMember: GuildMember,
   points: number
 ) {
   const { member, guildId } = interaction;
@@ -205,7 +205,7 @@ async function handlePointsSet(
     return;
   }
 
-  const result = await setPoints(guildId, user, points);
+  const result = await setPoints(guildId, guildMember, points);
 
   if (result.length === 0) {
     interaction.editReply({
@@ -222,7 +222,7 @@ async function handlePointsSet(
     {
       inline: false,
       name: 'User',
-      value: `<@!${user}>`,
+      value: `${member.user}`,
     },
     adminEmbedField(interaction),
   ]);
@@ -231,6 +231,7 @@ async function handlePointsSet(
     prev >= HELPFUL_ROLE_POINT_THRESHOLD_NUM &&
     curr < HELPFUL_ROLE_POINT_THRESHOLD_NUM
   ) {
+    await guildMember.roles.remove(HELPFUL_ROLE_ID)
     output.fields.push({
       inline: false,
       name: '⚠ Role Change',
@@ -240,6 +241,7 @@ async function handlePointsSet(
     prev < HELPFUL_ROLE_POINT_THRESHOLD_NUM &&
     curr > HELPFUL_ROLE_POINT_THRESHOLD_NUM
   ) {
+    await guildMember.roles.add(HELPFUL_ROLE_ID)
     output.fields.push({
       inline: false,
       name: '⚠ Role Change',
@@ -247,7 +249,7 @@ async function handlePointsSet(
     });
   }
 
-  interaction.reply({ embeds: [output] });
+  interaction.editReply({ embeds: [output] });
 }
 
 function createPointCheckEmbed(

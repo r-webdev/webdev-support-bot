@@ -1,6 +1,19 @@
 import { formatDistanceToNow } from 'date-fns';
-import type { EmbedField, Client, CommandInteraction, Message, ButtonInteraction, SelectMenuInteraction} from 'discord.js';
-import { MessageEmbed, Collection, MessageActionRow, MessageButton, MessageSelectMenu } from 'discord.js';
+import type {
+  EmbedField,
+  Client,
+  CommandInteraction,
+  Message,
+  ButtonInteraction,
+  SelectMenuInteraction,
+} from 'discord.js';
+import {
+  MessageEmbed,
+  Collection,
+  MessageActionRow,
+  MessageButton,
+  MessageSelectMenu,
+} from 'discord.js';
 import type { MessageComponentTypes } from 'discord.js/typings/enums';
 import { collect, take } from 'domyno';
 import { URL } from 'url';
@@ -26,7 +39,7 @@ import type { NPMResponse } from './types';
 const provider = 'npm';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const list = new (Intl as any).ListFormat
+const list = new (Intl as any).ListFormat();
 
 const fetch: typeof getData = getData;
 const waitForResponse: typeof getChosenResult = getChosenResult;
@@ -72,9 +85,12 @@ const npmEmbedToString = ({ name, description, url }: NPMEmbed, index) => {
 };
 
 // msg: Message, searchTerm: string
-const handleNpmCommand = async (client: Client, interaction: CommandInteraction): Promise<void> => {
-  const searchTerm = interaction.options.getString('name')
-  const defer = interaction.deferReply()
+const handleNpmCommand = async (
+  client: Client,
+  interaction: CommandInteraction
+): Promise<void> => {
+  const searchTerm = interaction.options.getString('name');
+  const defer = interaction.deferReply();
   try {
     const json = await fetch<NPMResponse[]>({
       isInvalidData: json => json.length === 0,
@@ -83,7 +99,7 @@ const handleNpmCommand = async (client: Client, interaction: CommandInteraction)
       searchTerm,
     });
 
-    await defer
+    await defer;
 
     if (!json) {
       return;
@@ -94,9 +110,9 @@ const handleNpmCommand = async (client: Client, interaction: CommandInteraction)
     if (firstTenResults.length === 1) {
       await interaction.reply({
         content: '',
-        embeds: ([
+        embeds: [
           createEmbed(createNPMEmbed(firstTenResults[0])),
-        ] as unknown) as MessageEmbed[],
+        ] as unknown as MessageEmbed[],
       });
       return;
     }
@@ -107,10 +123,10 @@ const handleNpmCommand = async (client: Client, interaction: CommandInteraction)
     );
     const selectRow = new MessageActionRow().addComponents(
       new MessageSelectMenu()
-        .setCustomId(`mdn🤔${msgId}🤔select`)
-        .setPlaceholder('Pick one to 5 options to display')
+        .setCustomId(`npm🤔${msgId}🤔select`)
+        .setPlaceholder('Pick one option to display')
         .setMinValues(1)
-        .setMaxValues(5)
+        .setMaxValues(1)
         .addOptions(
           firstTenResults.map(({ name, description, url }) => ({
             label: clampLengthMiddle(name, 25),
@@ -123,51 +139,89 @@ const handleNpmCommand = async (client: Client, interaction: CommandInteraction)
       new MessageButton()
         .setLabel('Cancel')
         .setStyle('DANGER')
-        .setCustomId(`mdn🤔${msgId}🤔cancel`)
+        .setCustomId(`npm🤔${msgId}🤔cancel`)
     );
 
     const int = (await interaction.editReply({
-      content: 'Please pick 1 - 5 options below to display',
+      content: 'Please pick 1 option below to display',
       components: [selectRow, buttonRow],
     })) as Message;
 
-    const interactionCollector = int.createMessageComponentCollector<MessageComponentTypes.BUTTON | MessageComponentTypes.SELECT_MENU>({
-      filter: item => item.user.id === interaction.user.id && item.customId.startsWith(`mdn🤔${msgId}`),
+    const interactionCollector = int.createMessageComponentCollector<
+      MessageComponentTypes.BUTTON | MessageComponentTypes.SELECT_MENU
+    >({
+      filter: item =>
+        item.user.id === interaction.user.id &&
+        item.customId.startsWith(`npm🤔${msgId}`),
     });
 
-    interactionCollector.once('collect', async (interaction: ButtonInteraction | SelectMenuInteraction) => {
-      await interaction.deferUpdate();
-      if (interaction.isButton()) {
-        await int.delete();
-        return;
+    interactionCollector.once(
+      'collect',
+      async (interaction: ButtonInteraction | SelectMenuInteraction) => {
+        await interaction.deferUpdate();
+        if (interaction.isButton()) {
+          await int.delete();
+          return;
+        }
+        const valueSet = new Set(interaction.values);
+        const values = collection.filter((_, key) => valueSet.has(key));
+
+        await interaction.editReply({
+          content: `Displaying Results for ${list.format(
+            values.map(({ name }) => name)
+          )}`,
+          components: [],
+        });
+
+        interaction.channel.send({
+          content: `Results for "${searchTerm}"`,
+          embeds: values.map(
+            ({
+              name,
+              description,
+              url,
+              author,
+              lastUpdate,
+              maintainers,
+              externalUrls,
+            }) =>
+              new MessageEmbed()
+                .setAuthor(`📦 Last updated ${lastUpdate}`)
+                .setTitle(`${name}`)
+                .setThumbnail(
+                  'https://static.npmjs.com/338e4905a2684ca96e08c7780fc68412.png'
+                )
+                .setDescription(
+                  description
+                    .split('\n')
+                    .map(item => item.trim())
+                    .join(' ')
+                )
+                .addFields(...createFields(name, externalUrls, maintainers), {
+                  name: 'Author',
+                  value: author.name,
+                  inline: true,
+                })
+                .setURL(url)
+                .setFooter(
+                  `requested by ${interaction.user.username}#${interaction.user.discriminator}`,
+                  interaction.user.avatarURL({ size: 64, format: 'webp' })
+                )
+                .setColor(0xcb_37_37)
+          ),
+        });
       }
-      const valueSet = new Set(interaction.values);
-      const values = collection.filter((_, key) => valueSet.has(key));
-
-      await interaction.editReply({
-        content: `Displaying Results for ${list.format(values.map(({name}) => name))}`,
-        components: []
-      })
-
-      interaction.channel.send({
-        content: `Results for "${searchTerm}"`,
-        embeds: values.map(({ name, description, url,author,lastUpdate,maintainers,externalUrls }) =>
-          new MessageEmbed()
-            .setAuthor(`📦 Last updated ${lastUpdate}`)
-            .setTitle(`${name}`)
-            .setThumbnail('https://static.npmjs.com/338e4905a2684ca96e08c7780fc68412.png')
-            .setDescription(description.split('\n').map(item => item.trim()).join(' '))
-            .addFields(...createFields(name, externalUrls, maintainers), { name: 'Author', value: author.name, inline: true })
-            .setURL(url)
-            .setFooter(`requested by ${interaction.user.username}#${interaction.user.discriminator}`, interaction.user.avatarURL({size:64,format:'webp'}))
-            .setColor(0xCB_37_37)
-        ),
-      });
-    });
+    );
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(error);
-    await interaction.reply(unknownError);
+    if (interaction.replied) {
+      try {
+        await interaction.reply(unknownError);
+      } catch {
+        await interaction.editReply(unknownError);
+      }
+    }
   }
 };
 
@@ -212,7 +266,7 @@ const createFields = (
     inline: false,
     name: 'How to install',
     value: createMarkdownBash(
-      [`npm install ${name}`,'# Or', `yarn add ${name}`].join('\n')
+      [`npm install ${name}`, '# Or', `yarn add ${name}`].join('\n')
     ),
   },
   ...Object.entries(externalUrls)
@@ -261,9 +315,9 @@ export const npmInteraction: CommandDataWithHandler = {
     {
       name: 'name',
       description: 'The name of the package',
-      type: "STRING",
+      type: 'STRING',
       required: true,
     },
   ],
   handler: handleNpmCommand,
-}
+};

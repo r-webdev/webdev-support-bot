@@ -17,7 +17,6 @@ const aboutMessages = new Map<string, ValueOrNullary<string>>([
   jquery,
   vscode,
   modules,
-  sass,
   format,
   code,
   flexbox,
@@ -47,8 +46,12 @@ export const shitpostInteraction: CommandDataWithHandler = {
     'A fun little shitpost command using some of the about/please commands',
   handler: async (client, interaction) => {
     const topic = interaction.options.getString('topic')
-    const replacement = interaction.options.getString('replacement')
+    const replacement = interaction.options.getString('replacement');
     const content = aboutMessages.get(topic);
+
+    if(replacement.match(/<!?\d+>/)) {
+      interaction.reply("Please don't try to tag users with this feature!")
+    }
 
     if (content) {
       const shitpostContent = valueOrCall(content).replace(

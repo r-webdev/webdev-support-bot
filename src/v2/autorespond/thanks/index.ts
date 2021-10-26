@@ -1,6 +1,5 @@
-import { MessageButton } from 'discord.js';
 import { MessageActionRow, MessageSelectMenu } from 'discord.js';
-import type { Message, EmbedField, TextChannel } from 'discord.js';
+import type { Message, TextChannel } from 'discord.js';
 import type { Client } from 'discord.js';
 
 import { POINT_LIMITER_IN_MINUTES } from '../../env';
@@ -9,13 +8,14 @@ import pointHandler, {
   generatePointsCacheEntryKey,
 } from '../../helpful_role/point_handler';
 import { cache } from '../../spam_filter';
-import { clampLength } from '../../utils/clampStr';
 import { stripMarkdownQuote } from '../../utils/content_format';
 import { createEmbed } from '../../utils/discordTools';
 import { mapʹ } from '../../utils/map';
 import { difference } from '../../utils/sets';
 import type { ThanksInteractionType } from './db_model';
 import { ThanksInteraction } from './db_model';
+import { handleThreadThanks } from './threadThanks';
+import { createResponse } from './createResponse';
 
 type CooldownUser = {
   id: string;
@@ -51,6 +51,9 @@ const handleThanks = async (msg: Message): Promise<void> => {
   const reply = await getReply(msg);
 
   if (botId || (msg.mentions.users.size === 0 && !reply)) {
+    if(msg.channel.type ==='GUILD_PRIVATE_THREAD' || msg.channel.type === 'GUILD_PUBLIC_THREAD') {
+      await handleThreadThanks(msg)
+    }
     return; // Break if no user has been mentioned
   }
 
@@ -127,7 +130,7 @@ const handleThanks = async (msg: Message): Promise<void> => {
 
   const response = await msg.channel.send(msgData);
 
-  const thxInter = await ThanksInteraction.create({
+  await ThanksInteraction.create({
     thanker: msg.author.id,
     guild: msg.guildId,
     channel: msg.channelId,
@@ -135,56 +138,6 @@ const handleThanks = async (msg: Message): Promise<void> => {
     responseMsgId: response.id,
   });
 };
-
-function createResponse(thankableUsers, authorId) {
-  const title = `Point${thankableUsers.size === 1 ? '' : 's'} received!`;
-
-  const description = `<@!${authorId}> has given a point to ${
-    thankableUsers.size === 1
-      ? `<@!${thankableUsers.first().id}>`
-      : 'the users mentioned below'
-  }!`;
-
-  const fields: EmbedField[] =
-    thankableUsers.size > 1
-      ? thankableUsers.map((u, _, i) => ({
-          inline: false,
-          name: `${(i + 1).toString()}.`,
-          value: `<@!${u.id}>`,
-        }))
-      : [];
-
-  const output = createEmbed({
-    description,
-    fields,
-    footerText: 'Point Handler',
-    provider: 'spam',
-    title,
-  }).embed;
-
-  return {
-    embeds: [output],
-    components: [
-      new MessageActionRow().addComponents(
-        thankableUsers.size > 1
-          ? new MessageSelectMenu()
-              .setCustomId(`thanks🤔${authorId}🤔select`)
-              .setPlaceholder('Accidentally Thank someone? Un-thank them here!')
-              .setMinValues(1)
-              .setOptions(
-                thankableUsers.map(user => ({
-                  label: clampLength(user.username, 25),
-                  value: user.id,
-                }))
-              )
-          : new MessageButton()
-              .setCustomId(`thanks🤔${authorId}🤔${thankableUsers.first().id}`)
-              .setStyle('DANGER')
-              .setLabel('This was an accident, UNDO!')
-      ),
-    ],
-  };
-}
 
 function attachUndoThanksListener(client: Client): void {
   client.on('interactionCreate', async interaction => {

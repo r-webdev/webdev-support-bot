@@ -18,8 +18,11 @@ import { handleDeprecatedCommands } from './autorespond/deprecatedCommands';
 import { detectVagueQuestion } from './autorespond/justask';
 import {handleThanks, attachUndoThanksListener} from './autorespond/thanks';
 import isThanksMessage from './autorespond/thanks/checker';
+import { attachThreadClose, attachThreadThanksHandler } from './autorespond/thanks/threadThanks';
 import { limitFnByUser } from './cache';
 import { registerCommands } from './commands';
+import { registerMessageContextMenu } from './message_context';
+import { registerUserContextMenu } from './user_context';
 import {
   stripMarkdownQuote,
 } from './utils/content_format';
@@ -43,14 +46,14 @@ export const startTime = new Date();
 const client = new Client({
   intents: [
     Intents.FLAGS.GUILDS,
-    // Intents.FLAGS.GUILD_MEMBERS, // Privileged Intent
+    Intents.FLAGS.GUILD_MEMBERS, // Privileged Intent
     Intents.FLAGS.GUILD_BANS,
     Intents.FLAGS.GUILD_EMOJIS_AND_STICKERS,
     Intents.FLAGS.GUILD_INTEGRATIONS,
     Intents.FLAGS.GUILD_WEBHOOKS,
     Intents.FLAGS.GUILD_INVITES,
     Intents.FLAGS.GUILD_VOICE_STATES,
-    // Intents.FLAGS.GUILD_PRESENCES, // Privileged Intent
+    Intents.FLAGS.GUILD_PRESENCES, // Privileged Intent
     Intents.FLAGS.GUILD_MESSAGES,
     Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
     Intents.FLAGS.GUILD_MESSAGE_TYPING,
@@ -75,8 +78,11 @@ client.once(
   'ready',
   async (): Promise<void> => {
     registerCommands(client)
-
+    registerUserContextMenu(client)
+    registerMessageContextMenu(client)
     attachUndoThanksListener(client)
+    attachThreadThanksHandler(client)
+    attachThreadClose(client)
 
     void client.user.setActivity(`@${client.user.username} --help`);
 
