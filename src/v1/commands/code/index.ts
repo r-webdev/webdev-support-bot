@@ -4,10 +4,11 @@ import { warning } from '../../utils/emojis';
 
 const sites = [
   `<https://codepen.io/> - ${warning} requires account`,
-  'https://codesandbox.io/',
+  '<https://codesandbox.io/>',
   '<https://repl.it/>',
   '<https://ideone.com/>',
   '<https://jsfiddle.net/>',
+  '<https://stackblitz.com/>',
 ].join('\n');
 
 const handleCodeRequest = async (msg: Message) => {

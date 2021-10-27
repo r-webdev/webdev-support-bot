@@ -10,7 +10,11 @@ export function limitFnByUser<T extends (...args: any[]) => any>(
 ) {
   return async function (msg: Message) {
     const user = msg.author.id;
-    const guild = msg.guild.id;
+    const guild = msg.guild?.id;
+
+    if(!guild) {
+      return;
+    }
 
     const prev = await get({ type, guild, user });
 

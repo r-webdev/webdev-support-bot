@@ -1,5 +1,5 @@
 import type { Message } from 'discord.js';
-import { filter } from '../../../utils/filter';
+import { filter } from 'domyno';
 
 import { createCodeBlockCapturer } from '../../utils/codeBlockCapturer';
 import { map } from '../../utils/map';
@@ -18,7 +18,7 @@ const getDeprecatedElements = pipe([
 ]);
 
 const mdnDeprecatedElUri =
-  '<https://developer.mozilla.org/en-US/docs/Web/HTML/Element#obsolete_and_deprecated_elements>';
+  '<https://developer.mozilla.org/en-US/docs/Web/HTML/Element#obsolete_and_deprecated_elements';
 const listFormatter = new Intl.ListFormat();
 const s = _({ 1: '' }, 's');
 const isA = _({ 1: 'is a', 2: 'are both' }, 'are all');

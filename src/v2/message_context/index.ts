@@ -14,14 +14,7 @@ export const registerMessageContextMenu = async (client: Client): Promise<void> 
   const existingCommands = await client.application.commands.fetch()
   existingCommands.sweep(x => x.type !== "MESSAGE")
 
-  if(existingCommands.size === 0) {
-    client.application.commands.create({
-      name: "Mod: Warn",
-      type: "MESSAGE",
-    })
-  } else {
-    console.log("DONE!")
-  }
+  client.application.commands.set([])
 
   client.on("interactionCreate", interaction => {
     if(!interaction.isContextMenu() || interaction.targetType !== "MESSAGE") {return}
