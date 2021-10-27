@@ -15,6 +15,7 @@ import {
 } from '../env';
 import { detectVar } from './autorespond/code_parsing';
 import { handleDeprecatedCommands } from './autorespond/deprecatedCommands';
+import { detectDeprecatedHTML } from './autorespond/html_parsing';
 import { detectVagueQuestion } from './autorespond/justask';
 import {handleThanks, attachUndoThanksListener} from './autorespond/thanks';
 import isThanksMessage from './autorespond/thanks/checker';
@@ -114,6 +115,12 @@ const detectVarLimited = limitFnByUser(detectVar, {
   type: 'VAR_CHECK',
 });
 
+
+const detectHTMLLimited = limitFnByUser(detectDeprecatedHTML, {
+  delay: VAR_DETECT_LIMIT,
+  type: 'DEP_HTML_CHECK',
+});
+
 const detectJustAsk = limitFnByUser(detectVagueQuestion, {
   delay: JUST_ASK_DETECT_LIMIT,
   type: 'JUST_ASK',
@@ -146,6 +153,7 @@ const handleNonCommandGuildMessages = async (msg: Message) => {
   await detectDeprecatedCommands(msg)
   await detectJustAsk(msg);
   await detectVarLimited(msg);
+  await detectHTMLLimited(msg)
 };
 
 // Establish a connection with the database

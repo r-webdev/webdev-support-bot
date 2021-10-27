@@ -51,8 +51,11 @@ const handleThanks = async (msg: Message): Promise<void> => {
   const reply = await getReply(msg);
 
   if (botId || (msg.mentions.users.size === 0 && !reply)) {
-    if(msg.channel.type ==='GUILD_PRIVATE_THREAD' || msg.channel.type === 'GUILD_PUBLIC_THREAD') {
-      await handleThreadThanks(msg)
+    if (
+      msg.channel.type === 'GUILD_PRIVATE_THREAD' ||
+      msg.channel.type === 'GUILD_PUBLIC_THREAD'
+    ) {
+      await handleThreadThanks(msg);
     }
     return; // Break if no user has been mentioned
   }
@@ -167,6 +170,12 @@ function attachUndoThanksListener(client: Client): void {
         responseMsgId: msgId,
       });
 
+    if (!thanksInteraction) {
+      interaction.editReply({
+        content: 'something went wrong',
+      });
+      return;
+    }
     const removeThankees: string[] = interaction.isButton()
       ? [thankeeId]
       : interaction.values;
@@ -204,16 +213,16 @@ function attachUndoThanksListener(client: Client): void {
 
       const oldSelect = oldMsg.components[0].components[0] as MessageSelectMenu;
       const newOptions = oldSelect.options
-      .filter(item => !removeThankees.includes(item.value))
-      .map(({ label, value }) => ({ label, value }))
+        .filter(item => !removeThankees.includes(item.value))
+        .map(({ label, value }) => ({ label, value }));
 
       oldMsg.edit({
         embeds: oldMsg.embeds,
         components: [
           new MessageActionRow().addComponents(
-            new MessageSelectMenu(oldSelect).setOptions(
-              newOptions
-            ).setMaxValues(newOptions.length)
+            new MessageSelectMenu(oldSelect)
+              .setOptions(newOptions)
+              .setMaxValues(newOptions.length)
           ),
         ],
       });

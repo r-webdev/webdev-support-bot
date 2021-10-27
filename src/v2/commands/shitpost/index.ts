@@ -5,13 +5,12 @@ import { map } from '../../utils/map';
 import type { ValueOrNullary } from '../../utils/valueOrCall';
 import { valueOrCall } from '../../utils/valueOrCall';
 import { flexbox } from '../about/handlers/flexbox';
-import { jquery } from '../about/handlers/jquery';
 import { lockfile } from '../about/handlers/lockfile';
 import { modules } from '../about/handlers/modules';
-import { sass } from '../about/handlers/sass';
 import { vscode } from '../about/handlers/vscode';
 import { code } from '../please/handlers/code';
 import { format } from '../please/handlers/format';
+import { jquery } from '../whyno/handlers/jquery';
 
 const aboutMessages = new Map<string, ValueOrNullary<string>>([
   jquery,
@@ -49,8 +48,9 @@ export const shitpostInteraction: CommandDataWithHandler = {
     const replacement = interaction.options.getString('replacement');
     const content = aboutMessages.get(topic);
 
-    if(replacement.match(/<!?\d+>/)) {
-      interaction.reply("Please don't try to tag users with this feature!")
+    console.log(replacement)
+    if(replacement.match(/<@[!&]?\d+>/)) {
+    interaction.reply({content:"Please don't try to tag users with this feature!", ephemeral: true})
     }
 
     if (content) {

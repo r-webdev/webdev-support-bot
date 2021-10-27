@@ -8,7 +8,7 @@
  * @param {Iterable<T>} iter
  */
 export function* filterʹ<T>(
-  fn: (item: T, index: number, iter: Iterable<T>) => T,
+  fn: (item: T, index: number, iter: Iterable<T>) => unknown,
   iter: Iterable<T>
 ) {
   let i = 0;
@@ -17,8 +17,8 @@ export function* filterʹ<T>(
   }
 }
 
-export function filter<T, U>(
-  fn: (item: T, index: number, iter: Iterable<T>) => U
+export function filter<T>(
+  fn: (item: T, index: number, iter: Iterable<T>) => unknown
 ) {
   return (iter: Iterable<T>) => filterʹ(fn, iter);
 }

@@ -1,19 +1,15 @@
-import type { ApplicationCommandOptionChoice, Client, CommandInteraction, Interaction } from 'discord.js';
+import type { ApplicationCommandOptionChoice, Client, CommandInteraction } from 'discord.js';
 
 import type { CommandDataWithHandler } from '../../../types';
 import { map } from '../../utils/map';
 import type { ValueOrNullary } from '../../utils/valueOrCall';
 import { valueOrCall } from '../../utils/valueOrCall';
-import { flexbox } from './handlers/flexbox';
-import { lockfile } from './handlers/lockfile';
-import { modules } from './handlers/modules';
-import { vscode } from './handlers/vscode';
+import { channel } from './handlers/channel';
+import { jquery } from './handlers/jquery';
 
-const aboutMessages = new Map<string, ValueOrNullary<string>>([
-  vscode,
-  modules,
-  flexbox,
-  lockfile,
+const whynoMessages = new Map<string, ValueOrNullary<string>>([
+  jquery,
+  channel
 ]);
 
 const mapTransformToChoices = map(
@@ -23,13 +19,13 @@ const mapTransformToChoices = map(
   })
 );
 
-export const aboutInteraction: CommandDataWithHandler = {
+export const whynoInteraction: CommandDataWithHandler = {
   description:
-    'Quick response for common "why" or "Tell me about..." questions',
+    'Quick response for common "why no" or "why not..." questions',
   handler: async (client: Client, interaction: CommandInteraction): Promise<void> => {
     const topic = interaction.options.get('topic').value as string;
     const user = interaction.options.getUser('tag');
-    const content = aboutMessages.get(topic);
+    const content = whynoMessages.get(topic);
 
     if (content) {
       interaction.reply(
@@ -38,13 +34,13 @@ export const aboutInteraction: CommandDataWithHandler = {
       return;
     }
 
-    interaction.reply(`An error occured when trying to call \`/about ${topic}`);
+    interaction.reply(`An error occured when trying to call \`/whyno ${topic}`);
   },
-  name: 'about',
+  name: 'whyno',
   options: [
     {
-      choices: [...mapTransformToChoices(aboutMessages.keys())],
-      description: 'The topic to ask about',
+      choices: [...mapTransformToChoices(whynoMessages.keys())],
+      description: 'The topic in question',
       name: 'topic',
       required: true,
       type: 'STRING',

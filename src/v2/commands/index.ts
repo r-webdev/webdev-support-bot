@@ -28,8 +28,23 @@ import { jobPostCommand } from './post';
 import { resourceInteraction } from './resource';
 // meme commands
 import { shitpostInteraction } from './shitpost';
+import { whynoInteraction } from './whyno';
 
-Error.stackTraceLimit = Infinity;
+const guildCommands = new Map(
+  [
+    aboutInteraction,
+    mdnCommand,
+    phpCommand,
+    pleaseInteraction,
+    pointsHandlers,
+    jobPostCommand,
+    resourceInteraction,
+    shitpostInteraction,
+    npmInteraction,
+    whynoInteraction
+  ].map(command => [command.name, command])
+); // placeholder for now
+
 
 export const applicationCommands = new Collection<
   string,
@@ -68,20 +83,6 @@ const stripNullish = <T>(obj: T): T => {
       .filter(([, b]) => b != null)
   ) as T;
 };
-
-const guildCommands = new Map(
-  [
-    aboutInteraction,
-    mdnCommand,
-    phpCommand,
-    pleaseInteraction,
-    pointsHandlers,
-    jobPostCommand,
-    resourceInteraction,
-    shitpostInteraction,
-    npmInteraction,
-  ].map(command => [command.name, command])
-); // placeholder for now
 
 export const registerCommands = async (client: Client): Promise<void> => {
   client.on(

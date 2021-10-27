@@ -5,11 +5,12 @@ import { map } from '../../utils/map';
 import type { ValueOrNullary } from '../../utils/valueOrCall';
 import { valueOrCall } from '../../utils/valueOrCall';
 import { code } from './handlers/code';
+import { english } from './handlers/english';
 import { format } from './handlers/format';
 import { justAsk } from './handlers/justAsk';
 
 
-const pleaseMessages = new Map<string, ValueOrNullary<string>>([format, code, justAsk]);
+const pleaseMessages = new Map<string, ValueOrNullary<string>>([format, code, justAsk, english]);
 
 const mapTransformToChoices = map(
   (item: string): ApplicationCommandOptionChoice => ({
