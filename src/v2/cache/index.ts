@@ -12,7 +12,11 @@ export function limitFnByUser<T extends (...args: unknown[]) => boolean | Promis
 ) {
   return async (msg: Message): Promise<boolean> => {
     const user = msg.author.id;
-    const guild = msg.guild.id;
+    const guild = msg.guild?.id;
+
+    if(!guild) {
+      return;
+    }
 
     const prev = await get({ type, guild, user });
 

@@ -22,8 +22,8 @@ const otherLanguageExamples = ['php', 'css', 'html', 'ts', 'sql', 'md']
 export const format: [string, () => string] = [
   'format',
   (): string => `
-☝ Did you know you can add 🖌 syntax highlighting to your code in Discord? Try this snippet:
-
+👆 Did you know you can add syntax highlighting to your code in Discord?
+https://cdn.discordapp.com/attachments/550768098660188191/834795086126121010/2021-04-22_10-16-33.gif
 ${getSnippetElements()}
 
 You can replace \`js\` with other languages too, e.g. ${otherLanguageExamples} and so on...
