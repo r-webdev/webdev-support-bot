@@ -24,9 +24,6 @@ import type { Embed } from '../../utils/discordTools';
 import {
   createMarkdownLink,
   createEmbed,
-  adjustDescriptionLength,
-  createMarkdownListItem,
-  getChosenResult,
   createMarkdownBash,
 } from '../../utils/discordTools';
 import { website, language } from '../../utils/emojis';
@@ -42,7 +39,6 @@ const provider = 'npm';
 const list = new (Intl as any).ListFormat();
 
 const fetch: typeof getData = getData;
-const waitForResponse: typeof getChosenResult = getChosenResult;
 const formatDateFromNow: typeof formatDistanceToNow = formatDistanceToNow;
 
 const getFirstTenResults = pipe<Iterable<NPMResponse>, NPMEmbed[]>([
@@ -66,23 +62,6 @@ const getFirstTenResults = pipe<Iterable<NPMResponse>, NPMEmbed[]>([
   collect,
 ]);
 
-const npmEmbedToString = ({ name, description, url }: NPMEmbed, index) => {
-  // cant guarantee syntactically correct markdown image links due to
-  // npm limiting description to 255 chars,
-  // hence ignore description in those cases
-  // e.g. redux-react-session
-  const hasMarkdownImageLink = description ? description.includes('[!') : true;
-
-  const linkTitle = hasMarkdownImageLink
-    ? `**${name}**`
-    : `**${name}** - *${adjustDescriptionLength(
-        index + 1,
-        name,
-        description
-      )}*`;
-
-  return createMarkdownListItem(index, createMarkdownLink(linkTitle, url));
-};
 
 // msg: Message, searchTerm: string
 const handleNpmCommand = async (

@@ -3,10 +3,7 @@ import type {
   Client,
   EmbedField,
   CommandInteraction,
-  RoleManager,
   GuildMemberRoleManager,
-  User,
-  UserFlagsString,
 } from 'discord.js';
 import type { GuildMember } from 'discord.js';
 
