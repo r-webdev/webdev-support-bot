@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { Client } from 'discord.js';
 import { Collection } from 'discord.js';
-import _ from 'lodash';
 
 // quick responses
 // base commands

@@ -40,7 +40,7 @@ function normalizeApplicationOptionData <T extends
     return {
       ...option,
       options: (option.options ?? []).map(normalizeApplicationOptionData),
-      required: option.required ?? false,
+      required: (option as unknown as {required: boolean}).required ?? false,
     }
   }
 
@@ -48,12 +48,12 @@ function normalizeApplicationOptionData <T extends
     return {
       ...option,
       options: (option.options ?? []).map(normalizeApplicationOptionData),
-      required: option.required ?? false,
+      required: (option as unknown as {required: boolean}).required ?? false,
     }
   }
 
   return {
     ...option,
-    required: option.required ?? false,
+    required: (option as unknown as {required: boolean}).required ?? false,
   } ;
 }

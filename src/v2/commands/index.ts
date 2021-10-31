@@ -8,7 +8,7 @@ import type {
   GuildResolvable,
 } from 'discord.js';
 import { Collection } from 'discord.js';
-import _ from 'lodash';
+import {isEqual} from 'lodash-es';
 import { CommandDataWithHandler } from '../../types';
 import { asyncCatch } from '../utils/asyncCatch';
 
@@ -28,6 +28,7 @@ import { jobPostCommand } from './post';
 import { resourceInteraction } from './resource';
 // meme commands
 import { shitpostInteraction } from './shitpost';
+// import { warn } from './warn';
 import { whynoInteraction } from './whyno';
 
 const guildCommands = new Map(
@@ -41,7 +42,8 @@ const guildCommands = new Map(
     resourceInteraction,
     shitpostInteraction,
     npmInteraction,
-    whynoInteraction
+    whynoInteraction,
+    // warn // Not used atm
   ].map(command => [command.name, command])
 ); // placeholder for now
 
@@ -219,7 +221,7 @@ function editExistingCommands(
     const { onAttach, handler, ...command } = cmd;
 
     if (
-      !_.isEqual(
+      !isEqual(
         getRelevantCmdProperties(cmd),
         getRelevantCmdProperties(existing)
       )
