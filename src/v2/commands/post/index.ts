@@ -215,7 +215,6 @@ const createJobPost = async (
 
   const user = createUserTag(username, discriminator);
   // const url = generateURL(guild.id, channelID, msgID);
-console.log(answers)
   try {
     const msg = await targetChannel.send({
       embeds: [
@@ -323,7 +322,6 @@ const handleJobPostingRequest = async (
 
     // Notify the user regarding the rules, and get the channel
     const channel = await author.createDM();
-    console.log(channel);
 
     const { id: channelID } = channel;
 

@@ -1,31 +1,46 @@
 /* eslint-disable @typescript-eslint/explicit-member-accessibility */
 export class ExternalResolver<T> extends Promise<T> {
-     readonly #resolve: (value:T) => void
+  readonly #resolve: (value: T) => void;
 
-     readonly #reject: (reason: unknown) => void
+  readonly #reject: (reason: unknown) => void;
 
-    public constructor() {
-      let resolver
-      let rejector
+  #resolved = false;
+  #rejected = false;
 
-      super((resolve,reject) => {
-        resolver = resolve
-        rejector = reject
-      })
+  public constructor() {
+    let resolver;
+    let rejector;
 
-      this.#resolve = resolver
-      this.#reject = rejector
-    };
+    super((resolve, reject) => {
+      resolver = resolve;
+      rejector = reject;
+    });
 
-    public resolve(value: T): void {
-      this.#resolve(value)
-    }
+    this.#resolve = resolver;
+    this.#reject = rejector;
+  }
 
-    public reject(reason: unknown): void {
-      this.#reject(reason)
-    }
+  public get settled() {
+    return this.#resolved || this.#rejected;
+  }
 
-    public static get [Symbol.species] (): PromiseConstructor {
-      return Promise
-    }
+  public get resolved() {
+    return this.#resolved;
+  }
+
+  public get rejected() {
+    return this.#rejected;
+  }
+
+  public resolve(value: T): void {
+    this.#resolve(value);
+  }
+
+  public reject(reason: unknown): void {
+    this.#reject(reason);
+  }
+
+  public static get [Symbol.species](): PromiseConstructor {
+    return Promise;
+  }
 }

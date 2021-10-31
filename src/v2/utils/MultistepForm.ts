@@ -31,7 +31,7 @@ export type ButtonQuestion = {
     value: string;
     style?: MessageButtonStyle;
   }[];
-  buttonDelay?: number;
+buttonDelay?: number;
 } & QuestionBase;
 
 export type TextQuestion = {
@@ -67,8 +67,8 @@ export class MultistepForm<T extends Record<string, MultiStepFormStep>> {
 
   public async getButtonResponse<P extends ButtonQuestion>(
     step: P
-  ): Promise<P['buttons'][number]['value']> {
-    const resolver = new ExternalResolver<P['buttons'][number]['value']>();
+  ): Promise<P['buttons'][number]['value'] | typeof __cancelled__> {
+    const resolver = new ExternalResolver<P['buttons'][number]['value'] | typeof __cancelled__>();
     const message = await this.#channel.send({
       content: step.body,
       components: [
@@ -119,7 +119,17 @@ export class MultistepForm<T extends Record<string, MultiStepFormStep>> {
     };
 
     collector.on('collect', handler);
+    console.log((Number(AWAIT_MESSAGE_TIMEOUT)* 1000 + (step.buttonDelay ?? 0)),step.buttonDelay, AWAIT_MESSAGE_TIMEOUT)
+    setTimeout(() => {
+      if(resolver.settled) return
 
+      collector.off('collect', handler)
+      resolver.resolve(__cancelled__)
+      message.edit({
+        components: []
+      })
+      message.channel.send("Timed out. Please restart the process.")
+    },  Number(AWAIT_MESSAGE_TIMEOUT) * 1000 )
     return resolver;
   }
 
