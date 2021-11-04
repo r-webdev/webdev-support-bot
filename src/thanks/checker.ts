@@ -24,6 +24,7 @@ const english = [
   'tysm',
   'thanx',
   'thnx',
+  'thankyou'
 ];
 const negativeEnglish = english
   .flatMap(word => ['n ' + word, 'n' + word, 'no' + word, 'no ' + word])
