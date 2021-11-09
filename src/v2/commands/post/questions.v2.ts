@@ -7,18 +7,19 @@ import {
 } from './env';
 
 const isNotEmpty = (str: string): boolean => str.replace(/\W+/, '').length > 0
-const isNotTooLong = (str:string) => {
-  const isLessThan1000 = str.length < 1000
+const isNotTooLong = length => (str:string) => {
+  const isLessThan1000 = str.length < length
   if(!isLessThan1000) {
-    return `Your message is ${str.length} characters long, the limit is 1000 characters, please shorten your input`
+    return `Your message is ${str.length} characters long, the limit is ${length} characters, please shorten your input`
   }
   return true
 }
-const and = <T,K>(...fns:((input:T) => K)[]) => (input:T) => {
+const and = <T,K>(...fns:((input:T) => K)[]) => (input:T):K | true=> {
   for (const fn of fns) {
-    const item = fn(input)
-    if(item) return item
+    const item: unknown = fn(input)
+    if(item !== true) return item as K
   }
+  return true
 }
 const dollarFormat = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
 /*
@@ -87,13 +88,13 @@ export const questions = {
   location: {
     type: 'text',
     body: 'Provide the location in a single message. If you wish not to share the location reply with `no`.',
-    validate: isNotEmpty,
+    validate: and<string, string|boolean>(isNotEmpty, isNotTooLong(30)),
     next: (value: string): string => 'description',
   },
   description: {
     type: 'text',
     body: 'With a single message provide a short description of the job.\nTypically job postings include a description of the job, estimated hours, technical knowledge requirements, scope, and desired qualifications.',
-    validate: isNotShort,
+    validate: and<string, string|boolean>(isNotShort, isNotTooLong(1000)),
     next: (value: string): string => 'compensation_type',
   },
   compensation_type: {
@@ -134,11 +135,11 @@ export const questions = {
     },
     format: (value: string): string =>
       dollarFormat.format(Number.parseFloat(value.split('$').join(''))),
+    next: () => 'contact'
   },
   contact: {
     type: 'text',
     body: 'Provide the method that applicants should apply for your job (e.g., DM, email, website application, etc.) and any additional information that you think would be helpful to potential applicants.',
-    validate: and<string, string|boolean>(isNotEmpty, isNotTooLong),
-    next: (value: string): string => 'contact',
+    validate: and<string, string|boolean>(isNotEmpty, isNotTooLong(100)),
   },
 } as const;

@@ -119,7 +119,6 @@ export class MultistepForm<T extends Record<string, MultiStepFormStep>> {
     };
 
     collector.on('collect', handler);
-    console.log((Number(AWAIT_MESSAGE_TIMEOUT)* 1000 + (step.buttonDelay ?? 0)),step.buttonDelay, AWAIT_MESSAGE_TIMEOUT)
     setTimeout(() => {
       if(resolver.settled) return
 

@@ -33,10 +33,12 @@ export class ExternalResolver<T> extends Promise<T> {
   }
 
   public resolve(value: T): void {
+    this.#resolved = true
     this.#resolve(value);
   }
 
   public reject(reason: unknown): void {
+    this.#rejected = true
     this.#reject(reason);
   }
 

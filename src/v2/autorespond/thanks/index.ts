@@ -2,7 +2,10 @@ import { MessageActionRow, MessageSelectMenu } from 'discord.js';
 import type { Message, TextChannel } from 'discord.js';
 import type { Client } from 'discord.js';
 
-import { POINT_LIMITER_IN_MINUTES } from '../../env';
+import {
+  FINAL_CACHE_EXPIRATION_IN_SECONDS,
+  POINT_LIMITER_IN_MINUTES,
+} from '../../env';
 import HelpfulRoleMember from '../../helpful_role/db_model';
 import pointHandler, {
   generatePointsCacheEntryKey,
@@ -16,6 +19,8 @@ import type { ThanksInteractionType } from './db_model';
 import { ThanksInteraction } from './db_model';
 import { handleThreadThanks } from './threadThanks';
 import { createResponse } from './createResponse';
+
+const TIMEOUT = Number.parseInt(FINAL_CACHE_EXPIRATION_IN_SECONDS) * 1000;
 
 type CooldownUser = {
   id: string;
@@ -69,6 +74,21 @@ const handleThanks = async (msg: Message): Promise<void> => {
 
   const quoteLessContent = stripMarkdownQuote(msg.content);
 
+  const previousThanksInteractions: ThanksInteractionType[] =
+    await ThanksInteraction.find({
+      createdAt: {
+        $gte: Date.now() - Number.parseInt(POINT_LIMITER_IN_MINUTES) * 60000,
+      },
+    }).exec();
+
+  const previousThanksIds = new Set(
+    previousThanksInteractions.flatMap(item => item.thankees)
+  );
+  const lastThanked = new Map(
+    previousThanksInteractions.flatMap(item =>
+      item.thankees.map(x => [x, item.createdAt])
+    )
+  );
   const unquotedMentionedUserIds = new Set(
     mapʹ(([, id]) => id, quoteLessContent.matchAll(/<@!?(\d+)>/gu))
   );
@@ -86,12 +106,13 @@ const handleThanks = async (msg: Message): Promise<void> => {
       return false;
     }
 
-    const entry: number = cache.get(
-      generatePointsCacheEntryKey(u.id, msg.author.id)
-    );
+    const entry = previousThanksIds.has(u.id);
 
     if (entry) {
-      usersOnCooldown.push({ id: u.id, timestamp: entry });
+      usersOnCooldown.push({
+        id: u.id,
+        timestamp: lastThanked.get(u.id).getTime(),
+      });
     }
 
     return !u.bot && u.id !== msg.author.id && !entry;

@@ -80,7 +80,7 @@ const getTargetChannel = (
   guild: Guild,
   name: string
 ): TextChannel | ThreadChannel =>
-  guild.channels.cache.find(({ name: n }) => n === name) as
+  guild.channels.cache.get(name) as
     | TextChannel
     | ThreadChannel;
 
@@ -112,7 +112,7 @@ const sendAlert = (
   userInput: string,
   { username, discriminator }: Metadata
 ): void => {
-  const targetChannel = getTargetChannel(guild, MOD_CHANNEL);
+  const targetChannel = getTargetChannel(guild, JOB_POSTINGS_CHANNEL);
 
   if (!targetChannel) {
     // eslint-disable-next-line no-console
@@ -170,7 +170,7 @@ const sendAlert = (
 const generateFields = pipe<Answers, Iterable<OutputField>>([
   filter(
     ([key, val]: [string, string]) =>
-      !['location','guidelines'].includes(key) && val.toLowerCase() !== 'no'
+      !['guidelines'].includes(key) && !(key === 'remote' && val.toLowerCase() === 'onsite')
   ),
   map(([key, val]: [string, string]): OutputField => {
     let value = val;
@@ -200,10 +200,9 @@ const createUserTag = (username: string, discriminator: string) =>
 const createJobPost = async (
   answers: Answers,
   guild: Guild,
-  channelID: string,
   { username, discriminator, userID }: Metadata
 ) => {
-  const targetChannel = getTargetChannel(guild, 'job-postt');
+  const targetChannel = getTargetChannel(guild, JOB_POSTINGS_CHANNEL);
 
   if (!targetChannel) {
     // eslint-disable-next-line no-console
@@ -232,7 +231,7 @@ const createJobPost = async (
             },
             {
               inline: true,
-              name: 'Created At',
+              name: 'Created On',
               value: getCurrentDate(),
             },
             ...generateFields(answers),
@@ -336,7 +335,7 @@ const handleJobPostingRequest = async (
       return;
     }
 
-    const url = await createJobPost(answers, guild, channelID, {
+    const url = await createJobPost(answers, guild, {
       discriminator,
       userID: id,
       username,
@@ -397,7 +396,8 @@ export const jobPostCommand: CommandDataWithHandler = {
         const dmChannel = await interaction.user.createDM();
         try {
           dmChannel.send({
-            content: `The user you want to DM is <@!${userId}>. The job posting can be found here: ${message.url}`,
+            content: `The user you want to DM is <@!${userId}>. The job posting can be found here: ${message.url}.\nA copy of the job posting is below for reference as well`,
+            embeds: message.embeds
           });
           interaction.editReply({
             content: 'Please check your dms',

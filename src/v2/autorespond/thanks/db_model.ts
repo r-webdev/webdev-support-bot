@@ -24,6 +24,8 @@ const schema = new Schema({
   responseMsgId: {
     type: String
   }
+}, {
+  timestamps: true
 })
 
 export const ThanksInteraction = model('thanksMessageInteraction', schema)
@@ -32,5 +34,7 @@ export type ThanksInteractionType = Document & {
   thanker: string,
   channel: string,
   thankees: string[],
-  responseMsgId: string
+  responseMsgId: string,
+  createdAt: Date,
+  updatedAt: Date
 };

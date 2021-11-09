@@ -110,6 +110,8 @@ const handler = async (client: Client, interaction: CommandInteraction): Promise
       .addComponents(
         new MessageSelectMenu()
         .setCustomId(`php🤔${msgId}🤔select`)
+        .setMaxValues(5)
+        .setMinValues(1)
         .addOptions(
           results.map(({ firstChild: link }, index) => {
             const { title, url } = metadataExtractor(link);
@@ -147,12 +149,12 @@ const handler = async (client: Client, interaction: CommandInteraction): Promise
         await int.delete();
         return;
       }
-      const [result] = interaction.values
+      const urls = interaction.values.map(x => metadataExtractor(results[x].firstChild).url)
 
 
       await interaction.editReply({
         components: [],
-        content: buildDirectUrl(provider, result)
+        content: urls.join('\n')
       });
     });
   } catch (error) {

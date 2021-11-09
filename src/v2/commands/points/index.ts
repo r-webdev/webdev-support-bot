@@ -13,10 +13,13 @@ import {
   MOD_ROLE_ID,
   HELPFUL_ROLE_ID,
   HELPFUL_ROLE_POINT_THRESHOLD,
+  POINT_DECAY_TIMER,
 } from '../../env';
 import type { IUser } from '../../helpful_role';
 import HelpfulRoleMember from '../../helpful_role/db_model';
+import { getTimeDiffToDecay } from '../../helpful_role/point_decay';
 import { createEmbed } from '../../utils/discordTools';
+import { _ } from '../../utils/pluralize';
 import { some } from '../../utils/some';
 import type { OutputField } from '../post';
 
@@ -89,7 +92,9 @@ async function handlePoints(
         });
         return;
       }
-      const member: GuildMember = interaction.options.getMember('user') as GuildMember
+      const member: GuildMember = interaction.options.getMember(
+        'user'
+      ) as GuildMember;
       const points: number = interaction.options.getInteger('value');
 
       await handlePointsSet(client, interaction, member, points);
@@ -102,14 +107,18 @@ async function handlePoints(
         });
         return;
       }
-      const member = interaction.options.getMember('user') as GuildMember
+      const member = interaction.options.getMember('user') as GuildMember;
 
       await handlePointsReset(interaction, member, client);
 
       return;
     }
     case 'leaderboard': {
-      await handleLeaderboards(interaction)
+      await handleLeaderboards(interaction);
+      return;
+    }
+    case 'decay': {
+      await handleDecayRequest(interaction);
       return;
     }
     default:
@@ -118,6 +127,37 @@ async function handlePoints(
   }
   interaction.deferReply();
 }
+
+const handleDecayRequest = async (interaction: CommandInteraction) => {
+  const { diff } = getTimeDiffToDecay();
+  const timer = Number.parseInt(POINT_DECAY_TIMER);
+
+  let [hours, minutes]: Array<string | number> = (timer - diff)
+    .toString()
+    .split('.');
+
+  hours = Number.parseInt(hours);
+  minutes = Math.floor((Number.parseInt(minutes.slice(0, 2)) * 60) / 100);
+
+  const hoursTxt = hours === 0 ? '' : _`${_.n} hour${_.s}`(hours);
+  const minutesTxt = minutes === 0 ? '' : _`${_.n} minute${_.s}`(minutes);
+
+  const description = _`The point decay will occur in ${[
+    hoursTxt,
+    minutesTxt,
+  ].filter(Boolean)}.`(0);
+
+  await interaction.editReply({
+    embeds: [
+      createEmbed({
+        description,
+        footerText: 'Point Decay System',
+        provider: 'spam',
+        title: 'Point Decay Status',
+      }).embed,
+    ],
+  });
+};
 
 async function handlePointsGet(
   userId: string,
@@ -228,7 +268,7 @@ async function handlePointsSet(
     prev >= HELPFUL_ROLE_POINT_THRESHOLD_NUM &&
     curr < HELPFUL_ROLE_POINT_THRESHOLD_NUM
   ) {
-    await guildMember.roles.remove(HELPFUL_ROLE_ID)
+    await guildMember.roles.remove(HELPFUL_ROLE_ID);
     output.fields.push({
       inline: false,
       name: '⚠ Role Change',
@@ -238,7 +278,7 @@ async function handlePointsSet(
     prev < HELPFUL_ROLE_POINT_THRESHOLD_NUM &&
     curr > HELPFUL_ROLE_POINT_THRESHOLD_NUM
   ) {
-    await guildMember.roles.add(HELPFUL_ROLE_ID)
+    await guildMember.roles.add(HELPFUL_ROLE_ID);
     output.fields.push({
       inline: false,
       name: '⚠ Role Change',
@@ -275,7 +315,9 @@ function createPointsEmbed(
   }).embed;
 }
 
-async function handleLeaderboards(interaction: CommandInteraction): Promise<void> {
+async function handleLeaderboards(
+  interaction: CommandInteraction
+): Promise<void> {
   try {
     const topUsers: IUser[] =
       LEADERBOARD_LIMIT > 0
@@ -368,6 +410,11 @@ export const pointsHandlers: CommandDataWithHandler = {
           required: true,
         },
       ],
+    },
+    {
+      name: 'decay',
+      description: 'See how long till the next points decay.',
+      type: 'SUB_COMMAND',
     },
   ],
 };

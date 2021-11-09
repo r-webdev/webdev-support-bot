@@ -69,7 +69,7 @@ const handleNpmCommand = async (
   interaction: CommandInteraction
 ): Promise<void> => {
   const searchTerm = interaction.options.getString('name');
-  const defer = interaction.deferReply();
+  await interaction.deferReply({ephemeral: true});
   try {
     const json = await fetch<NPMResponse[]>({
       isInvalidData: json => json.length === 0,
@@ -78,8 +78,6 @@ const handleNpmCommand = async (
       searchTerm,
     });
 
-    await defer;
-
     if (!json) {
       return;
     }
@@ -87,7 +85,7 @@ const handleNpmCommand = async (
     const firstTenResults = getFirstTenResults(json);
 
     if (firstTenResults.length === 1) {
-      await interaction.reply({
+      await interaction.editReply({
         content: '',
         embeds: [
           createEmbed(createNPMEmbed(firstTenResults[0])),

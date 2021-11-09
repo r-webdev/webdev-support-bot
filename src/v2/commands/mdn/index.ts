@@ -70,20 +70,20 @@ const mdnHandler = async (
   interaction: CommandInteraction
 ): Promise<unknown> => {
   const searchTerm: string = interaction.options.getString('query');
-  const deferral = interaction.deferReply({ ephemeral: true });
+  const deferral = await interaction.deferReply({ ephemeral: true });
   try {
     const url = getSearchUrl(provider, searchTerm);
     const { error, json } = await fetch<SearchResponse>(url, 'json');
 
     if (error) {
-      await interaction.reply({
+      await interaction.editReply({
         content: invalidResponse,
       });
       return;
     }
 
     if (json.documents.length === 0) {
-      await interaction.reply({
+      await interaction.editReply({
         content: noResults(searchTerm),
       });
       return;
@@ -154,7 +154,7 @@ const mdnHandler = async (
 
   } catch (error) {
     console.error(error);
-    interaction.reply(unknownError);
+    interaction.editReply(unknownError);
   }
 };
 

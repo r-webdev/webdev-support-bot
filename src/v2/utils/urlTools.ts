@@ -124,7 +124,7 @@ export const getSearchUrl = (provider: Provider, search: string) => {
 
 export const buildDirectUrl = (provider: Provider, href: string) => {
   if (providers[provider]) {
-    return providers[provider].direct.replace(TERM, href);
+    return providers[provider].direct.replace(TERM, href.replace(/^\//,''));
   }
 
   throw new Error(`provider not implemeted: ${provider}`);
