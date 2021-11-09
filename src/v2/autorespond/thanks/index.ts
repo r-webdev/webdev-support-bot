@@ -52,9 +52,7 @@ const getReply = async (msg): Promise<undefined | Message> => {
 
 const handleThanks = async (msg: Message): Promise<void> => {
   const botId = msg.author.bot;
-
   const reply = await getReply(msg);
-
   if (botId || (msg.mentions.users.size === 0 && !reply)) {
     if (
       msg.channel.type === 'GUILD_PRIVATE_THREAD' ||

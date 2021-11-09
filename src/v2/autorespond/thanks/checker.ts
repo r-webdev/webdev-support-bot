@@ -70,11 +70,12 @@ const noThanksRegex = new RegExp(
   'gui'
 );
 
-const hasThanks = str =>
-  thanksRegex.exec(removeDiacritics(str)
+const hasThanks = str => {
+  thanksRegex.lastIndex = -1
+  return thanksRegex.exec(removeDiacritics(str)
     .replace(/\s+/, ' ')
     .replace(noThanksRegex, ''));
-
+}
 const keywordValidator = (str: string) => {
   return Boolean(hasThanks(str));
 };

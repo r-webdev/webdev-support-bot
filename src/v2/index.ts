@@ -146,7 +146,6 @@ client.on('messageCreate', msg => {
 
 const handleNonCommandGuildMessages = async (msg: Message) => {
   const quoteLessContent = stripMarkdownQuote(msg.content);
-
   if (isWebdevAndWebDesignServer(msg) && isThanksMessage(quoteLessContent)) {
     handleThanks(msg);
   }
