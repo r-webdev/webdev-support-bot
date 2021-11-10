@@ -92,7 +92,7 @@ const handleNpmCommand = async (
           createNPMEmbed(firstTenResults[0], interaction.user),
         ]
       });
-      await interaction.editReply('👇 Display results below')
+      await interaction.editReply('👇 Displaying results below')
       return;
     }
 
@@ -114,16 +114,11 @@ const handleNpmCommand = async (
           }))
         )
     );
-    const buttonRow = new MessageActionRow().addComponents(
-      new MessageButton()
-        .setLabel('Cancel')
-        .setStyle('DANGER')
-        .setCustomId(`npm🤔${msgId}🤔cancel`)
-    );
+
 
     const int = (await interaction.editReply({
       content: 'Please pick 1 option below to display',
-      components: [selectRow, buttonRow],
+      components: [selectRow],
     })) as Message;
 
     const interactionCollector = int.createMessageComponentCollector<
@@ -139,7 +134,6 @@ const handleNpmCommand = async (
       async (interaction: ButtonInteraction | SelectMenuInteraction) => {
         await interaction.deferUpdate();
         if (interaction.isButton()) {
-          await int.delete();
           return;
         }
         const valueSet = new Set(interaction.values);
