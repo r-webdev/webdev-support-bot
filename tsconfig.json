@@ -1,15 +1,17 @@
 {
   "compilerOptions": {
-    "lib": ["es2019", "es2020.string"],
+    "lib": ["ESNext", "ESNext.Intl"],
     "allowJs": true,
-    "target": "es2019",
-    "module": "commonjs",
+    "target": "esnext",
+    "module": "esnext",
     "moduleResolution": "node",
     "sourceMap": true,
     "outDir": "./build",
     "rootDir": "./src",
-    "skipLibCheck": true
+    "typeRoots": ["./node_modules/@types", "./src/*.d.ts"],
+    "skipLibCheck": true,
+    "esModuleInterop": true
   },
-  "include": ["./src/**/*.ts"],
+  "include": ["./src/**/*.ts", "./src/*.d.ts"],
   "exclude": ["node_modules", "./src/**/__fixtures__/*", "./src/**/*.test.ts"]
 }
