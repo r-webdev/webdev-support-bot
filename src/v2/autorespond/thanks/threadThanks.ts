@@ -39,6 +39,7 @@ export async function handleThreadThanks(msg: Message): Promise<void> {
       Collection<string, ThreadMember>
     >,
     ThanksInteraction.find({
+      thanker: msg.author.id,
       createdAt: {
         $gte: Date.now() - Number.parseInt(POINT_LIMITER_IN_MINUTES) * 60000,
       },
