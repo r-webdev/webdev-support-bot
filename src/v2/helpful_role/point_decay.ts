@@ -7,10 +7,10 @@ import {
   HELPFUL_ROLE_POINT_THRESHOLD,
   HELPFUL_ROLE_EXEMPT_ID,
   HELPFUL_ROLE_ID,
-} from '../env';
-import { createEmbed } from '../utils/discordTools';
-import { capitalize } from '../utils/string';
-import HelpfulRoleMember from './db_model';
+} from '../env.js';
+import { createEmbed } from '../utils/discordTools.js';
+import { capitalize } from '../utils/string.js';
+import HelpfulRoleMember from './db_model.js';
 
 import type { IUser } from '.';
 

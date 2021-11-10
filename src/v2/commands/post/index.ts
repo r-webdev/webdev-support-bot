@@ -10,34 +10,28 @@ import type {
   ThreadChannel,
   CommandInteraction,
 } from 'discord.js';
-import { User, MessageButton } from 'discord.js';
+import { MessageButton } from 'discord.js';
 import {
-  GuildChannel,
-  MessageEmbed,
   MessageActionRow,
-  MessageSelectMenu,
 } from 'discord.js';
 import { filter } from 'domyno';
 
 import type { CommandDataWithHandler } from '../../../types';
-import { cache } from '../../spam_filter';
-import { MultistepForm } from '../../utils/MultistepForm';
-import { createEmbed, createMarkdownCodeBlock } from '../../utils/discordTools';
-import { map } from '../../utils/map';
-import { pipe } from '../../utils/pipe';
-import { capitalize } from '../../utils/string';
+import { cache } from '../../spam_filter/index.js';
+import { MultistepForm } from '../../utils/MultistepForm.js';
+import { createEmbed, createMarkdownCodeBlock } from '../../utils/discordTools.js';
+import { map } from '../../utils/map.js';
+import { pipe } from '../../utils/pipe.js';
+import { capitalize } from '../../utils/string.js';
 import {
   AWAIT_MESSAGE_TIMEOUT,
-  MOD_CHANNEL,
   JOB_POSTINGS_CHANNEL,
   POST_LIMITER,
   POST_LIMITER_IN_HOURS,
-  MINIMAL_COMPENSATION,
-  MINIMAL_AMOUNT_OF_WORDS,
-} from './env';
-import { questions } from './questions.v2';
-import { asyncCatch } from '../../utils/asyncCatch';
-import { SERVER_ID } from '../../env';
+} from './env.js';
+import { questions } from './questions.v2.js';
+import { asyncCatch } from '../../utils/asyncCatch.js';
+import { SERVER_ID } from '../../env.js';
 
 const dateFormatter = new Intl.DateTimeFormat('en-US', {
   month: 'long',

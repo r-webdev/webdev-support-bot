@@ -12,21 +12,21 @@ import {
   ENV,
   VAR_DETECT_LIMIT,
   JUST_ASK_DETECT_LIMIT,
-} from '../env';
-import { detectVar } from './autorespond/code_parsing';
-import { handleDeprecatedCommands } from './autorespond/deprecatedCommands';
-import { detectDeprecatedHTML } from './autorespond/html_parsing';
-import { detectVagueQuestion } from './autorespond/justask';
-import {handleThanks, attachUndoThanksListener} from './autorespond/thanks';
-import isThanksMessage from './autorespond/thanks/checker';
-import { attachThreadClose, attachThreadThanksHandler } from './autorespond/thanks/threadThanks';
-import { limitFnByUser } from './cache';
-import { registerCommands } from './commands';
-import { registerMessageContextMenu } from './message_context';
-import { registerUserContextMenu } from './user_context';
+} from '../env.js';
+import { detectVar } from './autorespond/code_parsing/index.js';
+import { handleDeprecatedCommands } from './autorespond/deprecatedCommands.js';
+import { detectDeprecatedHTML } from './autorespond/html_parsing/index.js';
+import { detectVagueQuestion } from './autorespond/justask.js';
+import {handleThanks, attachUndoThanksListener} from './autorespond/thanks/index.js';
+import isThanksMessage from './autorespond/thanks/checker.js';
+import { attachThreadClose, attachThreadThanksHandler } from './autorespond/thanks/threadThanks.js';
+import { limitFnByUser } from './cache/index.js';
+import { registerCommands } from './commands/index.js';
+import { registerMessageContextMenu } from './message_context/index.js';
+import { registerUserContextMenu } from './user_context/index.js';
 import {
   stripMarkdownQuote,
-} from './utils/content_format';
+} from './utils/content_format.js';
 
 const { connect } = mongoose
 

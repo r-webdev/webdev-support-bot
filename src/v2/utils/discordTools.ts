@@ -1,16 +1,16 @@
 import { MessageEmbed } from 'discord.js';
 import type { Message, MessageEditOptions, EmbedField , MessagePayload } from 'discord.js';
 
-import { REPO_LINK } from '../env';
-import { delayedMessageAutoDeletion } from './delayedMessageAutoDeletion';
-import { light, neutral_face, point_up, gear } from './emojis';
-import { unknownError } from './errors';
+import { REPO_LINK } from '../env.js';
+import { delayedMessageAutoDeletion } from './delayedMessageAutoDeletion.js';
+import { light, neutral_face, point_up, gear } from './emojis.js';
+import { unknownError } from './errors.js';
 import {
   reactionFilterBuilder,
   awaitReactionConfig,
   validReactions,
-} from './reactions';
-import { providers } from './urlTools';
+} from './reactions.js';
+import { providers } from './urlTools.js';
 
 export const createMarkdownLink = (title: string, url: string): string =>
   // eslint-disable-next-line unicorn/prefer-replace-all

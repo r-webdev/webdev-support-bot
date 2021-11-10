@@ -1,10 +1,10 @@
-import { MultistepForm, MultiStepFormStep } from '../../utils/MultistepForm';
-import { createMarkdownCodeBlock } from '../../utils/discordTools';
+import { MultistepForm, MultiStepFormStep } from '../../utils/MultistepForm.js';
+import { createMarkdownCodeBlock } from '../../utils/discordTools.js';
 import {
   MINIMAL_COMPENSATION,
   MINIMAL_AMOUNT_OF_WORDS,
   POST_LIMITER_IN_HOURS,
-} from './env';
+} from './env.js';
 
 const isNotEmpty = (str: string): boolean => str.replace(/\W+/, '').length > 0
 const isNotTooLong = length => (str:string) => {

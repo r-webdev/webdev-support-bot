@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { castArray } from './castArray';
+import { castArray } from './castArray.js';
 import { addBreadcrumb, Severity } from '@sentry/node';
 
 type WrappedValue<T> = {

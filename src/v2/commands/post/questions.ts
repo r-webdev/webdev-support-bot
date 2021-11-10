@@ -1,4 +1,4 @@
-import { MINIMAL_COMPENSATION, MINIMAL_AMOUNT_OF_WORDS } from './env';
+import { MINIMAL_COMPENSATION, MINIMAL_AMOUNT_OF_WORDS } from './env.js';
 
 const isNotEmpty = (str: string): boolean => str.length > 0;
 

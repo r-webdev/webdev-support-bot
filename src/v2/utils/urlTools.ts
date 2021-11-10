@@ -2,10 +2,10 @@ import type { CommandInteraction, Interaction } from 'discord.js';
 import { Message } from 'discord.js';
 import type { HeadersInit } from 'node-fetch';
 
-import { delayedMessageAutoDeletion } from './delayedMessageAutoDeletion';
+import { delayedMessageAutoDeletion } from './delayedMessageAutoDeletion.js';
 import type { Provider } from './discordTools';
-import { noResults, invalidResponse } from './errors';
-import useData from './useData';
+import { noResults, invalidResponse } from './errors.js';
+import useData from './useData.js';
 
 const SEARCH_TERM = '%SEARCH%';
 const TERM = '%TERM%';

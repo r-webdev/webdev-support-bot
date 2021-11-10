@@ -17,10 +17,10 @@ import DOMParser from 'dom-parser';
 import { decode } from 'html-entities';
 
 import type { CommandDataWithHandler } from '../../../types';
-import { invalidResponse, unknownError } from '../../../v2/utils/errors';
-import { clampLength, clampLengthMiddle } from '../../utils/clampStr';
-import { buildDirectUrl, getSearchUrl } from '../../utils/urlTools';
-import useData from '../../utils/useData';
+import { invalidResponse, unknownError } from '../../../v2/utils/errors.js';
+import { clampLength, clampLengthMiddle } from '../../utils/clampStr.js';
+import { buildDirectUrl, getSearchUrl } from '../../utils/urlTools.js';
+import useData from '../../utils/useData.js';
 
 const provider = 'php';
 

@@ -1,4 +1,4 @@
-import { GenericCache } from './model';
+import { GenericCache } from './model.js';
 
 export type CacheUpsertOptions = {
   guild: string;

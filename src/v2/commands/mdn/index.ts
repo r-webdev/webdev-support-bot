@@ -17,10 +17,10 @@ import type { MessageComponentTypes } from 'discord.js/typings/enums';
 import { URL } from 'url';
 
 import type { CommandDataWithHandler } from '../../../types';
-import { clampLength, clampLengthMiddle } from '../../utils/clampStr';
-import { invalidResponse, noResults, unknownError } from '../../utils/errors';
-import { getSearchUrl } from '../../utils/urlTools';
-import useData from '../../utils/useData';
+import { clampLength, clampLengthMiddle } from '../../utils/clampStr.js';
+import { invalidResponse, noResults, unknownError } from '../../utils/errors.js';
+import { getSearchUrl } from '../../utils/urlTools.js';
+import useData from '../../utils/useData.js';
 
 
 const list = new (Intl as any).ListFormat()

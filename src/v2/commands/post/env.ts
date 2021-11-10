@@ -6,7 +6,7 @@ import {
   POST_LIMITER_IN_HOURS, // Used for informing the user about the limiter
   AWAIT_MESSAGE_TIMEOUT as AMT, // Renamed for shadowing
   MINIMAL_AMOUNT_OF_WORDS as MAOW, // Renamed for shadowing as well
-} from '../../env';
+} from '../../env.js';
 
 // seconds to ms
 const AWAIT_MESSAGE_TIMEOUT = Number.parseInt(AMT) * 1000;

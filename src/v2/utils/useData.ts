@@ -11,8 +11,8 @@ import {
   API_CACHE_ENTRIES_LIMIT,
   API_CACHE_EXPIRATION_IN_SECONDS,
   API_CACHE_REVALIDATION_WINDOW_IN_SECONDS,
-} from '../env';
-import { Cache } from './Cache';
+} from '../env.js';
+import { Cache } from './Cache.js';
 
 const apiCache = new Cache({
   checkperiod: Number.parseInt(API_CACHE_REVALIDATION_WINDOW_IN_SECONDS, 10),

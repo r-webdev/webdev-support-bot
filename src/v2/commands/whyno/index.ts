@@ -1,11 +1,11 @@
 import type { ApplicationCommandOptionChoice, Client, CommandInteraction } from 'discord.js';
 
 import type { CommandDataWithHandler } from '../../../types';
-import { map } from '../../utils/map';
-import type { ValueOrNullary } from '../../utils/valueOrCall';
-import { valueOrCall } from '../../utils/valueOrCall';
-import { channel } from './handlers/channel';
-import { jquery } from './handlers/jquery';
+import { map } from '../../utils/map.js';
+import type { ValueOrNullary } from '../../utils/valueOrCall.js';
+import { valueOrCall } from '../../utils/valueOrCall.js';
+import { channel } from './handlers/channel.js';
+import { jquery } from './handlers/jquery.js';
 
 const whynoMessages = new Map<string, ValueOrNullary<string>>([
   jquery,

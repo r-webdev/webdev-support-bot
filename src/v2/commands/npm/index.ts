@@ -19,18 +19,18 @@ import { collect, take } from 'domyno';
 import { URL } from 'url';
 
 import type { CommandDataWithHandler } from '../../../types';
-import { clampLengthMiddle, clampLength } from '../../utils/clampStr';
-import type { Embed } from '../../utils/discordTools';
+import { clampLengthMiddle, clampLength } from '../../utils/clampStr.js';
+import type { Embed } from '../../utils/discordTools.js';
 import {
   createMarkdownLink,
   createEmbed,
   createMarkdownBash,
-} from '../../utils/discordTools';
-import { website, language } from '../../utils/emojis';
-import { unknownError } from '../../utils/errors';
-import { map } from '../../utils/map';
-import { pipe } from '../../utils/pipe';
-import { getData } from '../../utils/urlTools';
+} from '../../utils/discordTools.js';
+import { website, language } from '../../utils/emojis.js';
+import { unknownError } from '../../utils/errors.js';
+import { map } from '../../utils/map.js';
+import { pipe } from '../../utils/pipe.js';
+import { getData } from '../../utils/urlTools.js';
 import type { NPMResponse } from './types';
 
 const provider = 'npm';

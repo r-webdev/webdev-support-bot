@@ -1,7 +1,7 @@
 import { collect } from 'domyno';
 
-import { map } from '../../../utils/map';
-import { pipe } from '../../../utils/pipe';
+import { map } from '../../../utils/map.js';
+import { pipe } from '../../../utils/pipe.js';
 
 const BACKTICKS = '```';
 

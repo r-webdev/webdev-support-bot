@@ -1,4 +1,4 @@
-import { REPO_LINK } from '../env';
+import { REPO_LINK } from '../env.js';
 
 export const invalidResponse =
   'sorry, your request could not be processed. Please try again at a later time.';

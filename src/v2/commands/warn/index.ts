@@ -5,15 +5,15 @@ import type {
 } from 'discord.js';
 
 import type { CommandDataWithHandler } from '../../../types';
-import { map } from '../../utils/map';
-import type { ValueOrNullary } from '../../utils/valueOrCall';
-import { valueOrCall } from '../../utils/valueOrCall';
+import { map } from '../../utils/map.js';
+import type { ValueOrNullary } from '../../utils/valueOrCall.js';
+import { valueOrCall } from '../../utils/valueOrCall.js';
 import Fuse from 'fuse.js';
 import { zip } from 'domyno';
-import { pluckʹ } from '../../utils/pluck';
-import { asyncCatch } from '../../utils/asyncCatch';
-import { callOrValue } from '../../utils/callOrValue';
-import { _ } from '../../utils/pluralize';
+import { pluckʹ } from '../../utils/pluck.js';
+import { asyncCatch } from '../../utils/asyncCatch.js';
+import { callOrValue } from '../../utils/callOrValue.js';
+import { _ } from '../../utils/pluralize.js';
 
 const listFormatter = new Intl.ListFormat()
 const rulesId = '904060678699089950'

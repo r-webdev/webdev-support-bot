@@ -1,6 +1,6 @@
 import type { Message } from 'discord.js';
 
-import { stripMarkdownQuote } from '../utils/content_format';
+import { stripMarkdownQuote } from '../utils/content_format.js';
 
 const rePeople = String.raw`(?:any|some) (?:one|1+)`;
 const reHas = String.raw`(?:ha(?:s|ve)|got)`;

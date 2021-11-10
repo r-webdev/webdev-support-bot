@@ -1,10 +1,10 @@
-import { map } from '../../utils/map';
-import { merge } from '../../utils/merge';
-import { partition } from '../../utils/partition';
-import nothanks from './nothanks';
-import nothankyou from './nothankyou';
-import thanks from './thanks';
-import thankyou from './thankyou';
+import { map } from '../../utils/map.js';
+import { merge } from '../../utils/merge.js';
+import { partition } from '../../utils/partition.js';
+import nothanks from './nothanks.js';
+import nothankyou from './nothankyou.js';
+import thanks from './thanks.js';
+import thankyou from './thankyou.js';
 
 type ThankDef = typeof thanks[number];
 

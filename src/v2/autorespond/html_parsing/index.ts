@@ -1,13 +1,12 @@
 import type { Message } from 'discord.js';
 import { filter } from 'domyno';
 
-import { createCodeBlockCapturer } from '../../utils/codeBlockCapturer';
-import { map } from '../../utils/map';
-import { pipe } from '../../utils/pipe';
-import { pluck } from '../../utils/pluck';
-import { _ } from '../../utils/pluralize';
-import { some } from '../../utils/some';
-import { hasDeprecatedHTMLElementInSource } from './hasDeprecated';
+import { createCodeBlockCapturer } from '../../utils/codeBlockCapturer.js';
+import { map } from '../../utils/map.js';
+import { pipe } from '../../utils/pipe.js';
+import { pluck } from '../../utils/pluck.js';
+import { _ } from '../../utils/pluralize.js';
+import { hasDeprecatedHTMLElementInSource } from './hasDeprecated.js';
 
 const jsCodeBlocks = createCodeBlockCapturer(['html']);
 

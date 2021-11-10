@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 
-import useData from './useData';
+import useData from './useData.js';
 
 jest.mock('node-fetch');
 

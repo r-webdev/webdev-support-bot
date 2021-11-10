@@ -1,8 +1,8 @@
 import { MessageButton, User } from 'discord.js';
 import { MessageActionRow, MessageSelectMenu } from 'discord.js';
 import { EmbedField, Collection } from 'discord.js';
-import { clampLength } from '../../utils/clampStr';
-import { createEmbed } from '../../utils/discordTools';
+import { clampLength } from '../../utils/clampStr.js';
+import { createEmbed } from '../../utils/discordTools.js';
 
 export function createResponse(thankedUsers: Collection<string, User>, authorId: string) {
   const title = `Point${thankedUsers.size === 1 ? '' : 's'} received!`;

@@ -15,13 +15,13 @@ import {
   HELPFUL_ROLE_POINT_THRESHOLD,
   POINT_DECAY_TIMER,
   SERVER_ID,
-} from '../../env';
+} from '../../env.js';
 import type { IUser } from '../../helpful_role';
-import HelpfulRoleMember from '../../helpful_role/db_model';
-import { getTimeDiffToDecay } from '../../helpful_role/point_decay';
-import { createEmbed } from '../../utils/discordTools';
-import { _ } from '../../utils/pluralize';
-import { some } from '../../utils/some';
+import HelpfulRoleMember from '../../helpful_role/db_model.js';
+import { getTimeDiffToDecay } from '../../helpful_role/point_decay.js';
+import { createEmbed } from '../../utils/discordTools.js';
+import { _ } from '../../utils/pluralize.js';
+import { some } from '../../utils/some.js';
 import type { OutputField } from '../post';
 
 const LEADERBOARD_LIMIT = 20;

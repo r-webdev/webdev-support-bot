@@ -10,28 +10,28 @@ import type {
 import { Collection } from 'discord.js';
 import { filter } from 'domyno';
 import { isEqual } from 'lodash-es';
-import { CommandDataWithHandler } from '../../types';
-import { asyncCatch } from '../utils/asyncCatch';
+import type { CommandDataWithHandler } from '../../types';
+import { asyncCatch } from '../utils/asyncCatch.js';
 
-import { map, mapʹ } from '../utils/map';
-import { merge } from '../utils/merge';
-import { normalizeApplicationCommandData } from '../utils/normalizeCommand';
-import { pipe } from '../utils/pipe';
-import { difference, intersection } from '../utils/sets';
+import { map, mapʹ } from '../utils/map.js';
+import { merge } from '../utils/merge.js';
+import { normalizeApplicationCommandData } from '../utils/normalizeCommand.js';
+import { pipe } from '../utils/pipe.js';
+import { difference, intersection } from '../utils/sets.js';
 // quick responses
 // base commands
-import { aboutInteraction } from './about';
-import { mdnCommand } from './mdn';
-import { npmInteraction } from './npm';
-import { phpCommand } from './php';
-import { pleaseInteraction } from './please';
-import { pointsHandlers } from './points';
-import { jobPostCommand } from './post';
-import { resourceInteraction } from './resource';
+import { aboutInteraction } from './about/index.js';
+import { mdnCommand } from './mdn/index.js';
+import { npmInteraction } from './npm/index.js';
+import { phpCommand } from './php/index.js';
+import { pleaseInteraction } from './please/index.js';
+import { pointsHandlers } from './points/index.js';
+import { jobPostCommand } from './post/index.js';
+import { resourceInteraction } from './resource/index.js';
 // meme commands
-import { shitpostInteraction } from './shitpost';
-// import { warn } from './warn';
-import { whynoInteraction } from './whyno';
+import { shitpostInteraction } from './shitpost/index.js';
+// import { warn } from './warn/index.js';
+import { whynoInteraction } from './whyno/index.js';
 
 const guildCommands = new Map(
   [

@@ -4,8 +4,8 @@ import {
   NUMBER_OF_ALLOWED_MESSAGES,
   CACHE_REVALIDATION_IN_SECONDS,
   FINAL_CACHE_EXPIRATION_IN_SECONDS,
-} from '../env';
-import { Cache } from '../utils/Cache';
+} from '../env.js';
+import { Cache } from '../utils/Cache.js';
 
 const numberOfAllowedMessages = Number.parseInt(NUMBER_OF_ALLOWED_MESSAGES);
 const cacheRevalidationWindow =

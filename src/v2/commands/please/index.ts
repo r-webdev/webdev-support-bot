@@ -1,13 +1,13 @@
 import type { ApplicationCommandOptionChoice, Client, CommandInteraction } from 'discord.js';
 
 import type { CommandDataWithHandler } from '../../../types';
-import { map } from '../../utils/map';
-import type { ValueOrNullary } from '../../utils/valueOrCall';
-import { valueOrCall } from '../../utils/valueOrCall';
-import { code } from './handlers/code';
-import { english } from './handlers/english';
-import { format } from './handlers/format';
-import { justAsk } from './handlers/justask';
+import { map } from '../../utils/map.js';
+import type { ValueOrNullary } from '../../utils/valueOrCall.js';
+import { valueOrCall } from '../../utils/valueOrCall.js';
+import { code } from './handlers/code.js';
+import { english } from './handlers/english.js';
+import { format } from './handlers/format/index.js';
+import { justAsk } from './handlers/justask.js';
 
 
 const pleaseMessages = new Map<string, ValueOrNullary<string>>([format, code, justAsk, english]);

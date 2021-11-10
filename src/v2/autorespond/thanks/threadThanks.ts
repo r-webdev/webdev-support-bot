@@ -12,11 +12,11 @@ import {
   Collection,
   MessageSelectMenu,
 } from 'discord.js';
-import { asyncCatch } from '../../utils/asyncCatch';
-import { createResponse } from './createResponse';
-import { ThanksInteraction, ThanksInteractionType } from './db_model';
-import { _ } from '../../utils/pluralize';
-import { POINT_LIMITER_IN_MINUTES } from '../../env';
+import { asyncCatch } from '../../utils/asyncCatch.js';
+import { createResponse } from './createResponse.js';
+import { ThanksInteraction, ThanksInteractionType } from './db_model.js';
+import { _ } from '../../utils/pluralize.js';
+import { POINT_LIMITER_IN_MINUTES } from '../../env.js';
 
 const memoryCache = new Map<string, Message>();
 

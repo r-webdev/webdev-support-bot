@@ -1,11 +1,11 @@
 import type { ApplicationCommandOptionChoice, Client, CommandInteraction } from 'discord.js';
 
-import { ApplicationCommandOptionType } from '../../../enums';
+import { ApplicationCommandOptionType } from '../../../enums.js';
 import type { CommandDataWithHandler } from '../../../types';
-import { map } from '../../utils/map';
-import type { ValueOrNullary } from '../../utils/valueOrCall';
-import { valueOrCall } from '../../utils/valueOrCall';
-import { javascript } from './handlers/javascript';
+import { map } from '../../utils/map.js';
+import type { ValueOrNullary } from '../../utils/valueOrCall.js';
+import { valueOrCall } from '../../utils/valueOrCall.js';
+import { javascript } from './handlers/javascript.js';
 
 const resourceMessages = new Map<string, ValueOrNullary<{ content: string }>>([
   javascript,

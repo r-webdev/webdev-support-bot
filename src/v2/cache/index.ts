@@ -1,8 +1,8 @@
 import type { Message } from 'discord.js';
 
-import { upsert, get } from './cacheFns';
+import { upsert, get } from './cacheFns.js';
 
-export * from './cacheFns';
+export * from './cacheFns.js';
 
 type ConditionLimit = { delay: number; type: string; meta?: unknown };
 

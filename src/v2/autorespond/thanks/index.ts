@@ -4,17 +4,17 @@ import type { Client } from 'discord.js';
 
 import {
   POINT_LIMITER_IN_MINUTES,
-} from '../../env';
-import HelpfulRoleMember from '../../helpful_role/db_model';
-import pointHandler from '../../helpful_role/point_handler';
-import { stripMarkdownQuote } from '../../utils/content_format';
-import { createEmbed } from '../../utils/discordTools';
-import { mapʹ } from '../../utils/map';
-import { difference } from '../../utils/sets';
-import type { ThanksInteractionType } from './db_model';
-import { ThanksInteraction } from './db_model';
-import { handleThreadThanks } from './threadThanks';
-import { createResponse } from './createResponse';
+} from '../../env.js';
+import HelpfulRoleMember from '../../helpful_role/db_model.js';
+import pointHandler from '../../helpful_role/point_handler.js';
+import { stripMarkdownQuote } from '../../utils/content_format.js';
+import { createEmbed } from '../../utils/discordTools.js';
+import { mapʹ } from '../../utils/map.js';
+import { difference } from '../../utils/sets.js';
+import type { ThanksInteractionType } from './db_model.js';
+import { ThanksInteraction } from './db_model.js';
+import { handleThreadThanks } from './threadThanks.js';
+import { createResponse } from './createResponse.js';
 
 
 type CooldownUser = {

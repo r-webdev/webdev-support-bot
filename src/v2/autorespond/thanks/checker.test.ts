@@ -1,4 +1,4 @@
-import checker from './checker';
+import checker from './checker.js';
 
 describe('thanks checked', () => {
   test.each([

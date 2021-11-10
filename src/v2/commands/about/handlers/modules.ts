@@ -1,4 +1,4 @@
-import { createMarkdownCodeBlock } from '../../../utils/discordTools';
+import { createMarkdownCodeBlock } from '../../../utils/discordTools.js';
 
 export const modules: [string, string] = [
   'modules',

@@ -1,4 +1,4 @@
-import { vscode as vscode_emoji } from '../../../utils/emojis';
+import { vscode as vscode_emoji } from '../../../utils/emojis.js';
 
 export const vscode: [string, string] = [
   'vscode',

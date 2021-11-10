@@ -1,17 +1,17 @@
-import type { ApplicationCommandOptionChoice, Client } from 'discord.js';
+import type { ApplicationCommandOptionChoice } from 'discord.js';
 
 import type { CommandDataWithHandler } from '../../../types';
-import { ADMIN_ROLE_ID, HELPFUL_ROLE_ID, MOD_ROLE_ID, SERVER_ID } from '../../env';
-import { map } from '../../utils/map';
-import type { ValueOrNullary } from '../../utils/valueOrCall';
-import { valueOrCall } from '../../utils/valueOrCall';
-import { flexbox } from '../about/handlers/flexbox';
-import { lockfile } from '../about/handlers/lockfile';
-import { modules } from '../about/handlers/modules';
-import { vscode } from '../about/handlers/vscode';
-import { code } from '../please/handlers/code';
-import { format } from '../please/handlers/format';
-import { jquery } from '../whyno/handlers/jquery';
+import { ADMIN_ROLE_ID, HELPFUL_ROLE_ID, MOD_ROLE_ID, SERVER_ID } from '../../env.js';
+import { map } from '../../utils/map.js';
+import type { ValueOrNullary } from '../../utils/valueOrCall.js';
+import { valueOrCall } from '../../utils/valueOrCall.js';
+import { flexbox } from '../about/handlers/flexbox.js';
+import { lockfile } from '../about/handlers/lockfile.js';
+import { modules } from '../about/handlers/modules.js';
+import { vscode } from '../about/handlers/vscode.js';
+import { code } from '../please/handlers/code.js';
+import { format } from '../please/handlers/format/index.js';
+import { jquery } from '../whyno/handlers/jquery.js';
 
 const aboutMessages = new Map<string, ValueOrNullary<string>>([
   jquery,

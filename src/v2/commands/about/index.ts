@@ -6,13 +6,13 @@ import type {
 } from 'discord.js';
 
 import type { CommandDataWithHandler } from '../../../types';
-import { map } from '../../utils/map';
-import type { ValueOrNullary } from '../../utils/valueOrCall';
-import { valueOrCall } from '../../utils/valueOrCall';
-import { flexbox } from './handlers/flexbox';
-import { lockfile } from './handlers/lockfile';
-import { modules } from './handlers/modules';
-import { vscode } from './handlers/vscode';
+import { map } from '../../utils/map.js';
+import type { ValueOrNullary } from '../../utils/valueOrCall.js';
+import { valueOrCall } from '../../utils/valueOrCall.js';
+import { flexbox } from './handlers/flexbox.js';
+import { lockfile } from './handlers/lockfile.js';
+import { modules } from './handlers/modules.js';
+import { vscode } from './handlers/vscode.js';
 
 const aboutMessages = new Map<string, ValueOrNullary<string>>([
   vscode,

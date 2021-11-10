@@ -1,5 +1,5 @@
 import { parse } from 'node-html-parser';
-import { mapʹ } from '../../utils/map';
+import { mapʹ } from '../../utils/map.js';
 
 const deprecatedElementsMap = new Map([
   [

@@ -16,8 +16,8 @@ import type {
 } from 'discord.js';
 import { MessageComponentTypes } from 'discord.js/typings/enums';
 
-import { AWAIT_MESSAGE_TIMEOUT } from '../../env';
-import { ExternalResolver } from './ExternalResolver';
+import { AWAIT_MESSAGE_TIMEOUT } from '../../env.js';
+import { ExternalResolver } from './ExternalResolver.js';
 
 export type QuestionBase = {
   body: string;
