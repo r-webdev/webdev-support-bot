@@ -1,9 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`inform users that visual studio code is great and free 1`] = `
-"> :bulb: consider using a lightweight, customizeable and monthly updated editor such as
-> 
-> Visual Studio Code - <https://code.visualstudio.com/>
-> 
-> It's free & available cross platform and next to WebStorm the go to editor in this industry."
-`;
