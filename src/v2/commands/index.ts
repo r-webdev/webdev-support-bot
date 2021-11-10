@@ -4,6 +4,7 @@ import type {
   ApplicationCommandData,
   ApplicationCommandManager,
   Client,
+  Guild,
   GuildApplicationCommandManager,
   GuildResolvable,
 } from 'discord.js';
@@ -133,12 +134,13 @@ export const registerCommands = async (client: Client): Promise<void> => {
   }
 
   for (const [, oauth2Guild] of await client.guilds.fetch()) {
-    const guild = await oauth2Guild.fetch();
-    const cmds = await guild.commands.fetch();
+    let guild: { name: string } | Guild = { name: 'FAILED_TO_FETCH_GUILD' };
     try {
-      await addCommands(cmds, guildCommands, guild.commands);
-    } catch (e){
-      console.error(`Failed to add commands to guild: ${guild.name}`, e)
+      guild = await oauth2Guild.fetch();
+      const cmds = await (guild as Guild).commands.fetch();
+      await addCommands(cmds, guildCommands, (guild as Guild).commands);
+    } catch (e) {
+      console.error(`Failed to add commands to guild: ${guild.name}`, e);
     }
   }
   console.log('Guild specific commands added');
@@ -215,15 +217,25 @@ async function addCommands(
   );
 }
 
-function getDestination(commandManager: ApplicationCommandManager<ApplicationCommand<{ guild: GuildResolvable; }>, { guild: GuildResolvable; }, null> | GuildApplicationCommandManager) {
-  return "guild" in commandManager ? `Guild: ${commandManager.guild.name}` : 'App';
+function getDestination(
+  commandManager:
+    | ApplicationCommandManager<
+        ApplicationCommand<{ guild: GuildResolvable }>,
+        { guild: GuildResolvable },
+        null
+      >
+    | GuildApplicationCommandManager
+) {
+  return 'guild' in commandManager
+    ? `Guild: ${commandManager.guild.name}`
+    : 'App';
 }
 
 function createNewCommands(
   cmdDescriptions: Map<string, CommandDataWithHandler>,
   cmdMgr: ApplicationCommandManager | GuildApplicationCommandManager
 ) {
-  const destination = getDestination(cmdMgr)
+  const destination = getDestination(cmdMgr);
   return map(async (name: string) => {
     const command = cmdDescriptions.get(name);
     // this is always true
@@ -241,7 +253,7 @@ function editExistingCommands(
   cmdMgr: ApplicationCommandManager | GuildApplicationCommandManager,
   existingCommands: Map<string, ApplicationCommand>
 ) {
-  const destination = getDestination(cmdMgr)
+  const destination = getDestination(cmdMgr);
   return map((name: string) => {
     const cmd = cmdDescriptions.get(name);
     const existing = existingCommands.get(name);
@@ -265,7 +277,7 @@ function deleteRemovedCommands(
   cmdMgr: ApplicationCommandManager | GuildApplicationCommandManager,
   existingCommands: Map<string, ApplicationCommand>
 ) {
-  const destination = getDestination(cmdMgr)
+  const destination = getDestination(cmdMgr);
   return map(async (name: string) => {
     const existing = existingCommands.get(name)!;
     console.warn(`Deleting ${name} from ${destination}`);
