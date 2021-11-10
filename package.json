@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "TS_NODE_FILES=true TS_NODE_PROJECT=\"./tsconfig.json\" nodemon -r dotenv/config -x  node --experimental-specifier-resolution=node --loader ts-node/esm ./src/index.ts",
     "start": "node build/index.js",
-    "build": "yarn test:ci && tsc",
+    "build": "tsc",
     "lint": "eslint src && tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
