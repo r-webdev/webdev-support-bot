@@ -43,7 +43,7 @@ const mapTransformToChoices = map(
 
 export const shitpostInteraction: CommandDataWithHandler = {
   description:
-    'A fun little shitpost command using some of the about/please commands',
+    'A fun little shitpost command using some of the about/please/whyno commands',
   guildValidate: guild => guild.id === SERVER_ID,
   handler: async (client, interaction) => {
     const topic = interaction.options.getString('topic');
@@ -53,6 +53,7 @@ export const shitpostInteraction: CommandDataWithHandler = {
 
     if(canUseCommand(roles)){
       await interaction.reply({ephemeral: true, content: "This is only available to helpful members"})
+      return;
     }
 
     if (replacement.match(/<@[!&]?\d+>/)) {

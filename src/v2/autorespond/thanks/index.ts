@@ -3,14 +3,10 @@ import type { Message, TextChannel } from 'discord.js';
 import type { Client } from 'discord.js';
 
 import {
-  FINAL_CACHE_EXPIRATION_IN_SECONDS,
   POINT_LIMITER_IN_MINUTES,
 } from '../../env';
 import HelpfulRoleMember from '../../helpful_role/db_model';
-import pointHandler, {
-  generatePointsCacheEntryKey,
-} from '../../helpful_role/point_handler';
-import { cache } from '../../spam_filter';
+import pointHandler from '../../helpful_role/point_handler';
 import { stripMarkdownQuote } from '../../utils/content_format';
 import { createEmbed } from '../../utils/discordTools';
 import { mapʹ } from '../../utils/map';
@@ -20,7 +16,6 @@ import { ThanksInteraction } from './db_model';
 import { handleThreadThanks } from './threadThanks';
 import { createResponse } from './createResponse';
 
-const TIMEOUT = Number.parseInt(FINAL_CACHE_EXPIRATION_IN_SECONDS) * 1000;
 
 type CooldownUser = {
   id: string;
