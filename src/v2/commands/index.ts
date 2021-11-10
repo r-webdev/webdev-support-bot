@@ -137,6 +137,7 @@ export const registerCommands = async (client: Client): Promise<void> => {
     const cmds = await guild.commands.fetch();
     await addCommands(cmds, guildCommands, guild.commands);
   }
+  console.log('Guild specific commands added');
 
   const discordCommandsById = await client.application.commands.fetch();
   await addCommands(
@@ -149,7 +150,6 @@ export const registerCommands = async (client: Client): Promise<void> => {
   // await client.application?.commands.set([{type:''}])
   // await client.guilds.cache.get('618935554171469834').commands.set([]);
 
-  console.log('Guild specific commands added');
   // client.guilds.cache.forEach(guild => {
   //   guild.commands.set([])
   // })
@@ -211,16 +211,21 @@ async function addCommands(
   );
 }
 
+function getDestination(commandManager: ApplicationCommandManager<ApplicationCommand<{ guild: GuildResolvable; }>, { guild: GuildResolvable; }, null> | GuildApplicationCommandManager) {
+  return "guild" in commandManager ? `Guild: ${commandManager.guild.name}` : 'App';
+}
+
 function createNewCommands(
   cmdDescriptions: Map<string, CommandDataWithHandler>,
   cmdMgr: ApplicationCommandManager | GuildApplicationCommandManager
 ) {
+  const destination = getDestination(cmdMgr)
   return map(async (name: string) => {
     const command = cmdDescriptions.get(name);
     // this is always true
     if (command) {
       const { onAttach, handler, ...rest } = command;
-      console.info(`Creating ${name}`);
+      console.info(`Adding Command ${name} for ${destination}`);
 
       return cmdMgr.create(rest);
     }
@@ -232,6 +237,7 @@ function editExistingCommands(
   cmdMgr: ApplicationCommandManager | GuildApplicationCommandManager,
   existingCommands: Map<string, ApplicationCommand>
 ) {
+  const destination = getDestination(cmdMgr)
   return map((name: string) => {
     const cmd = cmdDescriptions.get(name);
     const existing = existingCommands.get(name);
@@ -244,12 +250,7 @@ function editExistingCommands(
         getRelevantCmdProperties(existing)
       )
     ) {
-      console.info(`Updating ${name}`);
-
-      console.log(
-        getRelevantCmdProperties(cmd),
-        getRelevantCmdProperties(existing)
-      );
+      console.info(`Updating ${name} for ${destination}`);
 
       return cmdMgr.edit(existing.id, command);
     }
@@ -260,9 +261,10 @@ function deleteRemovedCommands(
   cmdMgr: ApplicationCommandManager | GuildApplicationCommandManager,
   existingCommands: Map<string, ApplicationCommand>
 ) {
+  const destination = getDestination(cmdMgr)
   return map(async (name: string) => {
     const existing = existingCommands.get(name)!;
-    console.warn(`Deleting ${name}`);
+    console.warn(`Deleting ${name} from ${destination}`);
 
     return cmdMgr.delete(existing.id);
   });
