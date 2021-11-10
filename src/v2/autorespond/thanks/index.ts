@@ -69,6 +69,7 @@ const handleThanks = async (msg: Message): Promise<void> => {
 
   const previousThanksInteractions: ThanksInteractionType[] =
     await ThanksInteraction.find({
+      thanker: msg.author.id,
       createdAt: {
         $gte: Date.now() - Number.parseInt(POINT_LIMITER_IN_MINUTES) * 60000,
       },
