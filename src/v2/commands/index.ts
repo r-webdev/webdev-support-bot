@@ -135,7 +135,11 @@ export const registerCommands = async (client: Client): Promise<void> => {
   for (const [, oauth2Guild] of await client.guilds.fetch()) {
     const guild = await oauth2Guild.fetch();
     const cmds = await guild.commands.fetch();
-    await addCommands(cmds, guildCommands, guild.commands);
+    try {
+      await addCommands(cmds, guildCommands, guild.commands);
+    } catch (e){
+      console.error(`Failed to add commands to guild: ${guild.name}`, e)
+    }
   }
   console.log('Guild specific commands added');
 
