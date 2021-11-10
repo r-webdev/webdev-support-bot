@@ -95,7 +95,7 @@ export async function handleThreadThanks(msg: Message): Promise<void> {
       new MessageActionRow().addComponents(
         new MessageButton()
           .setLabel('Nevermind')
-          .setStyle('DANGER')
+          .setStyle('SECONDARY')
           .setCustomId(`threadThanks🤔${msg.id}🤔cancel🤔${msg.author.id}`)
       ),
     ],
@@ -191,7 +191,7 @@ function sendCloseThreadQuery(
     components: [
       new MessageActionRow().addComponents(
         new MessageButton()
-          .setStyle('DANGER')
+          .setStyle('PRIMARY')
           .setLabel('Yes please!')
           .setCustomId(`closeThread🤔${interaction.channel.id}🤔close`)
       ),

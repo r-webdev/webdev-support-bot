@@ -129,7 +129,7 @@ const handler = async (client: Client, interaction: CommandInteraction): Promise
       const buttonRow = new MessageActionRow().addComponents(
         new MessageButton()
           .setLabel('Cancel')
-          .setStyle('DANGER')
+          .setStyle('SECONDARY')
           .setCustomId(`mdn🤔${msgId}🤔cancel`)
       );
 

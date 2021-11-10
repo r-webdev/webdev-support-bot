@@ -44,7 +44,7 @@ export function createResponse(thankedUsers: Collection<string, User>, authorId:
             )
           : new MessageButton()
             .setCustomId(`thanks🤔${authorId}🤔${thankedUsers.first().id}`)
-            .setStyle('DANGER')
+            .setStyle('SECONDARY')
             .setLabel('This was an accident, UNDO!')
       ),
     ],

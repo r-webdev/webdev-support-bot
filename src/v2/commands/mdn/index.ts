@@ -110,7 +110,7 @@ const mdnHandler = async (
     const buttonRow = new MessageActionRow().addComponents(
       new MessageButton()
         .setLabel('Cancel')
-        .setStyle('DANGER')
+        .setStyle('SECONDARY')
         .setCustomId(`mdn🤔${msgId}🤔cancel`)
     );
 

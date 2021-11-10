@@ -249,7 +249,7 @@ const createJobPost = async (
             .setEmoji('✉️'),
           new MessageButton()
             .setCustomId(`job🤔${userID}🤔delete`)
-            .setStyle('DANGER')
+            .setStyle('SECONDARY')
             .setLabel('Delete my post (poster only)')
             .setEmoji('🗑')
         ),
