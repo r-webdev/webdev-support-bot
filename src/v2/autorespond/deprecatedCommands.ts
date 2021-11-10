@@ -36,7 +36,7 @@ export function handleDeprecatedCommands(msg: Message): boolean {
     msg.reply(
       `It looks like you're attempting to use a command. The web dev bot commands are now using the discord slash commands. Give \`/${
         diffCommands.get(cmd) ?? cmd
-      }\` a go`
+      }\` a go.`
     );
     return true;
   }
