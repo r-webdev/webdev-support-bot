@@ -14,7 +14,7 @@ import HelpfulRoleMember from './db_model.js';
 
 import type { IUser } from '.';
 
-let lastDecay = Date.now();
+const lastDecay = Date.now();
 
 // export const decay = async (
 //   { guild, author: { id } }: Message,

@@ -133,7 +133,7 @@ const handleDecayRequest = async (interaction: CommandInteraction) => {
   const { diff } = getTimeDiffToDecay();
   const timer = Number.parseInt(POINT_DECAY_TIMER);
 
-  let [hours, minutes]: Array<string | number> = (timer - diff)
+  let [hours, minutes]: (string | number)[] = (timer - diff)
     .toString()
     .split('.');
 

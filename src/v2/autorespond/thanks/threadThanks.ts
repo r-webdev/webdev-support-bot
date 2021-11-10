@@ -12,11 +12,13 @@ import {
   Collection,
   MessageSelectMenu,
 } from 'discord.js';
-import { asyncCatch } from '../../utils/asyncCatch.js';
-import { createResponse } from './createResponse.js';
-import { ThanksInteraction, ThanksInteractionType } from './db_model.js';
-import { _ } from '../../utils/pluralize.js';
+
 import { POINT_LIMITER_IN_MINUTES } from '../../env.js';
+import { asyncCatch } from '../../utils/asyncCatch.js';
+import { _ } from '../../utils/pluralize.js';
+import { createResponse } from './createResponse.js';
+import type { ThanksInteractionType } from './db_model.js';
+import { ThanksInteraction } from './db_model.js';
 
 const memoryCache = new Map<string, Message>();
 
@@ -28,7 +30,7 @@ export async function handleThreadThanks(msg: Message): Promise<void> {
 
   const oldResponseId = [msg.author.id, msg.channel.id].join('|');
   if (memoryCache.has(oldResponseId)) {
-    await memoryCache.get(oldResponseId).delete().catch(e => console.error("message already deleted")).finally(() => { memoryCache.delete(oldResponseId) });
+    await memoryCache.get(oldResponseId).delete().catch(error => { console.error("message already deleted"); }).finally(() => { memoryCache.delete(oldResponseId) });
   }
   // channel.members.fetch should return a collection
   const [members, previousInteractions]: [
@@ -41,7 +43,7 @@ export async function handleThreadThanks(msg: Message): Promise<void> {
     ThanksInteraction.find({
       thanker: msg.author.id,
       createdAt: {
-        $gte: Date.now() - Number.parseInt(POINT_LIMITER_IN_MINUTES) * 60000,
+        $gte: Date.now() - Number.parseInt(POINT_LIMITER_IN_MINUTES) * 60_000,
       },
     }),
   ]);
@@ -69,7 +71,7 @@ export async function handleThreadThanks(msg: Message): Promise<void> {
   const response = await msg.reply({
     content: [
       "Hey, it looks like you're trying to thank one or many users, but haven't specified who. Who would you like to thank?",
-      alreadyThanked.length
+      alreadyThanked.length > 0
         ? _`There ${_.mapper({ 1: 'is' }, 'are')} **${_.n} user${
             _.s
           } that you can't thank as you've thanked them recently**, so they won't show up as an option.`(
@@ -113,7 +115,7 @@ export function attachThreadThanksHandler(client: Client): void {
       if (!(interaction.isSelectMenu() || interaction.isButton())) {
         return;
       }
-      const channel = interaction.channel;
+      const {channel} = interaction;
       const [category, msgId, type, userId] = interaction.customId.split('🤔');
 
       if (category !== 'threadThanks') {
@@ -219,7 +221,7 @@ export function attachThreadClose(client: Client) {
 
       const channel = activeThreads.threads.get(channelId);
 
-      if (!channel || channel.archived === true) {
+      if (!channel || channel.archived) {
         interaction.reply({ content: '' });
       }
 

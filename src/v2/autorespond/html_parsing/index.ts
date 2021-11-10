@@ -31,7 +31,7 @@ export function detectDeprecatedHTML(msg: Message): boolean {
   const { content, channel, author } = msg;
 
   const deprecated = [...getDeprecatedElements(content)].flat(1);
-  if (deprecated.length) {
+  if (deprecated.length > 0) {
     const deprecatedTags = deprecated.map(([item]) => `\`<${item}>\``);
     const template = _`Hey <@!${author.id}>, I've noticed you're using ${
       _.n

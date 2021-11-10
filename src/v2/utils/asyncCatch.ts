@@ -2,8 +2,8 @@ export function asyncCatch<T extends readonly unknown[],K>(fn:(...args:T) => Pro
   return async (...args: T): Promise<K> => {
     try {
       return await fn(...args)
-    } catch(e) {
-      console.error(e)
+    } catch(error) {
+      console.error(error)
     }
   }
 }

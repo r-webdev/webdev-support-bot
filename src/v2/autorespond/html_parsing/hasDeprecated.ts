@@ -1,4 +1,5 @@
 import { parse } from 'node-html-parser';
+
 import { mapʹ } from '../../utils/map.js';
 
 const deprecatedElementsMap = new Map([
@@ -124,7 +125,7 @@ export function hasDeprecatedHTMLElementInSource(str: string) {
   const deprecatedElements = root.querySelectorAll(deprecatedElSelector)
 
   const uniqueElements = new Set(deprecatedElements.map(item => item.rawTagName.toLowerCase()))
-  if(uniqueElements.size) {
+  if(uniqueElements.size > 0) {
     return [...mapʹ(item => [item, deprecatedElementsMap.get(item)], uniqueElements)]
   }
   return false

@@ -13,7 +13,7 @@ import {
 import { providers } from './urlTools.js';
 
 export const createMarkdownLink = (title: string, url: string): string =>
-  // eslint-disable-next-line unicorn/prefer-replace-all
+   
   `[${title}](${url.replace(/\)/gu, '\\)')})`;
 
 export const BASE_DESCRIPTION = `

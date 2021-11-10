@@ -9,10 +9,10 @@ import { stripMarkdownQuote } from '../../utils/content_format.js';
 import { createEmbed } from '../../utils/discordTools.js';
 import { mapʹ } from '../../utils/map.js';
 import { difference } from '../../utils/sets.js';
+import { createResponse } from './createResponse.js';
 import type { ThanksInteractionType } from './db_model.js';
 import { ThanksInteraction } from './db_model.js';
 import { handleThreadThanks } from './threadThanks.js';
-import { createResponse } from './createResponse.js';
 
 type CooldownUser = {
   id: string;
@@ -62,7 +62,7 @@ const handleThanks = async (msg: Message): Promise<void> => {
     await ThanksInteraction.find({
       thanker: msg.author.id,
       createdAt: {
-        $gte: Date.now() - Number.parseInt(POINT_LIMITER_IN_MINUTES) * 60000,
+        $gte: Date.now() - Number.parseInt(POINT_LIMITER_IN_MINUTES) * 60_000,
       },
     }).exec();
 

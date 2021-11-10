@@ -17,7 +17,7 @@ const isNotTooLong = length => (str:string) => {
 const and = <T,K>(...fns:((input:T) => K)[]) => (input:T):K | true=> {
   for (const fn of fns) {
     const item: unknown = fn(input)
-    if(item !== true) return item as K
+    if(item !== true) {return item as K}
   }
   return true
 }

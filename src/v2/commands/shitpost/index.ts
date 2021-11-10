@@ -49,14 +49,14 @@ export const shitpostInteraction: CommandDataWithHandler = {
     const topic = interaction.options.getString('topic');
     const replacement = interaction.options.getString('replacement');
     const content = aboutMessages.get(topic);
-    const roles = interaction.member.roles;
+    const {roles} = interaction.member;
 
     if(canUseCommand(roles)){
       await interaction.reply({ephemeral: true, content: "This is only available to helpful members"})
       return;
     }
 
-    if (replacement.match(/<@[!&]?\d+>/)) {
+    if (/<@[!&]?\d+>/.test(replacement)) {
       await interaction.reply({
         content: "Please don't try to tag users with this feature!",
         ephemeral: true,

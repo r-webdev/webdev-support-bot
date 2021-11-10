@@ -1,6 +1,8 @@
-import { MessageButton, User } from 'discord.js';
+import { MessageButton } from 'discord.js';
 import { MessageActionRow, MessageSelectMenu } from 'discord.js';
-import { EmbedField, Collection } from 'discord.js';
+import type { User } from 'discord.js';
+import type { EmbedField, Collection } from 'discord.js';
+
 import { clampLength } from '../../utils/clampStr.js';
 import { createEmbed } from '../../utils/discordTools.js';
 

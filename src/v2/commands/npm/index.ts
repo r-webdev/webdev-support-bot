@@ -1,4 +1,4 @@
-import { User } from '@sentry/types';
+import type { User } from '@sentry/types';
 import { formatDistanceToNow } from 'date-fns';
 import type {
   EmbedField,

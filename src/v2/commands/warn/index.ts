@@ -3,17 +3,18 @@ import type {
   Client,
   CommandInteraction,
 } from 'discord.js';
+import { zip } from 'domyno';
+import Fuse from 'fuse.js';
 
 import type { CommandDataWithHandler } from '../../../types';
-import { map } from '../../utils/map.js';
-import type { ValueOrNullary } from '../../utils/valueOrCall.js';
-import { valueOrCall } from '../../utils/valueOrCall.js';
-import Fuse from 'fuse.js';
-import { zip } from 'domyno';
-import { pluckʹ } from '../../utils/pluck.js';
 import { asyncCatch } from '../../utils/asyncCatch.js';
 import { callOrValue } from '../../utils/callOrValue.js';
+import { map } from '../../utils/map.js';
+import { pluckʹ } from '../../utils/pluck.js';
 import { _ } from '../../utils/pluralize.js';
+import type { ValueOrNullary } from '../../utils/valueOrCall.js';
+import { valueOrCall } from '../../utils/valueOrCall.js';
+
 
 const listFormatter = new Intl.ListFormat()
 const rulesId = '904060678699089950'
@@ -108,9 +109,9 @@ warn msg: ${warnMessage(rules.length)}
 };
 
 function permutations<T>(items: T[][]) {
-  if(items.length === 0) return []
+  if(items.length === 0) {return []}
   const [item, ...rest] = items;
-  if (rest.length === 0) return item.map(x => [x]);
+  if (rest.length === 0) {return item.map(x => [x]);}
 
   const latterPers = permutations(rest);
 
@@ -132,7 +133,7 @@ function removeRepeated<T>(arr: Fuse.FuseResult<T>[][]) {
   console.log(arr)
   return arr.filter(x => {
     const s = new Set(x.map(i=>i.refIndex))
-    if(s.size !== x.length) return false
+    if(s.size !== x.length) {return false}
     return true
   })
 }

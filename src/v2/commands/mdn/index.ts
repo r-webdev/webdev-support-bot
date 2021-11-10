@@ -1,4 +1,4 @@
-/* eslint-disable unicorn/prefer-query-selector */
+ 
 import type {
   ButtonInteraction,
   Client,

@@ -21,14 +21,14 @@ export function search(fn: (path: ObjectKeyType[], value: any) => any) {
       const len = value.length;
       for (let i = 0; i < len; i++) {
         const item = value[i];
-        if (seen.has(item)) continue;
+        if (seen.has(item)) {continue;}
         yield* _recursiveSearch(item, path.concat(i), seen, skipOnMatch);
       }
       return;
     }
 
     for (const [key, val] of Object.entries(value)) {
-      if (seen.has(val)) continue;
+      if (seen.has(val)) {continue;}
       yield* _recursiveSearch(val, path.concat(key), seen, skipOnMatch);
     }
   }

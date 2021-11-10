@@ -120,7 +120,7 @@ export class MultistepForm<T extends Record<string, MultiStepFormStep>> {
 
     collector.on('collect', handler);
     setTimeout(() => {
-      if(resolver.settled) return
+      if(resolver.settled) {return}
 
       collector.off('collect', handler)
       resolver.resolve(__cancelled__)

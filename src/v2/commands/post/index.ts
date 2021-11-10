@@ -1,4 +1,4 @@
-/* eslint-disable no-await-in-loop */
+ 
 import type {
   Message,
   CollectorFilter,
@@ -17,8 +17,10 @@ import {
 import { filter } from 'domyno';
 
 import type { CommandDataWithHandler } from '../../../types';
+import { SERVER_ID } from '../../env.js';
 import { cache } from '../../spam_filter/index.js';
 import { MultistepForm } from '../../utils/MultistepForm.js';
+import { asyncCatch } from '../../utils/asyncCatch.js';
 import { createEmbed, createMarkdownCodeBlock } from '../../utils/discordTools.js';
 import { map } from '../../utils/map.js';
 import { pipe } from '../../utils/pipe.js';
@@ -30,8 +32,6 @@ import {
   POST_LIMITER_IN_HOURS,
 } from './env.js';
 import { questions } from './questions.v2.js';
-import { asyncCatch } from '../../utils/asyncCatch.js';
-import { SERVER_ID } from '../../env.js';
 
 const dateFormatter = new Intl.DateTimeFormat('en-US', {
   month: 'long',

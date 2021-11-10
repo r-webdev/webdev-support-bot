@@ -1,6 +1,7 @@
-import { EventEmitter } from 'events';
-import { castArray } from './castArray.js';
 import { addBreadcrumb, Severity } from '@sentry/node';
+import { EventEmitter } from 'events';
+
+import { castArray } from './castArray.js';
 
 type WrappedValue<T> = {
   v: T;
@@ -13,7 +14,7 @@ type ValueSetItem<Key, Value> = {
   key: Key;
 };
 
-interface CacheOptions {
+type CacheOptions = {
   /**
    * If enabled, all values will be stringified during the set operation
    *
@@ -137,7 +138,9 @@ const DEFAULT_OPTIONS: CacheOptions = {
  */
 export class Cache<Value = any, Key = any> extends EventEmitter {
   #data: Map<Key, WrappedValue<Value>>;
+
   options: CacheOptions;
+
   checkTimeout: NodeJS.Timeout;
 
   constructor(options: CacheOptions) {
@@ -305,9 +308,9 @@ export class Cache<Value = any, Key = any> extends EventEmitter {
         this.del(key);
       }
       return true;
-    } else {
+    } 
       return false;
-    }
+    
   }
 
   getTtl(key: Key): number | undefined {
@@ -318,9 +321,9 @@ export class Cache<Value = any, Key = any> extends EventEmitter {
     const value = this.#data.get(key);
     if (this.#data.has(key) && this._check(key, value)) {
       return value.t;
-    } else {
+    } 
       return void 0;
-    }
+    
   }
 
   /**
@@ -385,13 +388,13 @@ export class Cache<Value = any, Key = any> extends EventEmitter {
 
   private _killCheckPeriod() {
     if (this.checkTimeout != null) {
-      const checkTimeout = this.checkTimeout;
+      const {checkTimeout} = this;
       this.checkTimeout = null;
-      return clearTimeout(checkTimeout);
+      clearTimeout(checkTimeout); 
     }
   }
 
-  private _checkData(startPeriod: boolean = false): void {
+  private _checkData(startPeriod = false): void {
     const ref = this.#data;
 
     for (const [key, value] of ref) {

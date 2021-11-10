@@ -5,6 +5,7 @@ export class ExternalResolver<T> extends Promise<T> {
   readonly #reject: (reason: unknown) => void;
 
   #resolved = false;
+
   #rejected = false;
 
   public constructor() {

@@ -1,12 +1,12 @@
 import type { Message, GuildMember } from 'discord.js';
 
-import { startTime } from '../index.js';
 import {
   IS_PROD,
   HELPFUL_ROLE_ID,
   HELPFUL_ROLE_POINT_THRESHOLD,
   POINT_LIMITER_IN_MINUTES,
 } from '../env.js';
+import { startTime } from '../index.js';
 import { cache } from '../spam_filter/index.js';
 import { createEmbed } from '../utils/discordTools.js';
 import HelpfulRoleMember from './db_model.js';

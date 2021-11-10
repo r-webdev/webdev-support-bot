@@ -4,7 +4,7 @@ export function some<T>(
   return function (iter: Iterable<T>) {
     let i = 0;
     for (const item of iter) {
-      if (predicate(item, i++, iter)) return true;
+      if (predicate(item, i++, iter)) {return true;}
     }
     return false;
   };

@@ -1,4 +1,4 @@
-import { Message } from 'discord.js';
+import type { Message } from 'discord.js';
 
 import { missingRightsDeletion } from './errors.js';
 
@@ -29,5 +29,5 @@ export const delayedMessageAutoDeletion = (
     }, timeout);
   }
 
-  return;
+  
 };

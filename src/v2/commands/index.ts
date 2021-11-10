@@ -11,9 +11,9 @@ import type {
 import { Collection } from 'discord.js';
 import { filter } from 'domyno';
 import { isEqual } from 'lodash-es';
+
 import type { CommandDataWithHandler } from '../../types';
 import { asyncCatch } from '../utils/asyncCatch.js';
-
 import { map, mapʹ } from '../utils/map.js';
 import { merge } from '../utils/merge.js';
 import { normalizeApplicationCommandData } from '../utils/normalizeCommand.js';
@@ -111,8 +111,8 @@ export const registerCommands = async (client: Client): Promise<void> => {
             content: "Couldn't recognize command.",
           });
         }
-      } catch (e) {
-        console.error(e);
+      } catch (error) {
+        console.error(error);
         await interaction.reply({
           ephemeral: true,
           content: 'Something went wrong when trying to execute the command',
@@ -123,13 +123,13 @@ export const registerCommands = async (client: Client): Promise<void> => {
 
   for (const { onAttach } of applicationCommands.values()) {
     // We're attaching these so it's fine
-    // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
+     
     onAttach?.(client);
   }
 
   for (const { onAttach } of guildCommands.values()) {
     // We're attaching these so it's fine
-    // eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
+     
     onAttach?.(client);
   }
 
@@ -139,8 +139,8 @@ export const registerCommands = async (client: Client): Promise<void> => {
       guild = await oauth2Guild.fetch();
       const cmds = await (guild as Guild).commands.fetch();
       await addCommands(cmds, guildCommands, (guild as Guild).commands);
-    } catch (e) {
-      console.error(`Failed to add commands to guild: ${guild.name}`, e);
+    } catch (error) {
+      console.error(`Failed to add commands to guild: ${guild.name}`, error);
     }
   }
   console.log('Guild specific commands added');
@@ -219,11 +219,7 @@ async function addCommands(
 
 function getDestination(
   commandManager:
-    | ApplicationCommandManager<
-        ApplicationCommand<{ guild: GuildResolvable }>,
-        { guild: GuildResolvable },
-        null
-      >
+    | ApplicationCommandManager
     | GuildApplicationCommandManager
 ) {
   return 'guild' in commandManager

@@ -1,4 +1,4 @@
-// eslint-disable-next-line import/no-namespace
+ 
 import ts from 'typescript';
 
 export function hasVarInSource(source: string): boolean {

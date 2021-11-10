@@ -1,4 +1,4 @@
-import { Message } from 'discord.js';
+import type { Message } from 'discord.js';
 
 const linebreakPattern = /\n/gim;
 

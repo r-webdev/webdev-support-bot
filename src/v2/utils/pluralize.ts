@@ -19,7 +19,7 @@ const pluralize = ((
   return (n: number) =>
     strs.reduce((acc, item, i) => {
       const exp = exprs[i - 1];
-      if (Array.isArray(exp)) return acc + listFormatter.format(exp) + item;
+      if (Array.isArray(exp)) {return acc + listFormatter.format(exp) + item;}
       return acc + callOrValue(exp, n) + item;
     });
 }) as PluralizeFunction;
