@@ -1,6 +1,6 @@
 import type { Message } from 'discord.js';
 
-import { applicationCommands } from '../commands/index.js';
+import { applicationCommands, guildCommands } from '../commands/index.js';
 
 const diffCommands = new Map(
   Object.entries({
@@ -12,13 +12,18 @@ const diffCommands = new Map(
     formatting: 'please format',
     format: 'please format',
     code: 'please code',
+    leaderboard: 'points leaderboard',
   })
 );
 
 const regex = new RegExp(
-  `^!(${[...applicationCommands.keys(), ...diffCommands.keys()].join(
-    '|'
-  )})(?: |$)`,
+  `^!(${[
+    ...new Set([
+      ...applicationCommands.keys(),
+      ...guildCommands.keys(),
+      ...diffCommands.keys(),
+    ]),
+  ].join('|')})(?: |$)`,
   'iu'
 );
 

@@ -34,7 +34,7 @@ import { shitpostInteraction } from './shitpost/index.js';
 // import { warn } from './warn/index.js';
 import { whynoInteraction } from './whyno/index.js';
 
-const guildCommands = new Map(
+export const guildCommands = new Map(
   [
     aboutInteraction,
     mdnCommand,
