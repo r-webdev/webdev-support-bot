@@ -7,7 +7,7 @@ import { valueOrCall } from '../../utils/valueOrCall';
 import { code } from './handlers/code';
 import { english } from './handlers/english';
 import { format } from './handlers/format';
-import { justAsk } from './handlers/justAsk';
+import { justAsk } from './handlers/justask';
 
 
 const pleaseMessages = new Map<string, ValueOrNullary<string>>([format, code, justAsk, english]);
