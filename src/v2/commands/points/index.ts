@@ -256,11 +256,11 @@ async function handlePointsSet(
   }
 
   const [prev, curr] = result;
-  const output = createPointsEmbed(`Points have been set manually for a user`, [
+  const output = createPointsEmbed(`A user's points have been set to ${points}`, [
     {
       inline: false,
       name: 'User',
-      value: `${member.user}`,
+      value: `${guildMember.user}`,
     },
     adminEmbedField(interaction),
   ]);
