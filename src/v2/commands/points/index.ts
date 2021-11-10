@@ -14,6 +14,7 @@ import {
   HELPFUL_ROLE_ID,
   HELPFUL_ROLE_POINT_THRESHOLD,
   POINT_DECAY_TIMER,
+  SERVER_ID,
 } from '../../env';
 import type { IUser } from '../../helpful_role';
 import HelpfulRoleMember from '../../helpful_role/db_model';
@@ -361,6 +362,7 @@ export const pointsHandlers: CommandDataWithHandler = {
   description: 'point commands',
   handler: handlePoints,
   name: 'points',
+  guildValidate: (guild) => guild.id === SERVER_ID,
   options: [
     {
       name: 'leaderboard',

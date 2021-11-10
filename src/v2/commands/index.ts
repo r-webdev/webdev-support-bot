@@ -8,13 +8,15 @@ import type {
   GuildResolvable,
 } from 'discord.js';
 import { Collection } from 'discord.js';
-import {isEqual} from 'lodash-es';
+import { filter } from 'domyno';
+import { isEqual } from 'lodash-es';
 import { CommandDataWithHandler } from '../../types';
 import { asyncCatch } from '../utils/asyncCatch';
 
-import { map } from '../utils/map';
+import { map, mapʹ } from '../utils/map';
 import { merge } from '../utils/merge';
 import { normalizeApplicationCommandData } from '../utils/normalizeCommand';
+import { pipe } from '../utils/pipe';
 import { difference, intersection } from '../utils/sets';
 // quick responses
 // base commands
@@ -46,7 +48,6 @@ const guildCommands = new Map(
     // warn // Not used atm
   ].map(command => [command.name, command])
 ); // placeholder for now
-
 
 export const applicationCommands = new Collection<
   string,
@@ -170,24 +171,41 @@ async function addCommands(
     discordChatInputCommandsById.map(value => [value.name, value])
   );
 
+  const validCommands = pipe<
+    Iterable<[string, CommandDataWithHandler]>,
+    Iterable<string>
+  >([
+    filter<[string, CommandDataWithHandler]>(
+      ([key, val]: [string, CommandDataWithHandler]) =>
+        'guild' in commandManager && val.guildValidate
+          ? val.guildValidate(commandManager.guild)
+          : true
+    ),
+    map(([key]) => key),
+  ]);
+
   const newCommands = difference(
-    commandDescriptions.keys(),
+    validCommands(commandDescriptions),
     discordCommands.keys()
   );
   const existingCommands = intersection(
-    commandDescriptions.keys(),
+    validCommands(commandDescriptions),
     discordCommands.keys()
   );
   const deletedCommands = difference<string>(
     discordCommands.keys(),
-    commandDescriptions.keys()
+    validCommands(commandDescriptions)
   );
 
   // const new = await client.application.commands.create()
   await Promise.all(
     merge(
       createNewCommands(commandDescriptions, commandManager)(newCommands),
-      editExistingCommands(commandDescriptions, commandManager, discordCommands)(existingCommands),
+      editExistingCommands(
+        commandDescriptions,
+        commandManager,
+        discordCommands
+      )(existingCommands),
       deleteRemovedCommands(commandManager, discordCommands)(deletedCommands)
     )
   );

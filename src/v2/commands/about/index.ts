@@ -1,4 +1,9 @@
-import type { ApplicationCommandOptionChoice, Client, CommandInteraction, Interaction } from 'discord.js';
+import type {
+  ApplicationCommandOptionChoice,
+  Client,
+  CommandInteraction,
+  Interaction,
+} from 'discord.js';
 
 import type { CommandDataWithHandler } from '../../../types';
 import { map } from '../../utils/map';
@@ -24,22 +29,6 @@ const mapTransformToChoices = map(
 );
 
 export const aboutInteraction: CommandDataWithHandler = {
-  description:
-    'Quick response for common "why" or "Tell me about..." questions',
-  handler: async (client: Client, interaction: CommandInteraction): Promise<void> => {
-    const topic = interaction.options.get('topic').value as string;
-    const user = interaction.options.getUser('tag');
-    const content = aboutMessages.get(topic);
-
-    if (content) {
-      interaction.reply(
-        `${user ? `${user}\n` : ''} ${valueOrCall(content).trim()}`
-      );
-      return;
-    }
-
-    interaction.reply(`An error occured when trying to call \`/about ${topic}`);
-  },
   name: 'about',
   options: [
     {
@@ -55,4 +44,23 @@ export const aboutInteraction: CommandDataWithHandler = {
       type: 'USER',
     },
   ],
+  description:
+    'Quick response for common "why" or "Tell me about..." questions',
+  handler: async (
+    client: Client,
+    interaction: CommandInteraction
+  ): Promise<void> => {
+    const topic = interaction.options.get('topic').value as string;
+    const user = interaction.options.getUser('tag');
+    const content = aboutMessages.get(topic);
+
+    if (content) {
+      interaction.reply(
+        `${user ? `${user}\n` : ''} ${valueOrCall(content).trim()}`
+      );
+      return;
+    }
+
+    interaction.reply(`An error occured when trying to call \`/about ${topic}`);
+  },
 };

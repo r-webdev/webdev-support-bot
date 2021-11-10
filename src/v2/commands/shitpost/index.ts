@@ -1,6 +1,7 @@
 import type { ApplicationCommandOptionChoice, Client } from 'discord.js';
 
 import type { CommandDataWithHandler } from '../../../types';
+import { ADMIN_ROLE_ID, HELPFUL_ROLE_ID, MOD_ROLE_ID, SERVER_ID } from '../../env';
 import { map } from '../../utils/map';
 import type { ValueOrNullary } from '../../utils/valueOrCall';
 import { valueOrCall } from '../../utils/valueOrCall';
@@ -43,14 +44,23 @@ const mapTransformToChoices = map(
 export const shitpostInteraction: CommandDataWithHandler = {
   description:
     'A fun little shitpost command using some of the about/please commands',
+  guildValidate: guild => guild.id === SERVER_ID,
   handler: async (client, interaction) => {
-    const topic = interaction.options.getString('topic')
+    const topic = interaction.options.getString('topic');
     const replacement = interaction.options.getString('replacement');
     const content = aboutMessages.get(topic);
+    const roles = interaction.member.roles;
 
-    console.log(replacement)
-    if(replacement.match(/<@[!&]?\d+>/)) {
-    interaction.reply({content:"Please don't try to tag users with this feature!", ephemeral: true})
+    if(canUseCommand(roles)){
+      await interaction.reply({ephemeral: true, content: "This is only available to helpful members"})
+    }
+
+    if (replacement.match(/<@[!&]?\d+>/)) {
+      await interaction.reply({
+        content: "Please don't try to tag users with this feature!",
+        ephemeral: true,
+      });
+      return
     }
 
     if (content) {
@@ -78,3 +88,14 @@ export const shitpostInteraction: CommandDataWithHandler = {
     },
   ],
 };
+
+function canUseCommand(roles) {
+  if (Array.isArray(roles)) {
+    if (![HELPFUL_ROLE_ID, MOD_ROLE_ID, ADMIN_ROLE_ID].some(role => roles.includes(role))) {
+      return true;
+    }
+  } else {
+    return ![HELPFUL_ROLE_ID, MOD_ROLE_ID, ADMIN_ROLE_ID].some(role => roles.cache.has(HELPFUL_ROLE_ID))
+  }
+  return false;
+}

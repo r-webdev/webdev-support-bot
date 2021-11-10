@@ -37,6 +37,7 @@ import {
 } from './env';
 import { questions } from './questions.v2';
 import { asyncCatch } from '../../utils/asyncCatch';
+import { SERVER_ID } from '../../env';
 
 const dateFormatter = new Intl.DateTimeFormat('en-US', {
   month: 'long',
@@ -359,6 +360,7 @@ export const jobPostCommand: CommandDataWithHandler = {
   name: 'post',
   description: 'Start the process of creating a new job post',
   handler: handleJobPostingRequest,
+  guildValidate: (guild) => guild.id === SERVER_ID,
   onAttach: client => {
     client.on('interactionCreate', asyncCatch(async interaction => {
       if (!interaction.isButton()) {
