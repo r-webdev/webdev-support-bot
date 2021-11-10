@@ -6,11 +6,13 @@ const diffCommands = new Map(
   Object.entries({
     jquery: 'about jquery',
     vscode: 'about vscode',
+    justask: 'please justask',
     modules: 'about modules',
     flexbox: 'about flexbox',
     lockfile: 'about lockfile',
     formatting: 'please format',
     format: 'please format',
+    points: 'points get',
     code: 'please code',
     leaderboard: 'points leaderboard',
   })

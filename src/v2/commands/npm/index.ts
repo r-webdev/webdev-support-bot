@@ -1,3 +1,4 @@
+import { User } from '@sentry/types';
 import { formatDistanceToNow } from 'date-fns';
 import type {
   EmbedField,
@@ -85,12 +86,13 @@ const handleNpmCommand = async (
     const firstTenResults = getFirstTenResults(json);
 
     if (firstTenResults.length === 1) {
-      await interaction.editReply({
-        content: '',
+      await interaction.channel.send({
+        content: `Displaying result for ${searchTerm}`,
         embeds: [
-          createEmbed(createNPMEmbed(firstTenResults[0])),
-        ] as unknown as MessageEmbed[],
+          createNPMEmbed(firstTenResults[0], interaction.user),
+        ]
       });
+      await interaction.editReply('👇 Display results below')
       return;
     }
 
@@ -152,40 +154,7 @@ const handleNpmCommand = async (
 
         interaction.channel.send({
           content: `Results for "${searchTerm}"`,
-          embeds: values.map(
-            ({
-              name,
-              description,
-              url,
-              author,
-              lastUpdate,
-              maintainers,
-              externalUrls,
-            }) =>
-              new MessageEmbed()
-                .setAuthor(`📦 Last updated ${lastUpdate}`)
-                .setTitle(`${name}`)
-                .setThumbnail(
-                  'https://static.npmjs.com/338e4905a2684ca96e08c7780fc68412.png'
-                )
-                .setDescription(
-                  description
-                    .split('\n')
-                    .map(item => item.trim())
-                    .join(' ')
-                )
-                .addFields(...createFields(name, externalUrls, maintainers), {
-                  name: 'Author',
-                  value: author.name,
-                  inline: true,
-                })
-                .setURL(url)
-                .setFooter(
-                  `requested by ${interaction.user.username}#${interaction.user.discriminator}`,
-                  interaction.user.avatarURL({ size: 64, format: 'webp' })
-                )
-                .setColor(0xcb_37_37)
-          ),
+          embeds: values.map((npmEmbed) => createNPMEmbed(npmEmbed, interaction.user)),
         });
       }
     );
@@ -220,15 +189,30 @@ const createNPMEmbed = ({
   lastUpdate,
   maintainers,
   author,
-}: NPMEmbed): Embed => ({
-  author,
-  description,
-  fields: createFields(name, externalUrls, maintainers),
-  footerText: `last updated ${lastUpdate}`,
-  provider,
-  title: name,
-  url,
-});
+}: NPMEmbed, user: User): MessageEmbed =>
+  new MessageEmbed()
+    .setAuthor(`📦 Last updated ${lastUpdate}`)
+    .setTitle(`${name}`)
+    .setThumbnail(
+      'https://static.npmjs.com/338e4905a2684ca96e08c7780fc68412.png'
+    )
+    .setDescription(
+      description
+        .split('\n')
+        .map(item => item.trim())
+        .join(' ')
+    )
+    .addFields(...createFields(name, externalUrls, maintainers), {
+      name: 'Author',
+      value: author.name,
+      inline: true,
+    })
+    .setURL(url)
+    .setFooter(
+      `requested by ${user.username}#${user.discriminator}`,
+      user.avatarURL({ size: 64, format: 'webp' })
+    )
+    .setColor(0xcb_37_37);
 
 /**
  *  Creates fields for all links except npm since that ones in the title already
