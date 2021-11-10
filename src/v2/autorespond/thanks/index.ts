@@ -2,9 +2,7 @@ import { MessageActionRow, MessageSelectMenu } from 'discord.js';
 import type { Message, TextChannel } from 'discord.js';
 import type { Client } from 'discord.js';
 
-import {
-  POINT_LIMITER_IN_MINUTES,
-} from '../../env.js';
+import { POINT_LIMITER_IN_MINUTES } from '../../env.js';
 import HelpfulRoleMember from '../../helpful_role/db_model.js';
 import pointHandler from '../../helpful_role/point_handler.js';
 import { stripMarkdownQuote } from '../../utils/content_format.js';
@@ -15,7 +13,6 @@ import type { ThanksInteractionType } from './db_model.js';
 import { ThanksInteraction } from './db_model.js';
 import { handleThreadThanks } from './threadThanks.js';
 import { createResponse } from './createResponse.js';
-
 
 type CooldownUser = {
   id: string;
@@ -32,16 +29,10 @@ const timeUntilCooldownReset = (entry: number) =>
     Number.parseInt(POINT_LIMITER_IN_MINUTES) - (Date.now() - entry) / 60_000
   );
 
-const getReply = async (msg): Promise<undefined | Message> => {
+const getReply = async (msg: Message): Promise<undefined | Message> => {
   if (msg.reference) {
-    const { channelID, guildID, messageID } = msg.reference;
-    const guild = await msg.client.guilds.fetch(guildID);
-    if (guild) {
-      const channel = guild.channels.resolve(channelID);
-      if (channel.isText()) {
-        return channel.messages.fetch(messageID);
-      }
-    }
+    const { messageId } = msg.reference;
+    return msg.channel.messages.fetch(messageId);
   }
 };
 
