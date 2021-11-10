@@ -4,6 +4,9 @@
   "description": "",
   "main": "index.js",
   "type": "module",
+  "engines": {
+    "node": "16.13.0"
+  },
   "scripts": {
     "dev": "TS_NODE_FILES=true TS_NODE_PROJECT=\"./tsconfig.json\" nodemon -r dotenv/config -x  node --experimental-specifier-resolution=node --loader ts-node/esm ./src/index.ts",
     "start": "TS_NODE_FILES=true TS_NODE_PROJECT=\"./tsconfig.json\" node --experimental-specifier-resolution=node --loader ts-node/esm ./src/index.ts",
