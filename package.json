@@ -25,7 +25,7 @@
   "dependencies": {
     "@mdn/browser-compat-data": "4.0.10",
     "@sentry/node": "6.14.3",
-    "compare-versions": "4.0.1",
+    "compare-versions": "4.1.1",
     "date-fns": "2.25.0",
     "discord.js": "13.3.1",
     "dom-parser": "0.1.6",
