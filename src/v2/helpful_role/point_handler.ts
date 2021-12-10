@@ -5,6 +5,7 @@ import {
   HELPFUL_ROLE_ID,
   HELPFUL_ROLE_POINT_THRESHOLD,
   POINT_LIMITER_IN_MINUTES,
+  HELPFUL_ROLE_EXEMPT_ID,
 } from '../env.js';
 import { startTime } from '../index.js';
 import { cache } from '../spam_filter/index.js';
@@ -23,13 +24,15 @@ const grantHelpfulRole = async (user: GuildMember, msg: Message) => {
   await user.roles.add(HELPFUL_ROLE_ID);
 
   // Send notification message
-  await msg.channel.send(
-    {embeds:[createEmbed({
-      description: `<@!${user.id}> has been granted the <@&${HELPFUL_ROLE_ID}> role!`,
-      footerText: 'Helpful Role Handler',
-      provider: 'spam',
-      title: 'A user has received the Helpful role!',
-    }).embed]
+  await msg.channel.send({
+    embeds: [
+      createEmbed({
+        description: `<@!${user.id}> has been granted the <@&${HELPFUL_ROLE_ID}> role!`,
+        footerText: 'Helpful Role Handler',
+        provider: 'spam',
+        title: 'A user has received the Helpful role!',
+      }).embed,
+    ],
   });
 };
 
@@ -97,6 +100,10 @@ const pointHandler = async (
     Date.now(),
     Number.parseInt(POINT_LIMITER_IN_MINUTES) * 60
   );
+
+  if (guildMember.roles.cache.has(HELPFUL_ROLE_EXEMPT_ID)) {
+    return;
+  }
 
   // Check if the user has enough points to be given the helpful role
   if (user.points >= Number.parseInt(HELPFUL_ROLE_POINT_THRESHOLD)) {
