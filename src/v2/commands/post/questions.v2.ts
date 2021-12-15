@@ -34,7 +34,7 @@ const greeterMessage =
   ${createMarkdownCodeBlock(
     `
     1. Your job must provide monetary compensation.\n
-    2. Your job must not be related to cryptocurrency or gambling in any way.\n
+    2. Your job must not be related to cryptocurrency, blockchain, NFTs, Web3 technologies, or gambling in any way.\n
     3. Your job must provide at least $${MINIMAL_COMPENSATION} in compensation.\n
     4. You can only post a job once every ${
         Number.parseInt(POST_LIMITER_IN_HOURS, 10) === 1
