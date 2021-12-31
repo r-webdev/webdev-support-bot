@@ -1,4 +1,4 @@
- 
+
 import type {
   ButtonInteraction,
   Client,
@@ -162,6 +162,7 @@ export const mdnCommand: CommandDataWithHandler = {
   name: 'mdn',
   description: 'search mdn',
   handler: async (client, interaction): Promise<void> => {
+    if(!interaction.isCommand()) { return }
     await mdnHandler(client, interaction);
   },
   options: [

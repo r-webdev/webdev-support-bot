@@ -30,6 +30,7 @@ import { limitFnByUser } from './cache/index.js';
 import { registerCommands } from './commands/index.js';
 import pointDecaySystem, { loadLastDecayFromDB } from './helpful_role/point_decay.js';
 import { registerMessageContextMenu } from './message_context/index.js';
+import { handleDM } from './modules/modmail/index.js';
 import { registerUserContextMenu } from './user_context/index.js';
 import { asyncCatch } from './utils/asyncCatch.js';
 import { stripMarkdownQuote } from './utils/content_format.js';
@@ -68,6 +69,7 @@ const client = new Client({
     Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
     Intents.FLAGS.DIRECT_MESSAGE_TYPING,
   ],
+  partials: ['CHANNEL']
 });
 
 const blacklistedServer = new Set([
@@ -138,9 +140,13 @@ const detectDeprecatedCommands = limitFnByUser(handleDeprecatedCommands, {
 const isWebdevAndWebDesignServer = (msg: Message) =>
   msg.guild?.id === SERVER_ID || false;
 
+
 client.on('messageCreate', msg => {
   if (msg.author.bot) {
     return;
+  }
+  if(msg.channel.type === 'DM') {
+    return handleDM(msg)
   }
 
   if (NON_COMMAND_MSG_TYPES.has(msg.channel.type) && msg.guild) {

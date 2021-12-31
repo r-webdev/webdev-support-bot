@@ -7,23 +7,19 @@ import type {
   ApplicationCommandSubCommandData,
   ApplicationCommandSubGroupData,
 } from 'discord.js';
-import {
-  ApplicationCommand,
-  ChatInputApplicationCommandData,
-} from 'discord.js';
+import { ApplicationCommandTypes } from 'discord.js/typings/enums';
 
 export function normalizeApplicationCommandData<
   T extends ApplicationCommandData
 >(cmd: T): T {
-  if (!("type" in cmd) || cmd.type === 'CHAT_INPUT') {
+  if (!("type" in cmd) || cmd.type === 'CHAT_INPUT' || cmd.type === ApplicationCommandTypes.CHAT_INPUT) {
     return {
       ...cmd,
-      type: "CHAT_INPUT",
-      defaultPermission: cmd.defaultPermission ?? false,
       options: (cmd.options ?? []).map(normalizeApplicationOptionData),
     };
   }
-  return {...cmd}
+
+  return {...cmd, description: '', options: []}
 }
 
 function normalizeApplicationOptionData <T extends

@@ -1,3 +1,5 @@
+// we need to await in a loop as we're rate-limited anyway
+/* eslint-disable no-await-in-loop */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type {
   ApplicationCommand,
@@ -7,12 +9,15 @@ import type {
   Guild,
   GuildApplicationCommandManager,
   GuildResolvable,
+  ApplicationCommandType,
 } from 'discord.js';
 import { Collection } from 'discord.js';
+import { ApplicationCommandTypes } from 'discord.js/typings/enums';
 import { filter } from 'domyno';
 import { isEqual } from 'lodash-es';
 
 import type { CommandDataWithHandler } from '../../types';
+import { commands } from '../modules/modmail';
 import { asyncCatch } from '../utils/asyncCatch.js';
 import { map, mapʹ } from '../utils/map.js';
 import { merge } from '../utils/merge.js';
@@ -46,6 +51,7 @@ export const guildCommands = new Map(
     shitpostInteraction,
     npmInteraction,
     whynoInteraction,
+    ...commands,
     // warn // Not used atm
   ].map(command => [command.name, command])
 ); // placeholder for now
@@ -58,16 +64,22 @@ export const applicationCommands = new Collection<
 const getRelevantCmdProperties = ({
   description,
   name,
+  type = ApplicationCommandTypes.CHAT_INPUT,
   options,
+  defaultPermission = true,
 }: {
-  description: string;
+  type?: ApplicationCommandTypes | ApplicationCommandType;
+  description?: string;
   name: string;
   options?: unknown[];
+  defaultPermission?: boolean;
 }): ApplicationCommandData => {
   const relevantData = {
+    type: _normalizeType(type),
     description,
     name,
     options,
+    defaultPermission,
   } as unknown as ApplicationCommandData;
   return stripNullish(normalizeApplicationCommandData(relevantData));
 };
@@ -92,7 +104,7 @@ export const registerCommands = async (client: Client): Promise<void> => {
   client.on(
     'interactionCreate',
     asyncCatch(async interaction => {
-      if (!interaction.isCommand()) {
+      if (!interaction.isCommand() && !interaction.isContextMenu()) {
         return;
       }
 
@@ -123,13 +135,13 @@ export const registerCommands = async (client: Client): Promise<void> => {
 
   for (const { onAttach } of applicationCommands.values()) {
     // We're attaching these so it's fine
-     
+
     onAttach?.(client);
   }
 
   for (const { onAttach } of guildCommands.values()) {
     // We're attaching these so it's fine
-     
+
     onAttach?.(client);
   }
 
@@ -161,6 +173,25 @@ export const registerCommands = async (client: Client): Promise<void> => {
   // })
 };
 
+function _normalizeType(
+  type: ApplicationCommandType | ApplicationCommandTypes
+) {
+  if (typeof type === 'number') {
+    return type;
+  }
+
+  switch (type) {
+    case 'MESSAGE':
+      return ApplicationCommandTypes.MESSAGE;
+    case 'USER':
+      return ApplicationCommandTypes.USER;
+    case 'CHAT_INPUT':
+    default:
+      return ApplicationCommandTypes.CHAT_INPUT;
+  }
+}
+
+const interactionTypes = new Set(['CHAT_INPUT','USER','MESSAGE'])
 async function addCommands(
   serverCommands: Collection<
     string,
@@ -169,25 +200,22 @@ async function addCommands(
   commandDescriptions: Map<string, CommandDataWithHandler>,
   commandManager: ApplicationCommandManager | GuildApplicationCommandManager
 ) {
-  const discordChatInputCommandsById = serverCommands.filter(
-    x => x.type === 'CHAT_INPUT'
+  const discordInteractionsById = serverCommands.filter(
+    x => interactionTypes.has(x.type)
   );
 
   const discordCommands = new Collection(
-    discordChatInputCommandsById.map(value => [value.name, value])
+    discordInteractionsById.map(value => [value.name, value])
   );
 
-  const validCommands = pipe<
-    Iterable<[string, CommandDataWithHandler]>,
-    Iterable<string>
-  >([
+  const validCommands = pipe([
     filter<[string, CommandDataWithHandler]>(
-      ([key, val]: [string, CommandDataWithHandler]) =>
+      ([, val]: [string, CommandDataWithHandler]) =>
         'guild' in commandManager && val.guildValidate
           ? val.guildValidate(commandManager.guild)
           : true
     ),
-    map(([key]) => key),
+    map(([key]): string => key),
   ]);
 
   const newCommands = difference(
@@ -218,9 +246,7 @@ async function addCommands(
 }
 
 function getDestination(
-  commandManager:
-    | ApplicationCommandManager
-    | GuildApplicationCommandManager
+  commandManager: ApplicationCommandManager | GuildApplicationCommandManager
 ) {
   return 'guild' in commandManager
     ? `Guild: ${commandManager.guild.name}`
@@ -236,10 +262,13 @@ function createNewCommands(
     const command = cmdDescriptions.get(name);
     // this is always true
     if (command) {
-      const { onAttach, handler, ...rest } = command;
+      const { onAttach, handler, managePermissions, ...rest } = command;
       console.info(`Adding Command ${name} for ${destination}`);
 
-      return cmdMgr.create(rest);
+      const guildCmd = await cmdMgr.create(rest);
+      const { permissions, guild } = guildCmd;
+
+      await managePermissions?.(guild, permissions);
     }
   });
 }
@@ -250,11 +279,11 @@ function editExistingCommands(
   existingCommands: Map<string, ApplicationCommand>
 ) {
   const destination = getDestination(cmdMgr);
-  return map((name: string) => {
+  return map(async (name: string) => {
     const cmd = cmdDescriptions.get(name);
     const existing = existingCommands.get(name);
 
-    const { onAttach, handler, ...command } = cmd;
+    const { onAttach, handler, managePermissions, ...command } = cmd;
 
     if (
       !isEqual(
@@ -263,8 +292,18 @@ function editExistingCommands(
       )
     ) {
       console.info(`Updating ${name} for ${destination}`);
+      console.log(
+        getRelevantCmdProperties(cmd),
+        getRelevantCmdProperties(existing))
 
-      return cmdMgr.edit(existing.id, command);
+      await cmdMgr.edit(existing.id, command);
+    }
+
+    try {
+      const { permissions, guild } = existing;
+      await managePermissions?.(guild, permissions);
+    } catch (error) {
+      console.log({ error });
     }
   });
 }
@@ -278,6 +317,6 @@ function deleteRemovedCommands(
     const existing = existingCommands.get(name)!;
     console.warn(`Deleting ${name} from ${destination}`);
 
-    return cmdMgr.delete(existing.id);
+    await cmdMgr.delete(existing.id);
   });
 }
