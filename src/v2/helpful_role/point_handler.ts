@@ -101,12 +101,8 @@ const pointHandler = async (
     Number.parseInt(POINT_LIMITER_IN_MINUTES) * 60
   );
 
-  if (guildMember.roles.cache.has(HELPFUL_ROLE_EXEMPT_ID)) {
-    return;
-  }
-
   // Check if the user has enough points to be given the helpful role
-  if (user.points >= Number.parseInt(HELPFUL_ROLE_POINT_THRESHOLD)) {
+  if (!guildMember.roles.cache.has(HELPFUL_ROLE_EXEMPT_ID) && user.points >= Number.parseInt(HELPFUL_ROLE_POINT_THRESHOLD)) {
     await grantHelpfulRole(guildMember, msg);
   }
 
