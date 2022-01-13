@@ -27,7 +27,7 @@
     "@sentry/node": "6.16.1",
     "compare-versions": "4.1.2",
     "date-fns": "2.28.0",
-    "discord.js": "13.3.1",
+    "discord.js": "13.6.0",
     "dom-parser": "0.1.6",
     "domyno": "1.0.1",
     "fuse.js": "6.5.0",
