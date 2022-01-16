@@ -26,12 +26,12 @@ const schema = new Schema({
   },
 });
 
-export const GenericCache = model('GenericCache', schema) as unknown as Model<
-  Document & {
-    guild: string;
-    type: string;
-    timestamp: number;
-    usre: string;
-    meta?: unknown;
-  }
->;
+export const GenericCache = model<GenericCacheType>('GenericCache', schema)
+
+type GenericCacheType = {
+  guild: string;
+  type: string;
+  timestamp: number;
+  user: string;
+  meta?: unknown;
+}
