@@ -4,7 +4,6 @@ import { get, upsert } from '../cache/cacheFns.js';
 import {
   POINT_DECAY_TIMER,
   MOD_CHANNEL,
-  IS_PROD,
   HELPFUL_ROLE_POINT_THRESHOLD,
   HELPFUL_ROLE_EXEMPT_ID,
   SERVER_ID,
@@ -107,7 +106,6 @@ export const getTimeDiffToDecay = async (): Promise<{ diff: number; timestamp: n
 
   const timestamp = Date.now();
 
-
   return {
     diff: (timestamp - lastDecay) / (HOUR_IN_MS),
     timestamp,
@@ -118,7 +116,6 @@ const pointDecaySystem = async (decayData: {guild: Guild, userId?:string}): Prom
   const { diff, timestamp } = await getTimeDiffToDecay();
   const timer = Number.parseFloat(POINT_DECAY_TIMER)
 
-  console.log({diff,timestamp,timer, POINT_DECAY_TIMER})
   if (diff >= timer) {
     await saveLastDecay(timestamp)
 
@@ -126,8 +123,7 @@ const pointDecaySystem = async (decayData: {guild: Guild, userId?:string}): Prom
 
     setDecayTimeout(decayData.guild, (Number.parseFloat(POINT_DECAY_TIMER) ?? .5) * HOUR_IN_MS)
   } else {
-    console.log(diff*HOUR_IN_MS)
-    setDecayTimeout(decayData.guild, diff * HOUR_IN_MS)
+    setDecayTimeout(decayData.guild, (timer - diff) * HOUR_IN_MS)
   }
 };
 

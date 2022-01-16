@@ -1,4 +1,4 @@
- 
+
 import type {
   Message,
   CollectorFilter,
@@ -211,6 +211,7 @@ const createJobPost = async (
   // const url = generateURL(guild.id, channelID, msgID);
   try {
     const msg = await targetChannel.send({
+      content: `Job Poster: <@${userID}>`,
       embeds: [
         createEmbed({
           author: {
@@ -219,11 +220,6 @@ const createJobPost = async (
           description: `A user has created a new job post!`,
           // Using the spam provider because we only need the color/icon, which it provides anyway
           fields: [
-            {
-              inline: true,
-              name: 'User',
-              value: `<@!${userID}>`,
-            },
             {
               inline: true,
               name: 'Created On',
@@ -286,10 +282,10 @@ const handleJobPostingRequest = async (
 
   const filter: CollectorFilter<[Message]> = m => m.author.id === id;
   const send = (str: string) => author.send(str);
+  // Generate cache entry
+  const entry = generateCacheEntry(id);
 
   try {
-    // Generate cache entry
-    const entry = generateCacheEntry(id);
     // Check if the user has been cached
     const isCached = cache.get(entry.key);
 
@@ -317,8 +313,6 @@ const handleJobPostingRequest = async (
     // Notify the user regarding the rules, and get the channel
     const channel = await author.createDM();
 
-    const { id: channelID } = channel;
-
     const form = new MultistepForm(questions, channel, author);
 
     const answers = (await form.getResult('guidelines')) as unknown as Answers;
@@ -342,9 +336,13 @@ const handleJobPostingRequest = async (
     // Store the job post in the cache
     cache.set(entry.key, entry.value, POST_LIMITER);
   } catch (error) {
+    cache.del(entry.key)
+
     interaction.reply(
       'Please temporarily enable direct messages as the bot cares about your privacy.'
     );
+
+
     // eslint-disable-next-line no-console
     console.error('post.handleJobPostingRequest', error);
   }
