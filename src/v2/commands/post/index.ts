@@ -241,7 +241,7 @@ const createJobPost = async (
           new MessageButton()
             .setCustomId(`job🤔${userID}🤔response`)
             .setStyle('PRIMARY')
-            .setLabel('DM me the username')
+            .setLabel('DM me the posting')
             .setEmoji('✉️'),
           new MessageButton()
             .setCustomId(`job🤔${userID}🤔delete`)
