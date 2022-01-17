@@ -28,8 +28,10 @@ import {
 } from './autorespond/thanks/threadThanks.js';
 import { limitFnByUser } from './cache/index.js';
 import { registerCommands } from './commands/index.js';
+import pointDecaySystem, { loadLastDecayFromDB } from './helpful_role/point_decay.js';
 import { registerMessageContextMenu } from './message_context/index.js';
 import { registerUserContextMenu } from './user_context/index.js';
+import { asyncCatch } from './utils/asyncCatch.js';
 import { stripMarkdownQuote } from './utils/content_format.js';
 
 const NON_COMMAND_MSG_TYPES = new Set([
@@ -43,11 +45,10 @@ if (IS_PROD) {
     dsn: 'https://9902d087a01f4d8883daad5d59d90736@o163592.ingest.sentry.io/5307626',
   });
 }
-console.log(process.version);
-const alreadyVoted = new Set();
 
 // This date is used to check if the message's been created before the bot's started
 export const startTime = new Date();
+loadLastDecayFromDB()
 
 const client = new Client({
   intents: [
@@ -81,6 +82,9 @@ client.on('ready', () => {
 });
 
 client.once('ready', async (): Promise<void> => {
+  pointDecaySystem({
+    guild: client.guilds.resolve(SERVER_ID)
+  })
   registerCommands(client);
   registerUserContextMenu(client);
   registerMessageContextMenu(client);

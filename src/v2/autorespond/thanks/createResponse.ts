@@ -24,8 +24,8 @@ export function createResponse(thankedUsers: Collection<string, User>, authorId:
   const output = createEmbed({
     description,
     fields,
-    footerText: 'Point Handler',
-    provider: 'spam',
+    footerText: 'Thank a helpful member by replying "thanks @username" or saying "thanks" in a reply or thread.',
+    provider: 'helper',
     title,
   }).embed;
 

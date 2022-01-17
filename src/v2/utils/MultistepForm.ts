@@ -70,7 +70,7 @@ export class MultistepForm<T extends Record<string, MultiStepFormStep>> {
   ): Promise<P['buttons'][number]['value'] | typeof __cancelled__> {
     const resolver = new ExternalResolver<P['buttons'][number]['value'] | typeof __cancelled__>();
     const message = await this.#channel.send({
-      content: step.body,
+      content: `**${step.body}**`,
       components: [
         {
           type: 'ACTION_ROW',
@@ -109,7 +109,7 @@ export class MultistepForm<T extends Record<string, MultiStepFormStep>> {
         collector.off('collect', handler);
         await interaction.deferUpdate();
         interaction.editReply({
-          content: `${step.body}\n${
+          content: `**${step.body}**\n${
             step.buttons.find(({ value: val }) => val === value).label
           }`,
           components: [],
@@ -135,9 +135,8 @@ export class MultistepForm<T extends Record<string, MultiStepFormStep>> {
   public async getTextResponse<P extends TextQuestion>(
     step: P
   ): Promise<string | typeof __cancelled__> {
-    const resolver = new ExternalResolver<string>();
     const message = await this.sendWithCancel(
-      `${step.body}\n\nOr click below to cancel.`
+      `**${step.body}**\n\nOr click below to cancel.`
     );
 
     const deleteResolver = new ExternalResolver<typeof __cancelled__>();
@@ -187,9 +186,8 @@ export class MultistepForm<T extends Record<string, MultiStepFormStep>> {
       return step.format?.(value) ?? value;
     } catch {
       this.#channel.send(`You have timed out. Please try again`);
+      return __cancelled__
     }
-
-    return resolver;
   }
 
   public async getResult(startStep: keyof T): Promise<Map<keyof T, unknown>> {

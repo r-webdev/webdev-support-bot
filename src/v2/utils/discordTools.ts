@@ -13,7 +13,7 @@ import {
 import { providers } from './urlTools.js';
 
 export const createMarkdownLink = (title: string, url: string): string =>
-   
+
   `[${title}](${url.replace(/\)/gu, '\\)')})`;
 
 export const BASE_DESCRIPTION = `
@@ -28,11 +28,12 @@ ${gear} *issues? feature requests? head over to ${createMarkdownLink(
 export type Provider =
   | 'caniuse'
   | 'npm'
+  | 'helper'
   | 'github'
   | 'composer'
   | 'mdn'
   | 'bundlephobia'
-  | 'php';
+  | 'php'
 
 type ListEmbed = {
   provider: Provider;
