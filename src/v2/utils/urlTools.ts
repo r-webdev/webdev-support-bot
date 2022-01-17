@@ -23,6 +23,15 @@ type ProviderMap = {
 };
 
 export const providers: ProviderMap = {
+  helper: {
+    color: 0xe6_7e_22,
+    createTitle: () => '',
+    direct: '',
+    getExtendedInfoUrl: () => '',
+    help: '',
+    icon: '',
+    search: ''
+  },
   bundlephobia: {
     color: 0xff_ff_ff,
     createTitle: (searchTerm: string) =>

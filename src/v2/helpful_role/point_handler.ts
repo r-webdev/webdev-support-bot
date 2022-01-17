@@ -29,7 +29,7 @@ const grantHelpfulRole = async (user: GuildMember, msg: Message) => {
       createEmbed({
         description: `<@!${user.id}> has been granted the <@&${HELPFUL_ROLE_ID}> role!`,
         footerText: 'Helpful Role Handler',
-        provider: 'spam',
+        provider: 'helper',
         title: 'A user has received the Helpful role!',
       }).embed,
     ],

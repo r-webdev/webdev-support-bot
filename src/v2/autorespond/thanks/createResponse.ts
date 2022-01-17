@@ -25,7 +25,7 @@ export function createResponse(thankedUsers: Collection<string, User>, authorId:
     description,
     fields,
     footerText: 'Thank a helpful member by replying "thanks @username" or saying "thanks" in a reply or thread.',
-    provider: 'spam',
+    provider: 'helper',
     title,
   }).embed;
 
