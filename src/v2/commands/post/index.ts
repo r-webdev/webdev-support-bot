@@ -22,6 +22,7 @@ import { cache } from '../../spam_filter/index.js';
 import { MultistepForm } from '../../utils/MultistepForm.js';
 import { asyncCatch } from '../../utils/asyncCatch.js';
 import { createEmbed, createMarkdownCodeBlock } from '../../utils/discordTools.js';
+import { lock, unlock } from '../../utils/dmLock';
 import { map } from '../../utils/map.js';
 import { pipe } from '../../utils/pipe.js';
 import { capitalize } from '../../utils/string.js';
@@ -278,12 +279,12 @@ const handleJobPostingRequest = async (
 ): Promise<void> => {
   const { guild, member } = interaction;
   const { user: author } = interaction;
-  const { username, discriminator, id } = author;
+  const { username, discriminator, id: userID } = author;
 
-  const filter: CollectorFilter<[Message]> = m => m.author.id === id;
+  const filter: CollectorFilter<[Message]> = m => m.author.id === userID;
   const send = (str: string) => author.send(str);
   // Generate cache entry
-  const entry = generateCacheEntry(id);
+  const entry = generateCacheEntry(userID);
 
   try {
     // Check if the user has been cached
@@ -312,10 +313,10 @@ const handleJobPostingRequest = async (
 
     // Notify the user regarding the rules, and get the channel
     const channel = await author.createDM();
-
     const form = new MultistepForm(questions, channel, author);
-
+    lock(guild.id, userID, 'JOB_POST_FORM')
     const answers = (await form.getResult('guidelines')) as unknown as Answers;
+    unlock(guild.id, userID, 'JOB_POST_FORM')
 
     console.log(answers)
     // Just return if the iteration breaks due to invalid input
@@ -326,7 +327,7 @@ const handleJobPostingRequest = async (
 
     const url = await createJobPost(answers, guild, {
       discriminator,
-      userID: id,
+      userID,
       username,
     });
 

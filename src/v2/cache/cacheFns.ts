@@ -33,8 +33,9 @@ export async function upsert(options: CacheUpsertOptions) {
   const { guild, type, user, meta } = options;
 
   // Cannot use destructuring due to the properties being optional and TS not liking it
-  // eslint-disable-next-line unicorn/consistent-destructuring
-  const expireTime = "expiresAt" in options ? options.expiresAt : Date.now() + options.expiresIn;
+   
+  const expireTime =
+    'expiresAt' in options ? options.expiresAt : Date.now() + options.expiresIn;
 
   const result = await GenericCache.findOneAndUpdate(
     {
@@ -61,4 +62,20 @@ async function _purge() {
   return GenericCache.deleteMany({
     timestamp: { $lt: Date.now() },
   });
+}
+
+export async function purgeType({
+  guild,
+  type,
+}: {
+  guild: string;
+  type: string;
+}) {
+  await Promise.all([
+    _purge(),
+    GenericCache.deleteMany({
+      type,
+      guild,
+    }),
+  ]);
 }

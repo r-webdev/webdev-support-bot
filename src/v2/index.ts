@@ -32,8 +32,8 @@ import pointDecaySystem, { loadLastDecayFromDB } from './helpful_role/point_deca
 import { registerMessageContextMenu } from './message_context/index.js';
 import { handleDM } from './modules/modmail/index.js';
 import { registerUserContextMenu } from './user_context/index.js';
-import { asyncCatch } from './utils/asyncCatch.js';
 import { stripMarkdownQuote } from './utils/content_format.js';
+import { purge as purgeDMLocks } from './utils/dmLock.js';
 
 const NON_COMMAND_MSG_TYPES = new Set([
   'GUILD_TEXT',
@@ -84,6 +84,7 @@ client.on('ready', () => {
 });
 
 client.once('ready', async (): Promise<void> => {
+purgeDMLocks(SERVER_ID)
   pointDecaySystem({
     guild: client.guilds.resolve(SERVER_ID)
   })
@@ -141,10 +142,11 @@ const isWebdevAndWebDesignServer = (msg: Message) =>
   msg.guild?.id === SERVER_ID || false;
 
 
-client.on('messageCreate', msg => {
+client.on('messageCreate', async msg => {
   if (msg.author.bot) {
     return;
   }
+
   if(msg.channel.type === 'DM') {
     return handleDM(msg)
   }

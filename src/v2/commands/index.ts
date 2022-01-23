@@ -125,10 +125,17 @@ export const registerCommands = async (client: Client): Promise<void> => {
         }
       } catch (error) {
         console.error(error);
-        await interaction.reply({
-          ephemeral: true,
-          content: 'Something went wrong when trying to execute the command',
-        });
+
+        if (interaction.deferred) {
+          await interaction.editReply({
+            content: 'Something went wrong when trying to execute the command',
+          });
+        } else {
+          await interaction.reply({
+            ephemeral: true,
+            content: 'Something went wrong when trying to execute the command',
+          });
+        }
       }
     })
   );
