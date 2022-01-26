@@ -1,6 +1,8 @@
 import type { EmbedField, GuildMember, GuildMemberRoleManager } from 'discord.js';
 import { MessageEmbed } from 'discord.js';
 
+import { COLOR_MOD, COLOR_REPORTEE, COLOR_REPORTER, COLOR_USER_EMBED } from './colors';
+
 
 export function createInitialEmbed(): MessageEmbed {
   return new MessageEmbed().setTitle('New Ticket')
@@ -24,7 +26,7 @@ export function createReporterEmbed(member: GuildMember): MessageEmbed {
   return new MessageEmbed()
     .setTitle('Reporter')
     .setDescription('Below is information regarding the reporter')
-    .setColor(5_283_840)
+    .setColor(COLOR_REPORTER)
     .setAuthor({
       name: `${member.user.username}#${member.user.discriminator}`,
       iconURL: member.user.avatarURL(),
@@ -32,13 +34,27 @@ export function createReporterEmbed(member: GuildMember): MessageEmbed {
     .setThumbnail(member.user.avatarURL())
     .addFields(createUserFields(member));
 }
+export function createInitiatorEmbed(member: GuildMember) : MessageEmbed{
+  return new MessageEmbed()
+    .setTitle('Initiator')
+    .setDescription(
+      `This modmail was intiated by a ${member.user.toString()} at <t:${Date.now()/1000}>`
+    )
+    .setColor(COLOR_MOD)
+    .setAuthor({
+      name: `${member.user.username}#${member.user.discriminator}`,
+      iconURL: member.user.avatarURL(),
+    })
+    .setThumbnail(member.user.avatarURL())
+}
+
 export function createReporteeEmbed(member: GuildMember) : MessageEmbed{
   return new MessageEmbed()
     .setTitle('Reportee')
     .setDescription(
       'Below is information regarding the user that has been reported'
     )
-    .setColor(16_750_080)
+    .setColor(COLOR_REPORTEE)
     .setAuthor({
       name: `${member.user.username}#${member.user.discriminator}`,
       iconURL: member.user.avatarURL(),
@@ -53,7 +69,7 @@ export function createUserEmbed(member: GuildMember): MessageEmbed {
     .setDescription(
       'Information about the user'
     )
-    .setColor(16_750_080)
+    .setColor(COLOR_USER_EMBED)
     .setAuthor({
       name: `${member.user.username}#${member.user.discriminator}`,
       iconURL: member.user.avatarURL(),

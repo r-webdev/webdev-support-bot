@@ -8,7 +8,6 @@ export const getModMailThread = async (guild: Guild, user: User): Promise<Thread
   const cachedThread = cache.get(`${guild.id}|${user.id}`);
 
   if (cachedThread) {
-    console.log("Cached from",`${guild.id}|${user.id}`)
     return cachedThread;
   }
 

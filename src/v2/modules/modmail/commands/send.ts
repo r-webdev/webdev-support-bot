@@ -3,6 +3,7 @@ import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 import type { CommandDataWithHandler } from "../../../../types";
 import { SERVER_ID, MOD_ROLE_ID } from "../../../env";
 import { ModMailThread } from "../db/modmail_thread";
+import { COLOR_DELETED_MSG } from "../util/colors";
 
 export const sendCommand: CommandDataWithHandler = {
   type: 'CHAT_INPUT',
@@ -115,9 +116,9 @@ export const sendCommand: CommandDataWithHandler = {
           await message.delete()
           if("edit" in interaction.message) {
             interaction.message.edit({
-              content: `*The message below was deleted by <@${interaction.user.id}> at <t:${Date.now()/1000}>*`,
+              content: `*The message below was deleted by <@${interaction.user.id}> at <t:${Math.floor(Date.now()/1000)}>*`,
               embeds: [
-                interaction.message.embeds[0].setColor(0x90_00_00)
+                interaction.message.embeds[0].setColor(COLOR_DELETED_MSG)
               ],
               components: []
             })
