@@ -1,4 +1,5 @@
-import { Guild, ThreadChannel, User } from 'discord.js';
+import type { Guild, ThreadChannel, User } from 'discord.js';
+
 import { MODMAIL_CHANNEL_ID } from '../../../env.js';
 import { ModMailThread } from '../db/modmail_thread.js';
 import { cache } from "./cache";
@@ -26,9 +27,8 @@ export const createModMailThread = async (
   );
 
   const threadChannel = await modmailChannel.threads.create({
-    name: `${user.username}_${user.discriminator} ${date}`,
+    name: `${user.username}_${user.discriminator} ${date} [${user.id}]`,
     autoArchiveDuration: 'MAX',
-    reason: 'Test',
   });
 
   await ModMailThread.create({

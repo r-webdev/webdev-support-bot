@@ -8,6 +8,7 @@ export const {DISCORD_TOKEN} = process.env;
 export const {REPO_LINK} = process.env;
 
 export const {MODMAIL_CHANNEL_ID} = process.env;
+export const {DM_ALT_CHANNEL_ID} = process.env
 export const {MOD_CHANNEL} = process.env;
 export const {NUMBER_OF_ALLOWED_MESSAGES} = process.env;
 export const {CACHE_REVALIDATION_IN_SECONDS} = process.env;
