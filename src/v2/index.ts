@@ -31,6 +31,9 @@ import { registerCommands } from './commands/index.js';
 import pointDecaySystem, { loadLastDecayFromDB } from './helpful_role/point_decay.js';
 import { registerMessageContextMenu } from './message_context/index.js';
 import { handleDM } from './modules/modmail/index.js';
+import { handleDmThread } from './modules/modmail/util/handleDmThread.js';
+import { isDmThread } from './modules/modmail/util/isDmThread.js';
+import { isModMailThread } from './modules/modmail/util/isModMailThread.js';
 import { registerUserContextMenu } from './user_context/index.js';
 import { stripMarkdownQuote } from './utils/content_format.js';
 import { purge as purgeDMLocks } from './utils/dmLock.js';
@@ -161,8 +164,14 @@ const handleNonCommandGuildMessages = async (msg: Message) => {
   if (msg.author.bot) {
     return;
   }
-  if (isWebdevAndWebDesignServer(msg) && isThanksMessage(quoteLessContent)) {
-    handleThanks(msg);
+
+  if (isWebdevAndWebDesignServer(msg)) {
+    if(isThanksMessage(quoteLessContent)) {
+      handleThanks(msg);
+    }
+    if(isDmThread(msg)) {
+      handleDmThread(msg)
+    }
   }
   await detectDeprecatedCommands(msg);
   await detectJustAsk(msg);

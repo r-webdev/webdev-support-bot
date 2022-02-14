@@ -17,7 +17,7 @@ import { filter } from 'domyno';
 import { isEqual } from 'lodash-es';
 
 import type { CommandDataWithHandler } from '../../types';
-import { commands } from '../modules/modmail';
+import { modmailCommands } from '../modules/modmail';
 import { asyncCatch } from '../utils/asyncCatch.js';
 import { map, mapʹ } from '../utils/map.js';
 import { merge } from '../utils/merge.js';
@@ -51,7 +51,7 @@ export const guildCommands = new Map(
     shitpostInteraction,
     npmInteraction,
     whynoInteraction,
-    ...commands,
+    ...modmailCommands,
     // warn // Not used atm
   ].map(command => [command.name, command])
 ); // placeholder for now

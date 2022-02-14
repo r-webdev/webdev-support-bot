@@ -5,4 +5,4 @@ import { reportUser } from './reportUser';
 import { sendCommand } from './send';
 
 
-export const commands = [sendCommand, reportMessage, initiateModmail, reportUser, closeCommand           ];
+export const modmailCommands = [sendCommand, reportMessage, initiateModmail, reportUser, closeCommand];

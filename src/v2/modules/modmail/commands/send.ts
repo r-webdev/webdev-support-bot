@@ -1,16 +1,14 @@
 import type {
   DMChannel,
   Guild,
+  GuildMember,
   Message,
   MessageOptions,
   MessagePayload,
   TextChannel,
-  ThreadChannel} from 'discord.js';
-import {
-  MessageActionRow,
-  MessageButton,
-  MessageEmbed
+  ThreadChannel,
 } from 'discord.js';
+import { MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
 
 import type { CommandDataWithHandler } from '../../../../types';
 import { SERVER_ID, MOD_ROLE_ID, DM_ALT_CHANNEL_ID } from '../../../env';
@@ -104,7 +102,7 @@ export const sendCommand: CommandDataWithHandler = {
         ],
       });
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
   },
   onAttach(client) {
@@ -126,8 +124,12 @@ export const sendCommand: CommandDataWithHandler = {
         return;
       }
 
-      const dmChannel = await member.createDM();
-      const message = await dmChannel.messages.fetch(msgId);
+      const message = await getDmMessage({
+        member,
+        msgId,
+        guild: interaction.guild,
+      });
+
       try {
         await message.delete();
         if ('edit' in interaction.message) {
@@ -179,7 +181,7 @@ async function sendFakeDM(
     { upsert: true, new: true }
   ).exec();
 
-  console.log(dmThread)
+  console.log(dmThread);
 
   const channel = (await guild.channels.fetch(
     dmThread.channelId
@@ -190,20 +192,59 @@ async function sendFakeDM(
     thread = await channel.threads.fetch(dmThread.threadId);
   } else {
     try {
-    thread = await channel.threads.create({
-      name: `${dmChannel.recipient.username}_${dmChannel.recipient.discriminator} [${userId}]`,
-      type: 'GUILD_PRIVATE_THREAD',
-    });
-  } catch {
-    thread = await channel.threads.create({
-      name: `${dmChannel.recipient.username}_${dmChannel.recipient.discriminator} [${userId}]`,
-      type: 'GUILD_PUBLIC_THREAD',
-    });
-  }
+      thread = await channel.threads.create({
+        name: `${dmChannel.recipient.username}_${dmChannel.recipient.discriminator} [${userId}]`,
+        type: 'GUILD_PRIVATE_THREAD',
+      });
+    } catch {
+      thread = await channel.threads.create({
+        name: `${dmChannel.recipient.username}_${dmChannel.recipient.discriminator} [${userId}]`,
+        type: 'GUILD_PUBLIC_THREAD',
+      });
+    }
 
     dmThread.updateOne({ threadId: thread.id }).exec();
   }
 
   // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-  return thread.send(typeof content === 'string' ? `${dmChannel.recipient} ${content}` : { content: `${dmChannel.recipient} ${(content as {content?: string }).content ?? ''}`, ...content})
+  return thread.send(
+    typeof content === 'string'
+      ? `${dmChannel.recipient} ${content}`
+      : {
+          content: `${dmChannel.recipient} ${
+            (content as { content?: string }).content ?? ''
+          }`,
+          ...content,
+        }
+  );
+}
+async function getDmMessage({
+  member,
+  guild,
+  msgId,
+}: {
+  member: GuildMember;
+  guild: Guild;
+  msgId: string;
+}): Promise<Message | null> {
+  const userId = member.user.id;
+  const dmChannelReplacement = await DMThread.findOne({
+    guildId: SERVER_ID,
+    userId,
+    closedAt: { $exists: false },
+  }).exec();
+
+  console.log(dmChannelReplacement)
+  if (dmChannelReplacement) {
+    const channel = (await guild.channels.fetch(
+      dmChannelReplacement.channelId
+    )) as TextChannel;
+
+    const thread = await channel.threads.fetch(dmChannelReplacement.threadId);
+    return thread.messages.fetch(msgId);
+  }
+
+  const dmChannel = await member.createDM();
+
+  return await dmChannel.messages.fetch(msgId);
 }
