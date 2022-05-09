@@ -33,7 +33,7 @@
     "fuse.js": "6.5.3",
     "html-entities": "2.3.3",
     "lodash-es": "4.17.21",
-    "mongoose": "6.3.1",
+    "mongoose": "6.3.3",
     "node-cache": "5.1.2",
     "node-fetch": "3.2.3",
     "node-html-parser": "5.3.3",
