@@ -30,7 +30,7 @@
     "discord.js": "13.6.0",
     "dom-parser": "0.1.6",
     "domyno": "1.0.1",
-    "fuse.js": "6.6.1",
+    "fuse.js": "6.6.2",
     "html-entities": "2.3.3",
     "lodash-es": "4.17.21",
     "mongoose": "6.3.1",
