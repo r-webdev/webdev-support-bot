@@ -48,7 +48,7 @@
     "@types/mongoose": "5.11.97",
     "@types/node": "16.11.36",
     "@types/node-fetch": "3.0.3",
-    "dotenv": "10.0.0",
+    "dotenv": "16.0.1",
     "eslint": "8.16.0",
     "eslint-config-galex": "3.6.5",
     "husky": "8.0.1",
