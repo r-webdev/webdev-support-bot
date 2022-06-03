@@ -1,5 +1,5 @@
 import type {
-  ApplicationCommandOptionChoice,
+  ApplicationCommandOptionChoiceData,
   Client,
   CommandInteraction,
 } from 'discord.js';

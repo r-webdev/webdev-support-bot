@@ -1,4 +1,4 @@
-import type { ApplicationCommandOptionChoice } from 'discord.js';
+import type { ApplicationCommandOptionChoiceData } from 'discord.js';
 
 import type { CommandDataWithHandler } from '../../../types';
 import { ADMIN_ROLE_ID, HELPFUL_ROLE_ID, MOD_ROLE_ID, SERVER_ID } from '../../env.js';
@@ -35,7 +35,7 @@ const shitpostReplacements = {
 };
 
 const mapTransformToChoices = map(
-  (item: string): ApplicationCommandOptionChoice => ({
+  (item: string): ApplicationCommandOptionChoiceData => ({
     name: item,
     value: item,
   })
