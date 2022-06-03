@@ -1,4 +1,4 @@
-import type { ApplicationCommandOptionChoice, Client, CommandInteraction } from 'discord.js';
+import type { ApplicationCommandOptionChoiceData, Client, CommandInteraction } from 'discord.js';
 
 import type { CommandDataWithHandler } from '../../../types';
 import { map } from '../../utils/map.js';
@@ -13,7 +13,7 @@ const whynoMessages = new Map<string, ValueOrNullary<string>>([
 ]);
 
 const mapTransformToChoices = map(
-  (item: string): ApplicationCommandOptionChoice => ({
+  (item: string): ApplicationCommandOptionChoiceData => ({
     name: item,
     value: item,
   })

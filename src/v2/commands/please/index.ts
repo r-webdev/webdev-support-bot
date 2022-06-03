@@ -1,4 +1,4 @@
-import type { ApplicationCommandOptionChoice, Client, CommandInteraction } from 'discord.js';
+import type { ApplicationCommandOptionChoiceData, Client, CommandInteraction } from 'discord.js';
 
 import type { CommandDataWithHandler } from '../../../types';
 import { map } from '../../utils/map.js';
@@ -13,7 +13,7 @@ import { justAsk } from './handlers/justask.js';
 const pleaseMessages = new Map<string, ValueOrNullary<string>>([format, code, justAsk, english]);
 
 const mapTransformToChoices = map(
-  (item: string): ApplicationCommandOptionChoice => ({
+  (item: string): ApplicationCommandOptionChoiceData => ({
     name: item,
     value: item,
   })

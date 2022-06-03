@@ -1,4 +1,4 @@
-import { addBreadcrumb, Severity } from '@sentry/node';
+import { addBreadcrumb } from '@sentry/node';
 import type {
   HeadersInit,
   RequestInfo,
@@ -57,19 +57,19 @@ type FetchWithFormat<Format> = (
 const doFetch: <TParsedResponse>(
   cacheKey: string,
   mapper: ResponseMapper<TParsedResponse>
-) => FetchWithFormat<TParsedResponse> = <TParsedResponse>(cacheKey, mapper) => {
+) => FetchWithFormat<TParsedResponse> = <TParsedResponse>(cacheKey, mapper):FetchWithFormat<TParsedResponse> => {
   const casedCacheKey = cacheKey.toLowerCase();
-  const cachedResponse = apiCache.get<TParsedResponse>(casedCacheKey);
+  const cachedResponse = apiCache.get(casedCacheKey);
 
   if (cachedResponse) {
-    return () => cachedResponse;
+    return (async () => cachedResponse) as FetchWithFormat<TParsedResponse>;
   }
 
   return async (url, fetchOptions) => {
     addBreadcrumb({
       category: 'query',
       data: typeof url === 'string' ? { url } : undefined,
-      level: Severity.Info,
+      level: 'info',
       timestamp: Date.now(),
     });
 
@@ -81,7 +81,7 @@ const doFetch: <TParsedResponse>(
     console.timeEnd(timeLabel);
     const formattedResponse = await mapper(response);
     apiCache.set(casedCacheKey, formattedResponse);
-    return formattedResponse;
+    return formattedResponse as TParsedResponse;
   };
 };
 

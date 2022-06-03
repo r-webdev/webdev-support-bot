@@ -1,4 +1,4 @@
-import type { ApplicationCommandOptionChoice, Client, CommandInteraction } from 'discord.js';
+import type { ApplicationCommandOptionChoiceData, Client, CommandInteraction } from 'discord.js';
 
 import { ApplicationCommandOptionType } from '../../../enums.js';
 import type { CommandDataWithHandler } from '../../../types';
@@ -12,7 +12,7 @@ const resourceMessages = new Map<string, ValueOrNullary<{ content: string }>>([
 ]);
 
 const mapTransformToChoices = map(
-  (item: string): ApplicationCommandOptionChoice => ({
+  (item: string): ApplicationCommandOptionChoiceData => ({
     name: item,
     value: item,
   })
