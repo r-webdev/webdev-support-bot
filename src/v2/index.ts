@@ -30,9 +30,13 @@ import { limitFnByUser } from './cache/index.js';
 import { registerCommands } from './commands/index.js';
 import pointDecaySystem, { loadLastDecayFromDB } from './helpful_role/point_decay.js';
 import { registerMessageContextMenu } from './message_context/index.js';
+import { handleDmThread } from './modules/faux-dms/handleDmThread.js'
+import { isDmThread } from './modules/faux-dms/isDmThread.js'
+import { handleDM } from './modules/modmail/index.js';
+import { isModMailThread } from './modules/modmail/util/isModMailThread.js';
 import { registerUserContextMenu } from './user_context/index.js';
-import { asyncCatch } from './utils/asyncCatch.js';
 import { stripMarkdownQuote } from './utils/content_format.js';
+import { purge as purgeDMLocks } from './utils/dmLock.js';
 
 const NON_COMMAND_MSG_TYPES = new Set([
   'GUILD_TEXT',
@@ -68,6 +72,7 @@ const client = new Client({
     Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
     Intents.FLAGS.DIRECT_MESSAGE_TYPING,
   ],
+  partials: ['CHANNEL']
 });
 
 const blacklistedServer = new Set([
@@ -82,6 +87,7 @@ client.on('ready', () => {
 });
 
 client.once('ready', async (): Promise<void> => {
+purgeDMLocks(SERVER_ID)
   pointDecaySystem({
     guild: client.guilds.resolve(SERVER_ID)
   })
@@ -138,9 +144,14 @@ const detectDeprecatedCommands = limitFnByUser(handleDeprecatedCommands, {
 const isWebdevAndWebDesignServer = (msg: Message) =>
   msg.guild?.id === SERVER_ID || false;
 
-client.on('messageCreate', msg => {
+
+client.on('messageCreate', async msg => {
   if (msg.author.bot) {
     return;
+  }
+
+  if(msg.channel.type === 'DM') {
+    return handleDM(msg)
   }
 
   if (NON_COMMAND_MSG_TYPES.has(msg.channel.type) && msg.guild) {
@@ -153,8 +164,14 @@ const handleNonCommandGuildMessages = async (msg: Message) => {
   if (msg.author.bot) {
     return;
   }
-  if (isWebdevAndWebDesignServer(msg) && isThanksMessage(quoteLessContent)) {
-    handleThanks(msg);
+
+  if (isWebdevAndWebDesignServer(msg)) {
+    if(isThanksMessage(quoteLessContent)) {
+      handleThanks(msg);
+    }
+    if(isDmThread(msg)) {
+      handleDmThread(msg)
+    }
   }
   await detectDeprecatedCommands(msg);
   await detectJustAsk(msg);

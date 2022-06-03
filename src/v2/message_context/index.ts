@@ -1,5 +1,5 @@
 
- 
+
 import type { Client } from 'discord.js';
 import { Collection } from 'discord.js';
 
@@ -15,8 +15,8 @@ export const registerMessageContextMenu = async (client: Client): Promise<void> 
 
   client.application.commands.set([])
 
-  client.on("interactionCreate", interaction => {
-    if(!interaction.isContextMenu() || interaction.targetType !== "MESSAGE") {return}
-    console.log(interaction)
-  })
+  // client.on("interactionCreate", interaction => {
+  //   if(!interaction.isContextMenu() || interaction.targetType !== "MESSAGE") {return}
+  //   // console.log(interaction)
+  // })
 }

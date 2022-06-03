@@ -119,7 +119,6 @@ function permutations<T>(items: T[][]) {
 }
 
 function comb(items: { name: string; value: string }[]) {
-  console.log(items);
   const names = [...pluckʹ(items, 'name')];
   const values = [...pluckʹ(items, 'value')];
 
@@ -130,7 +129,6 @@ function comb(items: { name: string; value: string }[]) {
 }
 
 function removeRepeated<T>(arr: Fuse.FuseResult<T>[][]) {
-  console.log(arr)
   return arr.filter(x => {
     const s = new Set(x.map(i=>i.refIndex))
     if(s.size !== x.length) {return false}

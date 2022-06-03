@@ -45,7 +45,21 @@ export const shitpostInteraction: CommandDataWithHandler = {
   description:
     'A fun little shitpost command using some of the about/please/whyno commands',
   guildValidate: guild => guild.id === SERVER_ID,
+  defaultPermission: false,
+  async managePermissions(guild, permissions){
+    await permissions.add({
+      guild,
+      permissions: [
+        {
+          id: HELPFUL_ROLE_ID,
+          permission: true,
+          type: "ROLE"
+        }
+      ]
+    })
+  },
   handler: async (client, interaction) => {
+    if(!interaction.isCommand()) { return }
     const topic = interaction.options.getString('topic');
     const replacement = interaction.options.getString('replacement');
     const content = aboutMessages.get(topic);
