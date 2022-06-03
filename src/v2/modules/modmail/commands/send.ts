@@ -12,7 +12,7 @@ import { MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
 
 import type { CommandDataWithHandler } from '../../../../types';
 import { SERVER_ID, MOD_ROLE_ID, DM_ALT_CHANNEL_ID } from '../../../env';
-import { DMThread } from '../db/dm_thread';
+import { DMThread } from '../../faux-dms/db/dm_thread.js';
 import { ModMailThread } from '../db/modmail_thread';
 import { COLOR_DELETED_MSG, COLOR_MOD } from '../util/colors';
 
@@ -206,7 +206,7 @@ async function sendFakeDM(
     dmThread.updateOne({ threadId: thread.id }).exec();
   }
 
-  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+
   return thread.send(
     typeof content === 'string'
       ? `${dmChannel.recipient} ${content}`
@@ -246,5 +246,5 @@ async function getDmMessage({
 
   const dmChannel = await member.createDM();
 
-  return await dmChannel.messages.fetch(msgId);
+  return dmChannel.messages.fetch(msgId);
 }

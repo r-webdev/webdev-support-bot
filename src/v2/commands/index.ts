@@ -202,7 +202,7 @@ const interactionTypes = new Set(['CHAT_INPUT','USER','MESSAGE'])
 async function addCommands(
   serverCommands: Collection<
     string,
-    ApplicationCommand<{ guild: GuildResolvable }>
+    ApplicationCommand
   >,
   commandDescriptions: Map<string, CommandDataWithHandler>,
   commandManager: ApplicationCommandManager | GuildApplicationCommandManager
@@ -275,7 +275,7 @@ function createNewCommands(
       const guildCmd = await cmdMgr.create(rest);
       const { permissions, guild } = guildCmd;
 
-      await managePermissions?.(guild, permissions);
+      // await managePermissions?.(guild, permissions);
     }
   });
 }
@@ -290,8 +290,11 @@ function editExistingCommands(
     const cmd = cmdDescriptions.get(name);
     const existing = existingCommands.get(name);
 
-    const { onAttach, handler, managePermissions, ...command } = cmd;
-
+    const { onAttach, handler, managePermissions, ...comm } = cmd;
+    const command = {
+      defaultPermission: true,
+      ...comm,
+    }
     if (
       !isEqual(
         getRelevantCmdProperties(cmd),
@@ -306,12 +309,12 @@ function editExistingCommands(
       await cmdMgr.edit(existing.id, command);
     }
 
-    try {
-      const { permissions, guild } = existing;
-      await managePermissions?.(guild, permissions);
-    } catch (error) {
-      console.log({ error });
-    }
+    // try {
+    //   const { permissions, guild } = existing;
+    //   await managePermissions?.(guild, permissions);
+    // } catch (error) {
+    //   console.log({ error });
+    // }
   });
 }
 

@@ -1,8 +1,8 @@
 import type { Guild, Message, TextChannel } from 'discord.js';
 
-import { DM_ALT_CHANNEL_ID } from '../../../env';
-import { DMThread } from '../db/dm_thread';
-import { cache } from "./cache";
+import { DM_ALT_CHANNEL_ID } from '../../env'
+import { DMThread } from '../faux-dms/db/dm_thread.js';
+import { cache } from "../modmail/util/cache.js";
 
 export const isDmThread = async (msg: Message): Promise<boolean> => {
   if(!msg.channel.isThread()) {

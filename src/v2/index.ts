@@ -30,9 +30,9 @@ import { limitFnByUser } from './cache/index.js';
 import { registerCommands } from './commands/index.js';
 import pointDecaySystem, { loadLastDecayFromDB } from './helpful_role/point_decay.js';
 import { registerMessageContextMenu } from './message_context/index.js';
+import { handleDmThread } from './modules/faux-dms/handleDmThread.js'
+import { isDmThread } from './modules/faux-dms/isDmThread.js'
 import { handleDM } from './modules/modmail/index.js';
-import { handleDmThread } from './modules/modmail/util/handleDmThread.js';
-import { isDmThread } from './modules/modmail/util/isDmThread.js';
 import { isModMailThread } from './modules/modmail/util/isModMailThread.js';
 import { registerUserContextMenu } from './user_context/index.js';
 import { stripMarkdownQuote } from './utils/content_format.js';

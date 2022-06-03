@@ -1,8 +1,8 @@
 import type { Message} from 'discord.js';
 import { MessageEmbed } from 'discord.js';
 
-import { ModMailThread } from '../db/modmail_thread';
-import { getModMailThread } from './getModMailThread';
+import { ModMailThread } from '../modmail/db/modmail_thread';
+import { getModMailThread } from '../modmail/util/getModMailThread.js';
 
 export const handleDmThread = async (msg: Message) => {
   const modmailThreadData = await ModMailThread.findOne({
