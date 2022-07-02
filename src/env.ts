@@ -36,3 +36,9 @@ export const VAR_DETECT_LIMIT =
 
 export const JUST_ASK_DETECT_LIMIT =
   Number.parseInt(process.env.JUST_ASK_DETECT_LIMIT) || 86_400_000;
+
+export const NEW_USER_ROLE = process.env.NEW_USER_ROLE
+export const ONBOARDING_CHANNEL = process.env.ONBOARDING_CHANNEL
+export const JOIN_LOG_CHANNEL = process.env.JOIN_LOG_CHANNEL
+export const INTRO_CHANNEL = process.env.INTRO_CHANNEL
+export const INTRO_ROLE = process.env.INTRO_ROLE

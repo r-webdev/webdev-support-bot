@@ -13,8 +13,10 @@ import { filter } from 'domyno';
 import { isEqual } from 'lodash-es';
 
 import type { CommandDataWithHandler } from '../../types';
+import { setupCommands } from '../modules/mod/commands';
+import { roleCommands } from '../modules/roles/commands/index.js'
 import { asyncCatch } from '../utils/asyncCatch.js';
-import { map, mapʹ } from '../utils/map.js';
+import { map} from '../utils/map.js';
 import { merge } from '../utils/merge.js';
 import { normalizeApplicationCommandData } from '../utils/normalizeCommand.js';
 import { pipe } from '../utils/pipe.js';
@@ -46,6 +48,8 @@ export const guildCommands = new Map(
     shitpostInteraction,
     npmInteraction,
     whynoInteraction,
+    roleCommands,
+    setupCommands
     // warn // Not used atm
   ].map(command => [command.name, command])
 ); // placeholder for now
@@ -123,13 +127,13 @@ export const registerCommands = async (client: Client): Promise<void> => {
 
   for (const { onAttach } of applicationCommands.values()) {
     // We're attaching these so it's fine
-     
+
     onAttach?.(client);
   }
 
   for (const { onAttach } of guildCommands.values()) {
     // We're attaching these so it's fine
-     
+
     onAttach?.(client);
   }
 

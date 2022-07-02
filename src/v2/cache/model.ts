@@ -28,7 +28,7 @@ const schema = new Schema({
 
 export const GenericCache = model<GenericCacheType>('GenericCache', schema)
 
-type GenericCacheType = {
+export type GenericCacheType = {
   guild: string;
   type: string;
   timestamp: number;

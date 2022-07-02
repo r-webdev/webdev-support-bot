@@ -28,7 +28,7 @@ const schema = new Schema({
   timestamps: true
 })
 
-export const ThanksInteraction = model('thanksMessageInteraction', schema)
+export const ThanksInteraction = model<ThanksInteractionType>('thanksMessageInteraction', schema)
 export type ThanksInteractionType = Document & {
   guild: string,
   thanker: string,
