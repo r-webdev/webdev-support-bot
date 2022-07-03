@@ -3,11 +3,11 @@ import { MessageButton } from 'discord.js';
 import { MessageSelectMenu } from 'discord.js';
 import { MessageActionRow } from 'discord.js';
 
-import { NOTIFY_ROLES } from '../../roles/consts/notifyRoles';
-import { ROLES } from '../../roles/consts/roles';
+import { NOTIFY_ROLES } from '../../roles/consts/notifyRoles.js';
+import { ROLES } from '../../roles/consts/roles.js';
 import type { UserStateType } from '../db/user_state';
-import { getThread } from '../utils/getThread';
-import { sneakPin } from '../utils/sneakPin';
+import { getThread } from '../utils/getThread.js';
+import { sneakPin } from '../utils/sneakPin.js';
 
 export async function handleRoleSelection(
   guild: Guild,

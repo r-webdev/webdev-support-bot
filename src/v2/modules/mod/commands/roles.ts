@@ -2,10 +2,10 @@ import type { CommandInteraction } from 'discord.js';
 import { MessageActionRow, MessageButton, MessageEmbed } from 'discord.js';
 import { chunk } from 'domyno';
 
-import { map } from '../../../utils/map';
-import { pipe } from '../../../utils/pipe';
-import { NOTIFY_ROLES } from '../../roles/consts/notifyRoles';
-import { ROLES } from '../../roles/consts/roles';
+import { map } from '../../../utils/map.js';
+import { pipe } from '../../../utils/pipe.js';
+import { NOTIFY_ROLES } from '../../roles/consts/notifyRoles.js';
+import { ROLES } from '../../roles/consts/roles.js';
 
 const generateButtons = (roles: typeof ROLES | typeof NOTIFY_ROLES) =>
   roles.map(item =>

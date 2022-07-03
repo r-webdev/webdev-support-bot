@@ -1,6 +1,6 @@
-import { get, upsert } from '../../../cache';
-import type { GenericCacheType } from '../../../cache/model';
-import { SERVER_ID } from '../../../env';
+import { get, upsert } from '../../../cache/index.js';
+import type { GenericCacheType } from '../../../cache/model.js';
+import { SERVER_ID } from '../../../env.js';
 
 type OnboardingStartCache = {
   meta: {

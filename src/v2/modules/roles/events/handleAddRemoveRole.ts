@@ -5,8 +5,8 @@ import type {
   Role,
 } from 'discord.js';
 
-import { generateRoleSelect } from '../utils/generateRoleSelect';
-import { getAddRemoveRoles } from '../utils/getAddRemoveRoles';
+import { generateRoleSelect } from '../utils/generateRoleSelect.js';
+import { getAddRemoveRoles } from '../utils/getAddRemoveRoles.js';
 
 const listFormatter = new Intl.ListFormat();
 

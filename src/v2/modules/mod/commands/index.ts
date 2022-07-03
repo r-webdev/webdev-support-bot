@@ -1,8 +1,8 @@
 import type { CommandDataWithHandler } from '../../../../types';
-import { SERVER_ID } from '../../../env';
-import { beginOnboarding } from './onboardingBegin';
-import { setupOnboardingMsg } from './onboardingMsg';
-import { setupRoles } from './roles';
+import { SERVER_ID } from '../../../env.js';
+import { debugOnboarding } from './onboardingBegin.js';
+import { setupOnboardingMsg } from './onboardingMsg.js';
+import { setupRoles } from './roles.js';
 
 export const setupCommands: CommandDataWithHandler = {
   name: 'setup',
@@ -16,8 +16,8 @@ export const setupCommands: CommandDataWithHandler = {
       case 'roles.message':
         await setupRoles(interaction);
         break;
-      case 'onboarding.begin':
-        beginOnboarding(interaction);
+      case 'onboarding.debug':
+        debugOnboarding(interaction);
         break;
 
       case 'onboarding.message':
@@ -50,7 +50,7 @@ export const setupCommands: CommandDataWithHandler = {
           type: 'SUB_COMMAND',
           description: 'Post the onboarding command here',
         },
-        { name: 'begin', type: 'SUB_COMMAND', description: 'For now... debug' },
+        { name: 'debug', type: 'SUB_COMMAND', description: 'For now... debug info' },
       ],
     },
   ],

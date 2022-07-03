@@ -1,4 +1,4 @@
-import { SERVER_ID } from '../../../env';
+import { SERVER_ID } from '../../../env.js';
 
 export function limitToWebDevServer<
   HasGuildId extends { guild: { id: string } },

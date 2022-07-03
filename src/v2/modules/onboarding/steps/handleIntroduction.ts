@@ -1,10 +1,10 @@
 import type { Guild, GuildMember } from 'discord.js';
 import { MessageActionRow, MessageButton } from 'discord.js';
 
-import { INTRO_CHANNEL, INTRO_ROLE } from '../../../env';
+import { INTRO_CHANNEL, INTRO_ROLE } from '../../../env.js';
 import type { UserStateType } from '../db/user_state';
-import { getThread } from '../utils/getThread';
-import { sneakPin } from '../utils/sneakPin';
+import { getThread } from '../utils/getThread.js';
+import { sneakPin } from '../utils/sneakPin.js';
 
 export async function handleIntroduction(
   guild: Guild,

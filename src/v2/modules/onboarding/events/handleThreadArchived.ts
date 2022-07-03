@@ -1,7 +1,7 @@
 import type { ThreadChannel } from 'discord.js';
 
-import { INTRO_ROLE, ONBOARDING_CHANNEL, NEW_USER_ROLE } from '../../../env';
-import { UserState } from '../db/user_state';
+import { INTRO_ROLE, ONBOARDING_CHANNEL, NEW_USER_ROLE } from '../../../env.js';
+import { UserState } from '../db/user_state.js';
 
 export async function handleThreadArchived(
   oldThread: ThreadChannel,

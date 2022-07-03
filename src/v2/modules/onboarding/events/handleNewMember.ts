@@ -1,11 +1,11 @@
 import type { GuildMember, Guild, TextChannel } from 'discord.js';
 import { MessageEmbed, MessageActionRow, MessageButton } from 'discord.js';
 
-import { NEW_USER_ROLE, ONBOARDING_CHANNEL, SERVER_ID } from '../../../env';
-import { rules } from '../consts/rules';
-import { UserState } from '../db/user_state';
-import { continueOnboarding } from '../utils/continueOnboarding';
-import { sneakPin } from '../utils/sneakPin';
+import { NEW_USER_ROLE, ONBOARDING_CHANNEL, SERVER_ID } from '../../../env.js';
+import { rules } from '../consts/rules.js';
+import { UserState } from '../db/user_state.js';
+import { continueOnboarding } from '../utils/continueOnboarding.js';
+import { sneakPin } from '../utils/sneakPin.js';
 
 export const handleNewMember = async (member: GuildMember): Promise<void> => {
   const { guild, user, roles } = member;

@@ -1,6 +1,6 @@
 import type { Guild, TextChannel, ThreadChannel } from 'discord.js';
 
-import { ONBOARDING_CHANNEL } from '../../../env';
+import { ONBOARDING_CHANNEL } from '../../../env.js';
 
 export async function getThread(
   guild: Guild,

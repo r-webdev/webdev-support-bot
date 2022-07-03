@@ -1,8 +1,8 @@
 import type { GuildMember, Interaction, Message } from 'discord.js';
 import { MessageActionRow, MessageButton } from 'discord.js';
 
-import { UserState } from '../db/user_state';
-import { continueOnboarding } from '../utils/continueOnboarding';
+import { UserState } from '../db/user_state.js';
+import { continueOnboarding } from '../utils/continueOnboarding.js';
 
 export const handleRulesAgree = async (
   interaction: Interaction

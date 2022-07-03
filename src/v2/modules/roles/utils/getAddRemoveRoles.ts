@@ -1,8 +1,8 @@
 import type { GuildMember } from 'discord.js';
 
-import { partitionʹ } from '../../../utils/partition';
-import { NOTIFY_ROLES } from '../consts/notifyRoles';
-import { ROLES } from '../consts/roles';
+import { partitionʹ } from '../../../utils/partition.js';
+import { NOTIFY_ROLES } from '../consts/notifyRoles.js';
+import { ROLES } from '../consts/roles.js';
 
 const roleNames = new Set([...ROLES, ...NOTIFY_ROLES].map(x => x.name));
 

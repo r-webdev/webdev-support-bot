@@ -1,20 +1,20 @@
 import type { Client, GuildMember, Message, TextChannel } from 'discord.js';
 import { Permissions } from 'discord.js';
 
-import { SERVER_ID } from '../../env';
-import { NEW_USER_ROLE, ONBOARDING_CHANNEL, JOIN_LOG_CHANNEL } from '../../env';
-import { UserState } from './db/user_state';
-import { handleIntroductionMsg } from './events/handleIntroductionMsg';
-import { handleMemberLeave } from './events/handleMemberLeave';
-import { handleNewMember } from './events/handleNewMember';
-import { handleNotifyRolesSelected } from './events/handleNotifyRolesSelected';
-import { handleRoleSelected } from './events/handleRoleSelected';
-import { handleRulesAgree } from './events/handleRulesAgree';
-import { handleSkipIntro } from './events/handleSkipIntro';
-import { handleThreadArchived } from './events/handleThreadArchived';
-import { getMessagesUntil } from './utils/getMessagesUntil';
-import { limitToWebDevServer } from './utils/limitToWebDevServer';
-import { getOnboardingStart } from './utils/onboardingStart';
+import { SERVER_ID } from '../../env.js';
+import { NEW_USER_ROLE, ONBOARDING_CHANNEL, JOIN_LOG_CHANNEL } from '../../env.js';
+import { UserState } from './db/user_state.js';
+import { handleIntroductionMsg } from './events/handleIntroductionMsg.js';
+import { handleMemberLeave } from './events/handleMemberLeave.js';
+import { handleNewMember } from './events/handleNewMember.js';
+import { handleNotifyRolesSelected } from './events/handleNotifyRolesSelected.js';
+import { handleRoleSelected } from './events/handleRoleSelected.js';
+import { handleRulesAgree } from './events/handleRulesAgree.js';
+import { handleSkipIntro } from './events/handleSkipIntro.js';
+import { handleThreadArchived } from './events/handleThreadArchived.js';
+import { getMessagesUntil } from './utils/getMessagesUntil.js';
+import { limitToWebDevServer } from './utils/limitToWebDevServer.js';
+import { getOnboardingStart } from './utils/onboardingStart.js';
 
 export async function attach(client: Client): Promise<void> {
   const guild = client.guilds.resolve(SERVER_ID);

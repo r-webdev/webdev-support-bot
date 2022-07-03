@@ -96,6 +96,7 @@ client.once('ready', async (): Promise<void> => {
   attachThreadThanksHandler(client);
   attachThreadClose(client);
   if (await getOnboardingStart()) {
+    console.info("Onboarding functionality added")
     attachOnboarding(client);
   } else {
     console.info("Onboarding functionality not added")

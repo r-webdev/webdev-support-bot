@@ -2,7 +2,7 @@ import type { Guild, GuildMember } from 'discord.js';
 import { MessageActionRow, MessageButton } from 'discord.js';
 
 import type { UserStateType } from '../db/user_state';
-import { getThread } from '../utils/getThread';
+import { getThread } from '../utils/getThread.js';
 
 export async function handleStart(
   guild: Guild,

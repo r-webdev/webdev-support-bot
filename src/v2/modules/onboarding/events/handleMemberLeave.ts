@@ -1,7 +1,7 @@
 import type { GuildMember } from 'discord.js';
 
-import { SERVER_ID } from '../../../env';
-import { UserState } from '../db/user_state';
+import { SERVER_ID } from '../../../env.js';
+import { UserState } from '../db/user_state.js';
 
 export const handleMemberLeave = async (member: GuildMember): Promise<void> => {
   const { user, roles } = member;

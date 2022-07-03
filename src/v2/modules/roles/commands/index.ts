@@ -1,9 +1,9 @@
 import type { CommandDataWithHandler } from '../../../../types';
-import { SERVER_ID } from '../../../env';
-import { handleAddRemoveRole } from '../events/handleAddRemoveRole';
-import { handleAutoCompleteRole } from '../events/handleAutoCompleteRole';
-import { change } from './change';
-import { suggest } from './suggest';
+import { SERVER_ID } from '../../../env.js';
+import { handleAddRemoveRole } from '../events/handleAddRemoveRole.js';
+import { handleAutoCompleteRole } from '../events/handleAutoCompleteRole.js';
+import { change } from './change.js';
+import { suggest } from './suggest.js';
 
 export const roleCommands: CommandDataWithHandler = {
   name: 'roles',

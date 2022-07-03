@@ -1,6 +1,6 @@
 import type { Interaction } from 'discord.js';
 
-import { ROLES } from '../consts/roles';
+import { ROLES } from '../consts/roles.js';
 
 export const handleAutoCompleteRole = async (
   interaction: Interaction

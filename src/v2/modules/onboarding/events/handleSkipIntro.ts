@@ -1,8 +1,8 @@
 import type { Interaction, GuildMember } from 'discord.js';
 
-import { UserState } from '../db/user_state';
-import { continueOnboarding } from '../utils/continueOnboarding';
-import { getThread } from '../utils/getThread';
+import { UserState } from '../db/user_state.js';
+import { continueOnboarding } from '../utils/continueOnboarding.js';
+import { getThread } from '../utils/getThread.js';
 
 export const handleSkipIntro = async (
   interaction: Interaction

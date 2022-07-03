@@ -1,9 +1,9 @@
 import type { Message } from 'discord.js';
 
-import { INTRO_CHANNEL, NEW_USER_ROLE } from '../../../env';
-import { UserState } from '../db/user_state';
-import { continueOnboarding } from '../utils/continueOnboarding';
-import { getThread } from '../utils/getThread';
+import { INTRO_CHANNEL, NEW_USER_ROLE } from '../../../env.js';
+import { UserState } from '../db/user_state.js';
+import { continueOnboarding } from '../utils/continueOnboarding.js';
+import { getThread } from '../utils/getThread.js';
 
 export const handleIntroductionMsg = async (msg: Message): Promise<void> => {
   if (

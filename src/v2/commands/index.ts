@@ -14,7 +14,7 @@ import { filter } from 'domyno';
 import { isEqual } from 'lodash-es';
 
 import type { CommandDataWithHandler } from '../../types';
-import { setupCommands } from '../modules/mod/commands';
+import { setupCommands } from '../modules/mod/commands/index.js';
 import { roleCommands } from '../modules/roles/commands/index.js';
 import { asyncCatch } from '../utils/asyncCatch.js';
 import { map } from '../utils/map.js';
