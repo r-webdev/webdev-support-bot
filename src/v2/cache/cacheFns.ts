@@ -34,7 +34,8 @@ export async function upsert(options: CacheUpsertOptions) {
 
   // Cannot use destructuring due to the properties being optional and TS not liking it
   // eslint-disable-next-line unicorn/consistent-destructuring
-  const expireTime = "expiresAt" in options ? options.expiresAt : Date.now() + options.expiresIn;
+  const expireTime =
+    'expiresAt' in options ? options.expiresAt : Date.now() + options.expiresIn;
 
   const result = await GenericCache.findOneAndUpdate(
     {

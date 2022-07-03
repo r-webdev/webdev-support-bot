@@ -1,12 +1,10 @@
+const { createConfig } = require('eslint-config-galex/dist/createConfig');
+const { getDependencies } = require('eslint-config-galex/dist/getDependencies');
 const {
-  createConfig,
-  getDependencies,
-} = require('eslint-config-galex/src/createConfig');
-const {
-  createTSOverride,
-} = require('eslint-config-galex/src/overrides/typescript');
+  createTypeScriptOverride,
+} = require('eslint-config-galex/dist/overrides/typescript');
 
-const tsOverride = createTSOverride({
+const tsOverride = createTypeScriptOverride({
   ...getDependencies(),
   rules: {
     '@typescript-eslint/no-floating-promises': 0,

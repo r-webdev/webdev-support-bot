@@ -1,7 +1,12 @@
 import type { ApplicationCommandOptionChoiceData } from 'discord.js';
 
 import type { CommandDataWithHandler } from '../../../types';
-import { ADMIN_ROLE_ID, HELPFUL_ROLE_ID, MOD_ROLE_ID, SERVER_ID } from '../../env.js';
+import {
+  ADMIN_ROLE_ID,
+  HELPFUL_ROLE_ID,
+  MOD_ROLE_ID,
+  SERVER_ID,
+} from '../../env.js';
 import { map } from '../../utils/map.js';
 import type { ValueOrNullary } from '../../utils/valueOrCall.js';
 import { valueOrCall } from '../../utils/valueOrCall.js';
@@ -49,19 +54,22 @@ export const shitpostInteraction: CommandDataWithHandler = {
     const topic = interaction.options.getString('topic');
     const replacement = interaction.options.getString('replacement');
     const content = aboutMessages.get(topic);
-    const {roles} = interaction.member;
+    const { roles } = interaction.member;
 
-    if(canUseCommand(roles)){
-      await interaction.reply({ephemeral: true, content: "This is only available to helpful members"})
+    if (canUseCommand(roles)) {
+      await interaction.reply({
+        ephemeral: true,
+        content: 'This is only available to helpful members',
+      });
       return;
     }
 
-    if (/<@[!&]?\d+>/.test(replacement)) {
+    if (/<@[!&]?\d+>/u.test(replacement)) {
       await interaction.reply({
         content: "Please don't try to tag users with this feature!",
         ephemeral: true,
       });
-      return
+      return;
     }
 
     if (content) {
@@ -92,11 +100,17 @@ export const shitpostInteraction: CommandDataWithHandler = {
 
 function canUseCommand(roles) {
   if (Array.isArray(roles)) {
-    if (![HELPFUL_ROLE_ID, MOD_ROLE_ID, ADMIN_ROLE_ID].some(role => roles.includes(role))) {
+    if (
+      ![HELPFUL_ROLE_ID, MOD_ROLE_ID, ADMIN_ROLE_ID].some(role =>
+        roles.includes(role)
+      )
+    ) {
       return true;
     }
   } else {
-    return ![HELPFUL_ROLE_ID, MOD_ROLE_ID, ADMIN_ROLE_ID].some(role => roles.cache.has(HELPFUL_ROLE_ID))
+    return ![HELPFUL_ROLE_ID, MOD_ROLE_ID, ADMIN_ROLE_ID].some(role =>
+      roles.cache.has(HELPFUL_ROLE_ID)
+    );
   }
   return false;
 }

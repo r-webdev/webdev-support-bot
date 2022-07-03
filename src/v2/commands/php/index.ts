@@ -4,13 +4,9 @@ import type {
   Client,
   CommandInteraction,
   Message,
-  SelectMenuInteraction
+  SelectMenuInteraction,
 } from 'discord.js';
-import  {
-  MessageButton,
-  MessageActionRow,
-  MessageSelectMenu,
-} from 'discord.js';
+import { MessageButton, MessageActionRow, MessageSelectMenu } from 'discord.js';
 import type { MessageComponentTypes } from 'discord.js/typings/enums';
 import type { Node } from 'dom-parser';
 import DOMParser from 'dom-parser';
@@ -85,30 +81,31 @@ const makeRequest = requester;
 const parseText = textParser;
 const metadataExtractor = extractMetadataFromResult;
 
-const handler = async (client: Client, interaction: CommandInteraction): Promise<void> => {
+const handler = async (
+  client: Client,
+  interaction: CommandInteraction
+): Promise<void> => {
   const searchTerm = interaction.options.getString('query');
-  const defer = interaction.deferReply()
+  const defer = interaction.deferReply();
   try {
     const { error, text, searchUrl } = await makeRequest(searchTerm);
     if (error) {
-      await defer
+      await defer;
       await interaction.editReply(invalidResponse);
       return;
     }
 
     const { isDirect, results } = parseText(text);
     if (isDirect) {
-      await defer
+      await defer;
       await interaction.editReply(buildDirectUrl(provider, searchTerm));
       return;
     }
 
+    const msgId = Math.random().toString(16);
 
-    const msgId = Math.random().toString(16)
-
-    const selectRow = new MessageActionRow()
-      .addComponents(
-        new MessageSelectMenu()
+    const selectRow = new MessageActionRow().addComponents(
+      new MessageSelectMenu()
         .setCustomId(`php🤔${msgId}🤔select`)
         .setMaxValues(5)
         .setMinValues(1)
@@ -120,43 +117,50 @@ const handler = async (client: Client, interaction: CommandInteraction): Promise
               label: clampLengthMiddle(title, 25),
               description: clampLength(url, 50),
               value: String(index),
-            }
+            };
           })
         )
-      )
+    );
 
+    const buttonRow = new MessageActionRow().addComponents(
+      new MessageButton()
+        .setLabel('Cancel')
+        .setStyle('SECONDARY')
+        .setCustomId(`mdn🤔${msgId}🤔cancel`)
+    );
 
-      const buttonRow = new MessageActionRow().addComponents(
-        new MessageButton()
-          .setLabel('Cancel')
-          .setStyle('SECONDARY')
-          .setCustomId(`mdn🤔${msgId}🤔cancel`)
-      );
+    await defer;
+    const int = (await interaction.editReply({
+      content: 'Please pick 1 - 5 options below to display',
+      components: [selectRow, buttonRow],
+    })) as Message;
 
-      await defer
-      const int = (await interaction.editReply({
-        content: 'Please pick 1 - 5 options below to display',
-        components: [selectRow, buttonRow],
-      })) as Message;
-
-      const interactionCollector = int.createMessageComponentCollector<MessageComponentTypes.BUTTON | MessageComponentTypes.SELECT_MENU>({
-      filter: item => item.user.id === interaction.user.id && item.customId.startsWith(`php🤔${msgId}`),
+    const interactionCollector = int.createMessageComponentCollector<
+      MessageComponentTypes.BUTTON | MessageComponentTypes.SELECT_MENU
+    >({
+      filter: item =>
+        item.user.id === interaction.user.id &&
+        item.customId.startsWith(`php🤔${msgId}`),
     });
 
-    interactionCollector.once('collect', async (interaction:ButtonInteraction | SelectMenuInteraction) => {
-      await interaction.deferUpdate();
-      if (interaction.isButton()) {
-        await int.delete();
-        return;
+    interactionCollector.once(
+      'collect',
+      async (interaction: ButtonInteraction | SelectMenuInteraction) => {
+        await interaction.deferUpdate();
+        if (interaction.isButton()) {
+          await int.delete();
+          return;
+        }
+        const urls = interaction.values.map(
+          x => metadataExtractor(results[x].firstChild).url
+        );
+
+        await interaction.editReply({
+          components: [],
+          content: urls.join('\n'),
+        });
       }
-      const urls = interaction.values.map(x => metadataExtractor(results[x].firstChild).url)
-
-
-      await interaction.editReply({
-        components: [],
-        content: urls.join('\n')
-      });
-    });
+    );
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(error);
@@ -164,7 +168,7 @@ const handler = async (client: Client, interaction: CommandInteraction): Promise
   }
 };
 
-export const phpCommand : CommandDataWithHandler = {
+export const phpCommand: CommandDataWithHandler = {
   name: 'php',
   description: 'search and link something from php.net',
   handler,

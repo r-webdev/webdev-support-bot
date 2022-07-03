@@ -1,4 +1,8 @@
-import type { ApplicationCommandOptionChoiceData, Client, CommandInteraction } from 'discord.js';
+import type {
+  ApplicationCommandOptionChoiceData,
+  Client,
+  CommandInteraction,
+} from 'discord.js';
 
 import type { CommandDataWithHandler } from '../../../types';
 import { map } from '../../utils/map.js';
@@ -9,7 +13,7 @@ import { jquery } from './handlers/jquery.js';
 
 const whynoMessages = new Map<string, ValueOrNullary<string>>([
   jquery,
-  channel
+  channel,
 ]);
 
 const mapTransformToChoices = map(
@@ -20,16 +24,18 @@ const mapTransformToChoices = map(
 );
 
 export const whynoInteraction: CommandDataWithHandler = {
-  description:
-    'Quick response for common "why no" or "why not..." questions',
-  handler: async (client: Client, interaction: CommandInteraction): Promise<void> => {
+  description: 'Quick response for common "why no" or "why not..." questions',
+  handler: async (
+    client: Client,
+    interaction: CommandInteraction
+  ): Promise<void> => {
     const topic = interaction.options.get('topic').value as string;
     const user = interaction.options.getUser('tag');
     const content = whynoMessages.get(topic);
 
     if (content) {
       interaction.reply(
-        `${user ? `${user}\n` : ''} ${valueOrCall(content).trim()}`
+        `${user ? `${user.toString()}\n` : ''} ${valueOrCall(content).trim()}`
       );
       return;
     }

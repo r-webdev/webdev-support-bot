@@ -1,4 +1,3 @@
- 
 import ts from 'typescript';
 
 export function hasVarInSource(source: string): boolean {

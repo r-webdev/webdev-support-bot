@@ -3,7 +3,7 @@ import { callOrValue } from './callOrValue.js';
 type PluralizeFunction = {
   (
     strs: TemplateStringsArray,
-    ...exprs: (((n: number) => string) | unknown)[]
+    ...exprs: (((n: number) => string) | string | { toString(): string })[]
   ): (n: number) => string;
   s: (n: number) => string;
   mapper: typeof mapper;
@@ -14,13 +14,15 @@ const listFormatter = new Intl.ListFormat();
 
 const pluralize = ((
   strs: TemplateStringsArray,
-  ...exprs: (((n: number) => string) | unknown)[]
+  ...exprs: (((n: number) => string) | string | { toString(): string })[]
 ) => {
   return (n: number) =>
     strs.reduce((acc, item, i) => {
       const exp = exprs[i - 1];
-      if (Array.isArray(exp)) {return acc + listFormatter.format(exp) + item;}
-      return acc + callOrValue(exp, n) + item;
+      if (Array.isArray(exp)) {
+        return acc + listFormatter.format(exp) + item;
+      }
+      return `${acc}${callOrValue<string>(exp, n)}${item}`;
     });
 }) as PluralizeFunction;
 

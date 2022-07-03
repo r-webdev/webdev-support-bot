@@ -16,7 +16,7 @@ import type { IUser } from '.';
 
 const grantHelpfulRole = async (user: GuildMember, msg: Message) => {
   // Check if the user has the role
-  if (user.roles.cache.find(r => r.id === HELPFUL_ROLE_ID)) {
+  if (user.roles.cache.some(r => r.id === HELPFUL_ROLE_ID)) {
     return;
   }
 
@@ -102,7 +102,10 @@ const pointHandler = async (
   );
 
   // Check if the user has enough points to be given the helpful role
-  if (!guildMember.roles.cache.has(HELPFUL_ROLE_EXEMPT_ID) && user.points >= Number.parseInt(HELPFUL_ROLE_POINT_THRESHOLD)) {
+  if (
+    !guildMember.roles.cache.has(HELPFUL_ROLE_EXEMPT_ID) &&
+    user.points >= Number.parseInt(HELPFUL_ROLE_POINT_THRESHOLD)
+  ) {
     await grantHelpfulRole(guildMember, msg);
   }
 

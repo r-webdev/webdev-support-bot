@@ -1,4 +1,3 @@
- 
 import type { Client } from 'discord.js';
 import { Collection } from 'discord.js';
 

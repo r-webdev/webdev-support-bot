@@ -3,10 +3,8 @@
 
 import type {
   ButtonInteraction,
-  Client,
   DMChannel,
   Message,
-  MessageActionRowComponent,
   MessageActionRowComponentResolvable,
   MessageButtonStyle,
   PartialMessage,
@@ -14,10 +12,9 @@ import type {
   ThreadChannel,
   User,
 } from 'discord.js';
-import { MessageComponentTypes } from 'discord.js/typings/enums';
 
 import { AWAIT_MESSAGE_TIMEOUT } from '../../env.js';
-import { ExternalResolver } from './ExternalResolver.js';
+import { DeferredPromise } from './DeferredPromise.js';
 
 export type QuestionBase = {
   body: string;
@@ -31,13 +28,13 @@ export type ButtonQuestion = {
     value: string;
     style?: MessageButtonStyle;
   }[];
-buttonDelay?: number;
+  buttonDelay?: number;
 } & QuestionBase;
 
 export type TextQuestion = {
   type: 'text';
   validate?: (input: string) => boolean | string;
-  format?: (input:string) => string
+  format?: (input: string) => string;
 } & QuestionBase;
 
 export type MultiStepFormStep = ButtonQuestion | TextQuestion;
@@ -68,7 +65,9 @@ export class MultistepForm<T extends Record<string, MultiStepFormStep>> {
   public async getButtonResponse<P extends ButtonQuestion>(
     step: P
   ): Promise<P['buttons'][number]['value'] | typeof __cancelled__> {
-    const resolver = new ExternalResolver<P['buttons'][number]['value'] | typeof __cancelled__>();
+    const resolver = new DeferredPromise<
+      P['buttons'][number]['value'] | typeof __cancelled__
+    >();
     const message = await this.#channel.send({
       content: `**${step.body}**`,
       components: [
@@ -92,11 +91,10 @@ export class MultistepForm<T extends Record<string, MultiStepFormStep>> {
       }, step.buttonDelay);
     }
 
-    const collector =
-      message.createMessageComponentCollector({
-        componentType: 'BUTTON',
-        filter: interaction => interaction.user.id === this.#user.id,
-      });
+    const collector = message.createMessageComponentCollector({
+      componentType: 'BUTTON',
+      filter: interaction => interaction.user.id === this.#user.id,
+    });
 
     const handler = async (interaction: ButtonInteraction) => {
       if (interaction.isButton()) {
@@ -120,15 +118,17 @@ export class MultistepForm<T extends Record<string, MultiStepFormStep>> {
 
     collector.on('collect', handler);
     setTimeout(() => {
-      if(resolver.settled) {return}
+      if (resolver.settled) {
+        return;
+      }
 
-      collector.off('collect', handler)
-      resolver.resolve(__cancelled__)
+      collector.off('collect', handler);
+      resolver.resolve(__cancelled__);
       message.edit({
-        components: []
-      })
-      message.channel.send("Timed out. Please restart the process.")
-    },  Number(AWAIT_MESSAGE_TIMEOUT) * 1000 )
+        components: [],
+      });
+      message.channel.send('Timed out. Please restart the process.');
+    }, Number(AWAIT_MESSAGE_TIMEOUT) * 1000);
     return resolver;
   }
 
@@ -139,7 +139,7 @@ export class MultistepForm<T extends Record<string, MultiStepFormStep>> {
       `**${step.body}**\n\nOr click below to cancel.`
     );
 
-    const deleteResolver = new ExternalResolver<typeof __cancelled__>();
+    const deleteResolver = new DeferredPromise<typeof __cancelled__>();
 
     const handleDelete = (msg: Message | PartialMessage) => {
       if (msg.id !== message.id) {
@@ -157,18 +157,15 @@ export class MultistepForm<T extends Record<string, MultiStepFormStep>> {
       const res = await Promise.race([
         this.#channel.awaitMessages({
           time: Number.parseInt(AWAIT_MESSAGE_TIMEOUT) * 1000,
-          filter: (message) => {
-            const value = step.validate(message.cleanContent)
-            const fromUser = message.author.id === userId
+          filter: message => {
+            const value = step.validate(message.cleanContent);
+            const fromUser = message.author.id === userId;
 
-            if(typeof value === 'string' && fromUser) {
-              this.#channel.send(value)
+            if (typeof value === 'string' && fromUser) {
+              this.#channel.send(value);
             }
 
-            return (
-              fromUser &&
-              typeof value === 'boolean' && value
-            );
+            return fromUser && typeof value === 'boolean' && value;
           },
           max: 1,
         }),
@@ -182,11 +179,11 @@ export class MultistepForm<T extends Record<string, MultiStepFormStep>> {
         return __cancelled__;
       }
 
-      const value = res.first().content.trim()
+      const value = res.first().content.trim();
       return step.format?.(value) ?? value;
     } catch {
       this.#channel.send(`You have timed out. Please try again`);
-      return __cancelled__
+      return __cancelled__;
     }
   }
 
@@ -195,7 +192,11 @@ export class MultistepForm<T extends Record<string, MultiStepFormStep>> {
 
     const state: Map<keyof T, unknown> = new Map();
 
-    while (currentStep !== undefined && currentStep !==__cancelled__&& currentStep in this.#steps) {
+    while (
+      currentStep !== undefined &&
+      currentStep !== __cancelled__ &&
+      currentStep in this.#steps
+    ) {
       const step = this.#steps[currentStep];
       let value;
       if (step.type === 'button') {
@@ -214,7 +215,7 @@ export class MultistepForm<T extends Record<string, MultiStepFormStep>> {
 
       currentStep = step?.next?.(value, state);
     }
-    return currentStep !== __cancelled__ ? state : null;
+    return currentStep === __cancelled__ ? null : state;
   }
 
   private genButtons<P extends ButtonQuestion>(
@@ -227,7 +228,7 @@ export class MultistepForm<T extends Record<string, MultiStepFormStep>> {
         label: button.label,
         style: button.style ?? 'PRIMARY',
         customId: `${this.#id}🤔${button.value}`,
-        disabled: disabled ?? undefined
+        disabled: disabled ?? undefined,
       })
     );
   }
@@ -252,11 +253,10 @@ export class MultistepForm<T extends Record<string, MultiStepFormStep>> {
       ],
     });
 
-    const collector =
-      message.createMessageComponentCollector({
-        componentType: 'BUTTON',
-        filter: interaction => interaction.user.id === this.#user.id,
-      });
+    const collector = message.createMessageComponentCollector({
+      componentType: 'BUTTON',
+      filter: interaction => interaction.user.id === this.#user.id,
+    });
 
     const handler = (interaction: ButtonInteraction) => {
       if (interaction.isButton()) {

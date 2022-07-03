@@ -1,7 +1,7 @@
 import type { Document } from 'mongoose';
 import mongoose from 'mongoose';
 
-const { model, Schema } = mongoose
+const { model, Schema } = mongoose;
 
 const schema = new Schema({
   guild: {
@@ -9,18 +9,23 @@ const schema = new Schema({
   },
   name: {
     required: true,
-    type: String
+    type: String,
   },
   commandId: {
     required: true,
-    type: String
+    type: String,
   },
   applicationId: {
     required: true,
-    type: String
-  }
+    type: String,
+  },
 } as const);
 
 export const Command = model<CommandType>('commands', schema);
 
-export type CommandType = Document & { guild?: string, name: string, commandId: string, applicationId: string }
+export type CommandType = Document & {
+  guild?: string;
+  name: string;
+  commandId: string;
+  applicationId: string;
+};

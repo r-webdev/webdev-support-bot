@@ -1,4 +1,8 @@
-import type { ApplicationCommandOptionChoiceData, Client, CommandInteraction } from 'discord.js';
+import type {
+  ApplicationCommandOptionChoiceData,
+  Client,
+  CommandInteraction,
+} from 'discord.js';
 
 import type { CommandDataWithHandler } from '../../../types';
 import { map } from '../../utils/map.js';
@@ -9,8 +13,12 @@ import { english } from './handlers/english.js';
 import { format } from './handlers/format/index.js';
 import { justAsk } from './handlers/justask.js';
 
-
-const pleaseMessages = new Map<string, ValueOrNullary<string>>([format, code, justAsk, english]);
+const pleaseMessages = new Map<string, ValueOrNullary<string>>([
+  format,
+  code,
+  justAsk,
+  english,
+]);
 
 const mapTransformToChoices = map(
   (item: string): ApplicationCommandOptionChoiceData => ({
@@ -28,7 +36,7 @@ export const pleaseInteraction: CommandDataWithHandler = {
 
     if (content) {
       await interaction.reply(
-        `${user ? `${user}\n` : ''}${valueOrCall(content).trim()}`
+        `${user ? `${user.toString()}\n` : ''}${valueOrCall(content).trim()}`
       );
     }
   },

@@ -23,14 +23,22 @@ import { ThanksInteraction } from './db_model.js';
 const memoryCache = new Map<string, Message>();
 
 export async function handleThreadThanks(msg: Message): Promise<void> {
-  const { channel } = msg;
+  const { channel, author, id: msgId } = msg;
   if (!channel.isThread()) {
     return;
   }
 
-  const oldResponseId = [msg.author.id, msg.channel.id].join('|');
+  const oldResponseId = [author.id, channel.id].join('|');
   if (memoryCache.has(oldResponseId)) {
-    await memoryCache.get(oldResponseId).delete().catch(error => { console.error("message already deleted"); }).finally(() => { memoryCache.delete(oldResponseId) });
+    await memoryCache
+      .get(oldResponseId)
+      .delete()
+      .catch(error => {
+        console.error('message already deleted');
+      })
+      .finally(() => {
+        memoryCache.delete(oldResponseId);
+      });
   }
   // channel.members.fetch should return a collection
   const [members, previousInteractions]: [
@@ -41,7 +49,7 @@ export async function handleThreadThanks(msg: Message): Promise<void> {
       Collection<string, ThreadMember>
     >,
     ThanksInteraction.find({
-      thanker: msg.author.id,
+      thanker: author.id,
       createdAt: {
         $gte: Date.now() - Number.parseInt(POINT_LIMITER_IN_MINUTES) * 60_000,
       },
@@ -53,7 +61,7 @@ export async function handleThreadThanks(msg: Message): Promise<void> {
   const alreadyThanked = [];
 
   const otherMembers = members.filter(x => {
-    const notSelf = x.user.id !== msg.author.id;
+    const notSelf = x.user.id !== author.id;
     const notBot = !x.user.bot;
     const notTimeout = !previouslyThankedIds.has(x.user.id);
 
@@ -92,19 +100,19 @@ export async function handleThreadThanks(msg: Message): Promise<void> {
             }))
           )
           .setMinValues(1)
-          .setCustomId(`threadThanks🤔${msg.id}🤔select🤔${msg.author.id}`)
+          .setCustomId(`threadThanks🤔${msgId}🤔select🤔${author.id}`)
       ),
       new MessageActionRow().addComponents(
         new MessageButton()
           .setLabel('Nevermind')
           .setStyle('SECONDARY')
-          .setCustomId(`threadThanks🤔${msg.id}🤔cancel🤔${msg.author.id}`)
+          .setCustomId(`threadThanks🤔${msgId}🤔cancel🤔${author.id}`)
       ),
     ],
   });
 
-  if (msg.channel?.id) {
-    memoryCache.set([msg.author.id, msg.channel.id].join('|'), response);
+  if (channel?.id) {
+    memoryCache.set([author.id, channel.id].join('|'), response);
   }
 }
 
@@ -115,13 +123,13 @@ export function attachThreadThanksHandler(client: Client): void {
       if (!(interaction.isSelectMenu() || interaction.isButton())) {
         return;
       }
-      const {channel} = interaction;
-      const [category, msgId, type, userId] = interaction.customId.split('🤔');
+      const { channel, customId, user, message, guild } = interaction;
+      const [category, msgId, type, userId] = customId.split('🤔');
 
       if (category !== 'threadThanks') {
         return;
       }
-      if (interaction.user.id !== userId) {
+      if (user.id !== userId) {
         interaction.reply({
           content: "That's not for you! That prompt is for someone else.",
           ephemeral: true,
@@ -131,7 +139,7 @@ export function attachThreadThanksHandler(client: Client): void {
 
       if (type === 'cancel') {
         await Promise.all([
-          interaction.channel.messages.delete(interaction.message.id),
+          channel.messages.delete(message.id),
           interaction.reply({
             content: 'Sure thing, message removed!',
             ephemeral: true,
@@ -142,9 +150,9 @@ export function attachThreadThanksHandler(client: Client): void {
 
       if (type === 'select') {
         const { values } = interaction as SelectMenuInteraction;
-        interaction.channel.messages.delete(interaction.message.id);
-        const msgPromise = interaction.channel.messages.fetch(msgId);
-        const thankedMembers = await interaction.guild.members.fetch({
+        channel.messages.delete(message.id);
+        const msgPromise = channel.messages.fetch(msgId);
+        const thankedMembers = await guild.members.fetch({
           user: values,
         });
 
@@ -152,31 +160,31 @@ export function attachThreadThanksHandler(client: Client): void {
           thankedMembers.map(item => [item.user.id, item.user])
         );
 
-        const responseData = createResponse(thankedUsers, interaction.user.id);
+        const responseData = createResponse(thankedUsers, user.id);
         let response: Message;
 
         const msg = await msgPromise;
-        if (!msg) {
-          response = await msg.channel.send(responseData);
-        } else {
+        if (msg) {
           response = await msg.reply(responseData);
+        } else {
+          response = await msg.channel.send(responseData);
         }
 
-        const name = [interaction.channelId, interaction.user.id].join('|');
+        const name = [channel.id, user.id].join('|');
         if (memoryCache.has(name)) {
           const item = memoryCache.get(name);
           memoryCache.delete(name);
           await item.delete();
         }
 
-        if (channel.isThread() && channel.ownerId === interaction.user.id) {
+        if (channel.isThread() && channel.ownerId === user.id) {
           sendCloseThreadQuery(interaction);
         }
 
         await ThanksInteraction.create({
           thanker: userId,
-          guild: interaction.guildId,
-          channel: interaction.channelId,
+          guild: guild.id,
+          channel: channel.id,
           thankees: thankedUsers.map(u => u.id),
           responseMsgId: response.id,
         });
@@ -202,7 +210,7 @@ function sendCloseThreadQuery(
   });
 }
 
-export function attachThreadClose(client: Client) {
+export function attachThreadClose(client: Client): void {
   client.on(
     'interactionCreate',
     asyncCatch(async interaction => {

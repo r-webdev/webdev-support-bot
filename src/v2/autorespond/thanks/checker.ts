@@ -11,7 +11,8 @@ type ThankDef = typeof thanks[number];
 const wordBoundaryBefore = String.raw`(?<=^|$|\P{L})`;
 const wordBoundaryAfter = String.raw`(?=^|$|\P{L})`;
 
-const wordBoundarableRegex = /\p{Changes_When_Uppercased}|\p{Changes_When_Lowercased}/u;
+const wordBoundarableRegex =
+  /\p{Changes_When_Uppercased}|\p{Changes_When_Lowercased}/u;
 const nonNegativableEnglish = ['cheers'];
 const english = [
   'ty',
@@ -28,8 +29,17 @@ const english = [
   'thanx',
   'thnx',
 ];
-const negativeEnglish = [...english
-  .flatMap(word => [`n ${  word}`, `n${  word}`, `no${  word}`, `no ${  word}`]), 'no need to thank', 'thanks,? but no thanks', 'thanks for nothing'];
+const negativeEnglish = [
+  ...english.flatMap(word => [
+    `n ${word}`,
+    `n${word}`,
+    `no${word}`,
+    `no ${word}`,
+  ]),
+  'no need to thank',
+  'thanks,? but no thanks',
+  'thanks for nothing',
+];
 
 const partitionWrap = partition(
   (str: string) => !!wordBoundarableRegex.test(str)
@@ -74,12 +84,12 @@ const noThanksRegex = new RegExp(
 );
 
 const hasThanks = str => {
-  thanksRegex.lastIndex = -1
-  return thanksRegex.exec(removeDiacritics(str)
-    .replace(/\s+/, ' ')
-    .replace(noThanksRegex, ''));
-}
-const keywordValidator = (str: string) => {
+  thanksRegex.lastIndex = -1;
+  return thanksRegex.exec(
+    removeDiacritics(str).replace(/\s+/u, ' ').replace(noThanksRegex, '')
+  );
+};
+const keywordValidator = (str: string): boolean => {
   return Boolean(hasThanks(str));
 };
 

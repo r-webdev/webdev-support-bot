@@ -13,5 +13,5 @@
     "esModuleInterop": true
   },
   "include": ["./src/**/*.ts", "./src/*.d.ts"],
-  "exclude": ["node_modules", "./src/**/__fixtures__/*", "./src/**/*.test.ts"]
+  "exclude": ["node_modules", "./src/**/__fixtures__/*"]
 }

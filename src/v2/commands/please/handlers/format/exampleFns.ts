@@ -1,10 +1,12 @@
+// This file is literally just containing code to use in examples
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 export const LINE_SEPARATOR = '\n';
 
 function formatFn(fn: Function) {
   return fn
     .toString()
     .split(LINE_SEPARATOR)
-    .map(line => `> ${  line}`)
+    .map(line => `> ${line}`)
     .join(LINE_SEPARATOR);
 }
 
