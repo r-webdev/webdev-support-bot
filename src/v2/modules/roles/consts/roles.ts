@@ -1,80 +1,80 @@
 export const ROLES = [
   {
     name: '.NET',
-    emoji: '💻'
+    emoji: '💻',
   },
   {
     name: 'CSS',
-    emoji: '💻'
+    emoji: '💻',
   },
   {
     name: 'Go',
-    emoji: '💻'
+    emoji: '💻',
   },
   {
     name: 'HTML',
-    emoji: '💻'
+    emoji: '💻',
   },
   {
     name: 'Java',
-    emoji: '💻'
+    emoji: '💻',
   },
   {
     name: 'JS',
-    emoji: '💻'
+    emoji: '💻',
   },
   {
     name: 'PHP',
-    emoji: '💻'
+    emoji: '💻',
   },
   {
     name: 'Python',
-    emoji: '💻'
+    emoji: '💻',
   },
   {
     name: 'TS',
-    emoji: '💻'
+    emoji: '💻',
   },
 
   {
     name: 'Angular',
-    emoji: '🛠'
+    emoji: '🛠',
   },
   {
     name: 'React',
-    emoji: '🛠'
+    emoji: '🛠',
   },
   {
     name: 'Svelte',
-    emoji: '🛠'
+    emoji: '🛠',
   },
   {
     name: 'Vue',
-    emoji: '🛠'
+    emoji: '🛠',
   },
   {
     name: 'WordPress',
-    emoji: '🛠'
+    emoji: '🛠',
   },
   {
     name: 'Databases',
-    emoji: '🗃'
+    emoji: '🗃',
   },
   {
     name: 'DevOps',
-    emoji: '🗃'
+    emoji: '🗃',
   },
   {
     name: 'SEO',
-    emoji: '🗃'
+    emoji: '🗃',
   },
   {
     name: 'Graphic Design',
-    emoji: '🎨'
+    emoji: '🎨',
   },
   {
     name: 'UX',
-    emoji: '🎨'
+    emoji: '🎨',
   },
   // {
   //   name: 'All Development',

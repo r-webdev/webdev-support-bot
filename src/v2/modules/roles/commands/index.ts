@@ -1,4 +1,4 @@
-import { CommandDataWithHandler } from '../../../../types';
+import type { CommandDataWithHandler } from '../../../../types';
 import { SERVER_ID } from '../../../env';
 import { handleAddRemoveRole } from '../events/handleAddRemoveRole';
 import { handleAutoCompleteRole } from '../events/handleAutoCompleteRole';
@@ -11,17 +11,17 @@ export const roleCommands: CommandDataWithHandler = {
   async handler(client, interaction) {
     switch (interaction.options.getSubcommand()) {
       case 'suggest':
-        await suggest(interaction)
+        await suggest(interaction);
         break;
       case 'change':
-        await change(interaction)
+        change(interaction);
         break;
     }
   },
   onAttach(client) {
-    client.on('interactionCreate',handleAddRemoveRole)
+    client.on('interactionCreate', handleAddRemoveRole);
 
-    client.on('interactionCreate',handleAutoCompleteRole);
+    client.on('interactionCreate', handleAutoCompleteRole);
   },
   guildValidate: guild => guild.id === SERVER_ID,
   defaultPermission: false,

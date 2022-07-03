@@ -57,7 +57,10 @@ type FetchWithFormat<Format> = (
 const doFetch: <TParsedResponse>(
   cacheKey: string,
   mapper: ResponseMapper<TParsedResponse>
-) => FetchWithFormat<TParsedResponse> = <TParsedResponse>(cacheKey, mapper):FetchWithFormat<TParsedResponse> => {
+) => FetchWithFormat<TParsedResponse> = <TParsedResponse>(
+  cacheKey,
+  mapper
+): FetchWithFormat<TParsedResponse> => {
   const casedCacheKey = cacheKey.toLowerCase();
   const cachedResponse = apiCache.get(casedCacheKey);
 
@@ -73,6 +76,8 @@ const doFetch: <TParsedResponse>(
       timestamp: Date.now(),
     });
 
+    // this should be fine?
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string
     const timeLabel = `Time took for url=${encodeURIComponent(url.toString())}`;
     // eslint-disable-next-line no-console
     console.time(timeLabel);
@@ -87,36 +92,36 @@ const doFetch: <TParsedResponse>(
 
 const responseMapper: <T>(
   type: ResponseTypes
-) => (response: Response) => Promise<UnknownData<T>> = <T>(
-  type: string
-) => async response => {
-  if (!response.ok) {
-    return {
-      error: true,
-      json: null,
-      text: null,
-    } as unknown as Promise<UnknownData<T>>;
-  }
+) => (response: Response) => Promise<UnknownData<T>> =
+  <T>(type: string) =>
+  async response => {
+    if (!response.ok) {
+      return {
+        error: true,
+        json: null,
+        text: null,
+      } as unknown as Promise<UnknownData<T>>;
+    }
 
-  if (type === 'json') {
-    const json = await response.json();
-    return {
-      error: false,
-      json,
-      text: null,
-    }as unknown as Promise<UnknownData<T>>;
-  }
+    if (type === 'json') {
+      const json = await response.json();
+      return {
+        error: false,
+        json,
+        text: null,
+      } as unknown as Promise<UnknownData<T>>;
+    }
 
-  if (type === 'text') {
-    const text = await response.text();
+    if (type === 'text') {
+      const text = await response.text();
 
-    return {
-      error: false,
-      json: null,
-      text,
-    }as unknown as Promise<UnknownData<T>>;
-  }
-};
+      return {
+        error: false,
+        json: null,
+        text,
+      } as unknown as Promise<UnknownData<T>>;
+    }
+  };
 
 const useData = <T>(
   url: string,

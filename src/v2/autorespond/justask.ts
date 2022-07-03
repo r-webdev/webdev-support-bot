@@ -15,7 +15,7 @@ const heuristicJustAskRegex = new RegExp(
   'ui'
 );
 
-export function detectVagueQuestion(msg: Message):boolean {
+export function detectVagueQuestion(msg: Message): boolean {
   const content = stripMarkdownQuote(msg.cleanContent);
   if (content.split(' ').length < 50 && heuristicJustAskRegex.test(content)) {
     msg.reply(`
@@ -26,5 +26,5 @@ Here's why https://sol.gfxile.net/dontask.html
 `);
     return true;
   }
-  return false
+  return false;
 }

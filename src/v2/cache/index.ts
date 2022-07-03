@@ -6,15 +6,14 @@ export * from './cacheFns.js';
 
 type ConditionLimit = { delay: number; type: string; meta?: unknown };
 
-export function limitFnByUser<T extends (...args: unknown[]) => boolean | Promise<boolean>>(
-  fn: T,
-  { delay, type = `${fn.name}|${delay}` }: ConditionLimit
-) {
+export function limitFnByUser<
+  T extends (...args: unknown[]) => boolean | Promise<boolean>
+>(fn: T, { delay, type = `${fn.name}|${delay}` }: ConditionLimit) {
   return async (msg: Message): Promise<boolean> => {
     const user = msg.author.id;
     const guild = msg.guild?.id;
 
-    if(!guild) {
+    if (!guild) {
       return;
     }
 

@@ -10,7 +10,7 @@ import { hasDeprecatedHTMLElementInSource } from './hasDeprecated.js';
 
 const jsCodeBlocks = createCodeBlockCapturer(['html']);
 
-const getDeprecatedElements = pipe([
+const getDeprecatedElements = pipe<string, Iterable<string>>([
   jsCodeBlocks,
   pluck('code'),
   map(hasDeprecatedHTMLElementInSource),
@@ -20,7 +20,7 @@ const getDeprecatedElements = pipe([
 const mdnDeprecatedElUri =
   '<https://developer.mozilla.org/en-US/docs/Web/HTML/Element#obsolete_and_deprecated_elements';
 const isA = _.mapper({ 1: 'is a', 2: 'are both' }, 'are all');
-const mdnLink = ([item]: [any]): string =>
+const mdnLink = (item: string): string =>
   `<https://developer.mozilla.org/en-US/docs/Web/HTML/Element/${item.toLowerCase()}>`;
 
 export function detectDeprecatedHTML(msg: Message): boolean {

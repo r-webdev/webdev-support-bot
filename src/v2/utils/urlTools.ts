@@ -1,8 +1,6 @@
-import type { CommandInteraction, Interaction } from 'discord.js';
-import { Message } from 'discord.js';
+import type { CommandInteraction } from 'discord.js';
 import type { HeadersInit } from 'node-fetch';
 
-import { delayedMessageAutoDeletion } from './delayedMessageAutoDeletion.js';
 import type { Provider } from './discordTools';
 import { noResults, invalidResponse } from './errors.js';
 import useData from './useData.js';
@@ -30,7 +28,7 @@ export const providers: ProviderMap = {
     getExtendedInfoUrl: () => '',
     help: '',
     icon: '',
-    search: ''
+    search: '',
   },
   bundlephobia: {
     color: 0xff_ff_ff,
@@ -123,7 +121,7 @@ export const KEYWORD_REGEXP = new RegExp(
   'iu'
 );
 
-export const getSearchUrl = (provider: Provider, search: string) => {
+export const getSearchUrl = (provider: Provider, search: string): string => {
   if (providers[provider]) {
     return providers[provider].search.replace(SEARCH_TERM, encodeURI(search));
   }
@@ -131,16 +129,19 @@ export const getSearchUrl = (provider: Provider, search: string) => {
   throw new Error(`provider not implemeted: ${provider}`);
 };
 
-export const buildDirectUrl = (provider: Provider, href: string) => {
+export const buildDirectUrl = (provider: Provider, href: string): string => {
   if (providers[provider]) {
-    return providers[provider].direct.replace(TERM, href.replace(/^\//,''));
+    return providers[provider].direct.replace(TERM, href.replace(/^\//u, ''));
   }
 
   throw new Error(`provider not implemeted: ${provider}`);
 };
 
-export const getExtendedInfoUrl = (provider: Provider, term: string) => {
-  if (providers[provider] && providers[provider].getExtendedInfoUrl) {
+export const getExtendedInfoUrl = (
+  provider: Provider,
+  term: string
+): string => {
+  if (providers[provider]?.getExtendedInfoUrl) {
     return providers[provider].getExtendedInfoUrl(term);
   }
 
@@ -153,8 +154,8 @@ type GetDataParams = {
   msg: CommandInteraction;
   provider: Provider;
   searchTerm: string;
-  sanitizeData?: (data: any) => Partial<any>;
-  isInvalidData: (data: any) => boolean;
+  sanitizeData?: <T>(data: T) => Partial<T>;
+  isInvalidData: <T>(data: T) => boolean;
   headers?: HeadersInit;
 };
 

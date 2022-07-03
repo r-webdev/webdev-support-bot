@@ -1,6 +1,10 @@
-import { ROLES } from "../consts/roles";
+import type { Interaction } from 'discord.js';
 
-export const handleAutoCompleteRole =  async interaction => {
+import { ROLES } from '../consts/roles';
+
+export const handleAutoCompleteRole = async (
+  interaction: Interaction
+): Promise<void> => {
   if (interaction.isAutocomplete()) {
     const focused = interaction.options.getFocused();
     const listedRoles = ROLES.filter(roles =>
@@ -14,4 +18,4 @@ export const handleAutoCompleteRole =  async interaction => {
       }))
     );
   }
-}
+};

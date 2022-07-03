@@ -1,3 +1,5 @@
+// We're just treeting this like a giant JSON file but in TS
+/* eslint-disable import/no-anonymous-default-export, import/no-default-export */
 export default [
   { language: 'Arabic', symbol: 'ar', text: 'لا شكرا' },
   { language: 'Dutch', symbol: 'nl', text: 'Nee bedankt' },

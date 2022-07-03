@@ -3,7 +3,6 @@ import type {
   Client,
   CommandInteraction,
   Guild,
-  Interaction,
 } from 'discord.js';
 
 export type CommandDataWithHandler = ChatInputApplicationCommandData & {

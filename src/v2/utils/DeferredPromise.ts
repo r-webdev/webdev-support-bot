@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/explicit-member-accessibility */
-export class ExternalResolver<T> extends Promise<T> {
+export class DeferredPromise<T> extends Promise<T> {
   readonly #resolve: (value: T) => void;
 
   readonly #reject: (reason: unknown) => void;
@@ -21,29 +20,29 @@ export class ExternalResolver<T> extends Promise<T> {
     this.#reject = rejector;
   }
 
-  public get settled() {
+  public static get [Symbol.species](): PromiseConstructor {
+    return Promise;
+  }
+
+  public get settled(): boolean {
     return this.#resolved || this.#rejected;
   }
 
-  public get resolved() {
+  public get resolved(): boolean {
     return this.#resolved;
   }
 
-  public get rejected() {
+  public get rejected(): boolean {
     return this.#rejected;
   }
 
   public resolve(value: T): void {
-    this.#resolved = true
+    this.#resolved = true;
     this.#resolve(value);
   }
 
   public reject(reason: unknown): void {
-    this.#rejected = true
+    this.#rejected = true;
     this.#reject(reason);
-  }
-
-  public static get [Symbol.species](): PromiseConstructor {
-    return Promise;
   }
 }

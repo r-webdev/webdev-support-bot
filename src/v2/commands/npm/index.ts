@@ -63,14 +63,13 @@ const getFirstTenResults = pipe<Iterable<NPMResponse>, NPMEmbed[]>([
   collect,
 ]);
 
-
 // msg: Message, searchTerm: string
 const handleNpmCommand = async (
   client: Client,
   interaction: CommandInteraction
 ): Promise<void> => {
   const searchTerm = interaction.options.getString('name');
-  await interaction.deferReply({ephemeral: true});
+  await interaction.deferReply({ ephemeral: true });
   try {
     const json = await fetch<NPMResponse[]>({
       isInvalidData: json => json.length === 0,
@@ -88,11 +87,9 @@ const handleNpmCommand = async (
     if (firstTenResults.length === 1) {
       await interaction.channel.send({
         content: `Displaying result for ${searchTerm}`,
-        embeds: [
-          createNPMEmbed(firstTenResults[0], interaction.user),
-        ]
+        embeds: [createNPMEmbed(firstTenResults[0], interaction.user)],
       });
-      await interaction.editReply('👇 Displaying results below')
+      await interaction.editReply('👇 Displaying results below');
       return;
     }
 
@@ -114,7 +111,6 @@ const handleNpmCommand = async (
           }))
         )
     );
-
 
     const int = (await interaction.editReply({
       content: 'Please pick 1 option below to display',
@@ -148,7 +144,9 @@ const handleNpmCommand = async (
 
         interaction.channel.send({
           content: `Results for "${searchTerm}"`,
-          embeds: values.map((npmEmbed) => createNPMEmbed(npmEmbed, interaction.user)),
+          embeds: values.map(npmEmbed =>
+            createNPMEmbed(npmEmbed, interaction.user)
+          ),
         });
       }
     );
@@ -175,15 +173,18 @@ type NPMEmbed = {
   author: { name: string; url: string };
 };
 
-const createNPMEmbed = ({
-  externalUrls,
-  name,
-  url,
-  description,
-  lastUpdate,
-  maintainers,
-  author,
-}: NPMEmbed, user: User): MessageEmbed =>
+const createNPMEmbed = (
+  {
+    externalUrls,
+    name,
+    url,
+    description,
+    lastUpdate,
+    maintainers,
+    author,
+  }: NPMEmbed,
+  user: User
+): MessageEmbed =>
   new MessageEmbed()
     .setAuthor(`📦 Last updated ${lastUpdate}`)
     .setTitle(`${name}`)

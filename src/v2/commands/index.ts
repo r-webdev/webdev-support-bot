@@ -1,4 +1,5 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
+// This is required so far in this file
+/* eslint-disable no-await-in-loop */
 import type {
   ApplicationCommand,
   ApplicationCommandData,
@@ -14,9 +15,9 @@ import { isEqual } from 'lodash-es';
 
 import type { CommandDataWithHandler } from '../../types';
 import { setupCommands } from '../modules/mod/commands';
-import { roleCommands } from '../modules/roles/commands/index.js'
+import { roleCommands } from '../modules/roles/commands/index.js';
 import { asyncCatch } from '../utils/asyncCatch.js';
-import { map} from '../utils/map.js';
+import { map } from '../utils/map.js';
 import { merge } from '../utils/merge.js';
 import { normalizeApplicationCommandData } from '../utils/normalizeCommand.js';
 import { pipe } from '../utils/pipe.js';
@@ -49,7 +50,7 @@ export const guildCommands = new Map(
     npmInteraction,
     whynoInteraction,
     roleCommands,
-    setupCommands
+    setupCommands,
     // warn // Not used atm
   ].map(command => [command.name, command])
 ); // placeholder for now
@@ -222,9 +223,7 @@ async function addCommands(
 }
 
 function getDestination(
-  commandManager:
-    | ApplicationCommandManager
-    | GuildApplicationCommandManager
+  commandManager: ApplicationCommandManager | GuildApplicationCommandManager
 ) {
   return 'guild' in commandManager
     ? `Guild: ${commandManager.guild.name}`
@@ -279,7 +278,7 @@ function deleteRemovedCommands(
 ) {
   const destination = getDestination(cmdMgr);
   return map(async (name: string) => {
-    const existing = existingCommands.get(name)!;
+    const existing = existingCommands.get(name);
     console.warn(`Deleting ${name} from ${destination}`);
 
     return cmdMgr.delete(existing.id);

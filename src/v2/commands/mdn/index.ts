@@ -1,4 +1,3 @@
- 
 import type {
   ButtonInteraction,
   Client,
@@ -18,12 +17,15 @@ import { URL } from 'url';
 
 import type { CommandDataWithHandler } from '../../../types';
 import { clampLength, clampLengthMiddle } from '../../utils/clampStr.js';
-import { invalidResponse, noResults, unknownError } from '../../utils/errors.js';
+import {
+  invalidResponse,
+  noResults,
+  unknownError,
+} from '../../utils/errors.js';
 import { getSearchUrl } from '../../utils/urlTools.js';
 import useData from '../../utils/useData.js';
 
-
-const list = new (Intl as any).ListFormat()
+const list = new Intl.ListFormat();
 const provider = 'mdn';
 
 type SearchResponse = {
@@ -62,8 +64,6 @@ const fetch: typeof useData = useData;
 
 const buildDirectUrl = (path: string) =>
   new URL(path, 'https://developer.mozilla.org/en-US/docs/').toString();
-
-
 
 const mdnHandler = async (
   client: Client,
@@ -114,7 +114,6 @@ const mdnHandler = async (
         .setCustomId(`mdn🤔${msgId}🤔cancel`)
     );
 
-    await deferral;
     const int = (await interaction.editReply({
       content: 'Please pick 1 - 5 options below to display',
       components: [selectRow, buttonRow],
@@ -123,35 +122,46 @@ const mdnHandler = async (
     const interactionCollector = int.createMessageComponentCollector<
       MessageComponentTypes.SELECT_MENU | MessageComponentTypes.BUTTON
     >({
-      filter: item => item.user.id === interaction.user.id && item.customId.startsWith(`mdn🤔${msgId}`),
+      filter: item =>
+        item.user.id === interaction.user.id &&
+        item.customId.startsWith(`mdn🤔${msgId}`),
     });
 
-    interactionCollector.once('collect', async (interaction:ButtonInteraction|SelectMenuInteraction) => {
-      await interaction.deferUpdate();
-      if (interaction.isButton()) {
-        await int.delete();
-        return;
+    interactionCollector.once(
+      'collect',
+      async (interaction: ButtonInteraction | SelectMenuInteraction) => {
+        await interaction.deferUpdate();
+        if (interaction.isButton()) {
+          await int.delete();
+          return;
+        }
+        const valueSet = new Set(interaction.values);
+        const values = collection.filter((_, key) => valueSet.has(key));
+
+        await interaction.editReply({
+          content: `Displaying Results for ${list.format(
+            values.map(({ title }) => title)
+          )}`,
+          components: [],
+        });
+
+        interaction.channel.send({
+          content: `Results for "${searchTerm}"`,
+          embeds: values.map(({ title, summary, slug }) =>
+            new MessageEmbed()
+              .setTitle(`${maybeClippy()} ${title}`)
+              .setDescription(
+                summary
+                  .split('\n')
+                  .map(item => item.trim())
+                  .join(' ')
+              )
+              .setURL(buildDirectUrl(slug))
+              .setColor('WHITE')
+          ),
+        });
       }
-      const valueSet = new Set(interaction.values);
-      const values = collection.filter((_, key) => valueSet.has(key));
-
-      await interaction.editReply({
-        content: `Displaying Results for ${list.format(values.map(({title}) => title))}`,
-        components: []
-      })
-
-      interaction.channel.send({
-        content: `Results for "${searchTerm}"`,
-        embeds: values.map(({ title, summary, slug }) =>
-          new MessageEmbed()
-            .setTitle(`${maybeClippy()} ${title}`)
-            .setDescription(summary.split('\n').map(item => item.trim()).join(' '))
-            .setURL(buildDirectUrl(slug))
-            .setColor('WHITE')
-        ),
-      });
-    });
-
+    );
   } catch (error) {
     console.error(error);
     interaction.editReply(unknownError);

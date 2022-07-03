@@ -1,9 +1,8 @@
-import {
-  CommandInteraction,
-} from 'discord.js';
+import type { CommandInteraction } from 'discord.js';
 
-
-export async function setupOnboardingMsg(interaction: CommandInteraction) {
+export async function setupOnboardingMsg(
+  interaction: CommandInteraction
+): Promise<void> {
   await interaction.deferReply({ ephemeral: true });
 
   interaction.channel.send({

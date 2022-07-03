@@ -1,7 +1,6 @@
-import type { Document, Model} from 'mongoose';
 import mongoose from 'mongoose';
 
-const { model, Schema } = mongoose
+const { model, Schema } = mongoose;
 
 const schema = new Schema({
   guild: {
@@ -26,7 +25,7 @@ const schema = new Schema({
   },
 });
 
-export const GenericCache = model<GenericCacheType>('GenericCache', schema)
+export const GenericCache = model<GenericCacheType>('GenericCache', schema);
 
 export type GenericCacheType = {
   guild: string;
@@ -34,4 +33,4 @@ export type GenericCacheType = {
   timestamp: number;
   user: string;
   meta?: unknown;
-}
+};

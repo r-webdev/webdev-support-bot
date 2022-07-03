@@ -1,5 +1,4 @@
 import type { GuildMember, Interaction, Message } from 'discord.js';
-import { SERVER_ID } from '../../../env';
 
 import { UserState } from '../db/user_state';
 import { continueOnboarding } from '../utils/continueOnboarding';

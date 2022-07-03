@@ -3,7 +3,7 @@ import { SERVER_ID } from '../../../env';
 export function limitToWebDevServer<
   HasGuildId extends { guild: { id: string } },
   Output,
-  VArgs extends ReadonlyArray<unknown>
+  VArgs extends readonly unknown[]
 >(
   fn: (g: HasGuildId, ...vargs: VArgs) => Output
 ): (a: HasGuildId, ...vargs: VArgs) => Output {

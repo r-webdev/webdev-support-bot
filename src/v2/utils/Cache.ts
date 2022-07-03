@@ -75,7 +75,7 @@ type CacheOptions = {
    * @memberof Options
    */
   maxKeys?: number;
-}
+};
 
 const wrap = <T>(
   value: T,
@@ -160,7 +160,7 @@ export class Cache<Value = unknown, Key = unknown> extends EventEmitter {
    * @param key cache key
    * @returns The value stored in the key
    */
-   public get<T extends Value = Value>(key: Key): T | undefined {
+  public get<T extends Value = Value>(key: Key): T | undefined {
     const data = this.#data.get(key);
 
     addBreadcrumb({
@@ -180,7 +180,7 @@ export class Cache<Value = unknown, Key = unknown> extends EventEmitter {
    * @param keys an array of keys
    * @returns an object containing the values stored in the matching keys
    */
-   public mget<T extends Value = Value>(keys: Key[]): Map<Key, T> {
+  public mget<T extends Value = Value>(keys: Key[]): Map<Key, T> {
     const output: Map<Key, T> = new Map();
 
     addBreadcrumb({
@@ -209,7 +209,11 @@ export class Cache<Value = unknown, Key = unknown> extends EventEmitter {
    * it to a serialized JSON
    * @param ttl The time to live in seconds.
    */
-   public set<T extends Value = Value>(key: Key, value: T, ttl?: number): boolean {
+  public set<T extends Value = Value>(
+    key: Key,
+    value: T,
+    ttl?: number
+  ): boolean {
     const usedTtl = ttl ?? this.options.stdTTL;
 
     addBreadcrumb({
@@ -231,7 +235,9 @@ export class Cache<Value = unknown, Key = unknown> extends EventEmitter {
    *
    * @param keyValueSet an array of object which includes key,value and ttl
    */
-   public mset<T extends Value = Value>(keyValueSet: ValueSetItem<Key, T>[]): boolean {
+  public mset<T extends Value = Value>(
+    keyValueSet: ValueSetItem<Key, T>[]
+  ): boolean {
     const len = keyValueSet.length;
     addBreadcrumb({
       level: 'debug',
@@ -250,7 +256,7 @@ export class Cache<Value = unknown, Key = unknown> extends EventEmitter {
    * @param cb Callback function
    * @returns Number of deleted keys
    */
-   public del(keys: Key | Key[]): number {
+  public del(keys: Key | Key[]): number {
     let deleted = 0;
     const keyArr = castArray(keys);
     const data = this.#data;
@@ -282,7 +288,7 @@ export class Cache<Value = unknown, Key = unknown> extends EventEmitter {
    * @param key cache key
    * @returns The value stored in the key
    */
-   public take<T extends Value = Value>(key: Key): T | undefined {
+  public take<T extends Value = Value>(key: Key): T | undefined {
     const output = this.get(key);
 
     if (this.#data.has(key)) {
@@ -295,7 +301,7 @@ export class Cache<Value = unknown, Key = unknown> extends EventEmitter {
   /**
    * reset or redefine the ttl of a key. If `ttl` is not passed or set to 0 it's similar to `.del()`
    */
-   public ttl(key: Key, ttl: number = this.options.stdTTL): boolean {
+  public ttl(key: Key, ttl: number = this.options.stdTTL): boolean {
     if (!key) {
       return false;
     }
@@ -309,8 +315,7 @@ export class Cache<Value = unknown, Key = unknown> extends EventEmitter {
       }
       return true;
     }
-      return false;
-
+    return false;
   }
 
   public getTtl(key: Key): number | undefined {
@@ -322,15 +327,14 @@ export class Cache<Value = unknown, Key = unknown> extends EventEmitter {
     if (this.#data.has(key) && this._check(key, value)) {
       return value.t;
     }
-      return void 0;
-
+    return void 0;
   }
 
   /**
    * list all keys within this cache
    * @returns An array of all keys
    */
-   public keys(): IterableIterator<Key> {
+  public keys(): IterableIterator<Key> {
     return this.#data.keys();
   }
 
@@ -348,14 +352,14 @@ export class Cache<Value = unknown, Key = unknown> extends EventEmitter {
    * @param key cache key to check
    * @returns Boolean indicating if the key is cached or not
    */
-   public has(key: Key): boolean {
+  public has(key: Key): boolean {
     return this.has(key) && this._check(key, this.#data.get(key));
   }
 
   /**
    * flush the whole data and reset the stats
    */
-   public flushAll(_startPeriod = true): void {
+  public flushAll(_startPeriod = true): void {
     this.#data.clear();
     this._killCheckPeriod();
     this._checkData(_startPeriod);
@@ -365,14 +369,15 @@ export class Cache<Value = unknown, Key = unknown> extends EventEmitter {
   /**
    * This will clear the interval timeout which is set on checkperiod option.
    */
-   public close(): void {
+  public close(): void {
     this._killCheckPeriod();
   }
 
   /**
    * flush the stats and reset all counters to 0
    */
-   public flushStats(): void {}
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  public flushStats(): void {}
 
   private _check(key: Key, data) {
     let ret = true;
@@ -388,7 +393,7 @@ export class Cache<Value = unknown, Key = unknown> extends EventEmitter {
 
   private _killCheckPeriod() {
     if (this.checkTimeout != null) {
-      const {checkTimeout} = this;
+      const { checkTimeout } = this;
       this.checkTimeout = null;
       clearTimeout(checkTimeout);
     }
@@ -407,7 +412,7 @@ export class Cache<Value = unknown, Key = unknown> extends EventEmitter {
         this.options.checkperiod * 1000,
         startPeriod
       );
-      if (this.checkTimeout != null && this.checkTimeout.unref != null) {
+      if (this.checkTimeout?.unref != null) {
         this.checkTimeout.unref();
       }
     }

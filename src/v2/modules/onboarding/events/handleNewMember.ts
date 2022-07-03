@@ -7,7 +7,6 @@ import { UserState } from '../db/user_state';
 import { continueOnboarding } from '../utils/continueOnboarding';
 import { sneakPin } from '../utils/sneakPin';
 
-
 export const handleNewMember = async (member: GuildMember): Promise<void> => {
   const { guild, user, roles } = member;
 
@@ -16,11 +15,11 @@ export const handleNewMember = async (member: GuildMember): Promise<void> => {
     userId: user.id,
   });
 
-  if(oldState?.rolesOnLeave) {
-    const guildRoles = await guild.roles.fetch()
-    const ids = new Set(oldState.rolesOnLeave.map(({id}) => id))
-    const names = new Set(oldState.rolesOnLeave.map(({name}) => name))
-    member.roles.set(guildRoles.filter(x=> names.has(x.name) || ids.has(x.id)))
+  if (oldState?.rolesOnLeave) {
+    const guildRoles = await guild.roles.fetch();
+    const ids = new Set(oldState.rolesOnLeave.map(({ id }) => id));
+    const names = new Set(oldState.rolesOnLeave.map(({ name }) => name));
+    roles.set(guildRoles.filter(x => names.has(x.name) || ids.has(x.id)));
   }
 
   if (oldState?.state === 'ONBOARDED') {
@@ -50,7 +49,7 @@ async function beginOnboarding(guild: Guild, member: GuildMember) {
     name: `Hi ${member.displayName}! 👋`,
     type: 'GUILD_PUBLIC_THREAD',
     autoArchiveDuration: 60,
-    reason: `Onboarding ${member}`,
+    reason: `Onboarding ${member.toString()}`,
   });
 
   const state = await UserState.create({
@@ -60,7 +59,9 @@ async function beginOnboarding(guild: Guild, member: GuildMember) {
     threadId: thread.id,
   });
   await thread.send(
-    `Hi ${member}, welcome to ${guild.name}! Before you can get access to the rest of the server, we just need to go over a few things.
+    `Hi ${member.toString()}, welcome to ${
+      guild.name
+    }! Before you can get access to the rest of the server, we just need to go over a few things.
 
 First, to be able to interact with several of the features of this server, you **will** need embeds enabled.
 Second:`

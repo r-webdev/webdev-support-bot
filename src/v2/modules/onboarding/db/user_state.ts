@@ -1,7 +1,7 @@
 import type { Document } from 'mongoose';
 import mongoose from 'mongoose';
 
-const { model, Schema } = mongoose
+const { model, Schema } = mongoose;
 const schema = new Schema(
   {
     guild: {
@@ -13,10 +13,12 @@ const schema = new Schema(
       required: true,
     },
     rolesOnLeave: {
-      type: [{
-        name: String,
-        id: String
-      }],
+      type: [
+        {
+          name: String,
+          id: String,
+        },
+      ],
     },
     rulesAgreedDate: {
       type: Date,
@@ -27,7 +29,7 @@ const schema = new Schema(
     },
     threadId: {
       type: String,
-    }
+    },
   },
   { timestamps: true }
 );
@@ -37,15 +39,15 @@ export type OnboardingState =
   | 'START'
   | 'INTRODUCTION'
   | 'ROLE_SELECTION'
-  | 'ONBOARDED'
+  | 'ONBOARDED';
 
 export type UserStateType = Document & {
   guild: string;
   userId: string;
   rulesAgreedDate?: Date;
-  rolesOnLeave?: Array<{name: string, id: string}>
+  rolesOnLeave?: { name: string; id: string }[];
   state: OnboardingState;
-  threadId?: string,
+  threadId?: string;
   createdAt: Date;
   updatedAt: Date;
 };

@@ -7,7 +7,7 @@ const THIRTY_SECONDS_IN_MS = 30 * 1000;
 export const delayedMessageAutoDeletion = (
   msg: Message,
   timeout = THIRTY_SECONDS_IN_MS
-) => {
+): void => {
   // required so tests on CI dont crash
   if (msg) {
     setTimeout(async () => {
@@ -28,6 +28,4 @@ export const delayedMessageAutoDeletion = (
       }
     }, timeout);
   }
-
-  
 };

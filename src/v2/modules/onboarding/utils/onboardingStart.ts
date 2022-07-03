@@ -1,12 +1,12 @@
 import { get, upsert } from '../../../cache';
-import { GenericCacheType } from '../../../cache/model';
+import type { GenericCacheType } from '../../../cache/model';
 import { SERVER_ID } from '../../../env';
 
-interface OnboardingStartCache extends GenericCacheType {
+type OnboardingStartCache = {
   meta: {
     onboardingStart: number;
   };
-}
+} & GenericCacheType;
 
 const _getOnboardingCache = (): Promise<OnboardingStartCache> =>
   get({
@@ -15,10 +15,13 @@ const _getOnboardingCache = (): Promise<OnboardingStartCache> =>
     user: '',
   }) as unknown as Promise<OnboardingStartCache>;
 
-export const getOnboardingStart = async (): Promise<number | undefined> =>
-  (await _getOnboardingCache())?.meta.onboardingStart;
+export const getOnboardingStart = async (): Promise<number | undefined> => {
+  const cache = await _getOnboardingCache();
 
-export const setOnboardingStart = () =>
+  return cache?.meta.onboardingStart;
+};
+
+export const setOnboardingStart = (): Promise<OnboardingStartCache> =>
   upsert({
     expiresAt: Number.MAX_SAFE_INTEGER,
     guild: SERVER_ID,
@@ -27,4 +30,4 @@ export const setOnboardingStart = () =>
     meta: {
       onboardingStart: Date.now(),
     },
-  }) as unknown as Promise<OnboardingStartCache>;;
+  }) as unknown as Promise<OnboardingStartCache>;

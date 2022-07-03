@@ -1,11 +1,11 @@
-import type { TextChannel, GuildChannel } from 'discord.js';
+// import type { TextChannel, GuildChannel } from 'discord.js';
 
-import { MOD_CHANNEL } from '../env.js';
-import { createEmbed, createMarkdownBash } from '../utils/discordTools.js';
+// import { MOD_CHANNEL } from '../env.js';
+// import { createEmbed, createMarkdownBash } from '../utils/discordTools.js';
 
-import type { SpammerMetadata } from './index.js';
+// import type { SpammerMetadata } from './index.js';
 
-type ModChannel = TextChannel & Pick<GuildChannel, 'name'>;
+// type ModChannel = TextChannel & Pick<GuildChannel, 'name'>;
 
 // const spamFilterHandler = async ({
 //   userID,

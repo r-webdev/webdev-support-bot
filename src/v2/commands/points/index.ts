@@ -256,14 +256,17 @@ async function handlePointsSet(
   }
 
   const [prev, curr] = result;
-  const output = createPointsEmbed(`A user's points have been set to ${points}`, [
-    {
-      inline: false,
-      name: 'User',
-      value: `${guildMember.user}`,
-    },
-    adminEmbedField(interaction),
-  ]);
+  const output = createPointsEmbed(
+    `A user's points have been set to ${points}`,
+    [
+      {
+        inline: false,
+        name: 'User',
+        value: `${guildMember.user}`,
+      },
+      adminEmbedField(interaction),
+    ]
+  );
 
   if (
     prev >= HELPFUL_ROLE_POINT_THRESHOLD_NUM &&
@@ -362,7 +365,7 @@ export const pointsHandlers: CommandDataWithHandler = {
   description: 'point commands',
   handler: handlePoints,
   name: 'points',
-  guildValidate: (guild) => guild.id === SERVER_ID,
+  guildValidate: guild => guild.id === SERVER_ID,
   options: [
     {
       name: 'leaderboard',

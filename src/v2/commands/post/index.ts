@@ -1,4 +1,3 @@
-
 import type {
   Message,
   CollectorFilter,
@@ -11,9 +10,7 @@ import type {
   CommandInteraction,
 } from 'discord.js';
 import { MessageButton } from 'discord.js';
-import {
-  MessageActionRow,
-} from 'discord.js';
+import { MessageActionRow } from 'discord.js';
 import { filter } from 'domyno';
 
 import type { CommandDataWithHandler } from '../../../types';
@@ -21,7 +18,10 @@ import { SERVER_ID } from '../../env.js';
 import { cache } from '../../spam_filter/index.js';
 import { MultistepForm } from '../../utils/MultistepForm.js';
 import { asyncCatch } from '../../utils/asyncCatch.js';
-import { createEmbed, createMarkdownCodeBlock } from '../../utils/discordTools.js';
+import {
+  createEmbed,
+  createMarkdownCodeBlock,
+} from '../../utils/discordTools.js';
 import { map } from '../../utils/map.js';
 import { pipe } from '../../utils/pipe.js';
 import { capitalize } from '../../utils/string.js';
@@ -75,9 +75,7 @@ const getTargetChannel = (
   guild: Guild,
   name: string
 ): TextChannel | ThreadChannel =>
-  guild.channels.cache.get(name) as
-    | TextChannel
-    | ThreadChannel;
+  guild.channels.cache.get(name) as TextChannel | ThreadChannel;
 
 const generateURL = (guildID: string, channelID: string, msgID: string) =>
   `https://discordapp.com/channels/${guildID}/${channelID}/${msgID}`;
@@ -165,26 +163,27 @@ const sendAlert = (
 const generateFields = pipe<Answers, Iterable<OutputField>>([
   filter(
     ([key, val]: [string, string]) =>
-      !['guidelines'].includes(key) && !(key === 'remote' && val.toLowerCase() === 'onsite')
+      !['guidelines'].includes(key) &&
+      !(key === 'remote' && val.toLowerCase() === 'onsite')
   ),
   map(([key, val]: [string, string]): OutputField => {
     let value = val;
     switch (key) {
       case 'compensation':
-        value = val
+        value = val;
         break;
       case 'compensation_type':
-        value = capitalize(val)
+        value = capitalize(val);
         break;
       case 'remote':
-        value = val === 'remote' ? "Yes" : "No";
+        value = val === 'remote' ? 'Yes' : 'No';
         break;
     }
 
     return {
       inline: false,
       name: capitalize(key.replace('_', ' ')),
-      value: createMarkdownCodeBlock(value.replace(/```/g,'')),
+      value: createMarkdownCodeBlock(value.replace(/```/gu, '')),
     };
   }),
 ]);
@@ -304,7 +303,6 @@ const handleJobPostingRequest = async (
     }
     cache.set(entry.key, entry.value, POST_LIMITER);
 
-
     await interaction.reply({
       content: `I've DMed you to start the process.`,
       ephemeral: true,
@@ -317,10 +315,10 @@ const handleJobPostingRequest = async (
 
     const answers = (await form.getResult('guidelines')) as unknown as Answers;
 
-    console.log(answers)
+    console.log(answers);
     // Just return if the iteration breaks due to invalid input
     if (!answers) {
-      cache.del(entry.key)
+      cache.del(entry.key);
       return;
     }
 
@@ -336,12 +334,11 @@ const handleJobPostingRequest = async (
     // Store the job post in the cache
     cache.set(entry.key, entry.value, POST_LIMITER);
   } catch (error) {
-    cache.del(entry.key)
+    cache.del(entry.key);
 
     interaction.reply(
       'Please temporarily enable direct messages as the bot cares about your privacy.'
     );
-
 
     // eslint-disable-next-line no-console
     console.error('post.handleJobPostingRequest', error);
@@ -352,64 +349,68 @@ export const jobPostCommand: CommandDataWithHandler = {
   name: 'post',
   description: 'Start the process of creating a new job post',
   handler: handleJobPostingRequest,
-  guildValidate: (guild) => guild.id === SERVER_ID,
+  guildValidate: guild => guild.id === SERVER_ID,
   onAttach: client => {
-    client.on('interactionCreate', asyncCatch(async interaction => {
-      if (!interaction.isButton()) {
-        return;
-      }
-
-      const [category, userId, type] = interaction.customId.split('🤔');
-
-      if (category !== 'job') {
-        return;
-      }
-
-      const message = await interaction.channel.messages.fetch(interaction.message.id)
-
-      if (type === 'delete') {
-        if (interaction.user.id !== userId) {
-          interaction.reply({
-            content: "You don't have permission to delete this post",
-            ephemeral: true,
-          });
+    client.on(
+      'interactionCreate',
+      asyncCatch(async interaction => {
+        if (!interaction.isButton()) {
           return;
         }
 
+        const [category, userId, type] = interaction.customId.split('🤔');
 
-        await message.delete();
-
-        interaction.reply({
-          content: 'Your job post was deleted',
-          ephemeral: true,
-        });
-      }
-
-      if (type === 'response') {
-        await interaction.deferReply({ ephemeral: true });
-        const dmChannel = await interaction.user.createDM();
-        try {
-          dmChannel.send({
-            content: `The user you want to DM is <@!${userId}>. The job posting can be found here: ${message.url}.\nA copy of the job posting is below for reference as well`,
-            embeds: message.embeds
-          });
-          interaction.editReply({
-            content: 'Please check your dms',
-            components: [
-              new MessageActionRow().addComponents(
-                new MessageButton()
-                  .setStyle('LINK')
-                  .setURL(`https://discord.com/channels/@me/${dmChannel.id}`)
-                  .setLabel('Go to DMs')
-              ),
-            ],
-          });
-        } catch {
-          interaction.editReply(
-            `I tried to send you a DM but your DMs appear to be off. Heres the user you wish to DM <@${userId}>. If that doesn't work, please enable your DMs and try again.`
-          );
+        if (category !== 'job') {
+          return;
         }
-      }
-    }));
+
+        const message = await interaction.channel.messages.fetch(
+          interaction.message.id
+        );
+
+        if (type === 'delete') {
+          if (interaction.user.id !== userId) {
+            interaction.reply({
+              content: "You don't have permission to delete this post",
+              ephemeral: true,
+            });
+            return;
+          }
+
+          await message.delete();
+
+          interaction.reply({
+            content: 'Your job post was deleted',
+            ephemeral: true,
+          });
+        }
+
+        if (type === 'response') {
+          await interaction.deferReply({ ephemeral: true });
+          const dmChannel = await interaction.user.createDM();
+          try {
+            dmChannel.send({
+              content: `The user you want to DM is <@!${userId}>. The job posting can be found here: ${message.url}.\nA copy of the job posting is below for reference as well`,
+              embeds: message.embeds,
+            });
+            interaction.editReply({
+              content: 'Please check your dms',
+              components: [
+                new MessageActionRow().addComponents(
+                  new MessageButton()
+                    .setStyle('LINK')
+                    .setURL(`https://discord.com/channels/@me/${dmChannel.id}`)
+                    .setLabel('Go to DMs')
+                ),
+              ],
+            });
+          } catch {
+            interaction.editReply(
+              `I tried to send you a DM but your DMs appear to be off. Heres the user you wish to DM <@${userId}>. If that doesn't work, please enable your DMs and try again.`
+            );
+          }
+        }
+      })
+    );
   },
 };

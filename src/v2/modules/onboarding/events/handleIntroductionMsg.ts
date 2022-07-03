@@ -1,6 +1,6 @@
 import type { Message } from 'discord.js';
-import { INTRO_CHANNEL, NEW_USER_ROLE } from '../../../env';
 
+import { INTRO_CHANNEL, NEW_USER_ROLE } from '../../../env';
 import { UserState } from '../db/user_state';
 import { continueOnboarding } from '../utils/continueOnboarding';
 import { getThread } from '../utils/getThread';
@@ -8,7 +8,7 @@ import { getThread } from '../utils/getThread';
 export const handleIntroductionMsg = async (msg: Message): Promise<void> => {
   if (
     msg.channelId === INTRO_CHANNEL &&
-    msg.member.roles.cache.find(x => x.id === NEW_USER_ROLE)
+    msg.member.roles.cache.some(x => x.id === NEW_USER_ROLE)
   ) {
     const oldState = await UserState.findOne({
       guild: msg.guild.id,

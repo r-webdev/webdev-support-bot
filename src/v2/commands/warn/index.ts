@@ -1,23 +1,13 @@
-import type {
-  ApplicationCommandOptionChoiceData,
-  Client,
-  CommandInteraction,
-} from 'discord.js';
-import { zip } from 'domyno';
+import type { Client, CommandInteraction } from 'discord.js';
 import Fuse from 'fuse.js';
 
 import type { CommandDataWithHandler } from '../../../types';
 import { asyncCatch } from '../../utils/asyncCatch.js';
-import { callOrValue } from '../../utils/callOrValue.js';
-import { map } from '../../utils/map.js';
 import { pluckʹ } from '../../utils/pluck.js';
 import { _ } from '../../utils/pluralize.js';
-import type { ValueOrNullary } from '../../utils/valueOrCall.js';
-import { valueOrCall } from '../../utils/valueOrCall.js';
 
-
-const listFormatter = new Intl.ListFormat()
-const rulesId = '904060678699089950'
+const listFormatter = new Intl.ListFormat();
+const rulesId = '904060678699089950';
 
 const rules = [
   'Disrespectful',
@@ -42,18 +32,19 @@ const fuse = new Fuse(rules, {
   keys: ['name', 'value'],
 });
 
-
 export const warn: CommandDataWithHandler = {
   description: 'Quick response for common "why no" or "why not..." questions',
   handler: async (
     client: Client,
     interaction: CommandInteraction
   ): Promise<void> => {
-    const user =interaction.options.getUser('user')
-    const rules = interaction.options.getString('rules').split('|')
-    const reason =interaction.options.getString('reason')
+    const user = interaction.options.getUser('user');
+    const rules = interaction.options.getString('rules').split('|');
+    const reason = interaction.options.getString('reason');
 
-    const warnMessage = _`Rule${_.s} ${rules}. Please read the <#${rulesId}>. ${reason ?? ''}`
+    const warnMessage = _`Rule${_.s} ${rules}. Please read the <#${rulesId}>. ${
+      reason ?? ''
+    }`;
 
     await interaction.reply(`Debug Received:
 user: ${user}
@@ -63,27 +54,30 @@ warn msg: ${warnMessage(rules.length)}
     `);
   },
   onAttach(client) {
-    client.on('interactionCreate', asyncCatch(async interaction => {
-      if (!interaction.isAutocomplete()) {
-        return;
-      }
-      const result = interaction.options.getFocused() as string;
-      console.log(result)
-      const resultsParts = result.split(/&| and |,|\|/gi).filter(x => x.trim());
-      if (resultsParts.length === 0) {
-        return interaction.respond(rules);
-      }
-      const results = resultsParts
-        .map(x => fuse.search(x))
-        .filter(x => x.length);
-      const perms = removeRepeated<{ value: string, name: string}>(permutations(results));
-      const values = perms.map(item =>
-          comb(
-              item.map(x=>x.item)
-            )
-      );
-      await interaction.respond(values);
-    }));
+    client.on(
+      'interactionCreate',
+      asyncCatch(async interaction => {
+        if (!interaction.isAutocomplete()) {
+          return;
+        }
+        const result = interaction.options.getFocused();
+        console.log(result);
+        const resultsParts = result
+          .split(/&| and |,|\|/giu)
+          .filter(x => x.trim());
+        if (resultsParts.length === 0) {
+          return interaction.respond(rules);
+        }
+        const results = resultsParts
+          .map(x => fuse.search(x))
+          .filter(x => x.length);
+        const perms = removeRepeated<{ value: string; name: string }>(
+          permutations(results)
+        );
+        const values = perms.map(item => comb(item.map(x => x.item)));
+        await interaction.respond(values);
+      })
+    );
   },
   name: 'warn',
   options: [
@@ -109,13 +103,17 @@ warn msg: ${warnMessage(rules.length)}
 };
 
 function permutations<T>(items: T[][]) {
-  if(items.length === 0) {return []}
+  if (items.length === 0) {
+    return [];
+  }
   const [item, ...rest] = items;
-  if (rest.length === 0) {return item.map(x => [x]);}
+  if (rest.length === 0) {
+    return item.map(x => [x]);
+  }
 
   const latterPers = permutations(rest);
 
-  return item.flatMap(item => latterPers.map(x => [item, ...x]))
+  return item.flatMap(item => latterPers.map(x => [item, ...x]));
 }
 
 function comb(items: { name: string; value: string }[]) {
@@ -130,10 +128,12 @@ function comb(items: { name: string; value: string }[]) {
 }
 
 function removeRepeated<T>(arr: Fuse.FuseResult<T>[][]) {
-  console.log(arr)
+  console.log(arr);
   return arr.filter(x => {
-    const s = new Set(x.map(i=>i.refIndex))
-    if(s.size !== x.length) {return false}
-    return true
-  })
+    const s = new Set(x.map(i => i.refIndex));
+    if (s.size !== x.length) {
+      return false;
+    }
+    return true;
+  });
 }

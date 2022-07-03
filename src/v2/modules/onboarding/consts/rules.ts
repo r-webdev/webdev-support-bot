@@ -11,7 +11,10 @@ export const rules = [
     title: `Keep discussions limited to the most appropriate channel.`,
     description: `If multiple channels fit the criteria, pick one; if unsure, feel free to ask. Job postings must be posted in job-postings using the /post command.`,
   },
-  { title: `Do not share NSFW content.`, description: `Our users aren't all 18+`},
+  {
+    title: `Do not share NSFW content.`,
+    description: `Our users aren't all 18+`,
+  },
   {
     title: `Do not spam.`,
     description: `This includes but is not limited to: within the same channel, across multiple channels, or using large images`,
@@ -40,7 +43,10 @@ export const rules = [
     title: `Do not participate in academic dishonesty.`,
     description: `You can ask for help understanding homework but we will not do the work for you. `,
   },
-  { title: `Do not post shortened URLs.`, description: `We don't want to have to check every shortened url to see if it's malicious`},
+  {
+    title: `Do not post shortened URLs.`,
+    description: `We don't want to have to check every shortened url to see if it's malicious`,
+  },
   {
     title: `Do not upload code directly to Discord.`,
     description: `Use the /please code command to find third-party sites that can effectively share your code with others.`,

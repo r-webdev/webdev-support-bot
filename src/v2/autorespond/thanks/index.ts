@@ -218,7 +218,7 @@ function attachUndoThanksListener(client: Client): void {
         .map((item, x) => ({ ...item, name: `${x + 1}` }));
 
       const oldSelect = oldMsg.components[0].components[0] as MessageSelectMenu;
-      const newOptions = oldSelect.options
+      const nuOptions = oldSelect.options
         .filter(item => !removeThankees.includes(item.value))
         .map(({ label, value }) => ({ label, value }));
 
@@ -227,8 +227,8 @@ function attachUndoThanksListener(client: Client): void {
         components: [
           new MessageActionRow().addComponents(
             new MessageSelectMenu(oldSelect)
-              .setOptions(newOptions)
-              .setMaxValues(newOptions.length)
+              .setOptions(nuOptions)
+              .setMaxValues(nuOptions.length)
           ),
         ],
       });

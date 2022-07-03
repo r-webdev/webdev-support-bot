@@ -1,4 +1,8 @@
-import type { ApplicationCommandOptionChoiceData, Client, CommandInteraction } from 'discord.js';
+import type {
+  ApplicationCommandOptionChoiceData,
+  Client,
+  CommandInteraction,
+} from 'discord.js';
 
 import { ApplicationCommandOptionType } from '../../../enums.js';
 import type { CommandDataWithHandler } from '../../../types';

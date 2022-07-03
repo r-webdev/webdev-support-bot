@@ -1,25 +1,35 @@
-import { ButtonInteraction, GuildMember, Interaction, Role } from 'discord.js';
+import type {
+  ButtonInteraction,
+  GuildMember,
+  Interaction,
+  Role,
+} from 'discord.js';
+
 import { generateRoleSelect } from '../utils/generateRoleSelect';
 import { getAddRemoveRoles } from '../utils/getAddRemoveRoles';
 
 const listFormatter = new Intl.ListFormat();
 
-async function toggle(interaction:ButtonInteraction, role: Role) {
-  const member = interaction.member as GuildMember
-  const isAdd = !member.roles.resolve(role.id)
+async function toggle(interaction: ButtonInteraction, role: Role) {
+  const member = interaction.member as GuildMember;
+  const isAdd = !member.roles.resolve(role.id);
   if (isAdd) {
-    await member.roles.add(role.id)
+    await member.roles.add(role.id);
   } else {
-    await member.roles.remove(role.id)
+    await member.roles.remove(role.id);
   }
 
   return interaction.reply({
     ephemeral: true,
-    content: `I've ${isAdd ? 'added you to' : 'removed you from'} the ${role.name} role.`
-  })
+    content: `I've ${isAdd ? 'added you to' : 'removed you from'} the ${
+      role.name
+    } role.`,
+  });
 }
 
-export const handleAddRemoveRole = async (interaction:Interaction) => {
+export const handleAddRemoveRole = async (
+  interaction: Interaction
+): Promise<void> => {
   const member = interaction.member as GuildMember;
   if (!interaction.isButton() && !interaction.isSelectMenu()) {
     return;
@@ -44,10 +54,10 @@ export const handleAddRemoveRole = async (interaction:Interaction) => {
 
   if (subtype === 'add') {
     await member.roles.add(roles);
-  } else if(subtype === 'remove') {
+  } else if (subtype === 'remove') {
     await member.roles.remove(roles);
   } else {
-    return toggle(interaction as ButtonInteraction, roles[0])
+    return toggle(interaction as ButtonInteraction, roles[0]);
   }
 
   if (interaction.isSelectMenu()) {
@@ -56,15 +66,17 @@ export const handleAddRemoveRole = async (interaction:Interaction) => {
     );
 
     interaction.update({
-      content: `✅ You've been ${subtype === 'add' ? 'added to' : 'removed from'} ${listFormatter.format(roleNames)}`,
+      content: `✅ You've been ${
+        subtype === 'add' ? 'added to' : 'removed from'
+      } ${listFormatter.format(roleNames)}`,
       components: [
-        addRoles.length &&
+        addRoles.length > 0 &&
           generateRoleSelect(
             'Which roles would you like to join?',
             'roles🤔add',
             addRoles
           ),
-        removeRoles.length &&
+        removeRoles.length > 0 &&
           generateRoleSelect(
             'Which roles would you like to leave?',
             'roles🤔remove',
@@ -75,8 +87,9 @@ export const handleAddRemoveRole = async (interaction:Interaction) => {
   } else {
     interaction.reply({
       ephemeral: true,
-      content: `You've been ${subtype === 'add' ? 'added to' : 'removed from'} ${listFormatter.format(roleNames)}`,
+      content: `You've been ${
+        subtype === 'add' ? 'added to' : 'removed from'
+      } ${listFormatter.format(roleNames)}`,
     });
   }
-
 };

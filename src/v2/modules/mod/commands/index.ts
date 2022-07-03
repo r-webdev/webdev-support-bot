@@ -1,4 +1,4 @@
-import { CommandDataWithHandler } from '../../../../types';
+import type { CommandDataWithHandler } from '../../../../types';
 import { SERVER_ID } from '../../../env';
 import { beginOnboarding } from './onboardingBegin';
 import { setupOnboardingMsg } from './onboardingMsg';

@@ -1,5 +1,11 @@
 import { MessageEmbed } from 'discord.js';
-import type { Message, MessageEditOptions, EmbedField , MessagePayload } from 'discord.js';
+import type {
+  Message,
+  MessageEditOptions,
+  EmbedField,
+  MessagePayload,
+  MessageReaction,
+} from 'discord.js';
 
 import { REPO_LINK } from '../env.js';
 import { delayedMessageAutoDeletion } from './delayedMessageAutoDeletion.js';
@@ -13,7 +19,6 @@ import {
 import { providers } from './urlTools.js';
 
 export const createMarkdownLink = (title: string, url: string): string =>
-
   `[${title}](${url.replace(/\)/gu, '\\)')})`;
 
 export const BASE_DESCRIPTION = `
@@ -33,7 +38,7 @@ export type Provider =
   | 'composer'
   | 'mdn'
   | 'bundlephobia'
-  | 'php'
+  | 'php';
 
 type ListEmbed = {
   provider: Provider;
@@ -49,7 +54,7 @@ export const createListEmbed = ({
   url,
   footerText,
   description,
-}: ListEmbed) => {
+}: ListEmbed): { embed: MessageEmbed } => {
   if (providers[provider]) {
     const { createTitle } = providers[provider];
 
@@ -77,8 +82,7 @@ export type Embed = {
 
 const spamMeta = {
   color: 0xfe_5f_55,
-  icon:
-    'https://github.com/ljosberinn/webdev-support-bot/blob/master/logo.png?raw=true',
+  icon: 'https://github.com/ljosberinn/webdev-support-bot/blob/master/logo.png?raw=true',
 };
 
 export const createEmbed = ({
@@ -127,7 +131,7 @@ export const adjustDescriptionLength = (
   position: number,
   name: string,
   description: string
-) => {
+): string => {
   const positionLength = position.toString().length + 2;
   const nameLength = name.length;
   const descriptionLength = description.length;
@@ -162,7 +166,7 @@ export const adjustDescriptionLength = (
   return description;
 };
 
-export const adjustTitleLength = (title: string) => {
+export const adjustTitleLength = (title: string): string => {
   const titleLength = title.length;
 
   const cleansedTitle =
@@ -173,17 +177,21 @@ export const adjustTitleLength = (title: string) => {
         )}...`
       : title;
 
-  return cleansedTitle.replace(/\n/gm, ' ');
+  return cleansedTitle.replace(/\n/gmu, ' ');
 };
 
-export const createMarkdownListItem = (index: number, content: string) =>
-  `${index + 1}. ${content}`;
+export const createMarkdownListItem = (
+  index: number,
+  content: string
+): string => `${index + 1}. ${content}`;
 
-export const createMarkdownBash = (string: string) =>
+export const createMarkdownBash = (string: string): string =>
   ['```bash', string, '```'].join('\n');
 
-export const createMarkdownCodeBlock = (string: string, language = '') =>
-  [`\`\`\`${language}`, string, '```'].join('\n');
+export const createMarkdownCodeBlock = (
+  string: string,
+  language = ''
+): string => [`\`\`\`${language}`, string, '```'].join('\n');
 
 export const createDescription = (items: unknown[]): string =>
   [...items, BASE_DESCRIPTION].join('\n');
@@ -192,22 +200,27 @@ export const findEarlyReaction = (
   { reactions }: Message,
   id: string,
   currentlyValidEmojis: string[]
-) =>
+): MessageReaction =>
   reactions.cache.find(
     ({ users, emoji: { name } }) =>
       currentlyValidEmojis.includes(name) &&
-      !!users.cache.find(user => user.id === id)
+      users.cache.some(user => user.id === id)
   );
 
-export const clearReactions = ({ reactions }: Message) =>
-  reactions.removeAll().catch(error => {
+export const clearReactions = ({
+  reactions,
+}: Message): Promise<undefined | Message> => {
+  try {
+    return reactions.removeAll();
+  } catch (error) {
     // eslint-disable-next-line no-console
     console.error(error);
     // eslint-disable-next-line no-console
     console.info(
       'Attempting to remove reactions: message probably deleted or insufficient rights.'
     );
-  });
+  }
+};
 
 export const getChosenResult = async <T>(
   sentMsg: Message,
@@ -231,6 +244,8 @@ export const getChosenResult = async <T>(
     }
 
     try {
+      // this needs to be serialised
+      // eslint-disable-next-line no-await-in-loop
       await sentMsg.react(emoji);
     } catch {
       // eslint-disable-next-line no-console
@@ -258,8 +273,8 @@ export const getChosenResult = async <T>(
 
   try {
     const collectedReactions = await sentMsg.awaitReactions({
-     filter: reactionFilterBuilder(id, emojis),
-     ...awaitReactionConfig
+      filter: reactionFilterBuilder(id, emojis),
+      ...awaitReactionConfig,
     });
 
     const emojiName = collectedReactions.first().emoji.name;

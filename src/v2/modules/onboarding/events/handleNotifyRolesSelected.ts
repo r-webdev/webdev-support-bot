@@ -1,6 +1,4 @@
-import type { Guild, GuildMember, Interaction, Message } from 'discord.js';
-import { MessageActionRow, MessageButton } from 'discord.js';
-import { SERVER_ID } from '../../../env';
+import type { GuildMember, Interaction, Message } from 'discord.js';
 
 import { UserState } from '../db/user_state';
 import { continueOnboarding } from '../utils/continueOnboarding';
@@ -35,10 +33,10 @@ export const handleNotifyRolesSelected = async (
 
   msg.edit({
     components: msg.components.map(x => {
-      x.components[0].disabled = true
-      return x
-    })
-  })
+      x.components[0].disabled = true;
+      return x;
+    }),
+  });
 
   const oldState = await UserState.findOne({
     guild: guild.id,

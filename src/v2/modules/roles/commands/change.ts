@@ -1,18 +1,28 @@
-import {
-  CommandInteraction,
-  GuildMember,
-} from 'discord.js';
-import { getAddRemoveRoles } from '../utils/getAddRemoveRoles';
-import { generateRoleSelect } from '../utils/generateRoleSelect';
+import type { CommandInteraction, GuildMember } from 'discord.js';
 
-export function change(interaction: CommandInteraction) {
-  const [addRoles, removeRoles] = getAddRemoveRoles(interaction.member as GuildMember)
+import { generateRoleSelect } from '../utils/generateRoleSelect';
+import { getAddRemoveRoles } from '../utils/getAddRemoveRoles';
+
+export function change(interaction: CommandInteraction): void {
+  const [addRoles, removeRoles] = getAddRemoveRoles(
+    interaction.member as GuildMember
+  );
   interaction.reply({
     ephemeral: true,
     content: 'Please select the roles you wish to add or remove',
     components: [
-      addRoles.length && generateRoleSelect('Which roles would you like to join?', 'roles🤔add', addRoles),
-      removeRoles.length && generateRoleSelect('Which roles would you like to leave?', 'roles🤔remove', removeRoles),
+      addRoles.length > 0 &&
+        generateRoleSelect(
+          'Which roles would you like to join?',
+          'roles🤔add',
+          addRoles
+        ),
+      removeRoles.length > 0 &&
+        generateRoleSelect(
+          'Which roles would you like to leave?',
+          'roles🤔remove',
+          removeRoles
+        ),
     ].filter(Boolean),
   });
 }

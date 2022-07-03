@@ -26,11 +26,11 @@ export async function handleStart(
         ]),
       ],
     });
-  }, 2_000);
+  }, 2000);
 
   if (fromStart) {
     await pinned.last().reply({
-      content: `Hey ${member}, seems like something went wrong during your onboarding, this could be because you left during it or the bot was down. You should be able to continue from here.`,
+      content: `Hey ${member.toString()}, seems like something went wrong during your onboarding, this could be because you left during it or the bot was down. You should be able to continue from here.`,
     });
   }
 }

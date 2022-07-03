@@ -9,7 +9,6 @@ import type { UserStateType } from '../db/user_state';
 import { getThread } from '../utils/getThread';
 import { sneakPin } from '../utils/sneakPin';
 
-
 export async function handleRoleSelection(
   guild: Guild,
   member: GuildMember,
@@ -18,7 +17,7 @@ export async function handleRoleSelection(
 ): Promise<void> {
   const thread = await getThread(guild, oldState.threadId);
   const pinned = await thread.messages.fetchPinned();
-  if (pinned.size !== 0) {
+  if (pinned.size > 0) {
     return;
   }
   const rolesMsg = await thread.send({
@@ -73,7 +72,7 @@ We have quite a few channels, so to gain access to them, you'll need to opt in t
   await sneakPin(notificationRoles);
   if (fromStart) {
     await rolesMsg.reply({
-      content: `Hey ${member}, seems like something went wrong during your onboarding, this could be because you left during it or the bot was down. You should be able to continue from here.`,
+      content: `Hey ${member.toString()}, seems like something went wrong during your onboarding, this could be because you left during it or the bot was down. You should be able to continue from here.`,
     });
   }
 }

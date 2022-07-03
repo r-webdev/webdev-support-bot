@@ -1,8 +1,5 @@
 import {
   IS_PROD,
-  
-  
-  
   POST_LIMITER_IN_HOURS, // Used for informing the user about the limiter
   AWAIT_MESSAGE_TIMEOUT as AMT, // Renamed for shadowing
   MINIMAL_AMOUNT_OF_WORDS as MAOW, // Renamed for shadowing as well
@@ -19,14 +16,11 @@ const POST_LIMITER = IS_PROD
 // convert string to int
 const MINIMAL_AMOUNT_OF_WORDS = Number.parseInt(MAOW);
 
-export {
-  
-  
-  
-  MINIMAL_AMOUNT_OF_WORDS,
-  POST_LIMITER,
-  
-  AWAIT_MESSAGE_TIMEOUT,
-};
+export { MINIMAL_AMOUNT_OF_WORDS, POST_LIMITER, AWAIT_MESSAGE_TIMEOUT };
 
-export {MOD_CHANNEL, JOB_POSTINGS_CHANNEL, MINIMAL_COMPENSATION, POST_LIMITER_IN_HOURS} from '../../env.js';
+export {
+  MOD_CHANNEL,
+  JOB_POSTINGS_CHANNEL,
+  MINIMAL_COMPENSATION,
+  POST_LIMITER_IN_HOURS,
+} from '../../env.js';

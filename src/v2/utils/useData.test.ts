@@ -1,13 +1,14 @@
+import type { Response } from 'node-fetch';
 import fetch from 'node-fetch';
 
 import useData from './useData.js';
 
 jest.mock('node-fetch');
+const urlGen = () => `http://example.com/?q=${Date.now()}`;
 
 describe('useData', () => {
-  const urlGen = () => `http://example.com/?q=${Date.now()}`;
   const headers = { headers: {} };
-  const fetchMock: jest.MockedFunction<typeof fetch> = fetch as any;
+  const fetchMock = fetch as jest.MockedFunction<typeof fetch>;
 
   beforeEach(jest.clearAllMocks);
 
@@ -16,11 +17,12 @@ describe('useData', () => {
 
     fetchMock.mockResolvedValue({
       ok: false,
-    } as any);
+    } as unknown as Response);
 
     const response = await useData(url, 'text');
+
     expect(fetchMock).toBeCalledWith(url, headers);
-    expect(response).toEqual({
+    expect(response).toStrictEqual({
       error: true,
       json: null,
       text: null,
@@ -37,12 +39,12 @@ describe('useData', () => {
         fetchMock.mockResolvedValue({
           json: jsonMock,
           ok: true,
-        } as any);
+        } as unknown as Response);
 
         return jsonMock;
       },
       lastResponse => {
-        expect(lastResponse.json).toEqual({ test: 'cached' });
+        expect(lastResponse.json).toStrictEqual({ test: 'cached' });
       },
     ],
     [
@@ -54,22 +56,24 @@ describe('useData', () => {
         fetchMock.mockResolvedValue({
           ok: true,
           text: textMock,
-        } as any);
+        } as unknown as Response);
 
         return textMock;
       },
       lastResponse => {
-        expect(lastResponse.text).toEqual('text');
+        expect(lastResponse.text).toBe('text');
       },
     ],
-  ])(
+  ] as const)(
     'should cache entries for type: `%s`',
     async (type: Parameters<typeof useData>['1'], mock, assertResponse) => {
       const url = urlGen();
       const mockTarget = mock();
 
       const response = await useData(url, type);
+
       expect(fetchMock).toBeCalledWith(url, headers);
+
       assertResponse(response);
 
       const allCachedResponses = await Promise.all([
@@ -81,7 +85,10 @@ describe('useData', () => {
 
       expect(mockTarget).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledTimes(1);
-      allCachedResponses.forEach(lastResponse => assertResponse(lastResponse));
+
+      allCachedResponses.forEach(lastResponse => {
+        assertResponse(lastResponse);
+      });
     }
   );
 });
