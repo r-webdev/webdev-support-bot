@@ -32,13 +32,11 @@ import pointDecaySystem, {
   loadLastDecayFromDB,
 } from './helpful_role/point_decay.js';
 import { registerMessageContextMenu } from './message_context/index.js';
-import { attach } from './modules/onboarding/index.js';
+import { attach as attachOnboarding } from './modules/onboarding/index.js';
 import { getOnboardingStart } from './modules/onboarding/utils/onboardingStart.js';
 import { registerUserContextMenu } from './user_context/index.js';
-import { asyncCatch } from './utils/asyncCatch.js';
 import { stripMarkdownQuote } from './utils/content_format.js';
 
-Error.stackTraceLimit = Infinity;
 
 const NON_COMMAND_MSG_TYPES = new Set([
   'GUILD_TEXT',
@@ -98,7 +96,9 @@ client.once('ready', async (): Promise<void> => {
   attachThreadThanksHandler(client);
   attachThreadClose(client);
   if (await getOnboardingStart()) {
-    attach(client);
+    attachOnboarding(client);
+  } else {
+    console.info("Onboarding functionality not added")
   }
 
   void client.user.setActivity(`@${client.user.username} --help`);
