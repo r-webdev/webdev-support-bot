@@ -72,7 +72,7 @@ const handleNpmCommand = async (
   await interaction.deferReply({ ephemeral: true });
   try {
     const json = await fetch<NPMResponse[]>({
-      isInvalidData: json => json.length === 0,
+      isInvalidData: (json: unknown[]) => json.length === 0,
       msg: interaction,
       provider,
       searchTerm,

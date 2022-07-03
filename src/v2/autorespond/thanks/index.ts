@@ -41,8 +41,7 @@ const handleThanks = async (msg: Message): Promise<void> => {
   const reply = await getReply(msg);
   if (botId || (msg.mentions.users.size === 0 && !reply)) {
     if (
-      msg.channel.type === 'GUILD_PRIVATE_THREAD' ||
-      msg.channel.type === 'GUILD_PUBLIC_THREAD'
+      ['GUILD_PRIVATE_THREAD','GUILD_PUBLIC_THREAD'].includes(msg.channel.type)
     ) {
       await handleThreadThanks(msg);
     }

@@ -26,7 +26,7 @@ export async function handleStart(
         ]),
       ],
     });
-  }, 2000);
+  }, 15_000);
 
   if (fromStart) {
     await pinned.last().reply({

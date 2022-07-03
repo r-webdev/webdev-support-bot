@@ -154,8 +154,8 @@ type GetDataParams = {
   msg: CommandInteraction;
   provider: Provider;
   searchTerm: string;
-  sanitizeData?: <T>(data: T) => Partial<T>;
-  isInvalidData: <T>(data: T) => boolean;
+  sanitizeData?: (data: unknown) => Partial<unknown>;
+  isInvalidData: (data: unknown) => boolean;
   headers?: HeadersInit;
 };
 

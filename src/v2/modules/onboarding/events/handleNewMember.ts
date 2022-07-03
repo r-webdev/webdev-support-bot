@@ -45,12 +45,7 @@ async function beginOnboarding(guild: Guild, member: GuildMember) {
     ONBOARDING_CHANNEL
   ) as TextChannel;
 
-  const thread = await onboardingChannel.threads.create({
-    name: `Hi ${member.displayName}! 👋`,
-    type: 'GUILD_PUBLIC_THREAD',
-    autoArchiveDuration: 60,
-    reason: `Onboarding ${member.toString()}`,
-  });
+  const thread = await createOnboardingThread(onboardingChannel, member);
 
   const state = await UserState.create({
     guild: guild.id,
@@ -93,4 +88,18 @@ Second:`
 
   await sneakPin(rulesMsg);
   await continueOnboarding(guild, member, state, false);
+}
+async function createOnboardingThread(
+  onboardingChannel: TextChannel,
+  member: GuildMember
+) {
+  const obj = {
+    name: `Hi ${member.displayName}! 👋`,
+    reason: `Onboarding ${member.toString()}`,
+  }
+  try {
+    return await onboardingChannel.threads.create({...obj, type: 'GUILD_PRIVATE_THREAD'});
+  } catch {
+    return await onboardingChannel.threads.create({...obj, type: 'GUILD_PUBLIC_THREAD'});
+  }
 }
