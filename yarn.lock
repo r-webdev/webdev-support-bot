@@ -4188,10 +4188,10 @@ mongoose@*:
     ms "2.1.3"
     sift "16.0.0"
 
-mongoose@6.4.1:
-  version "6.4.1"
-  resolved "https://registry.yarnpkg.com/mongoose/-/mongoose-6.4.1.tgz#e50e1a92ccf7764f2cc57b5a801a52918c7c3e72"
-  integrity sha512-6a3UmHaC2BYdxZT7qqwORqbxDfAa5HaRMidkA8Ll4Rupnl6R8vRu5Av13jx4DaxgJBpPDo4/K9AXxb+OGSD+5w==
+mongoose@6.4.6:
+  version "6.4.6"
+  resolved "https://registry.yarnpkg.com/mongoose/-/mongoose-6.4.6.tgz#57bc7ae68de56abcc5e890284f2d10acac863aa2"
+  integrity sha512-ZAfNCWgXhwev6k/+rMzjHIJ/+wLkundQU/i+aUTqmCgGoYqc+B5e4EC4Y3E1XaLzNXiWID1/vocSM6zs5IAGvA==
   dependencies:
     bson "^4.6.2"
     kareem "2.4.1"
