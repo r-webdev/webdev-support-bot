@@ -50,7 +50,7 @@
     "@types/node": "18.0.0",
     "@types/node-fetch": "3.0.3",
     "dotenv": "16.0.1",
-    "eslint": "8.18.0",
+    "eslint": "8.28.0",
     "eslint-config-galex": "4.1.4",
     "husky": "8.0.1",
     "jest": "28.1.1",
