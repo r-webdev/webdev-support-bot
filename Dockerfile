@@ -1,4 +1,4 @@
-FROM node:16.15.0-alpine AS deps
+FROM node:16.18.1-alpine AS deps
 
 WORKDIR /app
 
@@ -10,7 +10,7 @@ COPY src ./src
 RUN yarn install --frozen-lockfile
 RUN npm run build
 
-FROM node:16.15.0-alpine
+FROM node:16.18.1-alpine
 
 WORKDIR /app
 
