@@ -21,4 +21,4 @@ COPY yarn.lock ./
 RUN yarn install --frozen-lockfile && rm -rf /usr/local/share/.cache
 COPY --from=deps /app/build .
 
-CMD ["npm","start"]
+CMD ["node","index.js"]
