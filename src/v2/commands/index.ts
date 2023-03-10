@@ -30,7 +30,6 @@ import { npmInteraction } from './npm/index.js';
 import { phpCommand } from './php/index.js';
 import { pleaseInteraction } from './please/index.js';
 import { pointsHandlers } from './points/index.js';
-import { jobPostCommand } from './post/index.js';
 import { resourceInteraction } from './resource/index.js';
 // meme commands
 import { shitpostInteraction } from './shitpost/index.js';
@@ -44,7 +43,6 @@ export const guildCommands = new Map(
     phpCommand,
     pleaseInteraction,
     pointsHandlers,
-    jobPostCommand,
     resourceInteraction,
     shitpostInteraction,
     npmInteraction,
