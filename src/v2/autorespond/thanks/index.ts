@@ -36,12 +36,12 @@ const getReply = async (msg: Message): Promise<undefined | Message> => {
   }
 };
 
-const handleThanks = async (msg: Message): Promise<void> => {
+const handleThanks = async (msg: Message, client: Client): Promise<void> => {
   const botId = msg.author.bot;
   const reply = await getReply(msg);
   if (botId || (msg.mentions.users.size === 0 && !reply)) {
     if (
-      ['GUILD_PRIVATE_THREAD','GUILD_PUBLIC_THREAD'].includes(msg.channel.type)
+      ['GUILD_PRIVATE_THREAD', 'GUILD_PUBLIC_THREAD'].includes(msg.channel.type)
     ) {
       await handleThreadThanks(msg);
     }
@@ -118,9 +118,8 @@ const handleThanks = async (msg: Message): Promise<void> => {
               value: `<@!${u.id}>\n${diff} minute${diff === 1 ? '' : 's'}.`,
             };
           }),
-          footerText: `You can only give a point to a user every ${POINT_LIMITER_IN_MINUTES} minute${
-            Number.parseInt(POINT_LIMITER_IN_MINUTES) === 1 ? '' : 's'
-          }.`,
+          footerText: `You can only give a point to a user every ${POINT_LIMITER_IN_MINUTES} minute${Number.parseInt(POINT_LIMITER_IN_MINUTES) === 1 ? '' : 's'
+            }.`,
           provider: 'spam',
           title: 'Cooldown alert!',
         }).embed,
@@ -134,7 +133,7 @@ const handleThanks = async (msg: Message): Promise<void> => {
   }
 
   thankableUsers.forEach(async user => pointHandler(user.id, msg));
-  const msgData = createResponse(thankableUsers, msg.author.id);
+  const msgData = createResponse(thankableUsers, msg.author.id, client);
 
   const response = await msg.channel.send(msgData);
 
