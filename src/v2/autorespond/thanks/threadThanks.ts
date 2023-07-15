@@ -80,8 +80,7 @@ export async function handleThreadThanks(msg: Message): Promise<void> {
     content: [
       "Hey, it looks like you're trying to thank one or many users, but haven't specified who. Who would you like to thank?",
       alreadyThanked.length > 0
-        ? _`There ${_.mapper({ 1: 'is' }, 'are')} **${_.n} user${
-            _.s
+        ? _`There ${_.mapper({ 1: 'is' }, 'are')} **${_.n} user${_.s
           } that you can't thank as you've thanked them recently**, so they won't show up as an option.`(
             alreadyThanked.length
           )
@@ -160,7 +159,7 @@ export function attachThreadThanksHandler(client: Client): void {
           thankedMembers.map(item => [item.user.id, item.user])
         );
 
-        const responseData = createResponse(thankedUsers, user.id);
+        const responseData = createResponse(thankedUsers, user.id, client);
         let response: Message;
 
         const msg = await msgPromise;

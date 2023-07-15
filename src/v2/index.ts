@@ -122,7 +122,7 @@ client.once('ready', async (): Promise<void> => {
 
   try {
     await client.user.setAvatar('./logo.png');
-  } catch {}
+  } catch { }
 });
 
 const detectVarLimited = limitFnByUser(detectVar, {
@@ -154,17 +154,17 @@ client.on('messageCreate', msg => {
   }
 
   if (NON_COMMAND_MSG_TYPES.has(msg.channel.type) && msg.guild) {
-    handleNonCommandGuildMessages(msg);
+    handleNonCommandGuildMessages(msg, client);
   }
 });
 
-const handleNonCommandGuildMessages = async (msg: Message) => {
+const handleNonCommandGuildMessages = async (msg: Message, client: Client) => {
   const quoteLessContent = stripMarkdownQuote(msg.content);
   if (msg.author.bot) {
     return;
   }
   if (isWebdevAndWebDesignServer(msg) && isThanksMessage(quoteLessContent)) {
-    handleThanks(msg);
+    handleThanks(msg, client);
   }
   await detectDeprecatedCommands(msg);
   await detectJustAsk(msg);
