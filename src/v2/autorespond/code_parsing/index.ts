@@ -28,8 +28,6 @@ export function detectVar(msg: Message): boolean {
     return;
   }
 
-  console.log(msg.content, msg.cleanContent)
-
   const { content, channel, author } = msg;
 
   if (getFirstVar(content)) {
