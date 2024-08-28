@@ -1,4 +1,4 @@
-import type { GuildMember, Interaction, Message } from 'discord.js';
+import { ActionRowBuilder, ComponentType, MessageActionRowComponentBuilder, type GuildMember, type Interaction, type Message, StringSelectMenuBuilder } from 'discord.js';
 
 import { UserState } from '../db/user_state.js';
 import { continueOnboarding } from '../utils/continueOnboarding.js';
@@ -6,7 +6,7 @@ import { continueOnboarding } from '../utils/continueOnboarding.js';
 export const handleRoleSelected = async (
   interaction: Interaction
 ): Promise<void> => {
-  if (!interaction.isSelectMenu() && !interaction.isButton()) {
+  if (!interaction.isStringSelectMenu() && !interaction.isButton()) {
     return;
   }
 
@@ -41,7 +41,14 @@ export const handleRoleSelected = async (
 
   await msg.edit({
     components: msg.components.map(x => {
-      x.components[0].disabled = true;
+      if (x.type === ComponentType.ActionRow) {
+        return new ActionRowBuilder<MessageActionRowComponentBuilder>(x).setComponents(x.components.map(x => {
+          if (x.type === ComponentType.StringSelect) {
+            return new StringSelectMenuBuilder(x).setDisabled(true)
+          }
+          return x as unknown as MessageActionRowComponentBuilder
+        }))
+      }
       return x;
     }),
   });

@@ -13,6 +13,10 @@ const jsCodeBlocks = createCodeBlockCapturer([
   'typescript',
 ]);
 
+const tap = <T>(x: T): T => {
+  console.log(x)
+  return x
+}
 const getFirstVar = pipe([jsCodeBlocks, pluck('code'), some(hasVarInSource)]);
 
 const messageFor = (userId: string) => `
@@ -23,6 +27,8 @@ export function detectVar(msg: Message): boolean {
   if (msg.author.id === msg.client.user.id) {
     return;
   }
+
+  console.log(msg.content, msg.cleanContent)
 
   const { content, channel, author } = msg;
 

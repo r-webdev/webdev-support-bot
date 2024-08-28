@@ -8,6 +8,7 @@ export function hasVarInSource(source: string): boolean {
     ts.ScriptTarget.Latest,
     true
   );
+  console.group({ source })
   return !!sourceFile.forEachChild(visit);
 }
 

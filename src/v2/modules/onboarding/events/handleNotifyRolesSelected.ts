@@ -1,4 +1,4 @@
-import type { GuildMember, Interaction, Message } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ComponentType, GuildMember, Interaction, Message, MessageActionRowComponent, MessageActionRowComponentBuilder } from 'discord.js';
 
 import { UserState } from '../db/user_state.js';
 import { continueOnboarding } from '../utils/continueOnboarding.js';
@@ -33,8 +33,17 @@ export const handleNotifyRolesSelected = async (
 
   msg.edit({
     components: msg.components.map(x => {
-      x.components[0].disabled = true;
-      return x;
+      if (x.type === ComponentType.ActionRow) {
+        return new ActionRowBuilder<MessageActionRowComponentBuilder>(x)
+          .setComponents(...x.components.map(x => {
+            if (x.type === ComponentType.Button) {
+              return new ButtonBuilder(x).setDisabled(true)
+            }
+            return x as unknown as MessageActionRowComponentBuilder
+          }))
+      }
+
+      return x
     }),
   });
 
