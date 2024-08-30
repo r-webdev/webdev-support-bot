@@ -116,7 +116,6 @@ export const registerCommands = async (client: Client): Promise<void> => {
           });
         }
       } catch (error) {
-        console.error(error);
         await interaction.reply({
           ephemeral: true,
           content: 'Something went wrong when trying to execute the command',
