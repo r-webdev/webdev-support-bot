@@ -203,7 +203,7 @@ const createNPMEmbed = (
     .setURL(url)
     .setFooter(
       {
-        text: `requested by ${user.username}#${user.discriminator}`,
+        text: `requested by ${user.username}`,
         iconURL: user.avatarURL({ size: 64, format: 'webp' })
       }
     )

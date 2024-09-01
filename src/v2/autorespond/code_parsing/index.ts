@@ -13,10 +13,6 @@ const jsCodeBlocks = createCodeBlockCapturer([
   'typescript',
 ]);
 
-const tap = <T>(x: T): T => {
-  console.log(x)
-  return x
-}
 const getFirstVar = pipe([jsCodeBlocks, pluck('code'), some(hasVarInSource)]);
 
 const messageFor = (userId: string) => `

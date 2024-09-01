@@ -153,7 +153,6 @@ client.on('messageCreate', msg => {
   }
 
   if (NON_COMMAND_MSG_TYPES.has(msg.channel.type) && msg.guild) {
-    console.log("Handled")
     handleNonCommandGuildMessages(msg);
   }
 });

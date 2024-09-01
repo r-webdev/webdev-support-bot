@@ -2,7 +2,7 @@ import { Message, MessageType } from 'discord.js';
 
 export const sneakPin = async (msg: Message): Promise<void> => {
   const awaitedPinned = msg.channel.awaitMessages({
-    filter: x => x.type === MessageType.ChannelPinnedMessage,
+    filter: msg => msg.type === MessageType.ChannelPinnedMessage,
     max: 1,
   });
 

@@ -40,16 +40,20 @@ export const handleRoleSelected = async (
   });
 
   await msg.edit({
-    components: msg.components.map(x => {
-      if (x.type === ComponentType.ActionRow) {
-        return new ActionRowBuilder<MessageActionRowComponentBuilder>(x).setComponents(x.components.map(x => {
-          if (x.type === ComponentType.StringSelect) {
-            return new StringSelectMenuBuilder(x).setDisabled(true)
-          }
-          return x as unknown as MessageActionRowComponentBuilder
-        }))
+    components: msg.components.map(component => {
+      if (component.type === ComponentType.ActionRow) {
+        return new ActionRowBuilder<MessageActionRowComponentBuilder>(component)
+          .setComponents(
+            component.components.map(subComponent => {
+              if (subComponent.type === ComponentType.StringSelect) {
+                return new StringSelectMenuBuilder(subComponent).setDisabled(true)
+              }
+              // This feels wrong, there really should be a better way to edit a component...surely
+              return subComponent as unknown as MessageActionRowComponentBuilder
+            })
+          )
       }
-      return x;
+      return component;
     }),
   });
 

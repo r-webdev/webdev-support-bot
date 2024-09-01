@@ -18,7 +18,10 @@ const generateButtons = (roles: typeof ROLES | typeof NOTIFY_ROLES) =>
 const chunkAndRowify = pipe<
   Iterable<ButtonBuilder>,
   Iterable<ActionRowBuilder<MessageActionRowComponentBuilder>>
->([chunk(5), map((x: ButtonBuilder[]) => new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(...x))]);
+>([
+  chunk(5),
+  map((buttonBuilders: ButtonBuilder[]) => new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(...buttonBuilders))
+]);
 
 export async function setupRoles(
   interaction: CommandInteraction

@@ -32,10 +32,10 @@ export const handleNotifyRolesSelected = async (
   const msg = interaction.message as Message;
 
   msg.edit({
-    components: msg.components.map(x => {
-      if (x.type === ComponentType.ActionRow) {
-        return new ActionRowBuilder<MessageActionRowComponentBuilder>(x)
-          .setComponents(...x.components.map(x => {
+    components: msg.components.map(component => {
+      if (component.type === ComponentType.ActionRow) {
+        return new ActionRowBuilder<MessageActionRowComponentBuilder>(component)
+          .setComponents(...component.components.map(x => {
             if (x.type === ComponentType.Button) {
               return new ButtonBuilder(x).setDisabled(true)
             }
@@ -43,7 +43,7 @@ export const handleNotifyRolesSelected = async (
           }))
       }
 
-      return x
+      return component
     }),
   });
 

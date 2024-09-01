@@ -14,7 +14,6 @@ export function createCodeBlockCapturer(
       String.raw`${BACKTICKS}(?<language>${langAlts})\n(?<code>[\s\S]+?)\n${BACKTICKS}`,
       'gui'
     );
-    console.log({ str })
     const matches = str.matchAll(langRegex);
     for (const {
       groups: { language, code },
