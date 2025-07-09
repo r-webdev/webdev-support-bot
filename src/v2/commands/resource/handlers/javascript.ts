@@ -21,11 +21,7 @@ ${BACKTICKS}
 `.trim()
 );
 
-const transform = pipe<Iterable<ResourceDescription>, string>([
-  mapTransform,
-  collect,
-  (arr: string[]) => arr.join('\n'),
-]);
+const transform = pipe(mapTransform, collect, arr => arr.join('\n'));
 
 const resources = [
   {

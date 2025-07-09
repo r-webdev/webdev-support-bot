@@ -12,7 +12,6 @@ import {
   MessageEmbed,
   Collection,
   MessageActionRow,
-  MessageButton,
   MessageSelectMenu,
 } from 'discord.js';
 import type { MessageComponentTypes } from 'discord.js/typings/enums';
@@ -42,26 +41,28 @@ const list = new (Intl as any).ListFormat();
 const fetch: typeof getData = getData;
 const formatDateFromNow: typeof formatDistanceToNow = formatDistanceToNow;
 
-const getFirstTenResults = pipe<Iterable<NPMResponse>, NPMEmbed[]>([
-  take<NPMResponse>(10),
-  map(({ name, date, description, links, publisher, maintainers }) => ({
-    author: {
-      name: publisher.username,
-      // icon_url: publisher.avatars.small,
-      url: `https://www.npmjs.com/~${publisher.username}`,
-    },
-    description,
-    externalUrls: {
-      homepage: links.homepage,
-      repository: links.repository,
-    },
-    lastUpdate: `${formatDateFromNow(new Date(date))} ago`,
-    maintainers: maintainers.length,
-    name,
-    url: links.npm,
-  })),
+const getFirstTenResults = pipe(
+  take(10),
+  map<NPMResponse, NPMEmbed>(
+    ({ name, date, description, links, publisher, maintainers }) => ({
+      author: {
+        name: publisher.username,
+        // icon_url: publisher.avatars.small,
+        url: `https://www.npmjs.com/~${publisher.username}`,
+      },
+      description,
+      externalUrls: {
+        homepage: links.homepage,
+        repository: links.repository,
+      },
+      lastUpdate: `${formatDateFromNow(new Date(date))} ago`,
+      maintainers: maintainers.length,
+      name,
+      url: links.npm,
+    })
+  ),
   collect,
-]);
+);
 
 // msg: Message, searchTerm: string
 const handleNpmCommand = async (
