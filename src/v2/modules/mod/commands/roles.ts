@@ -15,10 +15,10 @@ const generateButtons = (roles: typeof ROLES | typeof NOTIFY_ROLES) =>
       .setStyle('SECONDARY')
       .setEmoji(item.emoji)
   );
-const chunkAndRowify = pipe<
-  Iterable<MessageButton>,
-  Iterable<MessageActionRow>
->([chunk(5), map(x => new MessageActionRow().addComponents(...x))]);
+const chunkAndRowify = pipe(
+  chunk<MessageButton>(5),
+  map(x => new MessageActionRow().addComponents(...x))
+);
 
 export async function setupRoles(
   interaction: CommandInteraction

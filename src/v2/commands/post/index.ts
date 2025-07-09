@@ -160,13 +160,13 @@ const sendAlert = (
   }
 };
 
-const generateFields = pipe<Answers, Iterable<OutputField>>([
-  filter(
+const generateFields = pipe(
+  filter<[string, string]>(
     ([key, val]: [string, string]) =>
       !['guidelines'].includes(key) &&
       !(key === 'remote' && val.toLowerCase() === 'onsite')
   ),
-  map(([key, val]: [string, string]): OutputField => {
+  map(([key, val]): OutputField => {
     let value = val;
     switch (key) {
       case 'compensation':
@@ -186,7 +186,7 @@ const generateFields = pipe<Answers, Iterable<OutputField>>([
       value: createMarkdownCodeBlock(value.replace(/```/gu, '')),
     };
   }),
-]);
+);
 
 const createUserTag = (username: string, discriminator: string) =>
   `${username}#${discriminator}`;
