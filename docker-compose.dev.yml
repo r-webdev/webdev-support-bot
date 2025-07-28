@@ -1,0 +1,16 @@
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: webdev-support-bot-mongo-dev
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: webdev-support-bot
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_dev_data:/data/db
+
+volumes:
+  mongodb_dev_data:

@@ -105,13 +105,15 @@ cd webdev-support-bot
 
 cp .env.example .env # and enter a token
 
+
 yarn install # or npm install
 code .
 
+yarn docker:dev:up
 yarn dev # or npm dev
 
 # or be fancy with a one-liner
-git clone https://github.com/ljosberinn/webdev-support-bot/ && cd webdev-support-bot && cp .env.example .env && yarn install && code . && yarn dev
+git clone https://github.com/ljosberinn/webdev-support-bot/ && cd webdev-support-bot && cp .env.example .env && yarn install && code . && yarn docker:dev:up && yarn dev
 ```
 
 ## Environment variables

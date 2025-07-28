@@ -17,7 +17,9 @@
     "test:ci": "jest --ci",
     "lint:fix": "eslint --fix src && prettier --write src",
     "lint:types": "tsc --noEmit",
-    "install:clean": "rm -rf node_modules && rm yarn.lock && yarn"
+    "install:clean": "rm -rf node_modules && rm yarn.lock && yarn",
+    "docker:dev:up": "docker compose -f docker-compose.dev.yml up -d",
+    "docker:dev:down": "docker compose -f docker-compose.dev.yml down"
   },
   "keywords": [],
   "author": "",
@@ -66,5 +68,6 @@
   "lint-staged": {
     "src/**/*.{js,jsx,ts,tsx,json,css,scss,md}": "prettier --write",
     "*.js": "eslint --fix"
-  }
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }
