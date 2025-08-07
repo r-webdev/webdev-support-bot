@@ -1,9 +1,10 @@
 // This is required so far in this file
 /* eslint-disable no-await-in-loop */
-import type {
+import {
   ApplicationCommand,
   ApplicationCommandData,
   ApplicationCommandManager,
+  ApplicationCommandType,
   Client,
   Guild,
   GuildApplicationCommandManager,
@@ -35,6 +36,7 @@ import { resourceInteraction } from './resource/index.js';
 import { shitpostInteraction } from './shitpost/index.js';
 // import { warn } from './warn/index.js';
 import { whynoInteraction } from './whyno/index.js';
+import { repelInteraction } from './repel';
 
 export const guildCommands = new Map(
   [
@@ -49,8 +51,9 @@ export const guildCommands = new Map(
     whynoInteraction,
     roleCommands,
     setupCommands,
+    repelInteraction,
     // warn // Not used atm
-  ].map(command => [command.name, command])
+  ].map(command => [command.name, command]),
 ); // placeholder for now
 
 export const applicationCommands = new Collection<
@@ -65,7 +68,7 @@ const getRelevantCmdProperties = ({
 }: {
   description: string;
   name: string;
-  options?: unknown[];
+  options?: readonly unknown[];
 }): ApplicationCommandData => {
   const relevantData = {
     description,
@@ -87,7 +90,7 @@ const stripNullish = <T>(obj: T): T => {
   return Object.fromEntries(
     Object.entries(obj)
       .map(([a, b]) => [a, stripNullish(b)])
-      .filter(([, b]) => b != null)
+      .filter(([, b]) => b != null),
   ) as T;
 };
 
@@ -95,7 +98,7 @@ export const registerCommands = async (client: Client): Promise<void> => {
   client.on(
     'interactionCreate',
     asyncCatch(async interaction => {
-      if (!interaction.isCommand()) {
+      if (!interaction.isChatInputCommand()) {
         return;
       }
 
@@ -115,13 +118,12 @@ export const registerCommands = async (client: Client): Promise<void> => {
           });
         }
       } catch (error) {
-        console.error(error);
         await interaction.reply({
           ephemeral: true,
           content: 'Something went wrong when trying to execute the command',
         });
       }
-    })
+    }),
   );
 
   for (const { onAttach } of applicationCommands.values()) {
@@ -152,7 +154,7 @@ export const registerCommands = async (client: Client): Promise<void> => {
   await addCommands(
     discordCommandsById,
     applicationCommands,
-    client.application.commands
+    client.application.commands,
   );
 
   console.log('General Commands All Added');
@@ -170,14 +172,14 @@ async function addCommands(
     ApplicationCommand<{ guild: GuildResolvable }>
   >,
   commandDescriptions: Map<string, CommandDataWithHandler>,
-  commandManager: ApplicationCommandManager | GuildApplicationCommandManager
+  commandManager: ApplicationCommandManager | GuildApplicationCommandManager,
 ) {
   const discordChatInputCommandsById = serverCommands.filter(
-    x => x.type === 'CHAT_INPUT'
+    x => x.type === ApplicationCommandType.ChatInput,
   );
 
   const discordCommands = new Collection(
-    discordChatInputCommandsById.map(value => [value.name, value])
+    discordChatInputCommandsById.map(value => [value.name, value]),
   );
 
   const validCommands = pipe<
@@ -188,22 +190,22 @@ async function addCommands(
       ([key, val]: [string, CommandDataWithHandler]) =>
         'guild' in commandManager && val.guildValidate
           ? val.guildValidate(commandManager.guild)
-          : true
+          : true,
     ),
     map(([key]) => key),
   ]);
 
   const newCommands = difference(
     validCommands(commandDescriptions),
-    discordCommands.keys()
+    discordCommands.keys(),
   );
   const existingCommands = intersection(
     validCommands(commandDescriptions),
-    discordCommands.keys()
+    discordCommands.keys(),
   );
   const deletedCommands = difference<string>(
     discordCommands.keys(),
-    validCommands(commandDescriptions)
+    validCommands(commandDescriptions),
   );
 
   // const new = await client.application.commands.create()
@@ -213,15 +215,15 @@ async function addCommands(
       editExistingCommands(
         commandDescriptions,
         commandManager,
-        discordCommands
+        discordCommands,
       )(existingCommands),
-      deleteRemovedCommands(commandManager, discordCommands)(deletedCommands)
-    )
+      deleteRemovedCommands(commandManager, discordCommands)(deletedCommands),
+    ),
   );
 }
 
 function getDestination(
-  commandManager: ApplicationCommandManager | GuildApplicationCommandManager
+  commandManager: ApplicationCommandManager | GuildApplicationCommandManager,
 ) {
   return 'guild' in commandManager
     ? `Guild: ${commandManager.guild.name}`
@@ -230,7 +232,7 @@ function getDestination(
 
 function createNewCommands(
   cmdDescriptions: Map<string, CommandDataWithHandler>,
-  cmdMgr: ApplicationCommandManager | GuildApplicationCommandManager
+  cmdMgr: ApplicationCommandManager | GuildApplicationCommandManager,
 ) {
   const destination = getDestination(cmdMgr);
   return map(async (name: string) => {
@@ -248,7 +250,7 @@ function createNewCommands(
 function editExistingCommands(
   cmdDescriptions: Map<string, CommandDataWithHandler>,
   cmdMgr: ApplicationCommandManager | GuildApplicationCommandManager,
-  existingCommands: Map<string, ApplicationCommand>
+  existingCommands: Map<string, ApplicationCommand>,
 ) {
   const destination = getDestination(cmdMgr);
   return map((name: string) => {
@@ -260,7 +262,7 @@ function editExistingCommands(
     if (
       !isEqual(
         getRelevantCmdProperties(cmd),
-        getRelevantCmdProperties(existing)
+        getRelevantCmdProperties(existing),
       )
     ) {
       console.info(`Updating ${name} for ${destination}`);
@@ -272,7 +274,7 @@ function editExistingCommands(
 
 function deleteRemovedCommands(
   cmdMgr: ApplicationCommandManager | GuildApplicationCommandManager,
-  existingCommands: Map<string, ApplicationCommand>
+  existingCommands: Map<string, ApplicationCommand>,
 ) {
   const destination = getDestination(cmdMgr);
   return map(async (name: string) => {
