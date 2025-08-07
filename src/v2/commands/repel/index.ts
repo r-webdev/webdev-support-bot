@@ -120,7 +120,6 @@ export const repelInteraction: CommandDataWithHandler = {
         return;
       }
 
-
 			if (targetMember.roles.cache.has(repelRole.id)) {
 					await reply(
 							interaction,
