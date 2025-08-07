@@ -40,7 +40,7 @@ import { stripMarkdownQuote } from './utils/content_format.js';
 const NON_COMMAND_MSG_TYPES = new Set([
   ChannelType.GuildText,
   ChannelType.PrivateThread,
-  ChannelType.PublicThread
+  ChannelType.PublicThread,
 ]);
 
 if (IS_PROD) {
@@ -121,7 +121,7 @@ client.once('ready', async (): Promise<void> => {
 
   try {
     await client.user.setAvatar('./logo.png');
-  } catch { }
+  } catch {}
 });
 
 const detectVarLimited = limitFnByUser(detectVar, {
