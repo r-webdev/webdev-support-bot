@@ -120,6 +120,15 @@ export const repelInteraction: CommandDataWithHandler = {
         return;
       }
 
+
+			if (targetMember.roles.cache.has(repelRole.id)) {
+					await reply(
+							interaction,
+							`You cannot repel a user with the ${REPEL_ROLE_NAME} role.`,
+					);
+					return;
+			}
+
       const botMember = await interaction.guild.members.fetch(client.user!.id);
       const isOwner = interaction.guild.ownerId === member.id;
 
