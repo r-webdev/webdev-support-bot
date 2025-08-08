@@ -9,7 +9,7 @@ import {
   type TextChannel,
 } from 'discord.js';
 import type { CommandDataWithHandler } from '../../../types';
-import { REPEL_DELETE_COUNT, REPEL_ROLE_NAME } from '../../env';
+import { REPEL_DELETE_COUNT, REPEL_ROLE_ID } from '../../env';
 
 const TARGET_KEY = 'target';
 const MESSAGE_LINK_KEY = 'message_link';
@@ -64,16 +64,17 @@ export const repelInteraction: CommandDataWithHandler = {
       await reply(interaction, 'This command can only be used in a server.');
     }
     const repelRole = interaction.guild.roles.cache.find(
-      role => role.name === REPEL_ROLE_NAME,
+      role => role.id === REPEL_ROLE_ID,
     );
 
     if (!repelRole) {
       await reply(
         interaction,
-        `${REPEL_ROLE_NAME || 'Repel'} role not found. Please contact an admin.`,
+        'Repel role not found. Please check the id in the environment variables.',
       );
       return;
     }
+    const roleName = repelRole.name;
     const member = interaction.member as GuildMember;
 
     const canUseCommand =
@@ -84,7 +85,7 @@ export const repelInteraction: CommandDataWithHandler = {
     if (!canUseCommand) {
       await reply(
         interaction,
-        `You do not have permission to use this command. You need the ${REPEL_ROLE_NAME} role or moderate members permission.`,
+        `You do not have permission to use this command`,
       );
       return;
     }
@@ -120,13 +121,13 @@ export const repelInteraction: CommandDataWithHandler = {
         return;
       }
 
-			if (targetMember.roles.cache.has(repelRole.id)) {
-					await reply(
-							interaction,
-							`You cannot repel a user with the ${REPEL_ROLE_NAME} role.`,
-					);
-					return;
-			}
+      if (targetMember.roles.cache.has(repelRole.id)) {
+        await reply(
+          interaction,
+          `You cannot repel a user with the ${roleName} role.`,
+        );
+        return;
+      }
 
       const botMember = await interaction.guild.members.fetch(client.user!.id);
       const isOwner = interaction.guild.ownerId === member.id;

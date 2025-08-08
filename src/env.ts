@@ -43,6 +43,7 @@ export const { JOIN_LOG_CHANNEL } = process.env;
 export const { INTRO_CHANNEL } = process.env;
 export const { INTRO_ROLE } = process.env;
 
-export const { REPEL_ROLE_NAME } = process.env;
+export const { REPEL_ROLE_ID } = process.env;
 export const REPEL_DELETE_COUNT =
   Number.parseInt(process.env.REPEL_DELETE_COUNT) || 2;
+export const { REPEL_LOG_CHANNEL_ID } = process.env;
