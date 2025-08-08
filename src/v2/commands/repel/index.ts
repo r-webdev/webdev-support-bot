@@ -63,6 +63,13 @@ export const repelInteraction: CommandDataWithHandler = {
     if (!interaction.inGuild() || !interaction.guild) {
       await reply(interaction, 'This command can only be used in a server.');
     }
+    if (!interaction.isChatInputCommand()) {
+      await reply(
+        interaction,
+        'This command can only be used as a slash command.',
+      );
+      return;
+    }
     const repelRole = interaction.guild.roles.cache.find(
       role => role.id === REPEL_ROLE_ID,
     );
