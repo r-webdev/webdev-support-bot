@@ -2,9 +2,7 @@ import {
   ApplicationCommandOptionType,
   ChannelType,
   EmbedBuilder,
-  GuildChannel,
   PermissionFlagsBits,
-  TextBasedChannel,
   User,
   type Client,
   type CommandInteraction,
@@ -19,7 +17,7 @@ import {
   REPEL_DEFAULT_TIMEOUT,
 } from '../../env';
 import { DiscordAPIErrorCode } from '../../../enums';
-import { logEmbed, logSimple } from '../../utils/channel-logger';
+import { logEmbed } from '../../utils/channel-logger';
 
 enum RepelCommandOptions {
   TARGET = 'target',
@@ -164,7 +162,6 @@ export const repelInteraction: CommandDataWithHandler = {
       RepelCommandOptions.TARGET,
       false,
     )?.user as User;
-    console.log('Target User:', targetUser);
 
     let targetGuildMember: GuildMember | null = null;
     let userNotInServer = false;
