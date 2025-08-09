@@ -1,6 +1,7 @@
 import {
   ApplicationCommandOptionType,
   ChannelType,
+  EmbedBuilder,
   PermissionFlagsBits,
   User,
   type Client,
@@ -9,12 +10,23 @@ import {
   type TextChannel,
 } from 'discord.js';
 import type { CommandDataWithHandler } from '../../../types';
-import { REPEL_DELETE_COUNT, REPEL_ROLE_ID } from '../../env';
+import {
+  REPEL_DEFAULT_DELETE_COUNT,
+  REPEL_ROLE_ID,
+  REPEL_LOG_CHANNEL_ID,
+  REPEL_DEFAULT_TIMEOUT,
+} from '../../env';
+import { DiscordAPIErrorCode } from '../../../enums';
+import { logEmbed } from '../../utils/channel-logger';
 
-const TARGET_KEY = 'target';
-const MESSAGE_LINK_KEY = 'message_link';
+enum RepelCommandOptions {
+  TARGET = 'target',
+  MESSAGE_LINK = 'message_link',
+  DELETE_COUNT = 'delete_count',
+  TIMEOUT = 'timeout',
+  REASON = 'reason',
+}
 const DAY = 24 * 60 * 60 * 1000;
-const TIMEOUT_DURATION = 6 * 60 * 60 * 1000; // 6 hours in milliseconds
 
 const reply = (
   interaction: CommandInteraction,
@@ -22,40 +34,89 @@ const reply = (
   ephemeral = true,
 ) => interaction.reply({ content, ephemeral });
 
-const getTargetFromMessage = async (
-  client: Client,
-  guild: any,
-  messageLink: string,
-) => {
-  const match = messageLink.match(/(?:channels|@me)\/(?:(\d+)\/)?(\d+)\/(\d+)/);
-  if (!match) throw new Error('Invalid message link format.');
-  const messageId = match[3];
-  const channelId = match[2];
-
-  const channel = channelId ? await client.channels.fetch(channelId) : null;
-  if (channel?.type !== ChannelType.GuildText)
-    throw new Error('Invalid channel for message link.');
-
-  const message = await (channel as TextChannel).messages.fetch(messageId);
-  return await guild.members.fetch(message.author.id);
-};
-
 export const repelInteraction: CommandDataWithHandler = {
   name: 'repel',
-  description:
-    'Remove recent messages and timeout a user (requires timeout permissions)',
+  description: 'Remove recent messages and timeout a user',
   options: [
     {
-      name: TARGET_KEY,
+      name: RepelCommandOptions.TARGET,
       description: 'The user to repel',
       type: ApplicationCommandOptionType.User,
-      required: false,
+      required: true,
     },
     {
-      name: MESSAGE_LINK_KEY,
-      description: 'Message link to identify the user to repel',
+      name: RepelCommandOptions.REASON,
+      description: 'Reason for repelling the user',
       type: ApplicationCommandOptionType.String,
+      required: true,
+    },
+    {
+      name: RepelCommandOptions.DELETE_COUNT,
+      description: `Number of messages to delete from the user (default: ${REPEL_DEFAULT_DELETE_COUNT})`,
+      type: ApplicationCommandOptionType.Integer,
       required: false,
+      choices: [
+        {
+          name: '5 messages',
+          value: 5,
+        },
+        {
+          name: '10 messages',
+          value: 10,
+        },
+        {
+          name: '20 messages',
+          value: 20,
+        },
+        {
+          name: '50 messages',
+          value: 50,
+        },
+        {
+          name: '100 messages',
+          value: 100,
+        },
+        {
+          name: '200 messages',
+          value: 200,
+        },
+      ],
+    },
+    {
+      name: RepelCommandOptions.TIMEOUT,
+      description: `Timeout duration in hours (default: ${REPEL_DEFAULT_TIMEOUT} hours)`,
+      type: ApplicationCommandOptionType.Integer,
+      required: false,
+      choices: [
+        {
+          name: 'No timeout',
+          value: 0,
+        },
+        {
+          name: '1 hour',
+          value: 1,
+        },
+        {
+          name: '2 hours',
+          value: 2,
+        },
+        {
+          name: '3 hours',
+          value: 3,
+        },
+        {
+          name: '6 hours',
+          value: 6,
+        },
+        {
+          name: '12 hours',
+          value: 12,
+        },
+        {
+          name: '1 day',
+          value: 24,
+        },
+      ],
     },
   ],
 
@@ -97,38 +158,35 @@ export const repelInteraction: CommandDataWithHandler = {
       return;
     }
 
-    const targetUser = interaction.options.get(TARGET_KEY, false)?.user as
-      | User
-      | undefined;
-    const messageLink = interaction.options.get(MESSAGE_LINK_KEY, false)
-      ?.value as string | undefined;
+    const targetUser = interaction.options.get(
+      RepelCommandOptions.TARGET,
+      false,
+    )?.user as User;
+    console.log('Target User:', targetUser);
 
-    if (!targetUser && !messageLink) {
-      await reply(
-        interaction,
-        'You must specify either a user or a message link.',
-      );
-    }
+    let targetGuildMember: GuildMember | null = null;
+    let userNotInServer = false;
 
     try {
-      let targetMember: GuildMember;
-
-      if (targetUser) {
-        targetMember = await interaction.guild.members.fetch(targetUser.id);
-      } else if (messageLink) {
-        targetMember = await getTargetFromMessage(
-          client,
-          interaction.guild,
-          messageLink!,
-        );
+      targetGuildMember = await interaction.guild.members.fetch(targetUser.id);
+    } catch (error: any) {
+      if (
+        error.code === DiscordAPIErrorCode.UnknownMember ||
+        error.code === DiscordAPIErrorCode.UnknownUser
+      ) {
+        userNotInServer = true;
+      } else {
+        throw error;
       }
+    }
 
-      if (targetMember.id === member.id) {
+    if (targetGuildMember !== null) {
+      if (targetGuildMember.id === member.id) {
         await reply(interaction, 'You cannot repel yourself.');
         return;
       }
 
-      if (targetMember.roles.cache.has(repelRole.id)) {
+      if (targetGuildMember.roles.cache.has(repelRole.id)) {
         await reply(
           interaction,
           `You cannot repel a user with the ${roleName} role.`,
@@ -139,13 +197,14 @@ export const repelInteraction: CommandDataWithHandler = {
       const botMember = await interaction.guild.members.fetch(client.user!.id);
       const isOwner = interaction.guild.ownerId === member.id;
 
-      if (targetMember.id === interaction.guild.ownerId) {
+      if (targetGuildMember.id === interaction.guild.ownerId) {
         await reply(interaction, 'Cannot moderate the server owner.');
       }
 
       if (
         !isOwner &&
-        targetMember.roles.highest.position >= member.roles.highest.position
+        targetGuildMember.roles.highest.position >=
+          member.roles.highest.position
       ) {
         await reply(
           interaction,
@@ -154,23 +213,35 @@ export const repelInteraction: CommandDataWithHandler = {
       }
 
       if (
-        targetMember.roles.highest.position >= botMember.roles.highest.position
+        targetGuildMember.roles.highest.position >=
+        botMember.roles.highest.position
       ) {
         await reply(
           interaction,
           'I cannot moderate this user due to role hierarchy.',
         );
       }
+    }
 
+    const targetId = userNotInServer ? targetUser.id : targetGuildMember!.id;
+    const targetTag = userNotInServer
+      ? targetUser.tag
+      : targetGuildMember!.user.tag;
+
+    try {
       await interaction.deferReply({ ephemeral: true });
-
+      const messagesToDelete =
+        interaction.options.getInteger(
+          RepelCommandOptions.DELETE_COUNT,
+          false,
+        ) ?? REPEL_DEFAULT_DELETE_COUNT;
       let deletedCount = 0;
       const textChannels = interaction.guild.channels.cache.filter(
         ch => ch.type === ChannelType.GuildText,
       );
 
       for (const [, channel] of textChannels) {
-        if (deletedCount >= REPEL_DELETE_COUNT) break;
+        if (deletedCount >= messagesToDelete) break;
 
         try {
           const messages = await channel.messages.fetch({
@@ -179,12 +250,10 @@ export const repelInteraction: CommandDataWithHandler = {
           const userMessages = messages
             .filter(
               m =>
-                m.author.id === targetMember.id &&
+                m.author.id === targetId &&
                 Date.now() - m.createdTimestamp < 14 * DAY,
             )
-            .first(
-              Math.min(REPEL_DELETE_COUNT - deletedCount, REPEL_DELETE_COUNT),
-            );
+            .first(Math.min(messagesToDelete - deletedCount, messagesToDelete));
           if (userMessages.length > 0) {
             userMessages.length === 1
               ? await userMessages[0].delete()
@@ -194,23 +263,62 @@ export const repelInteraction: CommandDataWithHandler = {
         } catch {}
       }
 
-      const isUserTimedOut = targetMember.communicationDisabledUntilTimestamp
-        ? targetMember.communicationDisabledUntilTimestamp > Date.now()
-        : false;
+      const isUserTimedOut =
+        targetGuildMember?.communicationDisabledUntilTimestamp
+          ? targetGuildMember.communicationDisabledUntilTimestamp > Date.now()
+          : false;
 
-      if (!isUserTimedOut) {
-        await targetMember.timeout(
-          TIMEOUT_DURATION,
+      const timeoutDurationInHours =
+        interaction.options.getInteger(RepelCommandOptions.TIMEOUT, false) ??
+        REPEL_DEFAULT_TIMEOUT;
+      if (
+        !isUserTimedOut &&
+        timeoutDurationInHours > 0 &&
+        targetGuildMember !== null
+      ) {
+        await targetGuildMember.timeout(
+          timeoutDurationInHours * 60 * 60 * 1000,
           `Repel command used by ${member.user.tag}`,
         );
         await interaction.editReply({
-          content: `Successfully repelled ${targetMember.user.tag}. Removed ${deletedCount} messages and timed out for 6 hours.`,
+          content: `Successfully repelled ${targetTag}. Removed ${deletedCount} messages and timed out for ${timeoutDurationInHours} hours.`,
         });
       } else {
         await interaction.editReply({
-          content: `Successfully repelled ${targetMember.user.tag}. Removed ${deletedCount} messages.`,
+          content: `Successfully repelled ${targetTag}. Removed ${deletedCount} messages.`,
         });
       }
+
+      const embed = new EmbedBuilder()
+        .setTitle('Repel Action')
+        .setDescription(
+          `<@${targetId}> has been repelled by <@${member.id}> in <#${interaction.channelId}>.`,
+        )
+        .addFields(
+          {
+            name: 'Reason',
+            value: interaction.options.getString(
+              RepelCommandOptions.REASON,
+              true,
+            ),
+          },
+          {
+            name: 'Deleted Messages',
+            value: deletedCount.toString(),
+          },
+          {
+            name: 'Timeout Duration',
+            value:
+              isUserTimedOut || userNotInServer
+                ? 'No Timeout'
+                : timeoutDurationInHours === 0
+                  ? 'No Timeout'
+                  : `${timeoutDurationInHours} hours`,
+          },
+        )
+        .setColor(0x00ff00)
+        .setTimestamp();
+      await logEmbed(client, REPEL_LOG_CHANNEL_ID, embed, undefined, true);
     } catch (error: any) {
       const errorMsg =
         error.message || 'An error occurred while executing this command.';
