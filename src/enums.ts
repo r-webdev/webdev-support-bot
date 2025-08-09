@@ -52,3 +52,9 @@ export enum Months {
   November = 10,
   December = 11,
 }
+
+/* https://discord.com/developers/docs/topics/opcodes-and-status-codes#json-json-error-codes */
+export enum DiscordAPIErrorCode {
+  UnknownMember = 10007,
+  UnknownUser = 10013,
+}
