@@ -2,7 +2,9 @@ import {
   ApplicationCommandOptionType,
   ChannelType,
   EmbedBuilder,
+  GuildChannel,
   PermissionFlagsBits,
+  TextBasedChannel,
   User,
   type Client,
   type CommandInteraction,
@@ -17,7 +19,7 @@ import {
   REPEL_DEFAULT_TIMEOUT,
 } from '../../env';
 import { DiscordAPIErrorCode } from '../../../enums';
-import { logEmbed } from '../../utils/channel-logger';
+import { logEmbed, logSimple } from '../../utils/channel-logger';
 
 enum RepelCommandOptions {
   TARGET = 'target',
@@ -236,11 +238,22 @@ export const repelInteraction: CommandDataWithHandler = {
           false,
         ) ?? REPEL_DEFAULT_DELETE_COUNT;
       let deletedCount = 0;
-      const textChannels = interaction.guild.channels.cache.filter(
-        ch => ch.type === ChannelType.GuildText,
-      );
+      const textChannels = interaction.guild.channels.cache
+        .filter(
+          (ch): ch is TextChannel =>
+            (ch.type === ChannelType.GuildText ||
+              ch.type === ChannelType.GuildVoice) &&
+            ch.id !== interaction.channelId &&
+            Boolean(ch.lastMessageId),
+        )
+        .sort((a, b) => {
+          const aLastMessage = a.lastMessageId ? BigInt(a.lastMessageId) : 0n;
+          const bLastMessage = b.lastMessageId ? BigInt(b.lastMessageId) : 0n;
+          return Number(bLastMessage - aLastMessage);
+        })
+        .first(50);
 
-      for (const [, channel] of textChannels) {
+      for (const channel of [interaction.channel, ...textChannels]) {
         if (deletedCount >= messagesToDelete) break;
 
         try {
@@ -289,10 +302,15 @@ export const repelInteraction: CommandDataWithHandler = {
         });
       }
 
+      const channelInfo =
+        interaction.channel?.type === ChannelType.GuildVoice
+          ? `**${interaction.channel.name}** voice chat`
+          : `<#${interaction.channelId}>`;
+
       const embed = new EmbedBuilder()
         .setTitle('Repel Action')
         .setDescription(
-          `<@${targetId}> has been repelled by <@${member.id}> in <#${interaction.channelId}>.`,
+          `<@${targetId}> has been repelled by <@${member.id}> in ${channelInfo}.`,
         )
         .addFields(
           {
