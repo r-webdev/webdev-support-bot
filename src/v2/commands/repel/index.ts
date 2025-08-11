@@ -1,12 +1,15 @@
 import {
   ApplicationCommandOptionType,
   ChannelType,
+  ChatInputCommandInteraction,
   EmbedBuilder,
+  Guild,
+  GuildMember,
   PermissionFlagsBits,
+  Role,
   User,
   type Client,
   type CommandInteraction,
-  type GuildMember,
   type TextChannel,
 } from 'discord.js';
 import type { CommandDataWithHandler } from '../../../types';
@@ -15,9 +18,11 @@ import {
   REPEL_ROLE_ID,
   REPEL_LOG_CHANNEL_ID,
   REPEL_DEFAULT_TIMEOUT,
+  MODERATORS_ROLE_IDS,
 } from '../../env';
 import { DiscordAPIErrorCode } from '../../../enums';
 import { logEmbed } from '../../utils/channel-logger';
+import { buildCommandString } from '../../utils/build-command-string';
 
 enum RepelCommandOptions {
   TARGET = 'target',
@@ -25,14 +30,286 @@ enum RepelCommandOptions {
   DELETE_COUNT = 'delete_count',
   TIMEOUT = 'timeout',
   REASON = 'reason',
+  MESSAGE_TO_MODS = 'message_for_moderators',
 }
+
+const MESSAGES_PER_CHANNEL = 100; // Max messages to fetch per channel
+const DAYS_LOOK_BACK = 4; /* Number of days to look back for messages */
 const DAY = 24 * 60 * 60 * 1000;
+const IGNORED_CHANNEL_CATEGORIES = [
+  '679621550118273043' /* Staff */,
+  '973896398087000084' /* Mod Related Logs */,
+  '1350420544142442559' /* Tickets */,
+  '837507969859977258' /* Archived */,
+];
 
 const reply = (
   interaction: CommandInteraction,
   content: string,
   ephemeral = true,
 ) => interaction.reply({ content, ephemeral });
+
+const isUserInServer = (target: User | GuildMember): target is GuildMember => {
+  return target instanceof GuildMember;
+};
+
+const isUserTimedOut = (target: GuildMember) => {
+  return target.communicationDisabledUntilTimestamp
+    ? target.communicationDisabledUntilTimestamp > Date.now()
+    : false;
+};
+
+const handleTimeout = async ({
+  target,
+  duration,
+}: {
+  target: User | GuildMember;
+  duration: number;
+}) => {
+  if (!isUserInServer(target) || isUserTimedOut(target)) return 0;
+  const timeoutDuration = duration * 60 * 60 * 1000;
+  await target.timeout(
+    timeoutDuration,
+    `Repel command used by ${target.user.tag}`,
+  );
+  return duration;
+};
+
+const getTargetFromInteraction = async (
+  interaction: ChatInputCommandInteraction,
+) => {
+  const targetUser = interaction.options.getUser(
+    RepelCommandOptions.TARGET,
+    true,
+  );
+  let target: User | GuildMember | null = null;
+  try {
+    target = await interaction.guild!.members.fetch(targetUser.id);
+  } catch (error: any) {
+    if (
+      error.code === DiscordAPIErrorCode.UnknownMember ||
+      error.code === DiscordAPIErrorCode.UnknownUser
+    ) {
+      target = targetUser;
+    } else {
+      throw error;
+    }
+  }
+  return target;
+};
+
+const getTextChannels = (guild: Guild) => {
+  return guild.channels.cache
+    .filter(
+      (ch): ch is TextChannel =>
+        !IGNORED_CHANNEL_CATEGORIES.includes(ch.parentId) &&
+        ch.type === ChannelType.GuildText &&
+        Boolean(ch.lastMessageId),
+    )
+    .values();
+};
+
+const checkPermission = async ({
+  interaction,
+  member,
+  repelRole,
+}: {
+  interaction: ChatInputCommandInteraction;
+  member: GuildMember;
+  repelRole: Role;
+}) => {
+  const hasPermission =
+    member.permissions.has(PermissionFlagsBits.ModerateMembers) ||
+    member.roles.cache.has(repelRole.id) ||
+    member.roles.cache.some(role => role.position >= repelRole.position);
+
+  if (!hasPermission) {
+    await reply(interaction, `You do not have permission to use this command`);
+    return false;
+  }
+  return true;
+};
+
+const checkCanUseCommandOnTarget = async ({
+  interaction,
+  client,
+  member,
+  target,
+  repelRole,
+}: {
+  interaction: ChatInputCommandInteraction;
+  client: Client;
+  member: GuildMember;
+  target: GuildMember | User;
+  repelRole: Role;
+}) => {
+  const botMember = await interaction.guild.members.fetch(client.user!.id);
+  if (!isUserInServer(target)) {
+    return true;
+  }
+
+  const isTargetServerOwner = interaction.guild.ownerId === member.id;
+  if (target.id === member.id) {
+    await reply(interaction, 'You cannot repel yourself.');
+    return false;
+  }
+
+  if (target.roles.cache.has(repelRole.id)) {
+    await reply(
+      interaction,
+      `You cannot repel a user with the ${repelRole.name} role.`,
+    );
+    return false;
+  }
+
+  if (target.id === interaction.guild.ownerId) {
+    await reply(interaction, 'Cannot moderate the server owner.');
+    return false;
+  }
+
+  if (
+    !isTargetServerOwner &&
+    target.roles.highest.position >= member.roles.highest.position
+  ) {
+    await reply(
+      interaction,
+      'You cannot moderate this user due to role hierarchy.',
+    );
+    return false;
+  }
+
+  if (target.roles.highest.position >= botMember.roles.highest.position) {
+    await reply(
+      interaction,
+      'I cannot moderate this user due to role hierarchy.',
+    );
+    return false;
+  }
+  return true;
+};
+
+const handleDeleteMessages = async ({
+  channels,
+  count,
+  targetId,
+}: {
+  channels: ReturnType<typeof getTextChannels>;
+  count: number;
+  targetId: string;
+}) => {
+  let deletedCount = 0;
+  for (const channel of channels) {
+    if (deletedCount >= count) break;
+    try {
+      const messages = await channel.messages.fetch({
+        limit: MESSAGES_PER_CHANNEL,
+      });
+      if (messages.size === 0) continue;
+      const targetMessages = messages
+        .filter(
+          message =>
+            message.author.id === targetId &&
+            Date.now() - message.createdTimestamp < DAYS_LOOK_BACK * DAY,
+        )
+        .first(Math.min(count - deletedCount, count));
+      if (targetMessages.length > 0) {
+        if (targetMessages.length === 1) {
+          await targetMessages[0].delete();
+        } else {
+          await channel.bulkDelete(targetMessages);
+        }
+        deletedCount += targetMessages.length;
+      }
+      return deletedCount;
+    } catch {
+      continue;
+    }
+  }
+};
+
+const logToChannel = async ({
+  interaction,
+  member,
+  target,
+  duration,
+  deleteCount,
+}: {
+  interaction: ChatInputCommandInteraction;
+  member: GuildMember;
+  target: User | GuildMember;
+  duration?: number;
+  deleteCount: number;
+}) => {
+  const channelInfo =
+    interaction.channel?.type === ChannelType.GuildVoice
+      ? `**${interaction.channel.name}** voice chat`
+      : `<#${interaction.channelId}>`;
+  const memberAuthor = {
+    name: member.user.tag,
+    iconURL: member.user.displayAvatarURL(),
+  };
+  const targetAuthor = {
+    name: isUserInServer(target)
+      ? `${target.user.tag} | Repel | ${target.user.username}`
+      : `${target.tag} | Repel | ${target.username}`,
+    iconURL: isUserInServer(target)
+      ? target.user.displayAvatarURL()
+      : target.displayAvatarURL(),
+  };
+
+  const commandEmbed = new EmbedBuilder()
+    .setAuthor(memberAuthor)
+    .setDescription(
+      `Used \`repel\` command in ${channelInfo}.\n` +
+        buildCommandString(interaction),
+    )
+    .setColor('Green')
+    .setTimestamp();
+  const resultEmbed = new EmbedBuilder()
+    .setAuthor(targetAuthor)
+    .addFields(
+      {
+        name: 'Target',
+        value: `<@${target.id}>`,
+        inline: true,
+      },
+      {
+        name: 'Moderator',
+        value: `<@${member.id}>`,
+        inline: true,
+      },
+      {
+        name: 'Reason',
+        value: interaction.options.getString(RepelCommandOptions.REASON, true),
+        inline: true,
+      },
+      {
+        name: 'Deleted Messages',
+        value: deleteCount.toString(),
+        inline: true,
+      },
+      {
+        name: 'Timeout Duration',
+        value: duration ? `${duration} hours` : 'No Timeout',
+        inline: true,
+      },
+    )
+    .setColor('Orange')
+    .setTimestamp();
+
+  const modMessage =
+    interaction.options.getString(RepelCommandOptions.MESSAGE_TO_MODS) ?? false;
+  const mentionText = modMessage
+    ? `${MODERATORS_ROLE_IDS.map(id => `<@&${id}>`)} - ${modMessage}`
+    : undefined;
+  await logEmbed(
+    interaction.client,
+    REPEL_LOG_CHANNEL_ID,
+    [commandEmbed, resultEmbed],
+    mentionText,
+    true,
+  );
+};
 
 export const repelInteraction: CommandDataWithHandler = {
   name: 'repel',
@@ -118,6 +395,12 @@ export const repelInteraction: CommandDataWithHandler = {
         },
       ],
     },
+    {
+      name: RepelCommandOptions.MESSAGE_TO_MODS,
+      description: 'Pings moderators with a message',
+      type: ApplicationCommandOptionType.String,
+      required: false,
+    },
   ],
 
   handler: async (client: Client, interaction: CommandInteraction) => {
@@ -134,7 +417,6 @@ export const repelInteraction: CommandDataWithHandler = {
     const repelRole = interaction.guild.roles.cache.find(
       role => role.id === REPEL_ROLE_ID,
     );
-
     if (!repelRole) {
       await reply(
         interaction,
@@ -142,198 +424,61 @@ export const repelInteraction: CommandDataWithHandler = {
       );
       return;
     }
-    const roleName = repelRole.name;
+
     const member = interaction.member as GuildMember;
+    const hasPermission = await checkPermission({
+      interaction,
+      member,
+      repelRole,
+    });
+    if (!hasPermission) return;
 
-    const canUseCommand =
-      member.permissions.has(PermissionFlagsBits.ModerateMembers) ||
-      member.roles.cache.has(repelRole.id) ||
-      member.roles.cache.some(role => role.position >= repelRole.position);
+    const target = await getTargetFromInteraction(interaction);
+    const canUseCommandOnTarget = await checkCanUseCommandOnTarget({
+      interaction,
+      client,
+      member,
+      target,
+      repelRole,
+    });
 
-    if (!canUseCommand) {
-      await reply(
-        interaction,
-        `You do not have permission to use this command`,
-      );
-      return;
-    }
+    if (!canUseCommandOnTarget) return;
 
-    const targetUser = interaction.options.get(
-      RepelCommandOptions.TARGET,
-      false,
-    )?.user as User;
-
-    let targetGuildMember: GuildMember | null = null;
-    let userNotInServer = false;
-
-    try {
-      targetGuildMember = await interaction.guild.members.fetch(targetUser.id);
-    } catch (error: any) {
-      if (
-        error.code === DiscordAPIErrorCode.UnknownMember ||
-        error.code === DiscordAPIErrorCode.UnknownUser
-      ) {
-        userNotInServer = true;
-      } else {
-        throw error;
-      }
-    }
-
-    if (targetGuildMember !== null) {
-      if (targetGuildMember.id === member.id) {
-        await reply(interaction, 'You cannot repel yourself.');
-        return;
-      }
-
-      if (targetGuildMember.roles.cache.has(repelRole.id)) {
-        await reply(
-          interaction,
-          `You cannot repel a user with the ${roleName} role.`,
-        );
-        return;
-      }
-
-      const botMember = await interaction.guild.members.fetch(client.user!.id);
-      const isOwner = interaction.guild.ownerId === member.id;
-
-      if (targetGuildMember.id === interaction.guild.ownerId) {
-        await reply(interaction, 'Cannot moderate the server owner.');
-      }
-
-      if (
-        !isOwner &&
-        targetGuildMember.roles.highest.position >=
-          member.roles.highest.position
-      ) {
-        await reply(
-          interaction,
-          'You cannot moderate this user due to role hierarchy.',
-        );
-      }
-
-      if (
-        targetGuildMember.roles.highest.position >=
-        botMember.roles.highest.position
-      ) {
-        await reply(
-          interaction,
-          'I cannot moderate this user due to role hierarchy.',
-        );
-      }
-    }
-
-    const targetId = userNotInServer ? targetUser.id : targetGuildMember!.id;
-    const targetTag = userNotInServer
-      ? targetUser.tag
-      : targetGuildMember!.user.tag;
+    await reply(
+      interaction,
+      `Repelled ${isUserInServer(target) ? target.user.tag : target.tag}.`,
+      true,
+    );
 
     try {
-      await interaction.deferReply({ ephemeral: true });
-      const messagesToDelete =
+      const duration =
+        interaction.options.getInteger(RepelCommandOptions.TIMEOUT, false) ??
+        REPEL_DEFAULT_TIMEOUT;
+
+      const timeout = await handleTimeout({
+        target,
+        duration,
+      });
+
+      const count =
         interaction.options.getInteger(
           RepelCommandOptions.DELETE_COUNT,
           false,
         ) ?? REPEL_DEFAULT_DELETE_COUNT;
-      let deletedCount = 0;
-      const textChannels = interaction.guild.channels.cache
-        .filter(
-          (ch): ch is TextChannel =>
-            (ch.type === ChannelType.GuildText ||
-              ch.type === ChannelType.GuildVoice) &&
-            ch.id !== interaction.channelId &&
-            Boolean(ch.lastMessageId),
-        )
-        .sort((a, b) => {
-          const aLastMessage = a.lastMessageId ? BigInt(a.lastMessageId) : 0n;
-          const bLastMessage = b.lastMessageId ? BigInt(b.lastMessageId) : 0n;
-          return Number(bLastMessage - aLastMessage);
-        })
-        .first(50);
+      const channels = getTextChannels(interaction.guild);
+      const deleted = await handleDeleteMessages({
+        channels,
+        count,
+        targetId: target.id,
+      });
 
-      for (const channel of [interaction.channel, ...textChannels]) {
-        if (deletedCount >= messagesToDelete) break;
-
-        try {
-          const messages = await channel.messages.fetch({
-            limit: 100,
-          });
-          const userMessages = messages
-            .filter(
-              m =>
-                m.author.id === targetId &&
-                Date.now() - m.createdTimestamp < 14 * DAY,
-            )
-            .first(Math.min(messagesToDelete - deletedCount, messagesToDelete));
-          if (userMessages.length > 0) {
-            userMessages.length === 1
-              ? await userMessages[0].delete()
-              : await (channel as TextChannel).bulkDelete(userMessages);
-            deletedCount += userMessages.length;
-          }
-        } catch {}
-      }
-
-      const isUserTimedOut =
-        targetGuildMember?.communicationDisabledUntilTimestamp
-          ? targetGuildMember.communicationDisabledUntilTimestamp > Date.now()
-          : false;
-
-      const timeoutDurationInHours =
-        interaction.options.getInteger(RepelCommandOptions.TIMEOUT, false) ??
-        REPEL_DEFAULT_TIMEOUT;
-      if (
-        !isUserTimedOut &&
-        timeoutDurationInHours > 0 &&
-        targetGuildMember !== null
-      ) {
-        await targetGuildMember.timeout(
-          timeoutDurationInHours * 60 * 60 * 1000,
-          `Repel command used by ${member.user.tag}`,
-        );
-        await interaction.editReply({
-          content: `Successfully repelled ${targetTag}. Removed ${deletedCount} messages and timed out for ${timeoutDurationInHours} hours.`,
-        });
-      } else {
-        await interaction.editReply({
-          content: `Successfully repelled ${targetTag}. Removed ${deletedCount} messages.`,
-        });
-      }
-
-      const channelInfo =
-        interaction.channel?.type === ChannelType.GuildVoice
-          ? `**${interaction.channel.name}** voice chat`
-          : `<#${interaction.channelId}>`;
-
-      const embed = new EmbedBuilder()
-        .setTitle('Repel Action')
-        .setDescription(
-          `<@${targetId}> has been repelled by <@${member.id}> in ${channelInfo}.`,
-        )
-        .addFields(
-          {
-            name: 'Reason',
-            value: interaction.options.getString(
-              RepelCommandOptions.REASON,
-              true,
-            ),
-          },
-          {
-            name: 'Deleted Messages',
-            value: deletedCount.toString(),
-          },
-          {
-            name: 'Timeout Duration',
-            value:
-              isUserTimedOut || userNotInServer
-                ? 'No Timeout'
-                : timeoutDurationInHours === 0
-                  ? 'No Timeout'
-                  : `${timeoutDurationInHours} hours`,
-          },
-        )
-        .setColor(0x00ff00)
-        .setTimestamp();
-      await logEmbed(client, REPEL_LOG_CHANNEL_ID, embed, undefined, true);
+      await logToChannel({
+        interaction,
+        member,
+        target,
+        duration: timeout,
+        deleteCount: deleted,
+      });
     } catch (error: any) {
       const errorMsg =
         error.message || 'An error occurred while executing this command.';

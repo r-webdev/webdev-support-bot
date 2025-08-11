@@ -49,3 +49,7 @@ export const REPEL_DEFAULT_DELETE_COUNT =
 export const { REPEL_LOG_CHANNEL_ID } = process.env;
 export const REPEL_DEFAULT_TIMEOUT =
   Number.parseInt(process.env.REPEL_DEFAULT_TIMEOUT) || 6;
+
+export const MODERATORS_ROLE_IDS = process.env.MODERATORS_ROLE_IDS
+  ? process.env.MODERATORS_ROLE_IDS.split(',')
+  : undefined;
