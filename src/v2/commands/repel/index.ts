@@ -49,7 +49,7 @@ const reply = (
   ephemeral = true,
 ) => interaction.reply({ content, ephemeral });
 
-const isUserInServer = (target: User | GuildMember) => {
+const isUserInServer = (target: User | GuildMember): target is GuildMember => {
   return target instanceof GuildMember;
 };
 
