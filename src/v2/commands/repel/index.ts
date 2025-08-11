@@ -104,6 +104,7 @@ const getTextChannels = (interaction: ChatInputCommandInteraction) => {
       (ch): ch is TextChannel =>
         !IGNORED_CHANNEL_CATEGORIES.includes(ch.parentId) &&
         ch.type === ChannelType.GuildText &&
+        interaction.channelId !== ch.id &&
         Boolean(ch.lastMessageId),
     )
     .values();
