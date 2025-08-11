@@ -98,15 +98,17 @@ const getTargetFromInteraction = async (
   return target;
 };
 
-const getTextChannels = (guild: Guild) => {
-  return guild.channels.cache
+const getTextChannels = (interaction: ChatInputCommandInteraction) => {
+  const channels = interaction.guild.channels.cache
     .filter(
       (ch): ch is TextChannel =>
         !IGNORED_CHANNEL_CATEGORIES.includes(ch.parentId) &&
         ch.type === ChannelType.GuildText &&
+        interaction.channelId !== ch.id &&
         Boolean(ch.lastMessageId),
     )
     .values();
+  return [interaction.channel as TextChannel, ...channels];
 };
 
 const checkPermission = async ({
@@ -465,7 +467,7 @@ export const repelInteraction: CommandDataWithHandler = {
           RepelCommandOptions.DELETE_COUNT,
           false,
         ) ?? REPEL_DEFAULT_DELETE_COUNT;
-      const channels = getTextChannels(interaction.guild);
+      const channels = getTextChannels(interaction);
       const deleted = await handleDeleteMessages({
         channels,
         count,
