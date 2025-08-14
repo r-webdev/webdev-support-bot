@@ -222,11 +222,11 @@ const handleDeleteMessages = async ({
         }
         deletedCount += targetMessages.length;
       }
-      return deletedCount;
     } catch {
       continue;
     }
   }
+  return deletedCount;
 };
 
 const logToChannel = async ({
