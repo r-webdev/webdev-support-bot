@@ -66,7 +66,8 @@ const handleTimeout = async ({
   target: User | GuildMember;
   duration: number;
 }) => {
-  if (!isUserInServer(target) || isUserTimedOut(target)) return 0;
+  if (duration === 0 || !isUserInServer(target) || isUserTimedOut(target))
+    return 0;
   const timeoutDuration = duration * 60 * 60 * 1000;
   await target.timeout(
     timeoutDuration,
